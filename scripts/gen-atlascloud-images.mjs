@@ -48,9 +48,9 @@ const TRIO = 'The three super-fans: (A) tall deep-tan woman, long dark hair, LEO
   'top + shorts, stacked glow bracelets; (C) freckled woman, copper curls, chrome halter top + denim micro shorts, ' +
   'a whistle. All leopard/gold/glitter, drenched in sweat, euphoric, screaming.'
 const DIETER = 'DJ DIETER: a sleazy campy 2000s Eurodance heart-throb in his late 30s (Gunther vibe), tanned, ' +
-  'slicked-back dark hair, a THIN pencil MOUSTACHE, cheap flashy Euro wraparound SUNGLASSES, an open black ' +
-  'LEATHER JACKET over a bare tanned chest with a thick gold chain, headphones around his neck, a greasy ' +
-  'confident smirk, glistening with sweat, hands on the DJ decks.'
+  'with tousled natural BLOND hair (lightly styled, NOT heavily gelled or wet-look), a THIN pencil MOUSTACHE, ' +
+  'cheap flashy Euro wraparound SUNGLASSES, an open black LEATHER JACKET over a bare tanned chest with a thick ' +
+  'gold chain, headphones around his neck, a greasy confident smirk, glistening with sweat, hands on the DJ decks.'
 
 // ---- REFERENCE SHEET (text-to-image) ----
 const REFS = [
@@ -89,6 +89,15 @@ const SCENES = [
     prompt: `${KEEP} Wide festival-scale dancefloor, thousands of silhouettes with hands up; on the distant lit mainstage KIKI (image 2) is at the decks in a spotlight with DJ Dieter (image 1); giant laser truss, fog, gold confetti. ${STYLE} ${NEG}` },
   { out: 'public/assets/video/frames/club-vip.jpg', size: '2720*1530', refs: [C, K],
     prompt: `${KEEP} The leopard trio (image 1) and Kiki (image 2) in a VIP bottle-service booth, sparklers on champagne magnums, toasting and screaming with joy, humid haze, lasers. ${WARDROBE} ${STYLE} ${NEG}` },
+  // ---- LORE story beats (match the Origin scroll-journey chapters) ----
+  { out: 'public/assets/lore/munich.jpg', size: '2720*1530', refs: [D],
+    prompt: `${KEEP} FUNNY: DJ Dieter (image 1) alone in a cramped 1990s soundproofed Munich basement crammed with vintage synthesizers and MIDI workstations, hugging a giant subwoofer, DOZENS of framed noise-complaint letters on the wall behind him, single bare bulb, smug proud expression. ${STYLE} ${NEG}` },
+  { out: 'public/assets/lore/stockholm.jpg', size: '2720*1530', refs: [K],
+    prompt: `${KEEP} FUNNY: Kiki (image 1) as a roller-skating waitress mid-glide through a late-1990s Stockholm dial-up cyber café, silver two-piece, balancing a tray of lattes, walls of beige CRT monitors and tangled ethernet cables, utterly unimpressed expression. ${WARDROBE} ${STYLE} ${NEG}` },
+  { out: 'public/assets/lore/sauna.jpg', size: '2720*1530', refs: [K, D],
+    prompt: `${KEEP} FUNNY origin moment: Kiki (image 1) and DJ Dieter (image 2) in a steamy wood-panelled Berlin sauna — Dieter's waterproof drum machine sparks and overheats while Kiki dumps a cedar bucket of water on the glowing coals, an enormous burst of steam, both drenched, comedic. ${STYLE} ${NEG}` },
+  { out: 'public/assets/lore/doctrine.jpg', size: '2720*1530', refs: [K, D],
+    prompt: `${KEEP} DEADPAN FUNNY: Kiki (image 1) and DJ Dieter (image 2) signing a soggy dripping record-contract napkin at a small table, two sound engineers in rain ponchos behind them, a cedar bucket and a tube of thermal paste on the table, humid haze. ${STYLE} ${NEG}` },
 ]
 
 async function j(url, opts) {
