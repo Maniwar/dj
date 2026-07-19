@@ -19,7 +19,7 @@ export default function Hero() {
         </h1>
         <h2 className="hero-sub">THE MOIST MIX 2002 · UNFILTERED EXCESS</h2>
         <p className="hero-artists">
-          <b>DJ WOLFGANG</b> &amp; <b>KIKI G</b> <span className="aka">— System Overload —</span>
+          <b>DJ DIETER</b> &amp; <b>KIKI G</b> <span className="aka">— System Overload —</span>
         </p>
 
         <div className="hero-flex">

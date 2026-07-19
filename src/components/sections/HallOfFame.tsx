@@ -2,7 +2,7 @@ const QUOTES = [
   ['“Physically the wettest album ever pressed.”', 'MOISTURE WEEKLY'],
   ['“I have never sweated harder at a desk.”', 'SYNTH GOD MONTHLY'],
   ['“The bass liquefied my fillings. 5 stars.”', 'RAVE HERALD'],
-  ['“Wolfgang is not a god. But the synth IS so big.”', 'PITCHFORK-ish'],
+  ['“Dieter is not a god. But the synth IS so big.”', 'PITCHFORK-ish'],
   ['“Kiki G looked at me. I filed my taxes early.”', 'EURO DANCE DIGEST'],
   ['“Do not operate heavy machinery. Operate this.”', 'CLUB CIRCUIT'],
 ]

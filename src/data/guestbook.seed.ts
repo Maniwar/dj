@@ -16,7 +16,7 @@ export const GUESTBOOK_SEED: GuestPost[] = [
     flag: '🇸🇪',
     color: '#00ff9d',
     time: '2004-03-14 03:41',
-    body: "THE SUBWOOFER CRACKED MY MUM'S CHINA CABINET AND I HAVE NEVER FELT MORE ALIVE. 10/10 wolfgang is a GOD",
+    body: "THE SUBWOOFER CRACKED MY MUM'S CHINA CABINET AND I HAVE NEVER FELT MORE ALIVE. 10/10 dieter is a GOD",
     likes: 1204,
   },
   {
@@ -75,7 +75,7 @@ export const GUESTBOOK_SEED: GuestPost[] = [
     flag: '🇧🇪',
     color: '#0f9',
     time: '2004-03-17 09:12',
-    body: 'i reverse engineered the Synthesizer Is So Big bootleg _3 and its literally just wolfgang breathing near a Korg for 6 minutes. masterpiece. framed it.',
+    body: 'i reverse engineered the Synthesizer Is So Big bootleg _3 and its literally just dieter breathing near a Korg for 6 minutes. masterpiece. framed it.',
     likes: 1330,
   },
   {
@@ -98,7 +98,7 @@ export const GUESTBOOK_SEED: GuestPost[] = [
   },
   {
     id: 's10',
-    user: 'DJ_Wolfgang_OFFICIAL',
+    user: 'DJ_Dieter_OFFICIAL',
     flag: '🇩🇪',
     color: '#c0c0c0',
     time: '2004-03-19 04:44',

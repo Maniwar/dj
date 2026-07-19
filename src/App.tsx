@@ -10,10 +10,13 @@ import Hero from './components/sections/Hero'
 import Lore from './components/sections/Lore'
 import Tracklist from './components/sections/Tracklist'
 import Guestbook from './components/sections/Guestbook'
-import TourArchive from './components/sections/TourArchive'
+import TourJourney from './components/sections/TourJourney'
 import HallOfFame from './components/sections/HallOfFame'
 import Merch from './components/sections/Merch'
-import { BrandBar, Divider, Crest } from './components/Ornaments'
+import { BrandBar, Crest } from './components/Ornaments'
+import AudioReactive from './components/AudioReactive'
+import LyricMarquee from './components/LyricMarquee'
+import Lyrics from './components/player/Lyrics'
 import { useSiteStore } from './state/useSiteStore'
 
 export default function App() {
@@ -25,6 +28,7 @@ export default function App() {
 
   return (
     <AudioProvider>
+      <AudioReactive />
       <Broadcast />
       <ThermalRunaway />
       <FrictionOverlay />
@@ -32,25 +36,19 @@ export default function App() {
       <div className="content">
         <BrandBar />
         <Hero />
-        <Divider mark="❈" />
+        <LyricMarquee tint="magenta" offset={0} />
         <Lore />
-        <Divider mark="✦" />
+        <LyricMarquee tint="acid" offset={3} speed={28} />
         <Tracklist />
         <Guestbook />
-        <Divider mark="❈" />
-        <TourArchive />
-        <Divider mark="✦" />
+        <LyricMarquee tint="blue" offset={6} />
+        <TourJourney />
+        <LyricMarquee tint="magenta" offset={9} speed={40} />
         <HallOfFame />
         <Merch />
         <footer className="site-footer">
           <Crest small />
-          <div className="marquee-track slow">
-            <div className="marquee-run">
-              STAY MOIST · DRINK WATER · THE SYNTHESIZER IS SO BIG · STAY MOIST · MIND THE BASS ·
-              LIMITED EDITION · STAY MOIST · DRINK WATER · THE SYNTHESIZER IS SO BIG · STAY MOIST ·
-              MIND THE BASS · LIMITED EDITION ·
-            </div>
-          </div>
+          <LyricMarquee tint="acid" offset={2} speed={46} />
           <p>
             © 2002–2004 EUROBEAT RECORDS · SYSTEM OVERLOAD · ALL MOISTURE RESERVED · a parody, lovingly
           </p>
@@ -58,6 +56,7 @@ export default function App() {
       </div>
 
       <Player />
+      <Lyrics />
       <BootGate />
       <EasterEggs />
     </AudioProvider>

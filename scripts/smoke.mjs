@@ -73,7 +73,7 @@ if (await detents.count() > 1) await detents.nth(1).click()
 await page.waitForTimeout(400)
 
 // tour section (real Gemini posters)
-await page.locator('.tour').scrollIntoViewIfNeeded()
+await page.locator('#tour').scrollIntoViewIfNeeded()
 await page.waitForTimeout(1200)
 await page.screenshot({ path: `${OUT}/smoke-4-tour.png` })
 

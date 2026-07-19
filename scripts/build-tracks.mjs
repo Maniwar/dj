@@ -23,7 +23,7 @@ const OUT = resolve(ROOT, 'src/data/tracks.json')
 const VERSION_LABELS = [
   { label: 'A-Side · Studio Mix', badge: 'A-SIDE', vibe: 'The official multi-platinum cut, pressed clean.' },
   { label: 'White-Label Bootleg', badge: 'BOOTLEG', vibe: 'Ripped from a sweaty dubplate. Unmastered. Illegal. Superior.' },
-  { label: 'Basement VIP Edit', badge: 'VIP', vibe: 'Wolfgang re-patched this at 4am in the soundproofed basement.' },
+  { label: 'Basement VIP Edit', badge: 'VIP', vibe: 'Dieter re-patched this at 4am in the soundproofed basement.' },
   { label: 'Sauna Dub', badge: 'DUB', vibe: 'Recorded at 98% humidity. You can hear the coals.' },
   { label: 'Liquid-Cooled Overclock', badge: 'OC', vibe: 'Clipping hard. Do not attempt without thermal paste.' },
 ]

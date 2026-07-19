@@ -1,0 +1,1388 @@
+{
+  "euro-trash": {
+    "title": "Euro-Trash",
+    "bpm": 138,
+    "lines": [
+      {
+        "type": "section",
+        "text": "INTRO"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Look at you."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Leopard print and fake diamonds."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "You spilled champagne on my leather pants."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Mmm. I love it."
+      },
+      {
+        "type": "section",
+        "text": "VERSE 1"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "We do not wait in line. We break the line."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "You are dancing on the subwoofer."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Security is looking at us."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Give them a kiss."
+      },
+      {
+        "type": "section",
+        "text": "PRE-CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Oh, oh, oh! The glitter in my hair!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Oh, oh, oh! Like I just don't care!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "One, two, three, let's trash!"
+      },
+      {
+        "type": "section",
+        "text": "CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "I am Euro-Trash, completely unashamed!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Dancing on the table, I won't be tamed!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Too cheap, too loud, making such a scene!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "I’m the messiest girl that you've ever seen!"
+      },
+      {
+        "type": "section",
+        "text": "POST-CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Trashy! (Uh-oh!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Nasty! (Uh-oh!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Messy! (Uh-oh!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Let's go!"
+      },
+      {
+        "type": "section",
+        "text": "DROP"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "(Heavy relentless four-on-the-floor beat)"
+      },
+      {
+        "type": "section",
+        "text": "VERSE 2"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Your mascara is running down your face."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "It looks very expensive."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Throw your drink in the air."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Mmm. Sticky."
+      },
+      {
+        "type": "section",
+        "text": "CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "I am Euro-Trash, completely unashamed!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Dancing on the table, I won't be tamed!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Too cheap, too loud, making such a scene!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "I’m the messiest girl that you've ever seen!"
+      },
+      {
+        "type": "section",
+        "text": "OUTRO"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Female] Oops, I broke a glass!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Male] Mmm. Put it on my tab."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Female] Ciao losers!"
+      }
+    ]
+  },
+  "ciao-ciao-afterparty": {
+    "title": "Ciao Ciao Afterparty",
+    "bpm": 138,
+    "lines": [
+      {
+        "type": "section",
+        "text": "INTRO"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "The lights are coming on."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "The club is ugly in the light."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Mmm. Look at your makeup."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "We must leave this place."
+      },
+      {
+        "type": "section",
+        "text": "VERSE 1"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Put on your sunglasses."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Yes, even though it is dark outside."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "We are getting in the taxi."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Do not tell the driver where we are going."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "It is a secret."
+      },
+      {
+        "type": "section",
+        "text": "PRE-CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Oh, oh, oh! The sun is gonna rise!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Oh, oh, oh! I have stars in my eyes!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Take me to the moon!"
+      },
+      {
+        "type": "section",
+        "text": "CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Ciao ciao! The night is over but the bass is loud!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Ciao ciao! Let's find an afterparty in the crowd!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Still hot, still moist, we’re dancing in the street!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "I’ll never go to sleep, I just need the beat!"
+      },
+      {
+        "type": "section",
+        "text": "DROP"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "(Heavy relentless four-on-the-floor beat)"
+      },
+      {
+        "type": "section",
+        "text": "VERSE 2"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "This apartment is very small."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "But the stereo is very good."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Mmm. Drink this water."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Hydration is important for dancing."
+      },
+      {
+        "type": "section",
+        "text": "CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Ciao ciao! The night is over but the bass is loud!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Ciao ciao! Let's find an afterparty in the crowd!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Still hot, still moist, we’re dancing in the street!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "I’ll never go to sleep, I just need the beat!"
+      },
+      {
+        "type": "section",
+        "text": "OUTRO"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Female] Ciao ciao..."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Male] Mmm. Goodbye forever."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Female] Wait, where is my jacket?"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Male] (Silence, beat fading out to nothing)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Female] Hello?!"
+      }
+    ]
+  },
+  "abduct-me-baby": {
+    "title": "Abduct Me Baby",
+    "bpm": 138,
+    "lines": [
+      {
+        "type": "section",
+        "text": "INTRO"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Mmm. I come in peace."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "My spaceship is parked outside the club."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "It is shaped like a giant saucer."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Do you want to see my cockpit?"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Step into the tractor beam."
+      },
+      {
+        "type": "section",
+        "text": "HOOK 1"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "U-F-O! (Take me up!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "U-F-O! (Don't disrupt!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "U-F-O! (Take me up!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Everybody dancing in the Milky Way!"
+      },
+      {
+        "type": "section",
+        "text": "VERSE 1"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Zero gravity is very... bouncy."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Look at my glowing green stick."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "It is for navigation."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Mmm. Hold it steady."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Prepare for liftoff."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "We are leaving orbit."
+      },
+      {
+        "type": "section",
+        "text": "PRE-CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Oh, oh, oh! We're leaving the atmosphere!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Oh, oh, oh! The stars are so crystal clear!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Beam me up right now!"
+      },
+      {
+        "type": "section",
+        "text": "CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Abduct me baby, take me to the stars!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "We'll do the Eurodance all the way to Mars!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Flying in your saucer, zooming through the night!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Shameless in the galaxy, traveling at light!"
+      },
+      {
+        "type": "section",
+        "text": "POST-CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "So alien! (Beep!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "So cosmic! (Boop!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "So stellar! (Beep!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Outer space!"
+      },
+      {
+        "type": "section",
+        "text": "DROP"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "(Heavy relentless four-on-the-floor beat, sci-fi laser sounds)"
+      },
+      {
+        "type": "section",
+        "text": "VERSE 2"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Welcome to my home planet."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "It is time for the physical examination."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Do not be afraid."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "It is standard procedure."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Mmm. The probe is very cold."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "But it will warm up."
+      },
+      {
+        "type": "section",
+        "text": "PRE-CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Oh, oh, oh! We're leaving the atmosphere!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Oh, oh, oh! The stars are so crystal clear!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Beam me up right now!"
+      },
+      {
+        "type": "section",
+        "text": "CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Abduct me baby, take me to the stars!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "We'll do the Eurodance all the way to Mars!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Flying in your saucer, zooming through the night!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Shameless in the galaxy, traveling at light!"
+      },
+      {
+        "type": "section",
+        "text": "BREAKDOWN"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Male] Houston, we have a problem."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Female] (Gasps) Are we crashing?!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Male] Mmm. No. You are just too hot for this spaceship."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Male] Bring back the bassline."
+      },
+      {
+        "type": "section",
+        "text": "DROP"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "(Explosive, heavy, fast Eurodance beat returns)"
+      },
+      {
+        "type": "section",
+        "text": "CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Abduct me baby, take me to the stars!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "We'll do the Eurodance all the way to Mars!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Flying in your saucer, zooming through the night!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Shameless in the galaxy, traveling at light!"
+      },
+      {
+        "type": "section",
+        "text": "OUTRO"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Female] Take me back to Earth!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Male] Mmm. My teleporter is broken."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Female] Oh well!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Male] Ciao, Earthlings."
+      }
+    ]
+  },
+  "euro-airways": {
+    "title": "Euro Airways",
+    "bpm": 138,
+    "lines": [
+      {
+        "type": "section",
+        "text": "INTRO"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Mmm. Welcome aboard Euro Airways."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "I am your captain."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "The cockpit is fully loaded."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Please put your tray tables in the upright position."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "We are going to experience heavy turbulence."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Fasten your seatbelt."
+      },
+      {
+        "type": "section",
+        "text": "HOOK 1"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Air-plane! (Take me high!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Air-plane! (Touch the sky!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Air-plane! (Take me high!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Everybody flying in the clouds tonight!"
+      },
+      {
+        "type": "section",
+        "text": "VERSE 1"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "I see you are in first class."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Would you like a beverage?"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "My service cart is very full."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "I have a very large bag of peanuts."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Mmm. Salty."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Let me demonstrate the oxygen mask."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "You must strap it on very tightly."
+      },
+      {
+        "type": "section",
+        "text": "PRE-CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Oh, oh, oh! We are flying in the clouds!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Oh, oh, oh! The engines are so loud!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "One, two, three, let's fly!"
+      },
+      {
+        "type": "section",
+        "text": "CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Take me up into the sky, flying in the aeroplane!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Riding in the captain's chair, driving me insane!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Cruising at a mile high, shaking in the turbulence!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Shameless in the passenger seat, lacking common sense!"
+      },
+      {
+        "type": "section",
+        "text": "POST-CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "So bumpy! (Up!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "So jumpy! (Up!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "So high! (Up!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Take off!"
+      },
+      {
+        "type": "section",
+        "text": "DROP"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "(Heavy relentless four-on-the-floor beat, jet engine whoosh sounds)"
+      },
+      {
+        "type": "section",
+        "text": "VERSE 2"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "The cabin pressure is dropping."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "I need to pull the emergency lever."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Mmm. It goes all the way back."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Grab your inflatable life vest."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "It requires a lot of heavy blowing."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Puff your cheeks out."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Don't stop until it is fully inflated."
+      },
+      {
+        "type": "section",
+        "text": "PRE-CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Oh, oh, oh! We are flying in the clouds!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Oh, oh, oh! The engines are so loud!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "One, two, three, let's fly!"
+      },
+      {
+        "type": "section",
+        "text": "CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Take me up into the sky, flying in the aeroplane!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Riding in the captain's chair, driving me insane!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Cruising at a mile high, shaking in the turbulence!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Shameless in the passenger seat, lacking common sense!"
+      },
+      {
+        "type": "section",
+        "text": "BREAKDOWN"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Male] Oh no. We are out of fuel."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Female] (Gasps) We are going to crash!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Male] Mmm. Do not worry. I brought a parachute."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Male] Bring back the bassline."
+      },
+      {
+        "type": "section",
+        "text": "DROP"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "(Explosive, heavy, fast Eurodance beat returns)"
+      },
+      {
+        "type": "section",
+        "text": "CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Take me up into the sky, flying in the aeroplane!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Riding in the captain's chair, driving me insane!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Cruising at a mile high, shaking in the turbulence!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Shameless in the passenger seat, lacking common sense!"
+      },
+      {
+        "type": "section",
+        "text": "OUTRO"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Female] I lost my luggage!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Male] Mmm. You can borrow my uniform."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Female] It's too big!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Male] Ciao, frequent flyers."
+      }
+    ]
+  },
+  "bite-me-in-the-dark": {
+    "title": "Bite Me in the Dark",
+    "bpm": 138,
+    "lines": [
+      {
+        "type": "section",
+        "text": "INTRO"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Mmm. Welcome to my castle."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "It is very dark in Transylvania."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "I sleep in a wooden box."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "It is a tight squeeze."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "But I think we can both fit."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Take off your garlic necklace."
+      },
+      {
+        "type": "section",
+        "text": "HOOK 1"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Drac-u-la! (Bite my neck!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Vam-pi-ra! (What the heck!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Drac-u-la! (Bite my neck!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Everybody dancing with the living dead!"
+      },
+      {
+        "type": "section",
+        "text": "VERSE 1"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Look at my fangs."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "They are very long. And very sharp."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "I only come out at midnight."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Are you afraid of the dark?"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Come closer to my cape."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Let me taste your sweet plasma."
+      },
+      {
+        "type": "section",
+        "text": "PRE-CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Oh, oh, oh! I feel a shiver down my spine!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Oh, oh, oh! Your spooky eyes are looking fine!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "One, two, three, let's bite!"
+      },
+      {
+        "type": "section",
+        "text": "CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Bite me in the dark, make me yours tonight!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Dancing in the dungeon in the pale moonlight!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Sucking on my neck, you're driving me insane!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Shameless little vampire pumping through my vein!"
+      },
+      {
+        "type": "section",
+        "text": "POST-CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "So spooky! (Boo!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "So freaky! (Boo!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "So creepy! (Boo!)"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Drink it up!"
+      },
+      {
+        "type": "section",
+        "text": "DROP"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "(Heavy relentless four-on-the-floor beat, pipe organs and thunder crashes)"
+      },
+      {
+        "type": "section",
+        "text": "VERSE 2"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "I am turning into a bat."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "I will fly into your window."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Do not close the blinds."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Mmm. Your pulse is beating very fast."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "I am very thirsty."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Let me drain you dry."
+      },
+      {
+        "type": "section",
+        "text": "PRE-CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Oh, oh, oh! I feel a shiver down my spine!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Oh, oh, oh! Your spooky eyes are looking fine!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "One, two, three, let's bite!"
+      },
+      {
+        "type": "section",
+        "text": "CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Bite me in the dark, make me yours tonight!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Dancing in the dungeon in the pale moonlight!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Sucking on my neck, you're driving me insane!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Shameless little vampire pumping through my vein!"
+      },
+      {
+        "type": "section",
+        "text": "BREAKDOWN"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Male] Oh no. The sun is coming up."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Female] (Gasps) You are going to turn into dust!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Male] Mmm. Just rub some SPF 50 on my body."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Male] Bring back the bassline."
+      },
+      {
+        "type": "section",
+        "text": "DROP"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "(Explosive, heavy, fast Eurodance beat returns)"
+      },
+      {
+        "type": "section",
+        "text": "CHORUS"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Bite me in the dark, make me yours tonight!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Dancing in the dungeon in the pale moonlight!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Sucking on my neck, you're driving me insane!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "Shameless little vampire pumping through my vein!"
+      },
+      {
+        "type": "section",
+        "text": "OUTRO"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Female] I need a blood transfusion!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Male] Mmm. I know a guy."
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Female] See you next Halloween!"
+      },
+      {
+        "type": "line",
+        "voice": "dieter",
+        "text": "[Male] Ciao, mortals."
+      }
+    ]
+  }
+}

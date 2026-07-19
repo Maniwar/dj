@@ -24,6 +24,8 @@ export default function Player() {
   const volume = usePlayerStore((s) => s.volume)
   const friction = useSiteStore((s) => s.friction)
   const setFriction = useSiteStore((s) => s.setFriction)
+  const toggleLyrics = useSiteStore((s) => s.toggleLyrics)
+  const lyricsOpen = useSiteStore((s) => s.lyricsOpen)
   const thermal = useThermalReadout()
 
   const track = getTrack(slug)
@@ -60,6 +62,24 @@ export default function Player() {
     dragRef.current = null
   }
 
+  // ---- 3D parallax tilt (imperative CSS vars, no re-renders; disabled while dragging) ----
+  const onTilt = (e: React.PointerEvent) => {
+    if (dragRef.current) return
+    const el = winRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    const px = (e.clientX - r.left) / r.width - 0.5
+    const py = (e.clientY - r.top) / r.height - 0.5
+    el.style.setProperty('--ry', `${px * 12}deg`)
+    el.style.setProperty('--rx', `${-py * 12}deg`)
+  }
+  const onTiltLeave = () => {
+    const el = winRef.current
+    if (!el) return
+    el.style.setProperty('--ry', '0deg')
+    el.style.setProperty('--rx', '0deg')
+  }
+
   const pct = duration ? (currentTime / duration) * 100 : 0
   const overheating = thermal.temperature > 78
   const cooling = thermal.dewPointHit
@@ -73,6 +93,8 @@ export default function Player() {
       style={{ left: pos.x, top: pos.y }}
       role="region"
       aria-label="System Overload MP3-9000 player"
+      onPointerMove={onTilt}
+      onPointerLeave={onTiltLeave}
     >
       <div
         className="player-title"
@@ -139,6 +161,14 @@ export default function Player() {
             </button>
             <button className="tbtn" onClick={() => audio.next()} aria-label="Next">
               ⏭
+            </button>
+            <button
+              className={`tbtn lyr ${lyricsOpen ? 'on' : ''}`}
+              onClick={toggleLyrics}
+              aria-label="Toggle lyrics"
+              title="Karaoke / lyrics"
+            >
+              🎤
             </button>
             <div className="knobs">
               <Knob label="VOL" value={volume} onChange={(v) => audio.setVolume(v)} color="#12e0c0" />

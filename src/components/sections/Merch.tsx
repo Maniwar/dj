@@ -1,9 +1,9 @@
 const ITEMS = [
   { emoji: '🧴', name: 'Signature Thermal Paste', price: '€24', note: 'Arctic-grade. Smells of eucalyptus.' },
-  { emoji: '🥋', name: 'Moisture-Wicking Tracksuit', price: '€89', note: 'Velvet top, technical bottom. Wolfgang-approved.' },
+  { emoji: '🥋', name: 'Moisture-Wicking Tracksuit', price: '€89', note: 'Velvet top, technical bottom. Dieter-approved.' },
   { emoji: '🪣', name: 'The Cedar Bucket (Replica)', price: '€49', note: 'As dumped in Berlin, 2002. Water not included.' },
   { emoji: '💾', name: 'Bootleg Dubplate Blank', price: '€15', note: 'Cut your own white-label. Lathe sold separately.' },
-  { emoji: '🕶️', name: "Wolfgang's Cheap Sunglasses", price: '€9', note: 'Genuinely cheap. That is the point.' },
+  { emoji: '🕶️', name: "Dieter's Cheap Sunglasses", price: '€9', note: 'Genuinely cheap. That is the point.' },
   { emoji: '🌡️', name: 'Club Humidity Hygrometer', price: '€33', note: 'Reads 94% at all times. Possibly broken. Possibly correct.' },
 ]
 

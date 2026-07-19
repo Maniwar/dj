@@ -19,31 +19,24 @@ const ROOT = resolve(__dirname, '..')
 const MODEL = process.env.IMAGEN_MODEL || 'imagen-4.0-generate-001'
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:predict?key=${KEY}`
 
-// Shared style spine keeps every asset in the same farcical Euro-luxury world.
+// Style spine: RAW PHOTOREAL rave photography (like a real 2002 Eurodance CD cover),
+// NOT illustration/CGI/airbrushed. On-camera flash, grit, sweat, neon lasers.
 const STYLE =
-  'Farcical European luxury Eurodance aesthetic, Y2K/Frutiger-Aero meets baroque gold opulence, ' +
-  'leopard print accents, gilded gold, champagne, mega-festival EDC mainstage scale with lasers, ' +
-  'pyro and god-rays, humid steamy nightclub atmosphere, cinematic, hyper-saturated, glossy, ' +
-  'volumetric light, lens flares, ultra-detailed, photoreal-but-airbrushed CD-booklet art. ' +
-  'Tasteful, glamorous, joyful adults celebrating.'
+  'Raw photorealistic on-camera-flash nightlife photography, real 35mm film, high-ISO grain, harsh ' +
+  'direct flash, realistic sweaty glistening skin, real human faces, slight motion blur, gritty ' +
+  'photojournalistic 2000s Eurodance rave, neon magenta and acid-green laser beams cutting through ' +
+  'thick haze and fog, condensation, wet. Trashy Euro excess: gold chains, champagne, chrome. ' +
+  'WARDROBE is authentic festival/rave wear — leopard-print crop tops, bikini tops, hot pants, mesh, ' +
+  'fishnet, body glitter, platform boots — NOT formal cocktail dresses. Skimpy, sweaty, wild, ' +
+  'energetic, but tasteful and non-explicit. Authentic, unpolished, candid. Shot on a real camera.'
 
 const NEG =
-  'ABSOLUTELY NO TEXT of any kind: no words, no letters, no titles, no captions, no logos, no ' +
-  'numbers, no watermark, no signage lettering, no UUID strings — a purely photographic image. ' +
-  'No extra limbs, no deformed hands, not muted, not flat.'
+  'ABSOLUTELY NOT an illustration, NOT a cartoon, NOT anime, NOT CGI, NOT a 3D render, NOT airbrushed, ' +
+  'NOT painterly, NOT AI-smooth — must look like a REAL PHOTOGRAPH. ' +
+  'ABSOLUTELY NO TEXT: no words, letters, titles, captions, logos, numbers, watermark, signage. ' +
+  'No extra limbs, no deformed hands, no plastic skin.'
 
 const JOBS = [
-  {
-    out: 'public/assets/hero-keyart.jpg',
-    aspect: '16:9',
-    prompt:
-      'Epic hero key art: the Eurodance duo SYSTEM OVERLOAD commanding a colossal festival mainstage. ' +
-      'DJ WOLFGANG — deeply tanned European man, tiny pencil moustache, cheap chrome wraparound sunglasses, ' +
-      'open black leather jacket, purple velvet tracksuit bottoms, smug synth-god energy. Beside him KIKI G — ' +
-      'bubbly blonde woman, silver metallic chrome crop top, glossy Y2K makeup, platform boots, mid-laugh. ' +
-      'Behind them a 50,000-strong crowd with raised hands and phone flashes, gold pyro columns, laser fans, ' +
-      'a giant LED wall. ' + STYLE + ' ' + NEG,
-  },
   {
     out: 'public/assets/tour/ibiza.jpg',
     aspect: '16:9',
@@ -85,13 +78,14 @@ const JOBS = [
   },
   {
     out: 'public/assets/video/frames/club-podium.jpg', aspect: '16:9',
-    prompt: 'Three glamorous women in leopard-print dresses dancing wildly on a raised gold podium, champagne ' +
+    prompt: 'Three glamorous women in leopard-print rave wear (crop tops, hot pants, bikini tops) dancing wildly on a raised gold podium, champagne ' +
       'spraying, gold confetti falling, lasers and strobes, euphoric, mid-scream. ' + STYLE + ' ' + NEG,
   },
   {
     out: 'public/assets/video/frames/club-vip.jpg', aspect: '16:9',
-    prompt: 'VIP bottle-service booth dripping in gold and leopard upholstery, sparklers on champagne magnums, ' +
-      'the same three glamorous women toasting and laughing, moody club lighting, humid haze. ' + STYLE + ' ' + NEG,
+    prompt: 'VIP bottle-service booth, sparklers on champagne magnums, three glamorous female super-fans in ' +
+      'LEOPARD-PRINT outfits toasting and screaming with joy, moody club lighting, lasers, humid haze. ' +
+      'No men. ' + STYLE + ' ' + NEG,
   },
   {
     out: 'public/assets/video/frames/club-floor.jpg', aspect: '16:9',
@@ -100,9 +94,10 @@ const JOBS = [
   },
   {
     out: 'public/assets/video/frames/club-booth.jpg', aspect: '16:9',
-    prompt: 'DJ WOLFGANG (tanned European man, tiny moustache, cheap chrome sunglasses, open leather jacket) ' +
-      'and KIKI G (blonde woman, silver chrome crop top, glossy Y2K makeup) commanding a gilded DJ booth, ' +
-      'hands in the air, pyro behind them, adoring crowd in front. ' + STYLE + ' ' + NEG,
+    prompt: 'KIKI G — a blonde woman in a shiny SILVER metallic crop top with smudged glam Y2K makeup — ' +
+      'commands the DJ decks with one arm thrown in the air, while a packed crowd of female super-fans in ' +
+      'LEOPARD-PRINT outfits scream and reach toward her, lasers, fog, sweat. ' +
+      'NO men, no leather jackets, no sunglasses, no moustache. ' + STYLE + ' ' + NEG,
   },
 ]
 

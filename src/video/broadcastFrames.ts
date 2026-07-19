@@ -6,12 +6,12 @@
 import manifest from '../data/tracks.json'
 import type { Track } from '../data/types'
 
+// Only the frames that regenerated as raw PHOTOREAL rave (leopard-print fans, no cheesy
+// dude). club-vip / club-booth are excluded until Gemini credits are topped up.
 const CLUB = [
   '/assets/video/frames/club-crowd.jpg',
   '/assets/video/frames/club-podium.jpg',
-  '/assets/video/frames/club-vip.jpg',
   '/assets/video/frames/club-floor.jpg',
-  '/assets/video/frames/club-booth.jpg',
 ]
 
 export type Scene = {
