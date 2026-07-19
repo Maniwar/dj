@@ -81,12 +81,12 @@ const SCENES = [
   // ---- MAINSTAGE / BROADCAST club frames (current-track fallback) — cast on stage ----
   { out: 'public/assets/video/frames/club-booth.jpg', size: '2720*1530', refs: [K, D, C],
     prompt: `${KEEP} KIKI G (image 1) commands the DJ decks in her silver two-piece, arm thrown up; DJ Dieter (image 2) leans in sleazily beside her at the decks; the leopard trio (image 3) scream and reach up from the front row. Lasers, fog, sweat, champagne. ${STYLE} ${NEG}` },
-  { out: 'public/assets/video/frames/club-crowd.jpg', size: '2720*1530', refs: [D, K],
-    prompt: `${KEEP} First-person camcorder push through a packed sweaty rave crowd toward the mainstage, where KIKI (image 2) fronts in silver and DJ Dieter (image 1) works the decks behind her; hundreds of raised hands and phone flashes, green and magenta lasers through fog. ${STYLE} ${NEG}` },
+  { out: 'public/assets/video/frames/club-crowd.jpg', size: '2720*1530', refs: [K, D],
+    prompt: `${KEEP} Camcorder view over a packed INDOOR club crowd toward the mainstage: a GIANT LED JUMBOTRON above the stage shows a big live close-up of KIKI (image 1, silver) singing, while DJ DIETER (image 2, leather jacket + wraparound shades) works the decks below; green and magenta lasers, fog, a few phone flashes. Keep the foreground clear — do NOT fill it with a wall of raised hands. ${STYLE} ${NEG}` },
   { out: 'public/assets/video/frames/club-podium.jpg', size: '2720*1530', refs: [C, K],
-    prompt: `${KEEP} The leopard trio (image 1) dance wildly on a raised gold podium with Kiki (image 2) up front in silver, champagne spraying, gold confetti falling, mid-scream, strobes and lasers. ${WARDROBE} ${STYLE} ${NEG}` },
-  { out: 'public/assets/video/frames/club-floor.jpg', size: '2720*1530', refs: [D, K],
-    prompt: `${KEEP} Wide festival-scale dancefloor, thousands of silhouettes with hands up; on the distant lit mainstage KIKI (image 2) is at the decks in a spotlight with DJ Dieter (image 1); giant laser truss, fog, gold confetti. ${STYLE} ${NEG}` },
+    prompt: `${KEEP} INSIDE a packed nightclub: the leopard trio (image 1) and Kiki (image 2) dance on a small raised DJ STAGE RISER / go-go platform above the crowd, with chrome railings, champagne spraying, gold confetti, strobes and lasers overhead. It is clearly an indoor club stage — NOT a mountain, NOT any outdoor landscape or terrain. ${WARDROBE} ${STYLE} ${NEG}` },
+  { out: 'public/assets/video/frames/club-floor.jpg', size: '2720*1530', refs: [K, D],
+    prompt: `${KEEP} Wide festival-scale INDOOR club mainstage seen from the crowd: TWO GIANT LED JUMBOTRON SCREENS flank the DJ booth showing huge live close-ups of KIKI (image 1, silver crop top) and DJ DIETER (image 2, leather jacket + sunglasses); big laser truss overhead, fog, gold confetti. Keep hands out of the foreground. ${STYLE} ${NEG}` },
   { out: 'public/assets/video/frames/club-vip.jpg', size: '2720*1530', refs: [C, K],
     prompt: `${KEEP} The leopard trio (image 1) and Kiki (image 2) in a VIP bottle-service booth, sparklers on champagne magnums, toasting and screaming with joy, humid haze, lasers. ${WARDROBE} ${STYLE} ${NEG}` },
   // ---- LORE story beats (match the Origin scroll-journey chapters) ----
