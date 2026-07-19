@@ -1,0 +1,303 @@
+Metadata for: AI_Gunther-Abduct_Me_Baby
+Generated: 2026-07-19T19:57:23.772Z
+
+--- Track Information ---
+Title: Abduct Me Baby
+Artist: Maniwar
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat
+Track ID: 9af34a0a-2d28-4ba9-947f-335b6eaee54c
+
+--- Lyrics ---
+[Intro: Deep Sleazy Spoken Male]
+Mmm. I come in peace.
+My spaceship is parked outside the club.
+It is shaped like a giant saucer.
+Do you want to see my cockpit?
+Step into the tractor beam.
+
+[Hook 1: Vocal Chant - Squeaky High-Pitched Female]
+U-F-O! (Take me up!)
+U-F-O! (Don't disrupt!)
+U-F-O! (Take me up!)
+Everybody dancing in the Milky Way!
+
+[Verse 1: Deep Sleazy Spoken Male]
+Zero gravity is very... bouncy.
+Look at my glowing green stick. 
+It is for navigation.
+Mmm. Hold it steady.
+Prepare for liftoff.
+We are leaving orbit.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Oh, oh, oh! We're leaving the atmosphere!
+Oh, oh, oh! The stars are so crystal clear!
+Beam me up right now!
+
+[Chorus: Squeaky High-Pitched Female]
+Abduct me baby, take me to the stars!
+We'll do the Eurodance all the way to Mars!
+Flying in your saucer, zooming through the night!
+Shameless in the galaxy, traveling at light!
+
+[Post-Chorus: Squeaky High-Pitched Female]
+So alien! (Beep!)
+So cosmic! (Boop!)
+So stellar! (Beep!)
+Outer space!
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+(Heavy relentless four-on-the-floor beat, sci-fi laser sounds)
+
+[Verse 2: Deep Sleazy Spoken Male]
+Welcome to my home planet.
+It is time for the physical examination.
+Do not be afraid. 
+It is standard procedure.
+Mmm. The probe is very cold.
+But it will warm up.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Oh, oh, oh! We're leaving the atmosphere!
+Oh, oh, oh! The stars are so crystal clear!
+Beam me up right now!
+
+[Chorus: Squeaky High-Pitched Female]
+Abduct me baby, take me to the stars!
+We'll do the Eurodance all the way to Mars!
+Flying in your saucer, zooming through the night!
+Shameless in the galaxy, traveling at light!
+
+[Breakdown: Music Stops]
+[Male] Houston, we have a problem.
+[Female] (Gasps) Are we crashing?!
+[Male] Mmm. No. You are just too hot for this spaceship.
+[Male] Bring back the bassline.
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+(Explosive, heavy, fast Eurodance beat returns)
+
+[Chorus: Squeaky High-Pitched Female]
+Abduct me baby, take me to the stars!
+We'll do the Eurodance all the way to Mars!
+Flying in your saucer, zooming through the night!
+Shameless in the galaxy, traveling at light!
+
+[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]
+[Female] Take me back to Earth!
+[Male] Mmm. My teleporter is broken.
+[Female] Oh well!
+[Male] Ciao, Earthlings.
+
+Cover Art URL: https://cdn2.suno.ai/image_9af34a0a-2d28-4ba9-947f-335b6eaee54c.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "Abduct Me Baby",
+  "play_count": 1,
+  "upvote_count": 0,
+  "allow_comments": true,
+  "is_verified": false,
+  "id": "9af34a0a-2d28-4ba9-947f-335b6eaee54c",
+  "entity_type": "song_schema",
+  "video_url": "https://cdn1.suno.ai/9af34a0a-2d28-4ba9-947f-335b6eaee54c.mp4",
+  "audio_url": "https://cdn1.suno.ai/9af34a0a-2d28-4ba9-947f-335b6eaee54c.mp3",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/9af34a0a-2d28-4ba9-947f-335b6eaee54c.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/9af34a0a-2d28-4ba9-947f-335b6eaee54c.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_9af34a0a-2d28-4ba9-947f-335b6eaee54c.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_9af34a0a-2d28-4ba9-947f-335b6eaee54c.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat",
+    "prompt": "[Intro: Deep Sleazy Spoken Male]\nMmm. I come in peace.\nMy spaceship is parked outside the club.\nIt is shaped like a giant saucer.\nDo you want to see my cockpit?\nStep into the tractor beam.\n\n[Hook 1: Vocal Chant - Squeaky High-Pitched Female]\nU-F-O! (Take me up!)\nU-F-O! (Don't disrupt!)\nU-F-O! (Take me up!)\nEverybody dancing in the Milky Way!\n\n[Verse 1: Deep Sleazy Spoken Male]\nZero gravity is very... bouncy.\nLook at my glowing green stick. \nIt is for navigation.\nMmm. Hold it steady.\nPrepare for liftoff.\nWe are leaving orbit.\n\n[Pre-Chorus: Squeaky High-Pitched Female]\nOh, oh, oh! We're leaving the atmosphere!\nOh, oh, oh! The stars are so crystal clear!\nBeam me up right now!\n\n[Chorus: Squeaky High-Pitched Female]\nAbduct me baby, take me to the stars!\nWe'll do the Eurodance all the way to Mars!\nFlying in your saucer, zooming through the night!\nShameless in the galaxy, traveling at light!\n\n[Post-Chorus: Squeaky High-Pitched Female]\nSo alien! (Beep!)\nSo cosmic! (Boop!)\nSo stellar! (Beep!)\nOuter space!\n\n[Drop: Massive Cheesy Supersaw Synth Melody]\n(Heavy relentless four-on-the-floor beat, sci-fi laser sounds)\n\n[Verse 2: Deep Sleazy Spoken Male]\nWelcome to my home planet.\nIt is time for the physical examination.\nDo not be afraid. \nIt is standard procedure.\nMmm. The probe is very cold.\nBut it will warm up.\n\n[Pre-Chorus: Squeaky High-Pitched Female]\nOh, oh, oh! We're leaving the atmosphere!\nOh, oh, oh! The stars are so crystal clear!\nBeam me up right now!\n\n[Chorus: Squeaky High-Pitched Female]\nAbduct me baby, take me to the stars!\nWe'll do the Eurodance all the way to Mars!\nFlying in your saucer, zooming through the night!\nShameless in the galaxy, traveling at light!\n\n[Breakdown: Music Stops]\n[Male] Houston, we have a problem.\n[Female] (Gasps) Are we crashing?!\n[Male] Mmm. No. You are just too hot for this spaceship.\n[Male] Bring back the bassline.\n\n[Drop: Massive Cheesy Supersaw Synth Melody]\n(Explosive, heavy, fast Eurodance beat returns)\n\n[Chorus: Squeaky High-Pitched Female]\nAbduct me baby, take me to the stars!\nWe'll do the Eurodance all the way to Mars!\nFlying in your saucer, zooming through the night!\nShameless in the galaxy, traveling at light!\n\n[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]\n[Female] Take me back to Earth!\n[Male] Mmm. My teleporter is broken.\n[Female] Oh well!\n[Male] Ciao, Earthlings.",
+    "type": "gen",
+    "duration": 212.48,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "can_remix": false,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "video_is_stale": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": false,
+  "user_id": "b3994648-d81f-4eb6-8315-1473c3a65d10",
+  "display_name": "Maniwar",
+  "handle": "maniwar",
+  "is_handle_updated": true,
+  "avatar_image_url": "https://cdn2.suno.ai/ea1464a3-bea9-4470-a3e0-0e2fa95dfb3d.jpeg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-07-19T00:03:49.325Z",
+  "is_public": true,
+  "reaction": {
+    "play_count": 1,
+    "skip_count": 0,
+    "flagged": false,
+    "clip": "9af34a0a-2d28-4ba9-947f-335b6eaee54c",
+    "updated_at": "2026-07-19T00:28:11.989Z"
+  },
+  "is_persona_root": false,
+  "is_following_creator": false,
+  "project": {
+    "id": "37fc42a6-a608-449e-ab12-8dee720983b9",
+    "name": "AI Gunther",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": true,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "Eurodance, happy hardcore",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0,
+  "action_config": {
+    "actions": [
+      {
+        "action_type": "add_to_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "like_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "share_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "dislike_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "report_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remove_from_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "delete_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "edit_song_details",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "create_hook",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "download_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "unpublish_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remaster",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_comments_toggle_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_remix",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "pin_to_profile",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_extend",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_cover",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_reuse_style",
+        "disabled": false,
+        "visible": true
+      }
+    ]
+  },
+  "workspaceId": "37fc42a6-a608-449e-ab12-8dee720983b9",
+  "workspaceName": "AI Gunther"
+}

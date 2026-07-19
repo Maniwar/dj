@@ -1,0 +1,306 @@
+Metadata for: AI_Gunther-Shameless_in_the_Navy
+Generated: 2026-07-19T19:57:23.771Z
+
+--- Track Information ---
+Title: Shameless in the Navy
+Artist: Maniwar
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat
+Track ID: 6bcd1cd3-90de-4e15-972c-77ed94bafedb
+
+--- Lyrics ---
+[Intro: Deep Sleazy Spoken Male]
+Mmm. Welcome aboard my battleship.
+We are sailing on the high seas.
+Put on your tiny sailor hat.
+Help me polish my brass cannon.
+It is fully loaded.
+Prepare to fire.
+
+[Hook 1: Vocal Chant - Squeaky High-Pitched Female]
+Sail-or! (Ahoy!)
+Cap-tain! (Oh boy!)
+Sail-or! (Ahoy!)
+Everybody rocking on the boat tonight!
+
+[Verse 1: Deep Sleazy Spoken Male]
+The waves are very rough today.
+You are getting extremely wet.
+Let us go below deck.
+Mmm. Look at my giant mast.
+It takes a lot of wind to make it stand up.
+Grab the steering wheel.
+Hold it very steady.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Oh, oh, oh! The ocean is so deep!
+Oh, oh, oh! We're waking from our sleep!
+One, two, three, let's splash!
+
+[Chorus: Squeaky High-Pitched Female]
+Drop your anchor in my deep blue sea!
+Sailing on the ocean, you're the captain for me!
+Swab the slippery deck and hoist up the sail!
+Shameless in the navy, riding out on the gale!
+
+[Post-Chorus: Squeaky High-Pitched Female]
+So wavy! (Splash!)
+So salty! (Splash!)
+So soaking! (Splash!)
+Dive in!
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+(Heavy relentless four-on-the-floor beat, blast of a massive foghorn and seagull sounds)
+
+[Verse 2: Deep Sleazy Spoken Male]
+We are approaching the harbor.
+I need to dock my massive vessel.
+Your port is very narrow.
+Mmm. It will be a tight squeeze.
+Throw me your heavy ropes.
+Tie them into a very complicated knot.
+Do not let go.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Oh, oh, oh! The ocean is so deep!
+Oh, oh, oh! We're waking from our sleep!
+One, two, three, let's splash!
+
+[Chorus: Squeaky High-Pitched Female]
+Drop your anchor in my deep blue sea!
+Sailing on the ocean, you're the captain for me!
+Swab the slippery deck and hoist up the sail!
+Shameless in the navy, riding out on the gale!
+
+[Breakdown: Music Stops]
+[Male] Oh no. We have a leak in the hull.
+[Female] (Gasps) We are taking on water!
+[Male] Mmm. Grab this bucket and start pumping.
+[Male] Bring back the bassline.
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+(Explosive, heavy, fast Eurodance beat returns)
+
+[Chorus: Squeaky High-Pitched Female]
+Drop your anchor in my deep blue sea!
+Sailing on the ocean, you're the captain for me!
+Swab the slippery deck and hoist up the sail!
+Shameless in the navy, riding out on the gale!
+
+[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]
+[Female] I'm feeling seasick!
+[Male] Mmm. Come lay down in my private hammock.
+[Female] Don't rock the boat!
+[Male] Ciao, mermaids.
+
+Cover Art URL: https://cdn2.suno.ai/image_6bcd1cd3-90de-4e15-972c-77ed94bafedb.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "Shameless in the Navy",
+  "play_count": 4,
+  "upvote_count": 0,
+  "allow_comments": true,
+  "is_verified": false,
+  "id": "6bcd1cd3-90de-4e15-972c-77ed94bafedb",
+  "entity_type": "song_schema",
+  "video_url": "https://cdn1.suno.ai/6bcd1cd3-90de-4e15-972c-77ed94bafedb.mp4",
+  "audio_url": "https://cdn1.suno.ai/6bcd1cd3-90de-4e15-972c-77ed94bafedb.mp3",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/6bcd1cd3-90de-4e15-972c-77ed94bafedb.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/6bcd1cd3-90de-4e15-972c-77ed94bafedb.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_6bcd1cd3-90de-4e15-972c-77ed94bafedb.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_6bcd1cd3-90de-4e15-972c-77ed94bafedb.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat",
+    "prompt": "[Intro: Deep Sleazy Spoken Male]\nMmm. Welcome aboard my battleship.\nWe are sailing on the high seas.\nPut on your tiny sailor hat.\nHelp me polish my brass cannon.\nIt is fully loaded.\nPrepare to fire.\n\n[Hook 1: Vocal Chant - Squeaky High-Pitched Female]\nSail-or! (Ahoy!)\nCap-tain! (Oh boy!)\nSail-or! (Ahoy!)\nEverybody rocking on the boat tonight!\n\n[Verse 1: Deep Sleazy Spoken Male]\nThe waves are very rough today.\nYou are getting extremely wet.\nLet us go below deck.\nMmm. Look at my giant mast.\nIt takes a lot of wind to make it stand up.\nGrab the steering wheel.\nHold it very steady.\n\n[Pre-Chorus: Squeaky High-Pitched Female]\nOh, oh, oh! The ocean is so deep!\nOh, oh, oh! We're waking from our sleep!\nOne, two, three, let's splash!\n\n[Chorus: Squeaky High-Pitched Female]\nDrop your anchor in my deep blue sea!\nSailing on the ocean, you're the captain for me!\nSwab the slippery deck and hoist up the sail!\nShameless in the navy, riding out on the gale!\n\n[Post-Chorus: Squeaky High-Pitched Female]\nSo wavy! (Splash!)\nSo salty! (Splash!)\nSo soaking! (Splash!)\nDive in!\n\n[Drop: Massive Cheesy Supersaw Synth Melody]\n(Heavy relentless four-on-the-floor beat, blast of a massive foghorn and seagull sounds)\n\n[Verse 2: Deep Sleazy Spoken Male]\nWe are approaching the harbor.\nI need to dock my massive vessel.\nYour port is very narrow.\nMmm. It will be a tight squeeze.\nThrow me your heavy ropes.\nTie them into a very complicated knot.\nDo not let go.\n\n[Pre-Chorus: Squeaky High-Pitched Female]\nOh, oh, oh! The ocean is so deep!\nOh, oh, oh! We're waking from our sleep!\nOne, two, three, let's splash!\n\n[Chorus: Squeaky High-Pitched Female]\nDrop your anchor in my deep blue sea!\nSailing on the ocean, you're the captain for me!\nSwab the slippery deck and hoist up the sail!\nShameless in the navy, riding out on the gale!\n\n[Breakdown: Music Stops]\n[Male] Oh no. We have a leak in the hull.\n[Female] (Gasps) We are taking on water!\n[Male] Mmm. Grab this bucket and start pumping.\n[Male] Bring back the bassline.\n\n[Drop: Massive Cheesy Supersaw Synth Melody]\n(Explosive, heavy, fast Eurodance beat returns)\n\n[Chorus: Squeaky High-Pitched Female]\nDrop your anchor in my deep blue sea!\nSailing on the ocean, you're the captain for me!\nSwab the slippery deck and hoist up the sail!\nShameless in the navy, riding out on the gale!\n\n[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]\n[Female] I'm feeling seasick!\n[Male] Mmm. Come lay down in my private hammock.\n[Female] Don't rock the boat!\n[Male] Ciao, mermaids.",
+    "type": "gen",
+    "duration": 212.28,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "can_remix": false,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "video_is_stale": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": false,
+  "user_id": "b3994648-d81f-4eb6-8315-1473c3a65d10",
+  "display_name": "Maniwar",
+  "handle": "maniwar",
+  "is_handle_updated": true,
+  "avatar_image_url": "https://cdn2.suno.ai/ea1464a3-bea9-4470-a3e0-0e2fa95dfb3d.jpeg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-07-19T00:08:00.719Z",
+  "is_public": true,
+  "reaction": {
+    "play_count": 1,
+    "skip_count": 0,
+    "flagged": false,
+    "clip": "6bcd1cd3-90de-4e15-972c-77ed94bafedb",
+    "updated_at": "2026-07-19T00:16:58.199Z"
+  },
+  "is_persona_root": false,
+  "is_following_creator": false,
+  "project": {
+    "id": "37fc42a6-a608-449e-ab12-8dee720983b9",
+    "name": "AI Gunther",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": false,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "Eurodance, happy hardcore",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 1,
+  "action_config": {
+    "actions": [
+      {
+        "action_type": "add_to_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "like_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "share_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "dislike_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "report_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remove_from_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "delete_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "edit_song_details",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "create_hook",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "download_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "unpublish_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remaster",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_comments_toggle_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_remix",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "pin_to_profile",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_extend",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_cover",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_reuse_style",
+        "disabled": false,
+        "visible": true
+      }
+    ]
+  },
+  "workspaceId": "37fc42a6-a608-449e-ab12-8dee720983b9",
+  "workspaceName": "AI Gunther"
+}

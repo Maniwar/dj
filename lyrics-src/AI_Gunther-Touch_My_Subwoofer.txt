@@ -1,0 +1,271 @@
+Metadata for: AI_Gunther-Touch_My_Subwoofer
+Generated: 2026-07-19T19:57:23.774Z
+
+--- Track Information ---
+Title: Touch My Subwoofer
+Artist: Maniwar
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat
+Track ID: 76d387d7-0219-4f09-af35-20b9a7ddfd9c
+
+--- Lyrics ---
+[Intro: Deep Sleazy Spoken Male]
+Mmm. You are standing very close to the speaker.
+Can you feel the vibrations?
+Down in your shoes?
+Let's go deeper.
+
+[Verse 1: Deep Sleazy Spoken Male]
+1000 watts of pure European bass.
+It shakes the walls. It shakes your hips.
+Put your hand right here.
+Feel the cone moving.
+Mmm. Powerful.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Oh, oh, oh! The floor is gonna break!
+Oh, oh, oh! It's an earthquake!
+Pump the volume up!
+
+[Chorus: Squeaky High-Pitched Female]
+Touch my subwoofer, feel the heavy boom!
+Rattling the windows all across the room!
+Too low, too deep, vibrating on my skin!
+When the bass drops down, let the games begin!
+
+[Post-Chorus: Squeaky High-Pitched Female]
+Boom boom! (Shake it!)
+Boom boom! (Break it!)
+Boom boom! (Take it!)
+Down low!
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+(Bouncy happy hardcore bassline)
+
+[Verse 2: Deep Sleazy Spoken Male]
+The treble is nice.
+But the bass is naughty.
+Mmm. It is rattling my sunglasses.
+Do not turn it down.
+
+[Chorus: Squeaky High-Pitched Female]
+Touch my subwoofer, feel the heavy boom!
+Rattling the windows all across the room!
+Too low, too deep, vibrating on my skin!
+When the bass drops down, let the games begin!
+
+[Outro: Deep Sleazy Spoken Male]
+Mmm. My ears are bleeding.
+Perfect.
+
+Cover Art URL: https://cdn2.suno.ai/image_76d387d7-0219-4f09-af35-20b9a7ddfd9c.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "Touch My Subwoofer",
+  "play_count": 4,
+  "upvote_count": 0,
+  "allow_comments": true,
+  "is_verified": false,
+  "id": "76d387d7-0219-4f09-af35-20b9a7ddfd9c",
+  "entity_type": "song_schema",
+  "video_url": "https://cdn1.suno.ai/76d387d7-0219-4f09-af35-20b9a7ddfd9c.mp4",
+  "audio_url": "https://cdn1.suno.ai/76d387d7-0219-4f09-af35-20b9a7ddfd9c.mp3",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/76d387d7-0219-4f09-af35-20b9a7ddfd9c.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/76d387d7-0219-4f09-af35-20b9a7ddfd9c.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_76d387d7-0219-4f09-af35-20b9a7ddfd9c.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_76d387d7-0219-4f09-af35-20b9a7ddfd9c.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat",
+    "prompt": "[Intro: Deep Sleazy Spoken Male]\nMmm. You are standing very close to the speaker.\nCan you feel the vibrations?\nDown in your shoes?\nLet's go deeper.\n\n[Verse 1: Deep Sleazy Spoken Male]\n1000 watts of pure European bass.\nIt shakes the walls. It shakes your hips.\nPut your hand right here.\nFeel the cone moving.\nMmm. Powerful.\n\n[Pre-Chorus: Squeaky High-Pitched Female]\nOh, oh, oh! The floor is gonna break!\nOh, oh, oh! It's an earthquake!\nPump the volume up!\n\n[Chorus: Squeaky High-Pitched Female]\nTouch my subwoofer, feel the heavy boom!\nRattling the windows all across the room!\nToo low, too deep, vibrating on my skin!\nWhen the bass drops down, let the games begin!\n\n[Post-Chorus: Squeaky High-Pitched Female]\nBoom boom! (Shake it!)\nBoom boom! (Break it!)\nBoom boom! (Take it!)\nDown low!\n\n[Drop: Massive Cheesy Supersaw Synth Melody]\n(Bouncy happy hardcore bassline)\n\n[Verse 2: Deep Sleazy Spoken Male]\nThe treble is nice.\nBut the bass is naughty.\nMmm. It is rattling my sunglasses.\nDo not turn it down.\n\n[Chorus: Squeaky High-Pitched Female]\nTouch my subwoofer, feel the heavy boom!\nRattling the windows all across the room!\nToo low, too deep, vibrating on my skin!\nWhen the bass drops down, let the games begin!\n\n[Outro: Deep Sleazy Spoken Male]\nMmm. My ears are bleeding.\nPerfect.",
+    "type": "gen",
+    "duration": 149.32,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "can_remix": true,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "video_is_stale": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": false,
+  "user_id": "b3994648-d81f-4eb6-8315-1473c3a65d10",
+  "display_name": "Maniwar",
+  "handle": "maniwar",
+  "is_handle_updated": true,
+  "avatar_image_url": "https://cdn2.suno.ai/ea1464a3-bea9-4470-a3e0-0e2fa95dfb3d.jpeg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-07-18T18:26:17.824Z",
+  "is_public": true,
+  "reaction": {
+    "play_count": 4,
+    "skip_count": 0,
+    "flagged": false,
+    "clip": "76d387d7-0219-4f09-af35-20b9a7ddfd9c",
+    "updated_at": "2026-07-19T17:04:37.313Z"
+  },
+  "is_persona_root": false,
+  "is_following_creator": false,
+  "project": {
+    "id": "37fc42a6-a608-449e-ab12-8dee720983b9",
+    "name": "AI Gunther",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": true,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "Eurodance, happy hardcore",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0,
+  "action_config": {
+    "actions": [
+      {
+        "action_type": "add_to_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "like_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "share_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "dislike_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "report_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remove_from_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "delete_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "edit_song_details",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "create_hook",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "download_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "unpublish_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remaster",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_comments_toggle_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_remix",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "pin_to_profile",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_extend",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_cover",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_reuse_style",
+        "disabled": false,
+        "visible": true
+      }
+    ]
+  },
+  "workspaceId": "37fc42a6-a608-449e-ab12-8dee720983b9",
+  "workspaceName": "AI Gunther"
+}

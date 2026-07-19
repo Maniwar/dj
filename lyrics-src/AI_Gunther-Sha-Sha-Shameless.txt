@@ -1,0 +1,272 @@
+Metadata for: AI_Gunther-Sha-Sha-Shameless
+Generated: 2026-07-19T19:57:23.775Z
+
+--- Track Information ---
+Title: Sha-Sha-Shameless
+Artist: Maniwar
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat
+Track ID: 003a73a4-bd36-4955-8424-98db3b5a80d7
+
+--- Lyrics ---
+[Intro: Deep Spoken Male]
+Mmm. The bass is pumping.
+You are looking very... cheeky.
+Let's sweat.
+
+[Hook 1: Vocal Chant - Squeaky Female]
+Sha-sha-shameless! (Sha-la-la-la!)
+Sha-sha-shameless! (Give it to me now!)
+Sha-sha-shameless! (Sha-la-la-la!)
+Everybody on the floor, we are going wild!
+
+[Hook 2: Massive Synth Melody]
+(Fast, bouncy, aggressive happy synthesizer riff)
+
+[Verse 1: Deep Spoken Male]
+You are moving so fast.
+Like a beautiful torpedo.
+Step to the left. Step to the right.
+Perfect. Mmm.
+
+[Hook 3: Pre-Chorus Build - Squeaky Female]
+Oh, oh, oh! My heart is beating!
+Oh, oh, oh! The room is heating!
+One, two, three, let's go!
+
+[Hook 4: Main Chorus - Squeaky Female]
+I’m so shameless, I can’t behave!
+Up and down, I'm making a wave!
+Too hot, too wild, too much for you!
+Shameless on the floor, what you gonna do?
+
+[Post-Chorus Call & Response]
+[Female] Shameless!
+[Male] So naughty.
+[Female] Shameless!
+[Male] Mmm, yeah.
+[Female] Shameless!
+[Male] Give it to the bassline.
+
+[Drop: Massive Synth Melody]
+(Fast, bouncy, aggressive happy synthesizer riff)
+
+[Hook 1: Vocal Chant - Squeaky Female]
+Sha-sha-shameless! (Sha-la-la-la!)
+Sha-sha-shameless! (Give it to me now!)
+
+[Outro]
+[Male] Mmm. Very nice. See you at the afterparty.
+[Female] (Giggles) Ciao!
+
+Cover Art URL: https://cdn2.suno.ai/image_003a73a4-bd36-4955-8424-98db3b5a80d7.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "Sha-Sha-Shameless",
+  "play_count": 1,
+  "upvote_count": 0,
+  "allow_comments": true,
+  "is_verified": false,
+  "id": "003a73a4-bd36-4955-8424-98db3b5a80d7",
+  "entity_type": "song_schema",
+  "video_url": "https://cdn1.suno.ai/003a73a4-bd36-4955-8424-98db3b5a80d7.mp4",
+  "audio_url": "https://cdn1.suno.ai/003a73a4-bd36-4955-8424-98db3b5a80d7.mp3",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/003a73a4-bd36-4955-8424-98db3b5a80d7.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/003a73a4-bd36-4955-8424-98db3b5a80d7.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_003a73a4-bd36-4955-8424-98db3b5a80d7.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_003a73a4-bd36-4955-8424-98db3b5a80d7.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat",
+    "prompt": "[Intro: Deep Spoken Male]\nMmm. The bass is pumping.\nYou are looking very... cheeky.\nLet's sweat.\n\n[Hook 1: Vocal Chant - Squeaky Female]\nSha-sha-shameless! (Sha-la-la-la!)\nSha-sha-shameless! (Give it to me now!)\nSha-sha-shameless! (Sha-la-la-la!)\nEverybody on the floor, we are going wild!\n\n[Hook 2: Massive Synth Melody]\n(Fast, bouncy, aggressive happy synthesizer riff)\n\n[Verse 1: Deep Spoken Male]\nYou are moving so fast.\nLike a beautiful torpedo.\nStep to the left. Step to the right.\nPerfect. Mmm.\n\n[Hook 3: Pre-Chorus Build - Squeaky Female]\nOh, oh, oh! My heart is beating!\nOh, oh, oh! The room is heating!\nOne, two, three, let's go!\n\n[Hook 4: Main Chorus - Squeaky Female]\nI’m so shameless, I can’t behave!\nUp and down, I'm making a wave!\nToo hot, too wild, too much for you!\nShameless on the floor, what you gonna do?\n\n[Post-Chorus Call & Response]\n[Female] Shameless!\n[Male] So naughty.\n[Female] Shameless!\n[Male] Mmm, yeah.\n[Female] Shameless!\n[Male] Give it to the bassline.\n\n[Drop: Massive Synth Melody]\n(Fast, bouncy, aggressive happy synthesizer riff)\n\n[Hook 1: Vocal Chant - Squeaky Female]\nSha-sha-shameless! (Sha-la-la-la!)\nSha-sha-shameless! (Give it to me now!)\n\n[Outro]\n[Male] Mmm. Very nice. See you at the afterparty.\n[Female] (Giggles) Ciao!",
+    "type": "gen",
+    "duration": 158,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "can_remix": true,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "video_is_stale": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": false,
+  "user_id": "b3994648-d81f-4eb6-8315-1473c3a65d10",
+  "display_name": "Maniwar",
+  "handle": "maniwar",
+  "is_handle_updated": true,
+  "avatar_image_url": "https://cdn2.suno.ai/ea1464a3-bea9-4470-a3e0-0e2fa95dfb3d.jpeg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-07-18T17:51:45.104Z",
+  "is_public": true,
+  "reaction": {
+    "play_count": 1,
+    "skip_count": 0,
+    "flagged": false,
+    "clip": "003a73a4-bd36-4955-8424-98db3b5a80d7",
+    "updated_at": "2026-07-18T17:54:12.882Z"
+  },
+  "is_persona_root": false,
+  "is_following_creator": false,
+  "project": {
+    "id": "37fc42a6-a608-449e-ab12-8dee720983b9",
+    "name": "AI Gunther",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": false,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "Eurodance, happy hardcore",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0,
+  "action_config": {
+    "actions": [
+      {
+        "action_type": "add_to_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "like_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "share_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "dislike_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "report_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remove_from_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "delete_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "edit_song_details",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "create_hook",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "download_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "unpublish_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remaster",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_comments_toggle_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_remix",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "pin_to_profile",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_extend",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_cover",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_reuse_style",
+        "disabled": false,
+        "visible": true
+      }
+    ]
+  },
+  "workspaceId": "37fc42a6-a608-449e-ab12-8dee720983b9",
+  "workspaceName": "AI Gunther"
+}

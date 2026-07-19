@@ -1,0 +1,298 @@
+Metadata for: AI_Gunther-Fireman's_Disco
+Generated: 2026-07-19T19:57:23.772Z
+
+--- Track Information ---
+Title: Fireman's Disco
+Artist: Maniwar
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat
+Track ID: 489007d5-ec36-4fad-938d-4c631f5d576e
+
+--- Lyrics ---
+[Intro: Deep Sleazy Spoken Male]
+Mmm. Welcome to the fire station.
+The emergency bell is ringing.
+It is getting very hot in here.
+I must put on my large rubber boots.
+Help me grab my heavy hose.
+It takes two hands to hold it.
+
+[Hook 1: Vocal Chant - Squeaky High-Pitched Female]
+Fire-man! (Put it out!)
+Fire-man! (Scream and shout!)
+Fire-man! (Put it out!)
+Everybody sweating in the blazing heat!
+
+[Verse 1: Deep Sleazy Spoken Male]
+The flames are getting higher.
+You are trapped on the top balcony.
+Do not panic.
+I will extend my ladder. 
+Mmm. It goes up very high.
+Climb into my arms.
+Hold on to my suspenders.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Oh, oh, oh! The temperature is rising!
+Oh, oh, oh! It's totally surprising!
+One, two, three, let's spray!
+
+[Chorus: Squeaky High-Pitched Female]
+Put out the fire, water spraying everywhere!
+Sliding down the pole, flying through the smoky air!
+Pumping up the pressure, blasting from the hydrant now!
+Shameless in the burning room, making me say wow wow wow!
+
+[Post-Chorus: Squeaky High-Pitched Female]
+So burning! (Hot!)
+So smoking! (Hot!)
+So dripping! (Wet!)
+Hose it down!
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+(Heavy relentless four-on-the-floor beat, loud fire engine sirens)
+
+[Verse 2: Deep Sleazy Spoken Male]
+We are safe on the ground.
+But you are covered in ash.
+You need a thorough wash.
+Let me turn the nozzle to maximum pressure.
+Mmm. It is squirting everywhere.
+Now you are soaking wet.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Oh, oh, oh! The temperature is rising!
+Oh, oh, oh! It's totally surprising!
+One, two, three, let's spray!
+
+[Chorus: Squeaky High-Pitched Female]
+Put out the fire, water spraying everywhere!
+Sliding down the pole, flying through the smoky air!
+Pumping up the pressure, blasting from the hydrant now!
+Shameless in the burning room, making me say wow wow wow!
+
+[Breakdown: Music Stops]
+[Male] Oh no. The fire is spreading to the discotheque.
+[Female] (Gasps) We have to save the DJ!
+[Male] Mmm. We must evacuate the VIP lounge immediately.
+[Male] Bring back the bassline.
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+(Explosive, heavy, fast Eurodance beat returns)
+
+[Chorus: Squeaky High-Pitched Female]
+Put out the fire, water spraying everywhere!
+Sliding down the pole, flying through the smoky air!
+Pumping up the pressure, blasting from the hydrant now!
+Shameless in the burning room, making me say wow wow wow!
+
+[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]
+[Female] I'm still too hot!
+[Male] Mmm. Stop, drop, and roll with me.
+[Female] (Giggles) Okay!
+[Male] Ciao, arsonists.
+
+Cover Art URL: https://cdn2.suno.ai/image_489007d5-ec36-4fad-938d-4c631f5d576e.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "Fireman's Disco",
+  "play_count": 0,
+  "upvote_count": 0,
+  "allow_comments": true,
+  "is_verified": false,
+  "id": "489007d5-ec36-4fad-938d-4c631f5d576e",
+  "entity_type": "song_schema",
+  "video_url": "https://cdn1.suno.ai/489007d5-ec36-4fad-938d-4c631f5d576e.mp4",
+  "audio_url": "https://cdn1.suno.ai/489007d5-ec36-4fad-938d-4c631f5d576e.mp3",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/489007d5-ec36-4fad-938d-4c631f5d576e.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/489007d5-ec36-4fad-938d-4c631f5d576e.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_489007d5-ec36-4fad-938d-4c631f5d576e.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_489007d5-ec36-4fad-938d-4c631f5d576e.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat",
+    "prompt": "[Intro: Deep Sleazy Spoken Male]\nMmm. Welcome to the fire station.\nThe emergency bell is ringing.\nIt is getting very hot in here.\nI must put on my large rubber boots.\nHelp me grab my heavy hose.\nIt takes two hands to hold it.\n\n[Hook 1: Vocal Chant - Squeaky High-Pitched Female]\nFire-man! (Put it out!)\nFire-man! (Scream and shout!)\nFire-man! (Put it out!)\nEverybody sweating in the blazing heat!\n\n[Verse 1: Deep Sleazy Spoken Male]\nThe flames are getting higher.\nYou are trapped on the top balcony.\nDo not panic.\nI will extend my ladder. \nMmm. It goes up very high.\nClimb into my arms.\nHold on to my suspenders.\n\n[Pre-Chorus: Squeaky High-Pitched Female]\nOh, oh, oh! The temperature is rising!\nOh, oh, oh! It's totally surprising!\nOne, two, three, let's spray!\n\n[Chorus: Squeaky High-Pitched Female]\nPut out the fire, water spraying everywhere!\nSliding down the pole, flying through the smoky air!\nPumping up the pressure, blasting from the hydrant now!\nShameless in the burning room, making me say wow wow wow!\n\n[Post-Chorus: Squeaky High-Pitched Female]\nSo burning! (Hot!)\nSo smoking! (Hot!)\nSo dripping! (Wet!)\nHose it down!\n\n[Drop: Massive Cheesy Supersaw Synth Melody]\n(Heavy relentless four-on-the-floor beat, loud fire engine sirens)\n\n[Verse 2: Deep Sleazy Spoken Male]\nWe are safe on the ground.\nBut you are covered in ash.\nYou need a thorough wash.\nLet me turn the nozzle to maximum pressure.\nMmm. It is squirting everywhere.\nNow you are soaking wet.\n\n[Pre-Chorus: Squeaky High-Pitched Female]\nOh, oh, oh! The temperature is rising!\nOh, oh, oh! It's totally surprising!\nOne, two, three, let's spray!\n\n[Chorus: Squeaky High-Pitched Female]\nPut out the fire, water spraying everywhere!\nSliding down the pole, flying through the smoky air!\nPumping up the pressure, blasting from the hydrant now!\nShameless in the burning room, making me say wow wow wow!\n\n[Breakdown: Music Stops]\n[Male] Oh no. The fire is spreading to the discotheque.\n[Female] (Gasps) We have to save the DJ!\n[Male] Mmm. We must evacuate the VIP lounge immediately.\n[Male] Bring back the bassline.\n\n[Drop: Massive Cheesy Supersaw Synth Melody]\n(Explosive, heavy, fast Eurodance beat returns)\n\n[Chorus: Squeaky High-Pitched Female]\nPut out the fire, water spraying everywhere!\nSliding down the pole, flying through the smoky air!\nPumping up the pressure, blasting from the hydrant now!\nShameless in the burning room, making me say wow wow wow!\n\n[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]\n[Female] I'm still too hot!\n[Male] Mmm. Stop, drop, and roll with me.\n[Female] (Giggles) Okay!\n[Male] Ciao, arsonists.",
+    "type": "gen",
+    "duration": 265.6,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "can_remix": false,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "video_is_stale": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": false,
+  "user_id": "b3994648-d81f-4eb6-8315-1473c3a65d10",
+  "display_name": "Maniwar",
+  "handle": "maniwar",
+  "is_handle_updated": true,
+  "avatar_image_url": "https://cdn2.suno.ai/ea1464a3-bea9-4470-a3e0-0e2fa95dfb3d.jpeg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-07-19T00:05:45.323Z",
+  "is_public": true,
+  "is_persona_root": false,
+  "is_following_creator": false,
+  "project": {
+    "id": "37fc42a6-a608-449e-ab12-8dee720983b9",
+    "name": "AI Gunther",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": false,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "Eurodance, happy hardcore",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0,
+  "action_config": {
+    "actions": [
+      {
+        "action_type": "add_to_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "like_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "share_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "dislike_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "report_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remove_from_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "delete_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "edit_song_details",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "create_hook",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "download_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "unpublish_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remaster",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_comments_toggle_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_remix",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "pin_to_profile",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_extend",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_cover",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_reuse_style",
+        "disabled": false,
+        "visible": true
+      }
+    ]
+  },
+  "workspaceId": "37fc42a6-a608-449e-ab12-8dee720983b9",
+  "workspaceName": "AI Gunther"
+}

@@ -1,0 +1,304 @@
+Metadata for: AI_Gunther-Shameless_in_the_Luxury_Car
+Generated: 2026-07-19T19:57:23.773Z
+
+--- Track Information ---
+Title: Shameless in the Luxury Car
+Artist: Maniwar
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat
+Track ID: b69f0103-ffbe-4f59-9d75-91d93bdaaeca
+
+--- Lyrics ---
+[Intro: Deep Sleazy Spoken Male]
+Mmm. Get in.
+Do you like my Italian sports car?
+The seats are genuine leather.
+Do not scuff the dashboard.
+Buckle up.
+
+[Hook 1: Vocal Chant - Squeaky High-Pitched Female]
+Vroom-vroom! (Hit the gas!)
+Beep-beep! (Going fast!)
+Vroom-vroom! (Hit the gas!)
+Burning rubber on the overpass!
+
+[Verse 1: Deep Sleazy Spoken Male]
+The engine is purring. Just like you.
+Grab the stick shift. 
+It is a manual transmission. 
+You must handle it firmly.
+Mmm. Pump the clutch. 
+Shift into overdrive.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Oh, oh, oh! The speedometer is high!
+Oh, oh, oh! We are ready to fly!
+Zero to sixty right now!
+
+[Chorus: Squeaky High-Pitched Female]
+I’m riding in your passenger seat, we’re going really fast!
+Push the pedal down to the floor, I hope the fuel will last!
+Shifting all the heavy gears, you’re driving me insane!
+Shameless in the luxury car, speeding in the fast lane!
+
+[Post-Chorus: Squeaky High-Pitched Female]
+Shift it! (Uh-huh!)
+Drift it! (Uh-huh!)
+Rev it! (Uh-huh!)
+Don't stop!
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+(Heavy relentless four-on-the-floor beat, race car engine sounds)
+
+[Verse 2: Deep Sleazy Spoken Male]
+We are going way over the speed limit.
+The police are looking at us.
+We must hide in the tunnel.
+Mmm. It is very dark in the tunnel.
+Let me check your oil. 
+Very slick.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Oh, oh, oh! The speedometer is high!
+Oh, oh, oh! We are ready to fly!
+Zero to sixty right now!
+
+[Chorus: Squeaky High-Pitched Female]
+I’m riding in your passenger seat, we’re going really fast!
+Push the pedal down to the floor, I hope the fuel will last!
+Shifting all the heavy gears, you’re driving me insane!
+Shameless in the luxury car, speeding in the fast lane!
+
+[Breakdown: Music Stops]
+[Male] Oh no. We have a flat tire.
+[Female] (Giggles) What do we do?!
+[Male] Mmm. I will need to get the jack out of the trunk.
+[Male] It goes up and down. Up and down.
+[Male] Bring back the bass.
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+(Explosive, heavy, fast Eurodance beat returns)
+
+[Chorus: Squeaky High-Pitched Female]
+I’m riding in your passenger seat, we’re going really fast!
+Push the pedal down to the floor, I hope the fuel will last!
+Shifting all the heavy gears, you’re driving me insane!
+Shameless in the luxury car, speeding in the fast lane!
+
+[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]
+[Female] Park the car!
+[Male] Mmm. I do not have a license.
+[Female] (Screams)
+[Male] Ciao.
+
+Cover Art URL: https://cdn2.suno.ai/image_b69f0103-ffbe-4f59-9d75-91d93bdaaeca.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "Shameless in the Luxury Car",
+  "play_count": 1,
+  "upvote_count": 0,
+  "allow_comments": true,
+  "is_verified": false,
+  "id": "b69f0103-ffbe-4f59-9d75-91d93bdaaeca",
+  "entity_type": "song_schema",
+  "video_url": "https://cdn1.suno.ai/b69f0103-ffbe-4f59-9d75-91d93bdaaeca.mp4",
+  "audio_url": "https://cdn1.suno.ai/b69f0103-ffbe-4f59-9d75-91d93bdaaeca.mp3",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/b69f0103-ffbe-4f59-9d75-91d93bdaaeca.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/b69f0103-ffbe-4f59-9d75-91d93bdaaeca.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_b69f0103-ffbe-4f59-9d75-91d93bdaaeca.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_b69f0103-ffbe-4f59-9d75-91d93bdaaeca.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat",
+    "prompt": "[Intro: Deep Sleazy Spoken Male]\nMmm. Get in.\nDo you like my Italian sports car?\nThe seats are genuine leather.\nDo not scuff the dashboard.\nBuckle up.\n\n[Hook 1: Vocal Chant - Squeaky High-Pitched Female]\nVroom-vroom! (Hit the gas!)\nBeep-beep! (Going fast!)\nVroom-vroom! (Hit the gas!)\nBurning rubber on the overpass!\n\n[Verse 1: Deep Sleazy Spoken Male]\nThe engine is purring. Just like you.\nGrab the stick shift. \nIt is a manual transmission. \nYou must handle it firmly.\nMmm. Pump the clutch. \nShift into overdrive.\n\n[Pre-Chorus: Squeaky High-Pitched Female]\nOh, oh, oh! The speedometer is high!\nOh, oh, oh! We are ready to fly!\nZero to sixty right now!\n\n[Chorus: Squeaky High-Pitched Female]\nI’m riding in your passenger seat, we’re going really fast!\nPush the pedal down to the floor, I hope the fuel will last!\nShifting all the heavy gears, you’re driving me insane!\nShameless in the luxury car, speeding in the fast lane!\n\n[Post-Chorus: Squeaky High-Pitched Female]\nShift it! (Uh-huh!)\nDrift it! (Uh-huh!)\nRev it! (Uh-huh!)\nDon't stop!\n\n[Drop: Massive Cheesy Supersaw Synth Melody]\n(Heavy relentless four-on-the-floor beat, race car engine sounds)\n\n[Verse 2: Deep Sleazy Spoken Male]\nWe are going way over the speed limit.\nThe police are looking at us.\nWe must hide in the tunnel.\nMmm. It is very dark in the tunnel.\nLet me check your oil. \nVery slick.\n\n[Pre-Chorus: Squeaky High-Pitched Female]\nOh, oh, oh! The speedometer is high!\nOh, oh, oh! We are ready to fly!\nZero to sixty right now!\n\n[Chorus: Squeaky High-Pitched Female]\nI’m riding in your passenger seat, we’re going really fast!\nPush the pedal down to the floor, I hope the fuel will last!\nShifting all the heavy gears, you’re driving me insane!\nShameless in the luxury car, speeding in the fast lane!\n\n[Breakdown: Music Stops]\n[Male] Oh no. We have a flat tire.\n[Female] (Giggles) What do we do?!\n[Male] Mmm. I will need to get the jack out of the trunk.\n[Male] It goes up and down. Up and down.\n[Male] Bring back the bass.\n\n[Drop: Massive Cheesy Supersaw Synth Melody]\n(Explosive, heavy, fast Eurodance beat returns)\n\n[Chorus: Squeaky High-Pitched Female]\nI’m riding in your passenger seat, we’re going really fast!\nPush the pedal down to the floor, I hope the fuel will last!\nShifting all the heavy gears, you’re driving me insane!\nShameless in the luxury car, speeding in the fast lane!\n\n[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]\n[Female] Park the car!\n[Male] Mmm. I do not have a license.\n[Female] (Screams)\n[Male] Ciao.",
+    "type": "gen",
+    "duration": 251.92,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "can_remix": false,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "video_is_stale": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": false,
+  "user_id": "b3994648-d81f-4eb6-8315-1473c3a65d10",
+  "display_name": "Maniwar",
+  "handle": "maniwar",
+  "is_handle_updated": true,
+  "avatar_image_url": "https://cdn2.suno.ai/ea1464a3-bea9-4470-a3e0-0e2fa95dfb3d.jpeg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-07-18T23:59:43.524Z",
+  "is_public": true,
+  "reaction": {
+    "play_count": 1,
+    "skip_count": 0,
+    "flagged": false,
+    "clip": "b69f0103-ffbe-4f59-9d75-91d93bdaaeca",
+    "updated_at": "2026-07-19T00:12:02.746Z"
+  },
+  "is_persona_root": false,
+  "is_following_creator": false,
+  "project": {
+    "id": "37fc42a6-a608-449e-ab12-8dee720983b9",
+    "name": "AI Gunther",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": false,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "Eurodance, happy hardcore",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0,
+  "action_config": {
+    "actions": [
+      {
+        "action_type": "add_to_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "like_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "share_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "dislike_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "report_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remove_from_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "delete_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "edit_song_details",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "create_hook",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "download_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "unpublish_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remaster",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_comments_toggle_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_remix",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "pin_to_profile",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_extend",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_cover",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_reuse_style",
+        "disabled": false,
+        "visible": true
+      }
+    ]
+  },
+  "workspaceId": "37fc42a6-a608-449e-ab12-8dee720983b9",
+  "workspaceName": "AI Gunther"
+}

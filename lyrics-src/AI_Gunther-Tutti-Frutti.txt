@@ -1,0 +1,287 @@
+Metadata for: AI_Gunther-Tutti-Frutti
+Generated: 2026-07-19T19:57:23.773Z
+
+--- Track Information ---
+Title: Tutti-Frutti
+Artist: Maniwar
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat
+Track ID: 3c98690d-5970-4b92-adb4-e223bf83723a
+
+--- Lyrics ---
+[Intro: Deep Sleazy Spoken Male]
+Mmm. Welcome to my tropical resort.
+Are you hungry? 
+I brought you some fresh fruit. 
+I have a very large... banana.
+It is full of potassium.
+
+[Hook 1: Vocal Chant - Squeaky High-Pitched Female]
+Tutti-frutti! (Juicy juicy!)
+Tutti-frutti! (Make it fruity!)
+Tutti-frutti! (Juicy juicy!)
+Squeeze it till the juice comes out!
+
+[Verse 1: Deep Sleazy Spoken Male]
+Look at your melons. 
+They are so round. So ripe.
+Let me squeeze them to check for freshness.
+Mmm. Perfect. 
+Now, take my banana. 
+Peel it. Very slowly.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Oh, oh, oh! My peach is getting sweet!
+Oh, oh, oh! I'm melting in the heat!
+Take a little bite!
+
+[Chorus: Squeaky High-Pitched Female]
+I’m your fruity little snack, come and take a taste!
+Dripping sticky sweet juice all over the place!
+Grab my cherry, squeeze my lemon, make a lemonade!
+Shameless in the jungle, we are sweating in the shade!
+
+[Post-Chorus: Squeaky High-Pitched Female]
+So juicy! (Uh-huh!)
+So sticky! (Uh-huh!)
+So fruity! (Uh-huh!)
+Eat it up!
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+(Heavy relentless four-on-the-floor beat with tropical percussion)
+
+[Verse 2: Deep Sleazy Spoken Male]
+Your nectarine is dripping. Mmm.
+Let me show you my cucumber.
+Wait. A cucumber is a vegetable. 
+It does not matter. It is very hard.
+Put it in the fruit salad. 
+Toss it.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Oh, oh, oh! My peach is getting sweet!
+Oh, oh, oh! I'm melting in the heat!
+Take a little bite!
+
+[Chorus: Squeaky High-Pitched Female]
+I’m your fruity little snack, come and take a taste!
+Dripping sticky sweet juice all over the place!
+Grab my cherry, squeeze my lemon, make a lemonade!
+Shameless in the jungle, we are sweating in the shade!
+
+[Breakdown: Music Stops]
+[Male] Open your mouth.
+[Female] (Giggles) It's too big!
+[Male] Mmm. You have to swallow the seeds.
+[Male] Bring back the bassline.
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+(Explosive, heavy, fast Eurodance beat returns)
+
+[Chorus: Squeaky High-Pitched Female]
+I’m your fruity little snack, come and take a taste!
+Dripping sticky sweet juice all over the place!
+Grab my cherry, squeeze my lemon, make a lemonade!
+Shameless in the jungle, we are sweating in the shade!
+
+[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]
+[Female] I'm covered in juice...
+[Male] Mmm. I will need a napkin.
+[Female] Eat your fruit!
+[Male] Ciao, my little strawberry.
+
+Cover Art URL: https://cdn2.suno.ai/image_3c98690d-5970-4b92-adb4-e223bf83723a.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "Tutti-Frutti",
+  "play_count": 2,
+  "upvote_count": 0,
+  "allow_comments": true,
+  "is_verified": false,
+  "id": "3c98690d-5970-4b92-adb4-e223bf83723a",
+  "entity_type": "song_schema",
+  "video_url": "",
+  "audio_url": "https://cdn1.suno.ai/3c98690d-5970-4b92-adb4-e223bf83723a.mp3",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/3c98690d-5970-4b92-adb4-e223bf83723a.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/3c98690d-5970-4b92-adb4-e223bf83723a.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_3c98690d-5970-4b92-adb4-e223bf83723a.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_3c98690d-5970-4b92-adb4-e223bf83723a.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat",
+    "prompt": "[Intro: Deep Sleazy Spoken Male]\nMmm. Welcome to my tropical resort.\nAre you hungry? \nI brought you some fresh fruit. \nI have a very large... banana.\nIt is full of potassium.\n\n[Hook 1: Vocal Chant - Squeaky High-Pitched Female]\nTutti-frutti! (Juicy juicy!)\nTutti-frutti! (Make it fruity!)\nTutti-frutti! (Juicy juicy!)\nSqueeze it till the juice comes out!\n\n[Verse 1: Deep Sleazy Spoken Male]\nLook at your melons. \nThey are so round. So ripe.\nLet me squeeze them to check for freshness.\nMmm. Perfect. \nNow, take my banana. \nPeel it. Very slowly.\n\n[Pre-Chorus: Squeaky High-Pitched Female]\nOh, oh, oh! My peach is getting sweet!\nOh, oh, oh! I'm melting in the heat!\nTake a little bite!\n\n[Chorus: Squeaky High-Pitched Female]\nI’m your fruity little snack, come and take a taste!\nDripping sticky sweet juice all over the place!\nGrab my cherry, squeeze my lemon, make a lemonade!\nShameless in the jungle, we are sweating in the shade!\n\n[Post-Chorus: Squeaky High-Pitched Female]\nSo juicy! (Uh-huh!)\nSo sticky! (Uh-huh!)\nSo fruity! (Uh-huh!)\nEat it up!\n\n[Drop: Massive Cheesy Supersaw Synth Melody]\n(Heavy relentless four-on-the-floor beat with tropical percussion)\n\n[Verse 2: Deep Sleazy Spoken Male]\nYour nectarine is dripping. Mmm.\nLet me show you my cucumber.\nWait. A cucumber is a vegetable. \nIt does not matter. It is very hard.\nPut it in the fruit salad. \nToss it.\n\n[Pre-Chorus: Squeaky High-Pitched Female]\nOh, oh, oh! My peach is getting sweet!\nOh, oh, oh! I'm melting in the heat!\nTake a little bite!\n\n[Chorus: Squeaky High-Pitched Female]\nI’m your fruity little snack, come and take a taste!\nDripping sticky sweet juice all over the place!\nGrab my cherry, squeeze my lemon, make a lemonade!\nShameless in the jungle, we are sweating in the shade!\n\n[Breakdown: Music Stops]\n[Male] Open your mouth.\n[Female] (Giggles) It's too big!\n[Male] Mmm. You have to swallow the seeds.\n[Male] Bring back the bassline.\n\n[Drop: Massive Cheesy Supersaw Synth Melody]\n(Explosive, heavy, fast Eurodance beat returns)\n\n[Chorus: Squeaky High-Pitched Female]\nI’m your fruity little snack, come and take a taste!\nDripping sticky sweet juice all over the place!\nGrab my cherry, squeeze my lemon, make a lemonade!\nShameless in the jungle, we are sweating in the shade!\n\n[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]\n[Female] I'm covered in juice...\n[Male] Mmm. I will need a napkin.\n[Female] Eat your fruit!\n[Male] Ciao, my little strawberry.",
+    "type": "gen",
+    "duration": 211.76,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "can_remix": false,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": false,
+  "user_id": "b3994648-d81f-4eb6-8315-1473c3a65d10",
+  "display_name": "Maniwar",
+  "handle": "maniwar",
+  "is_handle_updated": true,
+  "avatar_image_url": "https://cdn2.suno.ai/ea1464a3-bea9-4470-a3e0-0e2fa95dfb3d.jpeg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-07-18T21:24:01.309Z",
+  "is_public": false,
+  "reaction": {
+    "play_count": 2,
+    "skip_count": 0,
+    "flagged": false,
+    "clip": "3c98690d-5970-4b92-adb4-e223bf83723a",
+    "updated_at": "2026-07-18T21:30:09.359Z"
+  },
+  "is_persona_root": false,
+  "is_following_creator": false,
+  "project": {
+    "id": "37fc42a6-a608-449e-ab12-8dee720983b9",
+    "name": "AI Gunther",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": false,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "Eurodance, happy hardcore",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0,
+  "action_config": {
+    "actions": [
+      {
+        "action_type": "add_to_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "like_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "share_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "dislike_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "report_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remove_from_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "delete_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "edit_song_details",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "create_hook",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "download_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "publish_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remaster",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_extend",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_cover",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_reuse_style",
+        "disabled": false,
+        "visible": true
+      }
+    ]
+  },
+  "workspaceId": "37fc42a6-a608-449e-ab12-8dee720983b9",
+  "workspaceName": "AI Gunther"
+}

@@ -1,0 +1,304 @@
+Metadata for: AI_Gunther-Shameless_Little_Mechanic
+Generated: 2026-07-19T19:57:23.772Z
+
+--- Track Information ---
+Title: Shameless Little Mechanic
+Artist: Maniwar
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat
+Track ID: 466f8c4d-7898-4a80-a00c-ec0fad1e4bfe
+
+--- Lyrics ---
+[Intro: Deep Sleazy Spoken Male]
+Mmm. Welcome to my garage.
+Pull your chassis onto the lift.
+We need to get under the hood.
+Your twin turbo is running very hot.
+I will need my biggest wrench.
+To tighten your loose nuts.
+
+[Hook 1: Vocal Chant - Squeaky High-Pitched Female]
+Me-chan-ic! (Fix it up!)
+Me-chan-ic! (Don't corrupt!)
+Me-chan-ic! (Fix it up!)
+Everybody pumping up the grease tonight!
+
+[Verse 1: Deep Sleazy Spoken Male]
+Your suspension is very bouncy.
+Let me check your fluid levels.
+Mmm. You are bone dry.
+I need to apply some heavy lubrication.
+Grab my dipstick.
+Wipe it off slowly.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Oh, oh, oh! The engine starts to roar!
+Oh, oh, oh! I'm begging you for more!
+One, two, three, let's rev!
+
+[Chorus: Squeaky High-Pitched Female]
+Lube it up and fix me, get under my hood!
+Working in the body shop, you make it feel so good!
+Pumping up the pressure, shining up the chrome!
+Shameless little mechanic, drive me all the way home!
+
+[Post-Chorus: Squeaky High-Pitched Female]
+So greasy! (Yeah!)
+So dirty! (Yeah!)
+So shiny! (Yeah!)
+Wrench it!
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+(Heavy relentless four-on-the-floor beat, pneumatic drill and ratchet sounds)
+
+[Verse 2: Deep Sleazy Spoken Male]
+Your bumper is very shiny.
+But your exhaust pipe needs work.
+I will pump you full of premium gas.
+Mmm. High octane.
+Hold this flashlight for me.
+I am going deep into the undercarriage.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Oh, oh, oh! The engine starts to roar!
+Oh, oh, oh! I'm begging you for more!
+One, two, three, let's rev!
+
+[Chorus: Squeaky High-Pitched Female]
+Lube it up and fix me, get under my hood!
+Working in the body shop, you make it feel so good!
+Pumping up the pressure, shining up the chrome!
+Shameless little mechanic, drive me all the way home!
+
+[Breakdown: Music Stops]
+[Male] Oh no. We blew a gasket.
+[Female] (Gasps) Is it going to explode?!
+[Male] Mmm. Only if you touch the spark plugs.
+[Male] Bring back the bassline.
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+(Explosive, heavy, fast Eurodance beat returns)
+
+[Chorus: Squeaky High-Pitched Female]
+Lube it up and fix me, get under my hood!
+Working in the body shop, you make it feel so good!
+Pumping up the pressure, shining up the chrome!
+Shameless little mechanic, drive me all the way home!
+
+[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]
+[Female] My battery is dead!
+[Male] Mmm. I have some very strong jumper cables.
+[Female] Spark me up!
+[Male] Ciao, motorheads.
+
+Cover Art URL: https://cdn2.suno.ai/image_466f8c4d-7898-4a80-a00c-ec0fad1e4bfe.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "Shameless Little Mechanic",
+  "play_count": 2,
+  "upvote_count": 0,
+  "allow_comments": true,
+  "is_verified": false,
+  "id": "466f8c4d-7898-4a80-a00c-ec0fad1e4bfe",
+  "entity_type": "song_schema",
+  "video_url": "https://cdn1.suno.ai/466f8c4d-7898-4a80-a00c-ec0fad1e4bfe.mp4",
+  "audio_url": "https://cdn1.suno.ai/466f8c4d-7898-4a80-a00c-ec0fad1e4bfe.mp3",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/466f8c4d-7898-4a80-a00c-ec0fad1e4bfe.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/466f8c4d-7898-4a80-a00c-ec0fad1e4bfe.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_466f8c4d-7898-4a80-a00c-ec0fad1e4bfe.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_466f8c4d-7898-4a80-a00c-ec0fad1e4bfe.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat",
+    "prompt": "[Intro: Deep Sleazy Spoken Male]\nMmm. Welcome to my garage.\nPull your chassis onto the lift.\nWe need to get under the hood.\nYour twin turbo is running very hot.\nI will need my biggest wrench.\nTo tighten your loose nuts.\n\n[Hook 1: Vocal Chant - Squeaky High-Pitched Female]\nMe-chan-ic! (Fix it up!)\nMe-chan-ic! (Don't corrupt!)\nMe-chan-ic! (Fix it up!)\nEverybody pumping up the grease tonight!\n\n[Verse 1: Deep Sleazy Spoken Male]\nYour suspension is very bouncy.\nLet me check your fluid levels.\nMmm. You are bone dry.\nI need to apply some heavy lubrication.\nGrab my dipstick.\nWipe it off slowly.\n\n[Pre-Chorus: Squeaky High-Pitched Female]\nOh, oh, oh! The engine starts to roar!\nOh, oh, oh! I'm begging you for more!\nOne, two, three, let's rev!\n\n[Chorus: Squeaky High-Pitched Female]\nLube it up and fix me, get under my hood!\nWorking in the body shop, you make it feel so good!\nPumping up the pressure, shining up the chrome!\nShameless little mechanic, drive me all the way home!\n\n[Post-Chorus: Squeaky High-Pitched Female]\nSo greasy! (Yeah!)\nSo dirty! (Yeah!)\nSo shiny! (Yeah!)\nWrench it!\n\n[Drop: Massive Cheesy Supersaw Synth Melody]\n(Heavy relentless four-on-the-floor beat, pneumatic drill and ratchet sounds)\n\n[Verse 2: Deep Sleazy Spoken Male]\nYour bumper is very shiny.\nBut your exhaust pipe needs work.\nI will pump you full of premium gas.\nMmm. High octane.\nHold this flashlight for me.\nI am going deep into the undercarriage.\n\n[Pre-Chorus: Squeaky High-Pitched Female]\nOh, oh, oh! The engine starts to roar!\nOh, oh, oh! I'm begging you for more!\nOne, two, three, let's rev!\n\n[Chorus: Squeaky High-Pitched Female]\nLube it up and fix me, get under my hood!\nWorking in the body shop, you make it feel so good!\nPumping up the pressure, shining up the chrome!\nShameless little mechanic, drive me all the way home!\n\n[Breakdown: Music Stops]\n[Male] Oh no. We blew a gasket.\n[Female] (Gasps) Is it going to explode?!\n[Male] Mmm. Only if you touch the spark plugs.\n[Male] Bring back the bassline.\n\n[Drop: Massive Cheesy Supersaw Synth Melody]\n(Explosive, heavy, fast Eurodance beat returns)\n\n[Chorus: Squeaky High-Pitched Female]\nLube it up and fix me, get under my hood!\nWorking in the body shop, you make it feel so good!\nPumping up the pressure, shining up the chrome!\nShameless little mechanic, drive me all the way home!\n\n[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]\n[Female] My battery is dead!\n[Male] Mmm. I have some very strong jumper cables.\n[Female] Spark me up!\n[Male] Ciao, motorheads.",
+    "type": "gen",
+    "duration": 222.52,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "can_remix": false,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "video_is_stale": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": false,
+  "user_id": "b3994648-d81f-4eb6-8315-1473c3a65d10",
+  "display_name": "Maniwar",
+  "handle": "maniwar",
+  "is_handle_updated": true,
+  "avatar_image_url": "https://cdn2.suno.ai/ea1464a3-bea9-4470-a3e0-0e2fa95dfb3d.jpeg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-07-19T00:06:54.944Z",
+  "is_public": true,
+  "reaction": {
+    "play_count": 1,
+    "skip_count": 0,
+    "flagged": false,
+    "clip": "466f8c4d-7898-4a80-a00c-ec0fad1e4bfe",
+    "updated_at": "2026-07-19T00:17:35.243Z"
+  },
+  "is_persona_root": false,
+  "is_following_creator": false,
+  "project": {
+    "id": "37fc42a6-a608-449e-ab12-8dee720983b9",
+    "name": "AI Gunther",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": false,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "Eurodance, happy hardcore",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0,
+  "action_config": {
+    "actions": [
+      {
+        "action_type": "add_to_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "like_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "share_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "dislike_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "report_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remove_from_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "delete_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "edit_song_details",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "create_hook",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "download_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "unpublish_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remaster",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_comments_toggle_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_remix",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "pin_to_profile",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_extend",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_cover",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_reuse_style",
+        "disabled": false,
+        "visible": true
+      }
+    ]
+  },
+  "workspaceId": "37fc42a6-a608-449e-ab12-8dee720983b9",
+  "workspaceName": "AI Gunther"
+}

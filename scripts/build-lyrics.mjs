@@ -39,9 +39,14 @@ function structure(lyrics) {
     const head = line.match(/^\[([^\]]+)\]$/)
     if (head) {
       const h = head[1].toLowerCase()
-      if (h.includes('male')) voice = 'dieter'
-      else if (h.includes('female')) voice = 'kiki'
-      else if (h.includes('and')) voice = 'both'
+      // "female" contains the substring "male", so strip it before testing for a male tag,
+      // otherwise every Female (Kiki) section is mis-detected as male (Dieter).
+      const female = h.includes('female')
+      const male = h.replace(/female/g, '').includes('male')
+      if (male && female) voice = 'both'
+      else if (female) voice = 'kiki'
+      else if (male) voice = 'dieter'
+      // else: keep the previous voice (instrumental / structural headers like [Drop])
       out.push({ type: 'section', text: head[1].replace(/:.*$/, '').trim().toUpperCase() })
       continue
     }

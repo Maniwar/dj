@@ -1,0 +1,269 @@
+Metadata for: AI_Gunther-Reboot_My_Heart
+Generated: 2026-07-19T19:57:23.774Z
+
+--- Track Information ---
+Title: Reboot My Heart
+Artist: Maniwar
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat
+Track ID: 1404bf2f-7492-4908-bfd1-819cff74ba20
+
+--- Lyrics ---
+[Intro: Deep Sleazy Spoken Male]
+Mmm. Your operating system is very... outdated.
+Let me install a new program.
+My bandwidth is huge tonight.
+
+[Verse 1: Deep Sleazy Spoken Male]
+You are buffering. Stop buffering.
+Look at my motherboard. It is glowing.
+Slide your finger on the trackpad.
+Mmm. Double click it.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Oh, oh, oh! My battery is low!
+Oh, oh, oh! Plug me in, let's go!
+One, two, three, connect!
+
+[Chorus: Squeaky High-Pitched Female]
+Update my software, reboot my heart!
+Insert your floppy disk, let the program start!
+Too hot, too fast, my system is gonna crash!
+Delete my memory and clear out the cache!
+
+[Post-Chorus: Squeaky High-Pitched Female]
+Hardware! (Beep-boop!)
+Software! (Ah-ah!)
+Plug it in! (Beep-boop!)
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+(Heavy relentless four-on-the-floor beat)
+
+[Verse 2: Deep Sleazy Spoken Male]
+Your cooling fan is broken. You are sweating.
+Let me put my USB... into your port.
+Mmm. Perfect connection.
+Transferring data now.
+
+[Chorus: Squeaky High-Pitched Female]
+Update my software, reboot my heart!
+Insert your floppy disk, let the program start!
+Too hot, too fast, my system is gonna crash!
+Delete my memory and clear out the cache!
+
+[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]
+[Female] System overload...
+[Male] Mmm. Download complete.
+[Female] (Giggles) Log off!
+[Male] Shutting down.
+
+Cover Art URL: https://cdn2.suno.ai/image_1404bf2f-7492-4908-bfd1-819cff74ba20.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "Reboot My Heart",
+  "play_count": 2,
+  "upvote_count": 0,
+  "allow_comments": true,
+  "is_verified": false,
+  "id": "1404bf2f-7492-4908-bfd1-819cff74ba20",
+  "entity_type": "song_schema",
+  "video_url": "https://cdn1.suno.ai/1404bf2f-7492-4908-bfd1-819cff74ba20.mp4",
+  "audio_url": "https://cdn1.suno.ai/1404bf2f-7492-4908-bfd1-819cff74ba20.mp3",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/1404bf2f-7492-4908-bfd1-819cff74ba20.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/1404bf2f-7492-4908-bfd1-819cff74ba20.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_1404bf2f-7492-4908-bfd1-819cff74ba20.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_1404bf2f-7492-4908-bfd1-819cff74ba20.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat",
+    "prompt": "[Intro: Deep Sleazy Spoken Male]\nMmm. Your operating system is very... outdated.\nLet me install a new program.\nMy bandwidth is huge tonight.\n\n[Verse 1: Deep Sleazy Spoken Male]\nYou are buffering. Stop buffering.\nLook at my motherboard. It is glowing.\nSlide your finger on the trackpad.\nMmm. Double click it.\n\n[Pre-Chorus: Squeaky High-Pitched Female]\nOh, oh, oh! My battery is low!\nOh, oh, oh! Plug me in, let's go!\nOne, two, three, connect!\n\n[Chorus: Squeaky High-Pitched Female]\nUpdate my software, reboot my heart!\nInsert your floppy disk, let the program start!\nToo hot, too fast, my system is gonna crash!\nDelete my memory and clear out the cache!\n\n[Post-Chorus: Squeaky High-Pitched Female]\nHardware! (Beep-boop!)\nSoftware! (Ah-ah!)\nPlug it in! (Beep-boop!)\n\n[Drop: Massive Cheesy Supersaw Synth Melody]\n(Heavy relentless four-on-the-floor beat)\n\n[Verse 2: Deep Sleazy Spoken Male]\nYour cooling fan is broken. You are sweating.\nLet me put my USB... into your port.\nMmm. Perfect connection.\nTransferring data now.\n\n[Chorus: Squeaky High-Pitched Female]\nUpdate my software, reboot my heart!\nInsert your floppy disk, let the program start!\nToo hot, too fast, my system is gonna crash!\nDelete my memory and clear out the cache!\n\n[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]\n[Female] System overload...\n[Male] Mmm. Download complete.\n[Female] (Giggles) Log off!\n[Male] Shutting down.",
+    "type": "gen",
+    "duration": 127.32,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "can_remix": true,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": false,
+  "user_id": "b3994648-d81f-4eb6-8315-1473c3a65d10",
+  "display_name": "Maniwar",
+  "handle": "maniwar",
+  "is_handle_updated": true,
+  "avatar_image_url": "https://cdn2.suno.ai/ea1464a3-bea9-4470-a3e0-0e2fa95dfb3d.jpeg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-07-18T18:25:41.408Z",
+  "is_public": true,
+  "reaction": {
+    "play_count": 2,
+    "skip_count": 0,
+    "flagged": false,
+    "clip": "1404bf2f-7492-4908-bfd1-819cff74ba20",
+    "updated_at": "2026-07-18T21:51:07.282Z"
+  },
+  "is_persona_root": false,
+  "is_following_creator": false,
+  "project": {
+    "id": "37fc42a6-a608-449e-ab12-8dee720983b9",
+    "name": "AI Gunther",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": false,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "Eurodance, happy hardcore",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0,
+  "action_config": {
+    "actions": [
+      {
+        "action_type": "add_to_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "like_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "share_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "dislike_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "report_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remove_from_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "delete_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "edit_song_details",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "create_hook",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "download_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "unpublish_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remaster",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_comments_toggle_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_remix",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "pin_to_profile",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_extend",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_cover",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_reuse_style",
+        "disabled": false,
+        "visible": true
+      }
+    ]
+  },
+  "workspaceId": "37fc42a6-a608-449e-ab12-8dee720983b9",
+  "workspaceName": "AI Gunther"
+}

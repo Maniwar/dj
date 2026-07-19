@@ -1,0 +1,303 @@
+Metadata for: AI_Gunther-Patient_Zero
+Generated: 2026-07-19T19:57:23.773Z
+
+--- Track Information ---
+Title: Patient Zero
+Artist: Maniwar
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat
+Track ID: afd8bad8-a37d-4dee-9675-1a3515e7a8db
+
+--- Lyrics ---
+[Intro: Deep Sleazy Spoken Male]
+Mmm. The waiting room is full.
+But I will see you right now.
+Step into my office.
+Take off your coat.
+Let me check your temperature.
+
+[Hook 1: Vocal Chant - Squeaky High-Pitched Female]
+Doc-tor! (Check my heart!)
+Doc-tor! (Off the chart!)
+Doc-tor! (Check my heart!)
+My temperature is tearing me apart!
+
+[Verse 1: Deep Sleazy Spoken Male]
+Your pulse is very erratic.
+I am putting on my gloves.
+They are made of latex.
+Mmm. Very snappy.
+Breathe in. Breathe out.
+You are hyperventilating.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Oh, oh, oh! I have a fever tonight!
+Oh, oh, oh! The room is spinning so bright!
+Give me the medicine!
+
+[Chorus: Squeaky High-Pitched Female]
+Give me mouth to mouth, don't let me down!
+I’m the sickest girl in this disco town!
+Resuscitate me, save my life tonight!
+Doctor, doctor, won't you do it right!
+
+[Post-Chorus: Squeaky High-Pitched Female]
+So dizzy! (Ahhh!)
+So sickly! (Ahhh!)
+Cure me! (Ahhh!)
+Right now!
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+(Heavy relentless four-on-the-floor beat, heartbeat monitor sounds)
+
+[Verse 2: Deep Sleazy Spoken Male]
+I am looking at your x-ray.
+You have a severe case of the rhythm.
+There is only one cure.
+I must give you a beat injection.
+Mmm. It is a very large needle.
+Do not flinch.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Oh, oh, oh! I have a fever tonight!
+Oh, oh, oh! The room is spinning so bright!
+Give me the medicine!
+
+[Chorus: Squeaky High-Pitched Female]
+Give me mouth to mouth, don't let me down!
+I’m the sickest girl in this disco town!
+Resuscitate me, save my life tonight!
+Doctor, doctor, won't you do it right!
+
+[Breakdown: Music Stops]
+[Male] Clear!
+(Electric defibrillator zap sound)
+[Female] (Gasps) I'm alive!
+[Male] Mmm. A medical miracle.
+[Male] Bring back the bassline.
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+(Explosive, heavy, fast Eurodance beat returns)
+
+[Chorus: Squeaky High-Pitched Female]
+Give me mouth to mouth, don't let me down!
+I’m the sickest girl in this disco town!
+Resuscitate me, save my life tonight!
+Doctor, doctor, won't you do it right!
+
+[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]
+[Female] I feel much better...
+[Male] Mmm. That will be five thousand euros.
+[Female] Put it on my tab!
+[Male] Ciao, patient zero.
+
+Cover Art URL: https://cdn2.suno.ai/image_afd8bad8-a37d-4dee-9675-1a3515e7a8db.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "Patient Zero",
+  "play_count": 1,
+  "upvote_count": 0,
+  "allow_comments": true,
+  "is_verified": false,
+  "id": "afd8bad8-a37d-4dee-9675-1a3515e7a8db",
+  "entity_type": "song_schema",
+  "video_url": "https://cdn1.suno.ai/afd8bad8-a37d-4dee-9675-1a3515e7a8db.mp4",
+  "audio_url": "https://cdn1.suno.ai/afd8bad8-a37d-4dee-9675-1a3515e7a8db.mp3",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/afd8bad8-a37d-4dee-9675-1a3515e7a8db.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/afd8bad8-a37d-4dee-9675-1a3515e7a8db.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_afd8bad8-a37d-4dee-9675-1a3515e7a8db.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_afd8bad8-a37d-4dee-9675-1a3515e7a8db.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat",
+    "prompt": "[Intro: Deep Sleazy Spoken Male]\nMmm. The waiting room is full.\nBut I will see you right now.\nStep into my office.\nTake off your coat.\nLet me check your temperature.\n\n[Hook 1: Vocal Chant - Squeaky High-Pitched Female]\nDoc-tor! (Check my heart!)\nDoc-tor! (Off the chart!)\nDoc-tor! (Check my heart!)\nMy temperature is tearing me apart!\n\n[Verse 1: Deep Sleazy Spoken Male]\nYour pulse is very erratic.\nI am putting on my gloves.\nThey are made of latex.\nMmm. Very snappy.\nBreathe in. Breathe out.\nYou are hyperventilating.\n\n[Pre-Chorus: Squeaky High-Pitched Female]\nOh, oh, oh! I have a fever tonight!\nOh, oh, oh! The room is spinning so bright!\nGive me the medicine!\n\n[Chorus: Squeaky High-Pitched Female]\nGive me mouth to mouth, don't let me down!\nI’m the sickest girl in this disco town!\nResuscitate me, save my life tonight!\nDoctor, doctor, won't you do it right!\n\n[Post-Chorus: Squeaky High-Pitched Female]\nSo dizzy! (Ahhh!)\nSo sickly! (Ahhh!)\nCure me! (Ahhh!)\nRight now!\n\n[Drop: Massive Cheesy Supersaw Synth Melody]\n(Heavy relentless four-on-the-floor beat, heartbeat monitor sounds)\n\n[Verse 2: Deep Sleazy Spoken Male]\nI am looking at your x-ray.\nYou have a severe case of the rhythm.\nThere is only one cure.\nI must give you a beat injection.\nMmm. It is a very large needle.\nDo not flinch.\n\n[Pre-Chorus: Squeaky High-Pitched Female]\nOh, oh, oh! I have a fever tonight!\nOh, oh, oh! The room is spinning so bright!\nGive me the medicine!\n\n[Chorus: Squeaky High-Pitched Female]\nGive me mouth to mouth, don't let me down!\nI’m the sickest girl in this disco town!\nResuscitate me, save my life tonight!\nDoctor, doctor, won't you do it right!\n\n[Breakdown: Music Stops]\n[Male] Clear!\n(Electric defibrillator zap sound)\n[Female] (Gasps) I'm alive!\n[Male] Mmm. A medical miracle.\n[Male] Bring back the bassline.\n\n[Drop: Massive Cheesy Supersaw Synth Melody]\n(Explosive, heavy, fast Eurodance beat returns)\n\n[Chorus: Squeaky High-Pitched Female]\nGive me mouth to mouth, don't let me down!\nI’m the sickest girl in this disco town!\nResuscitate me, save my life tonight!\nDoctor, doctor, won't you do it right!\n\n[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]\n[Female] I feel much better...\n[Male] Mmm. That will be five thousand euros.\n[Female] Put it on my tab!\n[Male] Ciao, patient zero.",
+    "type": "gen",
+    "duration": 211.08,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "can_remix": false,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "video_is_stale": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": false,
+  "user_id": "b3994648-d81f-4eb6-8315-1473c3a65d10",
+  "display_name": "Maniwar",
+  "handle": "maniwar",
+  "is_handle_updated": true,
+  "avatar_image_url": "https://cdn2.suno.ai/ea1464a3-bea9-4470-a3e0-0e2fa95dfb3d.jpeg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-07-19T00:03:16.295Z",
+  "is_public": true,
+  "reaction": {
+    "play_count": 1,
+    "skip_count": 0,
+    "flagged": false,
+    "clip": "afd8bad8-a37d-4dee-9675-1a3515e7a8db",
+    "updated_at": "2026-07-19T00:37:29.510Z"
+  },
+  "is_persona_root": false,
+  "is_following_creator": false,
+  "project": {
+    "id": "37fc42a6-a608-449e-ab12-8dee720983b9",
+    "name": "AI Gunther",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": false,
+  "comment_count": 0,
+  "flag_count": 0,
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0,
+  "action_config": {
+    "actions": [
+      {
+        "action_type": "add_to_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "like_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "share_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "dislike_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "report_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remove_from_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "delete_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "edit_song_details",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "create_hook",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "download_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "unpublish_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remaster",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_comments_toggle_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_remix",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "pin_to_profile",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_extend",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_cover",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_reuse_style",
+        "disabled": false,
+        "visible": true
+      }
+    ]
+  },
+  "workspaceId": "37fc42a6-a608-449e-ab12-8dee720983b9",
+  "workspaceName": "AI Gunther"
+}

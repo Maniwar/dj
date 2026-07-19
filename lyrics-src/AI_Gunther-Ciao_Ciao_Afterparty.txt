@@ -1,0 +1,268 @@
+Metadata for: AI_Gunther-Ciao_Ciao_Afterparty
+Generated: 2026-07-19T19:57:23.774Z
+
+--- Track Information ---
+Title: Ciao Ciao Afterparty
+Artist: Maniwar
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat
+Track ID: 264f4121-3462-41dd-a977-967208f52a7b
+
+--- Lyrics ---
+[Intro: Deep Sleazy Spoken Male]
+The lights are coming on.
+The club is ugly in the light.
+Mmm. Look at your makeup.
+We must leave this place.
+
+[Verse 1: Deep Sleazy Spoken Male]
+Put on your sunglasses.
+Yes, even though it is dark outside.
+We are getting in the taxi.
+Do not tell the driver where we are going.
+It is a secret.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Oh, oh, oh! The sun is gonna rise!
+Oh, oh, oh! I have stars in my eyes!
+Take me to the moon!
+
+[Chorus: Squeaky High-Pitched Female]
+Ciao ciao! The night is over but the bass is loud!
+Ciao ciao! Let's find an afterparty in the crowd!
+Still hot, still moist, we’re dancing in the street!
+I’ll never go to sleep, I just need the beat!
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+(Heavy relentless four-on-the-floor beat)
+
+[Verse 2: Deep Sleazy Spoken Male]
+This apartment is very small.
+But the stereo is very good.
+Mmm. Drink this water.
+Hydration is important for dancing.
+
+[Chorus: Squeaky High-Pitched Female]
+Ciao ciao! The night is over but the bass is loud!
+Ciao ciao! Let's find an afterparty in the crowd!
+Still hot, still moist, we’re dancing in the street!
+I’ll never go to sleep, I just need the beat!
+
+[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]
+[Female] Ciao ciao...
+[Male] Mmm. Goodbye forever.
+[Female] Wait, where is my jacket?
+[Male] (Silence, beat fading out to nothing)
+[Female] Hello?!
+
+Cover Art URL: https://cdn2.suno.ai/image_264f4121-3462-41dd-a977-967208f52a7b.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "Ciao Ciao Afterparty",
+  "play_count": 5,
+  "upvote_count": 0,
+  "allow_comments": true,
+  "is_verified": false,
+  "id": "264f4121-3462-41dd-a977-967208f52a7b",
+  "entity_type": "song_schema",
+  "video_url": "https://cdn1.suno.ai/264f4121-3462-41dd-a977-967208f52a7b.mp4",
+  "audio_url": "https://cdn1.suno.ai/264f4121-3462-41dd-a977-967208f52a7b.mp3",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/264f4121-3462-41dd-a977-967208f52a7b.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/264f4121-3462-41dd-a977-967208f52a7b.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_264f4121-3462-41dd-a977-967208f52a7b.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_264f4121-3462-41dd-a977-967208f52a7b.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat",
+    "prompt": "[Intro: Deep Sleazy Spoken Male]\nThe lights are coming on.\nThe club is ugly in the light.\nMmm. Look at your makeup.\nWe must leave this place.\n\n[Verse 1: Deep Sleazy Spoken Male]\nPut on your sunglasses.\nYes, even though it is dark outside.\nWe are getting in the taxi.\nDo not tell the driver where we are going.\nIt is a secret.\n\n[Pre-Chorus: Squeaky High-Pitched Female]\nOh, oh, oh! The sun is gonna rise!\nOh, oh, oh! I have stars in my eyes!\nTake me to the moon!\n\n[Chorus: Squeaky High-Pitched Female]\nCiao ciao! The night is over but the bass is loud!\nCiao ciao! Let's find an afterparty in the crowd!\nStill hot, still moist, we’re dancing in the street!\nI’ll never go to sleep, I just need the beat!\n\n[Drop: Massive Cheesy Supersaw Synth Melody]\n(Heavy relentless four-on-the-floor beat)\n\n[Verse 2: Deep Sleazy Spoken Male]\nThis apartment is very small.\nBut the stereo is very good.\nMmm. Drink this water.\nHydration is important for dancing.\n\n[Chorus: Squeaky High-Pitched Female]\nCiao ciao! The night is over but the bass is loud!\nCiao ciao! Let's find an afterparty in the crowd!\nStill hot, still moist, we’re dancing in the street!\nI’ll never go to sleep, I just need the beat!\n\n[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]\n[Female] Ciao ciao...\n[Male] Mmm. Goodbye forever.\n[Female] Wait, where is my jacket?\n[Male] (Silence, beat fading out to nothing)\n[Female] Hello?!",
+    "type": "gen",
+    "duration": 177.64,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "can_remix": true,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "video_is_stale": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": false,
+  "user_id": "b3994648-d81f-4eb6-8315-1473c3a65d10",
+  "display_name": "Maniwar",
+  "handle": "maniwar",
+  "is_handle_updated": true,
+  "avatar_image_url": "https://cdn2.suno.ai/ea1464a3-bea9-4470-a3e0-0e2fa95dfb3d.jpeg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-07-18T18:26:26.540Z",
+  "is_public": true,
+  "reaction": {
+    "play_count": 1,
+    "skip_count": 0,
+    "flagged": false,
+    "clip": "264f4121-3462-41dd-a977-967208f52a7b",
+    "updated_at": "2026-07-18T21:17:33.305Z"
+  },
+  "is_persona_root": false,
+  "is_following_creator": false,
+  "project": {
+    "id": "37fc42a6-a608-449e-ab12-8dee720983b9",
+    "name": "AI Gunther",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": false,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "Eurodance, happy hardcore",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0,
+  "action_config": {
+    "actions": [
+      {
+        "action_type": "add_to_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "like_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "share_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "dislike_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "report_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remove_from_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "delete_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "edit_song_details",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "create_hook",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "download_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "unpublish_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remaster",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_comments_toggle_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_remix",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "pin_to_profile",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_extend",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_cover",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_reuse_style",
+        "disabled": false,
+        "visible": true
+      }
+    ]
+  },
+  "workspaceId": "37fc42a6-a608-449e-ab12-8dee720983b9",
+  "workspaceName": "AI Gunther"
+}

@@ -1,0 +1,327 @@
+Metadata for: AI_Gunther-Shameless_on_the_Floor
+Generated: 2026-07-19T19:57:23.775Z
+
+--- Track Information ---
+Title: Shameless on the Floor
+Artist: Maniwar
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat
+Track ID: b65e8154-f43d-4ccc-92dc-9d6ea5d626e5
+
+--- Lyrics ---
+[Intro: Deep Spoken Male]
+Mmm. The club is completely full.
+But I am only looking at your... hardware.
+The bass is pumping.
+You are looking very... slippery tonight.
+Let's get wet.
+
+[Hook 1: Vocal Chant - Squeaky Female]
+Sha-sha-shameless! (Sha-la-la-la!)
+Sha-sha-shameless! (Squeeze it for me now!)
+Sha-sha-shameless! (Sha-la-la-la!)
+Everybody on the floor, we are going wild!
+
+[Hook 2: Massive Synth Melody]
+(Fast, bouncy, aggressive happy synthesizer riff)
+
+[Verse 1: Deep Spoken Male]
+You are moving so fast.
+Up and down on my... equalizer.
+Slide your hand over my joystick.
+Let me plug directly into your socket.
+Perfect. Mmm. So moist.
+
+[Hook 3: Pre-Chorus Build - Squeaky Female]
+Oh, oh, oh! My engine is heating!
+Oh, oh, oh! The rhythm is beating!
+Push all my buttons, let's go!
+
+[Hook 4: Main Chorus - Squeaky Female]
+I’m so shameless, I can’t behave!
+Soaking and moist all over this rave!
+Too hot, too wild, sliding right into you!
+Shameless on the floor, what you gonna do?
+
+[Post-Chorus Call & Response]
+[Female] Shameless!
+[Male] So slippery.
+[Female] Shameless!
+[Male] Mmm, deeper.
+
+[Hook 2: Massive Synth Melody]
+(Fast, bouncy, aggressive happy synthesizer riff)
+
+[Verse 2: Deep Spoken Male]
+You are dripping now. Excellent.
+Look at my floppy disk.
+Suddenly... it is a hard drive.
+Do you want to ride my subwoofer?
+Mmm. It vibrates.
+Let's go faster.
+
+[Hook 3: Pre-Chorus Build - Squeaky Female]
+Oh, oh, oh! My engine is heating!
+Oh, oh, oh! The rhythm is beating!
+Push all my buttons, let's go!
+
+[Hook 4: Main Chorus - Squeaky Female]
+I’m so shameless, I can’t behave!
+Soaking and moist all over this rave!
+Too hot, too wild, sliding right into you!
+Shameless on the floor, what you gonna do?
+
+[Breakdown: The Dramatic Pause]
+(Music completely stops. Silence.)
+[Male] Stop the music.
+[Female] (Giggles)
+[Male] You are making a mess on the dancefloor.
+[Male] Now... bring back the bass.
+
+[Drop: Mega Synth Melody]
+(Explosive, heavy, fast Eurodance beat returns with massive synths!)
+
+[Hook 5: The Spelling Bridge - Squeaky Female]
+S-H-A-M-E-L-E-S-S!
+Rubbing together, skin on my chest!
+S-H-A-M-E-L-E-S-S!
+Pump it up harder, put me to the test!
+
+[Hook 1: Vocal Chant - Squeaky Female]
+Sha-sha-shameless! (Sha-la-la-la!)
+Sha-sha-shameless! (Squeeze it for me now!)
+
+[Hook 4: Main Chorus - Squeaky Female]
+I’m so shameless, I can’t behave!
+Soaking and moist all over this rave!
+Too hot, too wild, sliding right into you!
+Shameless on the floor, what you gonna do?
+
+[Post-Chorus Call & Response]
+[Female] Shameless!
+[Male] Keep pumping.
+[Female] Shameless!
+[Male] Oh yes.
+[Female] Shameless!
+[Male] Give it to the bassline.
+
+[Outro: Deep Male and Squeaky Female]
+(Beat fading out slowly)
+[Female] Sha-sha-shameless...
+[Male] Mmm. I need a towel.
+[Female] (Breathless moan)
+[Male] Unplug my cables. We are done here.
+[Female] Ciao!
+[Male] See you in the VIP room.
+
+Cover Art URL: https://cdn2.suno.ai/image_b65e8154-f43d-4ccc-92dc-9d6ea5d626e5.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "Shameless on the Floor",
+  "play_count": 3,
+  "upvote_count": 0,
+  "allow_comments": true,
+  "is_verified": false,
+  "id": "b65e8154-f43d-4ccc-92dc-9d6ea5d626e5",
+  "entity_type": "song_schema",
+  "video_url": "https://cdn1.suno.ai/b65e8154-f43d-4ccc-92dc-9d6ea5d626e5.mp4",
+  "audio_url": "https://cdn1.suno.ai/b65e8154-f43d-4ccc-92dc-9d6ea5d626e5.mp3",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/b65e8154-f43d-4ccc-92dc-9d6ea5d626e5.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/b65e8154-f43d-4ccc-92dc-9d6ea5d626e5.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_b65e8154-f43d-4ccc-92dc-9d6ea5d626e5.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_b65e8154-f43d-4ccc-92dc-9d6ea5d626e5.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat",
+    "prompt": "[Intro: Deep Spoken Male]\nMmm. The club is completely full.\nBut I am only looking at your... hardware.\nThe bass is pumping.\nYou are looking very... slippery tonight.\nLet's get wet.\n\n[Hook 1: Vocal Chant - Squeaky Female]\nSha-sha-shameless! (Sha-la-la-la!)\nSha-sha-shameless! (Squeeze it for me now!)\nSha-sha-shameless! (Sha-la-la-la!)\nEverybody on the floor, we are going wild!\n\n[Hook 2: Massive Synth Melody]\n(Fast, bouncy, aggressive happy synthesizer riff)\n\n[Verse 1: Deep Spoken Male]\nYou are moving so fast.\nUp and down on my... equalizer.\nSlide your hand over my joystick.\nLet me plug directly into your socket.\nPerfect. Mmm. So moist.\n\n[Hook 3: Pre-Chorus Build - Squeaky Female]\nOh, oh, oh! My engine is heating!\nOh, oh, oh! The rhythm is beating!\nPush all my buttons, let's go!\n\n[Hook 4: Main Chorus - Squeaky Female]\nI’m so shameless, I can’t behave!\nSoaking and moist all over this rave!\nToo hot, too wild, sliding right into you!\nShameless on the floor, what you gonna do?\n\n[Post-Chorus Call & Response]\n[Female] Shameless!\n[Male] So slippery.\n[Female] Shameless!\n[Male] Mmm, deeper.\n\n[Hook 2: Massive Synth Melody]\n(Fast, bouncy, aggressive happy synthesizer riff)\n\n[Verse 2: Deep Spoken Male]\nYou are dripping now. Excellent.\nLook at my floppy disk.\nSuddenly... it is a hard drive.\nDo you want to ride my subwoofer?\nMmm. It vibrates.\nLet's go faster.\n\n[Hook 3: Pre-Chorus Build - Squeaky Female]\nOh, oh, oh! My engine is heating!\nOh, oh, oh! The rhythm is beating!\nPush all my buttons, let's go!\n\n[Hook 4: Main Chorus - Squeaky Female]\nI’m so shameless, I can’t behave!\nSoaking and moist all over this rave!\nToo hot, too wild, sliding right into you!\nShameless on the floor, what you gonna do?\n\n[Breakdown: The Dramatic Pause]\n(Music completely stops. Silence.)\n[Male] Stop the music.\n[Female] (Giggles)\n[Male] You are making a mess on the dancefloor.\n[Male] Now... bring back the bass.\n\n[Drop: Mega Synth Melody]\n(Explosive, heavy, fast Eurodance beat returns with massive synths!)\n\n[Hook 5: The Spelling Bridge - Squeaky Female]\nS-H-A-M-E-L-E-S-S!\nRubbing together, skin on my chest!\nS-H-A-M-E-L-E-S-S!\nPump it up harder, put me to the test!\n\n[Hook 1: Vocal Chant - Squeaky Female]\nSha-sha-shameless! (Sha-la-la-la!)\nSha-sha-shameless! (Squeeze it for me now!)\n\n[Hook 4: Main Chorus - Squeaky Female]\nI’m so shameless, I can’t behave!\nSoaking and moist all over this rave!\nToo hot, too wild, sliding right into you!\nShameless on the floor, what you gonna do?\n\n[Post-Chorus Call & Response]\n[Female] Shameless!\n[Male] Keep pumping.\n[Female] Shameless!\n[Male] Oh yes.\n[Female] Shameless!\n[Male] Give it to the bassline.\n\n[Outro: Deep Male and Squeaky Female]\n(Beat fading out slowly)\n[Female] Sha-sha-shameless...\n[Male] Mmm. I need a towel.\n[Female] (Breathless moan)\n[Male] Unplug my cables. We are done here.\n[Female] Ciao!\n[Male] See you in the VIP room.",
+    "type": "gen",
+    "duration": 240.88,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "can_remix": true,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "video_is_stale": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": false,
+  "user_id": "b3994648-d81f-4eb6-8315-1473c3a65d10",
+  "display_name": "Maniwar",
+  "handle": "maniwar",
+  "is_handle_updated": true,
+  "avatar_image_url": "https://cdn2.suno.ai/ea1464a3-bea9-4470-a3e0-0e2fa95dfb3d.jpeg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-07-18T18:00:21.982Z",
+  "is_public": true,
+  "reaction": {
+    "play_count": 3,
+    "skip_count": 0,
+    "flagged": false,
+    "clip": "b65e8154-f43d-4ccc-92dc-9d6ea5d626e5",
+    "updated_at": "2026-07-18T21:53:07.683Z"
+  },
+  "is_persona_root": false,
+  "is_following_creator": false,
+  "project": {
+    "id": "37fc42a6-a608-449e-ab12-8dee720983b9",
+    "name": "AI Gunther",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": true,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "Eurodance, happy hardcore",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0,
+  "action_config": {
+    "actions": [
+      {
+        "action_type": "add_to_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "like_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "share_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "dislike_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "report_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remove_from_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "delete_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "edit_song_details",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "create_hook",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "download_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "unpublish_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remaster",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_comments_toggle_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_remix",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "pin_to_profile",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_extend",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_cover",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_reuse_style",
+        "disabled": false,
+        "visible": true
+      }
+    ]
+  },
+  "workspaceId": "37fc42a6-a608-449e-ab12-8dee720983b9",
+  "workspaceName": "AI Gunther"
+}

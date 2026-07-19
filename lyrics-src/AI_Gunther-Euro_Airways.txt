@@ -1,0 +1,298 @@
+Metadata for: AI_Gunther-Euro_Airways
+Generated: 2026-07-19T19:57:23.772Z
+
+--- Track Information ---
+Title: Euro Airways
+Artist: Maniwar
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat
+Track ID: c8296059-4035-4a4f-bc87-5602f2ab9916
+
+--- Lyrics ---
+[Intro: Deep Sleazy Spoken Male]
+Mmm. Welcome aboard Euro Airways.
+I am your captain.
+The cockpit is fully loaded.
+Please put your tray tables in the upright position.
+We are going to experience heavy turbulence.
+Fasten your seatbelt.
+
+[Hook 1: Vocal Chant - Squeaky High-Pitched Female]
+Air-plane! (Take me high!)
+Air-plane! (Touch the sky!)
+Air-plane! (Take me high!)
+Everybody flying in the clouds tonight!
+
+[Verse 1: Deep Sleazy Spoken Male]
+I see you are in first class.
+Would you like a beverage?
+My service cart is very full.
+I have a very large bag of peanuts.
+Mmm. Salty.
+Let me demonstrate the oxygen mask.
+You must strap it on very tightly.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Oh, oh, oh! We are flying in the clouds!
+Oh, oh, oh! The engines are so loud!
+One, two, three, let's fly!
+
+[Chorus: Squeaky High-Pitched Female]
+Take me up into the sky, flying in the aeroplane!
+Riding in the captain's chair, driving me insane!
+Cruising at a mile high, shaking in the turbulence!
+Shameless in the passenger seat, lacking common sense!
+
+[Post-Chorus: Squeaky High-Pitched Female]
+So bumpy! (Up!)
+So jumpy! (Up!)
+So high! (Up!)
+Take off!
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+(Heavy relentless four-on-the-floor beat, jet engine whoosh sounds)
+
+[Verse 2: Deep Sleazy Spoken Male]
+The cabin pressure is dropping.
+I need to pull the emergency lever.
+Mmm. It goes all the way back.
+Grab your inflatable life vest.
+It requires a lot of heavy blowing.
+Puff your cheeks out.
+Don't stop until it is fully inflated.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Oh, oh, oh! We are flying in the clouds!
+Oh, oh, oh! The engines are so loud!
+One, two, three, let's fly!
+
+[Chorus: Squeaky High-Pitched Female]
+Take me up into the sky, flying in the aeroplane!
+Riding in the captain's chair, driving me insane!
+Cruising at a mile high, shaking in the turbulence!
+Shameless in the passenger seat, lacking common sense!
+
+[Breakdown: Music Stops]
+[Male] Oh no. We are out of fuel.
+[Female] (Gasps) We are going to crash!
+[Male] Mmm. Do not worry. I brought a parachute.
+[Male] Bring back the bassline.
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+(Explosive, heavy, fast Eurodance beat returns)
+
+[Chorus: Squeaky High-Pitched Female]
+Take me up into the sky, flying in the aeroplane!
+Riding in the captain's chair, driving me insane!
+Cruising at a mile high, shaking in the turbulence!
+Shameless in the passenger seat, lacking common sense!
+
+[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]
+[Female] I lost my luggage!
+[Male] Mmm. You can borrow my uniform.
+[Female] It's too big!
+[Male] Ciao, frequent flyers.
+
+Cover Art URL: https://cdn2.suno.ai/image_c8296059-4035-4a4f-bc87-5602f2ab9916.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "Euro Airways",
+  "play_count": 0,
+  "upvote_count": 0,
+  "allow_comments": true,
+  "is_verified": false,
+  "id": "c8296059-4035-4a4f-bc87-5602f2ab9916",
+  "entity_type": "song_schema",
+  "video_url": "https://cdn1.suno.ai/c8296059-4035-4a4f-bc87-5602f2ab9916.mp4",
+  "audio_url": "https://cdn1.suno.ai/c8296059-4035-4a4f-bc87-5602f2ab9916.mp3",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/c8296059-4035-4a4f-bc87-5602f2ab9916.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/c8296059-4035-4a4f-bc87-5602f2ab9916.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_c8296059-4035-4a4f-bc87-5602f2ab9916.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_c8296059-4035-4a4f-bc87-5602f2ab9916.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat",
+    "prompt": "[Intro: Deep Sleazy Spoken Male]\nMmm. Welcome aboard Euro Airways.\nI am your captain.\nThe cockpit is fully loaded.\nPlease put your tray tables in the upright position.\nWe are going to experience heavy turbulence.\nFasten your seatbelt.\n\n[Hook 1: Vocal Chant - Squeaky High-Pitched Female]\nAir-plane! (Take me high!)\nAir-plane! (Touch the sky!)\nAir-plane! (Take me high!)\nEverybody flying in the clouds tonight!\n\n[Verse 1: Deep Sleazy Spoken Male]\nI see you are in first class.\nWould you like a beverage?\nMy service cart is very full.\nI have a very large bag of peanuts.\nMmm. Salty.\nLet me demonstrate the oxygen mask.\nYou must strap it on very tightly.\n\n[Pre-Chorus: Squeaky High-Pitched Female]\nOh, oh, oh! We are flying in the clouds!\nOh, oh, oh! The engines are so loud!\nOne, two, three, let's fly!\n\n[Chorus: Squeaky High-Pitched Female]\nTake me up into the sky, flying in the aeroplane!\nRiding in the captain's chair, driving me insane!\nCruising at a mile high, shaking in the turbulence!\nShameless in the passenger seat, lacking common sense!\n\n[Post-Chorus: Squeaky High-Pitched Female]\nSo bumpy! (Up!)\nSo jumpy! (Up!)\nSo high! (Up!)\nTake off!\n\n[Drop: Massive Cheesy Supersaw Synth Melody]\n(Heavy relentless four-on-the-floor beat, jet engine whoosh sounds)\n\n[Verse 2: Deep Sleazy Spoken Male]\nThe cabin pressure is dropping.\nI need to pull the emergency lever.\nMmm. It goes all the way back.\nGrab your inflatable life vest.\nIt requires a lot of heavy blowing.\nPuff your cheeks out.\nDon't stop until it is fully inflated.\n\n[Pre-Chorus: Squeaky High-Pitched Female]\nOh, oh, oh! We are flying in the clouds!\nOh, oh, oh! The engines are so loud!\nOne, two, three, let's fly!\n\n[Chorus: Squeaky High-Pitched Female]\nTake me up into the sky, flying in the aeroplane!\nRiding in the captain's chair, driving me insane!\nCruising at a mile high, shaking in the turbulence!\nShameless in the passenger seat, lacking common sense!\n\n[Breakdown: Music Stops]\n[Male] Oh no. We are out of fuel.\n[Female] (Gasps) We are going to crash!\n[Male] Mmm. Do not worry. I brought a parachute.\n[Male] Bring back the bassline.\n\n[Drop: Massive Cheesy Supersaw Synth Melody]\n(Explosive, heavy, fast Eurodance beat returns)\n\n[Chorus: Squeaky High-Pitched Female]\nTake me up into the sky, flying in the aeroplane!\nRiding in the captain's chair, driving me insane!\nCruising at a mile high, shaking in the turbulence!\nShameless in the passenger seat, lacking common sense!\n\n[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]\n[Female] I lost my luggage!\n[Male] Mmm. You can borrow my uniform.\n[Female] It's too big!\n[Male] Ciao, frequent flyers.",
+    "type": "gen",
+    "duration": 243.16,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "can_remix": false,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": false,
+  "user_id": "b3994648-d81f-4eb6-8315-1473c3a65d10",
+  "display_name": "Maniwar",
+  "handle": "maniwar",
+  "is_handle_updated": true,
+  "avatar_image_url": "https://cdn2.suno.ai/ea1464a3-bea9-4470-a3e0-0e2fa95dfb3d.jpeg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-07-19T00:05:09.372Z",
+  "is_public": true,
+  "is_persona_root": false,
+  "is_following_creator": false,
+  "project": {
+    "id": "37fc42a6-a608-449e-ab12-8dee720983b9",
+    "name": "AI Gunther",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": false,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "Eurodance, happy hardcore",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0,
+  "action_config": {
+    "actions": [
+      {
+        "action_type": "add_to_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "like_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "share_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "dislike_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "report_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remove_from_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "delete_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "edit_song_details",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "create_hook",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "download_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "unpublish_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remaster",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_comments_toggle_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "allow_remix",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "pin_to_profile",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_extend",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_cover",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_reuse_style",
+        "disabled": false,
+        "visible": true
+      }
+    ]
+  },
+  "workspaceId": "37fc42a6-a608-449e-ab12-8dee720983b9",
+  "workspaceName": "AI Gunther"
+}
