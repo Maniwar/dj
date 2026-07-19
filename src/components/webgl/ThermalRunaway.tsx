@@ -78,10 +78,13 @@ function Mainstage() {
     }
     freqTex.needsUpdate = true
 
-    u.uBass.value = b.bass
-    u.uLevel.value = b.level
-    u.uTreble.value = b.treble
-    u.uBeat.value = b.beat
+    // Amplify the (usually timid) raw bands so the lasers/haze visibly pump to the beat.
+    const boost = (x: number, g: number, gamma: number) =>
+      Math.min(1, Math.pow(Math.max(0, x), gamma) * g)
+    u.uBass.value = boost(b.bass, 1.7, 0.78)
+    u.uLevel.value = boost(b.level, 1.7, 0.8)
+    u.uTreble.value = boost(b.treble, 1.75, 0.8)
+    u.uBeat.value = boost(b.beat, 1.7, 0.68)
     u.uTemp.value = (t.temperature - AMBIENT) / (MAXT - AMBIENT)
     u.uHumidity.value = t.humidity
     u.uDew.value = t.dewPointHit ? 1 : Math.max(0, u.uDew.value - dt * 1.5)

@@ -67,18 +67,24 @@ export const thermalFrag = /* glsl */ `
     vec2 p = vec2((uv.x-0.5)*aspect, uv.y-0.5);
     vec3 col = vec3(0.0);
 
-    // thin sweeping laser streaks (magenta / acid-green / blue), beat-reactive
-    for(int i=0;i<3;i++){
+    // thin sweeping laser streaks (magenta / acid-green / blue / cyan), HARD beat-reactive:
+    // each kick jolts the sweep, fattens the beam, and flares its brightness so the lasers
+    // visibly punch on the beat instead of drifting.
+    for(int i=0;i<4;i++){
       float fi=float(i);
-      float a = (fi-1.0)*0.5 + sin(uTime*(0.5+fi*0.2))*0.6;
+      float sweep = sin(uTime*(0.5+fi*0.2) + uBeat*2.6)*0.62;   // beat kicks the angle
+      float a = (fi-1.5)*0.42 + sweep;
       vec2 dir = vec2(cos(a), sin(a));
       float d = abs(dot(p, vec2(dir.y,-dir.x)));
-      float streak = smoothstep(0.004, 0.0, d);
-      vec3 lc = fi<0.5 ? vec3(1.0,0.12,0.56) : (fi<1.5 ? vec3(0.39,1.0,0.18) : vec3(0.08,0.88,1.0));
-      col += lc * streak * (0.25 + uTreble*0.5 + uBeat*0.5);
+      float w = 0.0032 + uBeat*0.013 + uBass*0.004;             // beam fattens on the beat
+      float streak = smoothstep(w, 0.0, d);
+      vec3 lc = fi<0.5 ? vec3(1.0,0.12,0.56)
+              : (fi<1.5 ? vec3(0.39,1.0,0.18)
+              : (fi<2.5 ? vec3(0.08,0.88,1.0) : vec3(0.65,0.3,1.0)));
+      col += lc * streak * (0.1 + uTreble*0.42 + uBeat*1.35);   // dim base -> flares on kicks
     }
-    // faint volumetric haze bloom that breathes with the level
-    col += vec3(0.5,0.3,0.6) * fbm(uv*3.0 - uTime*0.05) * uLevel * 0.12;
+    // volumetric haze bloom that breathes with the level AND pulses on the beat
+    col += vec3(0.5,0.3,0.6) * fbm(uv*3.0 - uTime*0.05) * (uLevel*0.13 + uBeat*0.1);
 
     // CONDENSATION beading over the whole "lens" — the humidity signature
     float beads = droplets(uv, 0.04 + uHumidity*0.30);
