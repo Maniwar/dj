@@ -72,8 +72,9 @@ export const thermalFrag = /* glsl */ `
     // visibly punch on the beat instead of drifting.
     for(int i=0;i<4;i++){
       float fi=float(i);
-      float sweep = sin(uTime*(0.5+fi*0.2) + uBeat*2.6)*0.62;   // beat kicks the angle
-      float a = (fi-1.5)*0.42 + sweep;
+      // smooth continuous sweep (a touch faster so it reads lively), with only a small
+      // beat nudge — the beat punch lives in brightness + beam width below, not a big jump.
+      float a = (fi-1.5)*0.42 + sin(uTime*(0.85+fi*0.28))*0.62 + uBeat*0.18;
       vec2 dir = vec2(cos(a), sin(a));
       float d = abs(dot(p, vec2(dir.y,-dir.x)));
       float w = 0.0032 + uBeat*0.013 + uBass*0.004;             // beam fattens on the beat

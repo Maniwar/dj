@@ -8,6 +8,11 @@ import { thermalVert, thermalFrag } from './thermalShader'
 const AMBIENT = 22
 const MAXT = 125
 const FREQ_BINS = 64
+// The full-screen fragment shader is the heaviest thing on the page. Cap the render
+// resolution hard on phones (1x) and modestly on desktop (1.4x) so the beat cuts, lasers
+// and the whole compositing stack stay at 60fps instead of flickering.
+const MAX_DPR =
+  typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches ? 1 : 1.4
 
 const pointer = { x: 0.5, y: 0.5 }
 if (typeof window !== 'undefined') {
@@ -53,7 +58,7 @@ function Mainstage() {
   )
 
   useEffect(() => {
-    const dpr = Math.min(1.75, window.devicePixelRatio || 1)
+    const dpr = Math.min(MAX_DPR, window.devicePixelRatio || 1)
     gl.setPixelRatio(dpr)
     uniforms.uRes.value.set(size.width * dpr, size.height * dpr)
   }, [size, gl, uniforms])
@@ -123,7 +128,7 @@ export default function ThermalRunaway() {
           premultipliedAlpha: false,
           powerPreference: 'high-performance',
         }}
-        dpr={[1, 1.75]}
+        dpr={[1, MAX_DPR]}
         frameloop="always"
       >
         <Mainstage />

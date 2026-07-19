@@ -57,7 +57,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     const src = ctx.createMediaElementSource(elRef.current)
     const analyser = ctx.createAnalyser()
     analyser.fftSize = audioBus.fftSize
-    analyser.smoothingTimeConstant = 0.82
+    analyser.smoothingTimeConstant = 0.62 // snappier bars/beat (0.82 was sluggish)
     const gain = ctx.createGain()
     gain.gain.value = usePlayerStore.getState().volume
     src.connect(analyser)
