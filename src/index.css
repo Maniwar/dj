@@ -629,7 +629,13 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   transform: translate(-50%,-64%) scale(calc(1 + var(--m-beat,0) * 0.14)); font-size: 1.45rem;
   filter: drop-shadow(0 4px 6px rgba(0,0,0,0.7)); will-change: left, transform; }
 .rail-pct { font-family: 'Courier New', monospace; font-size: 0.68rem; color: var(--champagne); min-width: 32px; text-align: right; }
-/* On phones the docked player owns the bottom, so hide the bottom rail (the full site-wide
-   journey redesign will replace it); keeps them from overlapping. */
-@media (max-width: 640px) { .tour-rail { display: none; } }
+/* On phones the docked player owns the bottom, so dock the tour rail at the TOP instead
+   (no overlap). Slides down from above. */
+@media (max-width: 640px) {
+  .tour-rail { top: 8px; bottom: auto; width: calc(100vw - 16px);
+    transform: translateX(-50%) translateY(-180%); }
+  .tour-rail.show { transform: translateX(-50%) translateY(0); }
+  .rail-brand { display: none; }
+  .rail-frame { gap: 10px; padding: 7px 12px; -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
 @media (prefers-reduced-motion: reduce) { .tour-rail { transition: opacity 0.3s ease; } }

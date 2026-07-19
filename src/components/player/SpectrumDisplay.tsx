@@ -8,6 +8,8 @@ const BARS = 40
 export default function SpectrumDisplay() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const peaksRef = useRef<number[]>(new Array(BARS).fill(0))
+  const valsRef = useRef<number[]>(new Array(BARS).fill(0))
+  const agcRef = useRef(0.35) // running peak for auto-gain normalization
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -55,18 +57,30 @@ export default function SpectrumDisplay() {
       const temp = audioBus.thermal.temperature
       const hot = Math.min(1, Math.max(0, (temp - 22) / 90))
 
+      // Pass 1: average energy per contiguous log band + track the frame's loudest band.
+      const vals = valsRef.current
       let bandLo = minBin
+      let frameMax = 0.0001
       for (let i = 0; i < BARS; i++) {
         let hi = Math.floor(minBin * Math.pow(logBase, i + 1))
         if (hi <= bandLo) hi = bandLo + 1
         if (hi > N) hi = N
-        // peak within the band reads punchier than an average
-        let m = 0
-        for (let j = bandLo; j < hi; j++) if (freq[j] > m) m = freq[j]
+        let sum = 0
+        for (let j = bandLo; j < hi; j++) sum += freq[j]
+        const avg = sum / ((hi - bandLo) * 255)
         bandLo = hi
-        let v = m / 255
-        // noise floor + gamma + gain for a lively, wide dynamic range
-        v = Math.min(1, Math.pow(Math.max(0, v - 0.03), 0.62) * 1.35)
+        vals[i] = avg
+        if (avg > frameMax) frameMax = avg
+      }
+      // AUTO-GAIN: fast-attack / slow-release running peak. Loud EDM saturates the analyser
+      // near max, so a fixed gain always pins the bars — instead we normalize to the recent
+      // peak, so the display shows the spectral SHAPE (dynamic) regardless of loudness.
+      agcRef.current = frameMax > agcRef.current ? frameMax : agcRef.current * 0.94 + frameMax * 0.06
+      const ref = Math.max(0.1, agcRef.current)
+
+      for (let i = 0; i < BARS; i++) {
+        // normalize to the running peak; gamma>1 opens the gap between loud and quiet bars
+        const v = Math.min(1, Math.pow(vals[i] / ref, 1.35))
         const bh = v * H
         const x = i * (bw + gap)
 

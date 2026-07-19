@@ -11,8 +11,10 @@ import { sceneForTrack, hydrateRealVideo, type Scene } from './broadcastFrames'
 // strobes. Always shows the CURRENT track's city. If a real AtlasCloud mp4 exists for the
 // scene, it plays that (muted) instead of the montage. The player's MP3 is the only sound.
 
-const MIN_CUT_MS = 520 // don't cut faster than this even on dense beats
-const MAX_HOLD_MS = 4200 // force a cut at least this often so it never feels frozen
+// Calmer cut cadence on mobile — rapid full-screen background swaps are what flicker on
+// phones. Keeps the effect (footage still cuts + Ken-Burns), just far less frantic.
+const MIN_CUT_MS = PERF.isMobile ? 1500 : 520 // don't cut faster than this even on dense beats
+const MAX_HOLD_MS = PERF.isMobile ? 6500 : 4200 // force a cut at least this often
 
 export default function Broadcast() {
   const slug = usePlayerStore((s) => s.currentTrackSlug)
@@ -34,6 +36,17 @@ export default function Broadcast() {
     hydrateRealVideo().then(() => setScene(sceneForTrack(slug)))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Pre-decode every frame of the current scene so a beat-cut swaps to an already-decoded
+  // background instead of flashing while it decodes (the mobile flicker, isolated via
+  // ?nobroadcast). Cheap: the scenes reuse a handful of images.
+  useEffect(() => {
+    scene.frames.forEach((f) => {
+      const img = new Image()
+      img.decoding = 'async'
+      img.src = withBase(f)
+    })
+  }, [scene])
 
   // scene follows the current track (hard glitch-cut on change)
   useEffect(() => {
@@ -112,15 +125,15 @@ export default function Broadcast() {
         <video className="bc-video" src={withBase(scene.mp4)} autoPlay muted loop playsInline />
       ) : (
         <>
+          {/* stable divs (no key on src change) so a beat-cut swaps the backgroundImage
+              in place instead of remounting + re-decoding the frame (the mobile flash) */}
           <div
             className={`bc-frame ${showA ? 'on' : ''}`}
             style={{ backgroundImage: `url(${withBase(aSrc)})` }}
-            key={`a-${aSrc}`}
           />
           <div
             className={`bc-frame ${!showA ? 'on' : ''}`}
             style={{ backgroundImage: `url(${withBase(bSrc)})` }}
-            key={`b-${bSrc}`}
           />
         </>
       )}
