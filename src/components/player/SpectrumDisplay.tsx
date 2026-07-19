@@ -53,8 +53,9 @@ export default function SpectrumDisplay() {
         let v = 0
         for (let j = 0; j < step; j++) v += freq[i * step + j]
         v = v / (step * 255)
-        // gamma lift + gain so quiet mixes still throw tall, lively bars (was too flat)
-        v = Math.min(1, Math.pow(v, 0.62) * 1.35)
+        // subtract a noise floor (so bars actually drop between hits instead of pinning at
+        // the top) then gamma + modest gain for a lively-but-dynamic range.
+        v = Math.min(1, Math.pow(Math.max(0, v - 0.06) / 0.94, 0.72) * 1.15)
         const bh = v * H
         const x = i * (bw + gap)
 

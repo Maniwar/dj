@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { audioBus } from '../../audio/audioBus'
 import { useSiteStore } from '../../state/useSiteStore'
 import { thermalVert, thermalFrag } from './thermalShader'
+import { PERF } from '../../lib/perfFlags'
 
 const AMBIENT = 22
 const MAXT = 125
@@ -118,7 +119,7 @@ function Mainstage() {
 
 export default function ThermalRunaway() {
   const reduced = useSiteStore((s) => s.reducedMotion)
-  if (reduced) return <div className="thermal-fallback" aria-hidden />
+  if (reduced || PERF.noShader) return <div className="thermal-fallback" aria-hidden />
   return (
     <div className="thermal-canvas" aria-hidden>
       <Canvas

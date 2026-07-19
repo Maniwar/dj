@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { audioBus } from '../audio/audioBus'
+import { PERF } from '../lib/perfFlags'
 
 // Pumps the live audio bands onto :root as CSS custom properties so the ENTIRE PAGE
 // can react to the music in pure CSS (no per-element JS). One rAF loop, throttled
@@ -19,6 +20,11 @@ const gain = (x: number, g: number, gamma: number) =>
 export default function AudioReactive() {
   useEffect(() => {
     const root = document.documentElement
+    if (PERF.noReact) {
+      // low-power: set neutral values once, no per-frame writes
+      for (const v of ['--m-beat', '--m-level', '--m-bass', '--m-treble']) root.style.setProperty(v, '0.2')
+      return
+    }
     let raf = 0
     let beat = 0, level = 0, bass = 0, treble = 0
     const loop = () => {
