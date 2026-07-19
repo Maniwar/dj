@@ -283,10 +283,10 @@ section { position: relative; padding: 9vh 6vw; }
    the contained scene (so nobody's cropped AND the space isn't wasted). A soft feathered mask
    fades the sharp image into the party at its edges. */
 .lore-bg-blur { display: none; }
-.lore-bg { position: absolute; inset: 0; background-size: contain; background-repeat: no-repeat; background-position: center;
-  filter: brightness(0.9) contrast(1.08) saturate(1.2);
-  -webkit-mask-image: radial-gradient(120% 88% at 50% 50%, #000 72%, transparent 100%);
-  mask-image: radial-gradient(120% 88% at 50% 50%, #000 72%, transparent 100%); }
+/* full-bleed cover so the scene is BIG; scenes are composed portrait-safe so cover doesn't
+   cut the characters even on a phone */
+.lore-bg { position: absolute; inset: 0; background-size: cover; background-position: center; background-color: #0a0a12;
+  filter: brightness(0.7) contrast(1.08) saturate(1.2); }
 .lore-scan { position: absolute; inset: 0; pointer-events: none;
   background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0 2px, transparent 2px 4px),
     radial-gradient(135% 100% at 50% 45%, transparent 55%, rgba(3,3,8,0.4) 100%); }
@@ -320,9 +320,7 @@ section { position: relative; padding: 9vh 6vw; }
   .lore-title .section-title { font-size: clamp(1.7rem, 8.5vw, 2.6rem); }
   .lore-stop { align-items: flex-end; }
   .lore-bg, .lore-stop.side-left .lore-bg, .lore-stop.side-right .lore-bg {
-    background-size: contain; background-repeat: no-repeat; background-position: center 15%; transform: none; }
-  .lore-stop[data-active="true"].side-left .lore-bg,
-  .lore-stop[data-active="true"].side-right .lore-bg { transform: none; }
+    background-size: cover; background-position: center 30%; }
   .lore-panel, .lore-stop.side-left .lore-panel, .lore-stop.side-right .lore-panel {
     width: auto; margin: 0 4vw 9vh; text-align: left; border-right: none; border-left: 4px solid var(--accent);
     transform: translateX(-40px); padding: 1.1rem 1.2rem;
@@ -614,10 +612,8 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .journey-stop { position: relative; height: 100vh; display: grid; place-items: center; overflow: hidden; }
 /* blurred fill + CONTAINED sharp image so the crew is never cropped at any width */
 .journey-bg-blur { display: none; }
-.journey-bg { position: absolute; inset: 0; background-size: contain; background-repeat: no-repeat; background-position: center;
-  filter: brightness(0.82) contrast(1.12) saturate(1.25);
-  -webkit-mask-image: radial-gradient(120% 88% at 50% 50%, #000 72%, transparent 100%);
-  mask-image: radial-gradient(120% 88% at 50% 50%, #000 72%, transparent 100%); }
+.journey-bg { position: absolute; inset: 0; background-size: cover; background-position: center; background-color: #0a0a12;
+  filter: brightness(0.6) contrast(1.12) saturate(1.25); }
 .journey-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;
   filter: brightness(0.5) contrast(1.12) saturate(1.25); background-color: #0a0a12; }
 @keyframes journeyZoom { from { transform: scale(1.06) translateY(0); } to { transform: scale(1.2) translateY(-2%); } }
