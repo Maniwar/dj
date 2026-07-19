@@ -5,3 +5,8 @@ smoke-shots
 *.log
 .DS_Store
 .vite
+
+# secrets — API keys must never reach GitHub
+.env
+.env.*
+!.env.example

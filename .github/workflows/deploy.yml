@@ -1,0 +1,51 @@
+name: Deploy to GitHub Pages
+
+# Builds the Vite site and publishes /dist to GitHub Pages on every push to main.
+# The site is a PROJECT page (served at https://<user>.github.io/dj/), so the build sets
+# BASE_PATH=/dj/ — Vite bakes that into import.meta.env.BASE_URL and every asset URL
+# resolves under the subpath (see src/lib/asset.ts).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Least-privilege token that can publish to Pages via OIDC.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time; let an in-progress production deploy finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install deps
+        run: npm ci
+      - name: Build (project subpath /dj/)
+        run: npm run build
+        env:
+          BASE_PATH: /dj/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

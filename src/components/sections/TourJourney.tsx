@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { TOUR_CLIPS } from '../../data/tour.manifest'
+import { SCENES, hydrateRealVideo } from '../../video/broadcastFrames'
+import { withBase } from '../../lib/asset'
 
 // Vehicle for each leg of the world tour — the crew travels city to city as you scroll.
 const VEHICLES: Record<string, { icon: string; verb: string }> = {
@@ -12,7 +14,31 @@ const VEHICLES: Record<string, { icon: string; verb: string }> = {
 export default function TourJourney() {
   const secRef = useRef<HTMLElement>(null)
   const [active, setActive] = useState(0)
+  // Real AtlasCloud mp4 per city (empty until `npm run gen:videos` has run). Sourced from
+  // atlascloud.results.json via the hydrated SCENES, matching the Broadcast's source of truth.
+  const [videoMap, setVideoMap] = useState<Record<string, string>>({})
+  const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
   const cities = TOUR_CLIPS
+
+  // Pull in real videos once (if the results file has ready clips). A city's stop swaps its
+  // poster Ken-Burns for a muted <video loop> the moment a real mp4 exists.
+  useEffect(() => {
+    let alive = true
+    hydrateRealVideo().then(() => {
+      if (!alive) return
+      const map: Record<string, string> = {}
+      for (const c of cities) {
+        const fromScene = SCENES[c.id]?.mp4
+        const fromClip = c.status === 'ready' && c.mp4Url ? c.mp4Url : ''
+        const mp4 = fromScene || fromClip
+        if (mp4) map[c.id] = mp4
+      }
+      setVideoMap(map)
+    })
+    return () => {
+      alive = false
+    }
+  }, [cities])
 
   useEffect(() => {
     const el = secRef.current
@@ -41,6 +67,15 @@ export default function TourJourney() {
     }
   }, [cities.length])
 
+  // Single-decode: only the active stop's video plays; the rest are paused (mobile-friendly).
+  useEffect(() => {
+    for (const [id, v] of Object.entries(videoRefs.current)) {
+      if (!v) continue
+      if (id === cities[active]?.id) v.play().catch(() => {})
+      else v.pause()
+    }
+  }, [active, videoMap, cities])
+
   const current = cities[active]
   const v = VEHICLES[current?.id] ?? { icon: '🚐', verb: 'ROLLING TO' }
 
@@ -54,24 +89,43 @@ export default function TourJourney() {
       </div>
 
       <div className="journey-stops">
-        {cities.map((c, i) => (
-          <div className="journey-stop" key={c.id} data-active={i === active}>
-            <div
-              className="journey-bg"
-              style={{ backgroundImage: c.posterUrl ? `url(${c.posterUrl})` : undefined }}
-            />
-            <div className="journey-scan" aria-hidden />
-            <div className="journey-card">
-              <span className="journey-leg">
-                {VEHICLES[c.id]?.icon} STOP {String(i + 1).padStart(2, '0')} / {String(cities.length).padStart(2, '0')}
-              </span>
-              <h3 className="journey-city">{c.city}</h3>
-              <span className="journey-venue">{c.venue} · {c.year}</span>
-              <p className="journey-blurb">{c.blurb}</p>
-              <span className="journey-seed">● REC · seed·{c.seed} · same leopard crew, every city</span>
+        {cities.map((c, i) => {
+          const mp4 = videoMap[c.id]
+          return (
+            <div className="journey-stop" key={c.id} data-active={i === active}>
+              {mp4 ? (
+                <video
+                  className="journey-video"
+                  ref={(el) => {
+                    videoRefs.current[c.id] = el
+                  }}
+                  src={withBase(mp4)}
+                  poster={withBase(c.posterUrl)}
+                  muted
+                  loop
+                  playsInline
+                  preload="none"
+                  aria-hidden
+                />
+              ) : (
+                <div
+                  className="journey-bg"
+                  style={{ backgroundImage: c.posterUrl ? `url(${withBase(c.posterUrl)})` : undefined }}
+                />
+              )}
+              <div className="journey-scan" aria-hidden />
+              <div className="journey-card">
+                <span className="journey-leg">
+                  {VEHICLES[c.id]?.icon} STOP {String(i + 1).padStart(2, '0')} / {String(cities.length).padStart(2, '0')}
+                </span>
+                <h3 className="journey-city">{c.city}</h3>
+                <span className="journey-venue">{c.venue} · {c.year}</span>
+                <p className="journey-blurb">{c.blurb}</p>
+                <span className="journey-seed">● REC · seed·{c.seed} · same leopard crew, every city</span>
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* sticky HUD — the vehicle travels the route as you scroll */}

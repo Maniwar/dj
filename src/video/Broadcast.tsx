@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { audioBus } from '../audio/audioBus'
+import { withBase } from '../lib/asset'
 import { usePlayerStore } from '../state/usePlayerStore'
 import { useSiteStore } from '../state/useSiteStore'
 import { sceneForTrack, hydrateRealVideo, type Scene } from './broadcastFrames'
@@ -105,17 +106,17 @@ export default function Broadcast() {
       data-city={scene.city}
     >
       {scene.mp4 ? (
-        <video className="bc-video" src={scene.mp4} autoPlay muted loop playsInline />
+        <video className="bc-video" src={withBase(scene.mp4)} autoPlay muted loop playsInline />
       ) : (
         <>
           <div
             className={`bc-frame ${showA ? 'on' : ''}`}
-            style={{ backgroundImage: `url(${aSrc})` }}
+            style={{ backgroundImage: `url(${withBase(aSrc)})` }}
             key={`a-${aSrc}`}
           />
           <div
             className={`bc-frame ${!showA ? 'on' : ''}`}
-            style={{ backgroundImage: `url(${bSrc})` }}
+            style={{ backgroundImage: `url(${withBase(bSrc)})` }}
             key={`b-${bSrc}`}
           />
         </>

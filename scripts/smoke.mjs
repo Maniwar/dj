@@ -1,13 +1,26 @@
 import { chromium } from 'playwright-core'
+import { existsSync, mkdirSync } from 'node:fs'
 
 const URL = process.env.SMOKE_URL || 'http://localhost:4173/'
-const EXE = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'
 const OUT = process.env.SMOKE_OUT || './smoke-shots'
-import { mkdirSync } from 'node:fs'
 mkdirSync(OUT, { recursive: true })
 
-const browser = await chromium.launch({
-  executablePath: EXE,
+// Resolve a Chromium/Chrome binary across environments (playwright-core bundles none):
+// explicit override, the CI bundle, then common local installs. Last resort: the system
+// 'chrome' channel. Keeps the smoke test runnable on the CI box AND a dev's macOS machine.
+const CANDIDATES = [
+  process.env.SMOKE_BROWSER,
+  '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', // CI bundle (Linux)
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', // macOS
+  '/Applications/Chromium.app/Contents/MacOS/Chromium',
+  '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
+  '/usr/bin/google-chrome',
+  '/usr/bin/chromium-browser',
+  '/usr/bin/chromium',
+].filter(Boolean)
+
+const exe = CANDIDATES.find((p) => existsSync(p))
+const launchOpts = {
   headless: true,
   args: [
     '--headless=new',
@@ -19,7 +32,20 @@ const browser = await chromium.launch({
     '--enable-webgl',
     '--autoplay-policy=no-user-gesture-required',
   ],
-})
+}
+if (exe) launchOpts.executablePath = exe
+else launchOpts.channel = 'chrome' // fall back to a system Google Chrome install
+
+let browser
+try {
+  browser = await chromium.launch(launchOpts)
+} catch (e) {
+  console.error(
+    '[smoke] could not launch a browser. Install Chrome or set SMOKE_BROWSER to a Chrome/Chromium binary.\n' +
+      String(e?.message || e),
+  )
+  process.exit(2)
+}
 const page = await browser.newPage({ viewport: { width: 1280, height: 900 } })
 
 const errors = []
@@ -58,9 +84,10 @@ const probe = await page.evaluate(() => {
     hasPlayer: !!document.querySelector('.player'),
     hasSpectrum: !!document.querySelector('.spectrum-canvas'),
     trackRows: document.querySelectorAll('.tl-row').length,
-    tourCards: document.querySelectorAll('.tour-card').length,
+    tourStops: document.querySelectorAll('.journey-stop').length,
     guestPosts: document.querySelectorAll('.gb-post').length,
     audioSrc: audio ? audio.currentSrc.split('/').pop() : null,
+    audioPath: audio ? new URL(audio.currentSrc || 'about:blank', location.href).pathname : null,
     bootlegDetents: document.querySelectorAll('.bootleg .detent').length,
   }
 })

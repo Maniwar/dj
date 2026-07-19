@@ -6,6 +6,9 @@ import { viteStaticCopy } from 'vite-plugin-static-copy'
 // We keep it there and serve/copy it to the web root so <audio src="/mp3/..."> works
 // in both dev and production without duplicating the files into /public.
 export default defineConfig({
+  // Base public path. "/" for local dev/preview; the GitHub Pages project deploy sets
+  // BASE_PATH=/dj/ (repo name) so absolute asset URLs resolve under maniwar.github.io/dj/.
+  base: process.env.BASE_PATH || '/',
   plugins: [
     react(),
     // /mp3 lives at the repo root (per brief); copy it to the web root. Everything in

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { audioBus } from './audioBus'
+import { withBase } from '../lib/asset'
 import { useSiteStore } from '../state/useSiteStore'
 import {
   usePlayerStore,
@@ -176,7 +177,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       }
     }
     el.addEventListener('loadedmetadata', onReady)
-    el.src = src
+    el.src = withBase(src)
     el.load()
   }
 
