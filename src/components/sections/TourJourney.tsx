@@ -76,9 +76,6 @@ export default function TourJourney() {
     }
   }, [active, videoMap, cities])
 
-  const current = cities[active]
-  const v = VEHICLES[current?.id] ?? { icon: '🚐', verb: 'ROLLING TO' }
-
   return (
     <section className="journey" id="tour" ref={secRef}>
       <div className="journey-title">
@@ -126,22 +123,6 @@ export default function TourJourney() {
             </div>
           )
         })}
-      </div>
-
-      {/* sticky HUD — the vehicle travels the route as you scroll */}
-      <div className="journey-hud" aria-hidden>
-        <div className="hud-route">
-          <div className="hud-line" />
-          {cities.map((c, i) => (
-            <span key={c.id} className={`hud-pin ${i <= active ? 'done' : ''}`} style={{ left: `${(i / (cities.length - 1)) * 100}%` }}>
-              <b>{c.city}</b>
-            </span>
-          ))}
-          <span className="hud-vehicle">{v.icon}</span>
-        </div>
-        <div className="hud-label">
-          {v.verb} <b>{current?.city}</b>
-        </div>
       </div>
     </section>
   )

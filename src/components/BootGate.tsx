@@ -41,8 +41,10 @@ export default function BootGate() {
 
   const handleLogOn = () => {
     logOn()
-    // the required first user gesture -> start the continuous global stream
-    const first = usePlayerStore.getState().tracks[0]
+    // the required first user gesture -> start the continuous global stream on a RANDOM
+    // track so the album doesn't open on the same song every visit.
+    const tracks = usePlayerStore.getState().tracks
+    const first = tracks[Math.floor(Math.random() * tracks.length)]
     audio.playTrack(first.slug)
   }
 

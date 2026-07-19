@@ -16,6 +16,7 @@ import Merch from './components/sections/Merch'
 import { BrandBar, Crest } from './components/Ornaments'
 import AudioReactive from './components/AudioReactive'
 import LyricMarquee from './components/LyricMarquee'
+import TourRail from './components/TourRail'
 import Lyrics from './components/player/Lyrics'
 import { useSiteStore } from './state/useSiteStore'
 
@@ -38,17 +39,17 @@ export default function App() {
         <Hero />
         <LyricMarquee tint="magenta" offset={0} />
         <Lore />
-        <LyricMarquee tint="acid" offset={3} speed={28} />
+        <LyricMarquee tint="acid" offset={3} pxPerSec={95} />
         <Tracklist />
         <Guestbook />
         <LyricMarquee tint="blue" offset={6} />
         <TourJourney />
-        <LyricMarquee tint="magenta" offset={9} speed={40} />
+        <LyricMarquee tint="magenta" offset={9} pxPerSec={55} />
         <HallOfFame />
         <Merch />
         <footer className="site-footer">
           <Crest small />
-          <LyricMarquee tint="acid" offset={2} speed={46} />
+          <LyricMarquee tint="acid" offset={2} pxPerSec={45} />
           <p>
             © 2002–2004 EUROBEAT RECORDS · SYSTEM OVERLOAD · ALL MOISTURE RESERVED · a parody, lovingly
           </p>
@@ -57,6 +58,7 @@ export default function App() {
 
       <Player />
       <Lyrics />
+      <TourRail />
       <BootGate />
       <EasterEggs />
     </AudioProvider>
