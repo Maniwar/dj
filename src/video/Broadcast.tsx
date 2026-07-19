@@ -87,7 +87,9 @@ export default function Broadcast() {
   }
 
   useEffect(() => {
-    if (reduced || scene.mp4) return // reduced motion or real video -> no still-cutting
+    // reduced motion, a real video, OR mobile -> no still-cutting. On phones the rapid
+    // full-screen crossfades are the flicker source, so hold a single static frame there.
+    if (reduced || scene.mp4 || PERF.isMobile) return
     let raf = 0
     let prev = performance.now()
     const loop = (now: number) => {

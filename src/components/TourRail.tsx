@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { TOUR_CLIPS } from '../data/tour.manifest'
 import { useSiteStore } from '../state/useSiteStore'
 
-// A persistent, fixed "world tour" progress rail that rides along the bottom of the WHOLE
-// site (not just the tour section). As you scroll the entire page the vehicle travels the
-// route and the four cities light up as milestones. Fancy gilt pill frame + glowing
-// acid→magenta progress fill, beat-reactive via --m-beat. pointer-events:none so it never
-// blocks the player/karaoke. Appears once you've logged on and scrolled past the hero.
+// A persistent VERTICAL "world tour" progress rail down the right edge of the page. As you
+// scroll the whole site top→bottom the vehicle travels down the rail and the four cities
+// light up as milestones; the fill grows from the top. Beat-reactive via --m-beat.
+// pointer-events:none so it never blocks anything. On the right edge it stays clear of the
+// bottom-docked mobile player.
 const LEG: Record<string, string> = { ibiza: '🛥️', tokyo: '✈️', miami: '🚌', berlin: '🚄' }
 
 export default function TourRail() {
@@ -43,28 +43,26 @@ export default function TourRail() {
 
   const current = cities[active]
   const veh = LEG[current?.id] ?? '🚐'
-  const shown = loggedOn && pct > 3
+  const shown = loggedOn && pct > 2
 
   return (
     <div ref={rootRef} className={`tour-rail ${shown ? 'show' : ''}`} aria-hidden>
-      <div className="rail-frame">
-        <span className="rail-brand">GLOBAL MELTDOWN TOUR</span>
-        <div className="rail-track">
-          <div className="rail-line" />
-          <div className="rail-fill" />
-          {cities.map((c, i) => (
-            <span
-              key={c.id}
-              className={`rail-pin ${i <= active ? 'done' : ''}`}
-              style={{ left: `${(i / (cities.length - 1)) * 100}%` }}
-            >
-              <b>{c.city}</b>
-            </span>
-          ))}
-          <span className="rail-vehicle">{veh}</span>
-        </div>
-        <span className="rail-pct">{pct}%</span>
+      <span className="rail-cap">TOUR</span>
+      <div className="rail-track">
+        <div className="rail-line" />
+        <div className="rail-fill" />
+        {cities.map((c, i) => (
+          <span
+            key={c.id}
+            className={`rail-pin ${i <= active ? 'done' : ''} ${i === active ? 'now' : ''}`}
+            style={{ top: `${(i / (cities.length - 1)) * 100}%` }}
+          >
+            <b>{c.city}</b>
+          </span>
+        ))}
+        <span className="rail-vehicle">{veh}</span>
       </div>
+      <span className="rail-pct">{pct}%</span>
     </div>
   )
 }

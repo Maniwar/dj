@@ -44,22 +44,31 @@ export default function Lore() {
       </div>
 
       <div className="lore-stops">
-        {stops.map((s, i) => (
-          <div className={`lore-stop accent-${s.accent} ${s.kind}`} key={s.id} data-active={i === active}>
-            <div className="lore-bg" style={{ backgroundImage: `url(${withBase(s.image)})` }} />
-            <div className="lore-scan" aria-hidden />
-            <div className="lore-panel">
-              <span className="lore-eyebrow">{s.eyebrow}</span>
-              <h3 className={`lore-name ${s.kind}`}>{s.title}</h3>
-              <p className="lore-body">{s.body}</p>
-              {s.kind === 'hero' && (
-                <span className="lore-tag">
-                  ● {s.id === 'kiki' ? 'SHE IS THE SIGNAL' : 'HE IS THE NOISE'}
-                </span>
-              )}
+        {stops.map((s, i) => {
+          // alternate which side the copy slides in from so the stops "swipe" across as you
+          // scroll and Kiki/Dieter feed into each other
+          const side = i % 2 === 0 ? 'left' : 'right'
+          return (
+            <div
+              className={`lore-stop accent-${s.accent} ${s.kind} side-${side}`}
+              key={s.id}
+              data-active={i === active}
+            >
+              <div className="lore-bg" style={{ backgroundImage: `url(${withBase(s.image)})` }} />
+              <div className="lore-scan" aria-hidden />
+              <div className="lore-panel">
+                <span className="lore-eyebrow">{s.eyebrow}</span>
+                <h3 className={`lore-name ${s.kind}`}>{s.title}</h3>
+                <p className="lore-body">{s.body}</p>
+                {s.kind === 'hero' && (
+                  <span className="lore-tag">
+                    ● {s.id === 'kiki' ? 'SHE IS THE SIGNAL' : 'HE IS THE NOISE'}
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </section>
   )
