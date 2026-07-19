@@ -6,6 +6,7 @@
   "description": "System Overload // Club Humidity — The Moist Mix 2002. A campy Y2K cyber-club promo site.",
   "scripts": {
     "gen:tracks": "node scripts/build-tracks.mjs",
+    "gen:lyrics": "node scripts/build-lyrics.mjs",
     "prebuild": "npm run gen:tracks",
     "predev": "node scripts/build-tracks.mjs",
     "dev": "vite",

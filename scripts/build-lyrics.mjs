@@ -10,10 +10,10 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(__dirname, '..')
-const SRC =
-  process.argv[2] ||
-  process.env.LYRICS_SRC ||
-  '/root/.claude/uploads/89c3bf2c-722e-5b39-b472-22254fb189e6'
+// Prefer an in-repo `lyrics-src/` folder so lyric builds are reproducible anywhere (the
+// old default pointed at a one-off chat-upload path that no longer exists). Override with
+// an arg or LYRICS_SRC.
+const SRC = process.argv[2] || process.env.LYRICS_SRC || resolve(ROOT, 'lyrics-src')
 const OUT = resolve(ROOT, 'src/data/lyrics.json')
 
 const slugify = (s) =>
@@ -56,15 +56,27 @@ if (!existsSync(SRC)) {
 }
 
 const files = readdirSync(SRC).filter((f) => /\.txt$/i.test(f))
-const lyrics = {}
+// Merge into any existing sheets so adding just the missing songs never drops the rest.
+const existing = existsSync(OUT) ? JSON.parse(readFileSync(OUT, 'utf8')) : {}
+const built = {}
 for (const f of files) {
   const parsed = parseFile(readFileSync(join(SRC, f), 'utf8'))
   if (!parsed.title || !parsed.lyrics) continue
   const slug = slugify(parsed.title)
-  lyrics[slug] = { title: parsed.title, bpm: parsed.bpm, lines: structure(parsed.lyrics) }
+  built[slug] = { title: parsed.title, bpm: parsed.bpm, lines: structure(parsed.lyrics) }
 }
 
+// Guard: never wipe existing sheets when the source folder has nothing parseable.
+if (!Object.keys(built).length) {
+  console.warn(
+    `[build-lyrics] no parseable .txt in ${SRC} — leaving the existing ` +
+      `${Object.keys(existing).length} sheet(s) untouched.`,
+  )
+  process.exit(0)
+}
+
+const lyrics = { ...existing, ...built }
 mkdirSync(dirname(OUT), { recursive: true })
 writeFileSync(OUT, JSON.stringify(lyrics, null, 2) + '\n')
-console.log(`[build-lyrics] ${files.length} files -> ${Object.keys(lyrics).length} tracks with lyrics:`)
+console.log(`[build-lyrics] parsed ${Object.keys(built).length} file(s); lyrics.json now has ${Object.keys(lyrics).length} sheet(s):`)
 console.log('  ' + Object.keys(lyrics).join(', '))
