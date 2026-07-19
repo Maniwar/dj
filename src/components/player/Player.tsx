@@ -31,12 +31,23 @@ export default function Player() {
   const track = getTrack(slug)
   const version = getVersion(slug, versionId)
 
-  // ---- draggable window ----
+  // ---- draggable window (desktop) / docked bottom bar (mobile) ----
   const [pos, setPos] = useState<{ x: number; y: number }>({ x: 24, y: 0 })
   const [placed, setPlaced] = useState(false)
   const [minimized, setMinimized] = useState(false)
   const dragRef = useRef<{ dx: number; dy: number } | null>(null)
   const winRef = useRef<HTMLDivElement>(null)
+  // On phones the draggable/tilting 348px window is too big and blocks scroll — dock it as a
+  // full-width compact bar at the bottom instead (CSS controls position; drag/tilt disabled).
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches,
+  )
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)')
+    const on = () => setIsMobile(mq.matches)
+    mq.addEventListener('change', on)
+    return () => mq.removeEventListener('change', on)
+  }, [])
 
   useEffect(() => {
     if (placed) return
@@ -87,20 +98,20 @@ export default function Player() {
   return (
     <div
       ref={winRef}
-      className={`player ${overheating ? 'overheating' : ''} ${cooling ? 'cooling' : ''} ${
-        minimized ? 'minimized' : ''
-      }`}
-      style={{ left: pos.x, top: pos.y }}
+      className={`player ${isMobile ? 'mobile' : ''} ${overheating ? 'overheating' : ''} ${
+        cooling ? 'cooling' : ''
+      } ${minimized ? 'minimized' : ''}`}
+      style={isMobile ? undefined : { left: pos.x, top: pos.y }}
       role="region"
       aria-label="System Overload MP3-9000 player"
-      onPointerMove={onTilt}
-      onPointerLeave={onTiltLeave}
+      onPointerMove={isMobile ? undefined : onTilt}
+      onPointerLeave={isMobile ? undefined : onTiltLeave}
     >
       <div
         className="player-title"
-        onPointerDown={onTitleDown}
-        onPointerMove={onTitleMove}
-        onPointerUp={onTitleUp}
+        onPointerDown={isMobile ? undefined : onTitleDown}
+        onPointerMove={isMobile ? undefined : onTitleMove}
+        onPointerUp={isMobile ? undefined : onTitleUp}
       >
         <span className="dot green" />
         <span className="title-text">◈ SYSTEM OVERLOAD — MP3-9000 ◈</span>

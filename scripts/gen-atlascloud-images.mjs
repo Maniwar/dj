@@ -47,8 +47,10 @@ const TRIO = 'The three super-fans: (A) tall deep-tan woman, long dark hair, LEO
   'leopard hot pants, big gold hoops; (B) petite woman, platinum hair with pink tips, holographic-silver bikini ' +
   'top + shorts, stacked glow bracelets; (C) freckled woman, copper curls, chrome halter top + denim micro shorts, ' +
   'a whistle. All leopard/gold/glitter, drenched in sweat, euphoric, screaming.'
-const DIETER = 'DJ DIETER kept as a shadowy BACKGROUND SILHOUETTE at the decks — a broad older man in shadow, ' +
-  'stubble, faint red rim-light. NOT a leather jacket, NOT sunglasses, NOT a moustache close-up. Never the focus.'
+const DIETER = 'DJ DIETER: a broad, deeply tanned older European man about 55, balding with slicked-back thinning ' +
+  'hair and heavy grey stubble, a sleazy confident smirk, glistening with sweat, wearing an unbuttoned shiny ' +
+  'silk shirt (or a metallic tracksuit jacket) with a thick gold chain, headphones slung around his neck, hands ' +
+  'on the decks. NOT a leather jacket, NOT sunglasses, NOT a handlebar-moustache catalog model.'
 
 // ---- REFERENCE SHEET (text-to-image) ----
 const REFS = [
@@ -56,8 +58,8 @@ const REFS = [
     prompt: `Full-length reference photo of ${KIKI} She stands mid-rave, one arm up, laser haze behind. ${WARDROBE} ${STYLE} ${NEG}` },
   { out: 'public/assets/ref/crew.jpg', size: '2720*1530',
     prompt: `Reference photo of the recurring crew together. ${TRIO} They pose as a trio on a podium, champagne, gold confetti. ${WARDROBE} ${STYLE} ${NEG}` },
-  { out: 'public/assets/ref/dieter.jpg', size: '2720*1530',
-    prompt: `Reference photo: ${DIETER} Foreground empty; he is small and dark behind the decks, magenta/green lasers. ${STYLE} ${NEG}` },
+  { out: 'public/assets/ref/dieter.jpg', size: '1664*2496',
+    prompt: `Clear, well-lit reference PORTRAIT, waist-up and centered, of ${DIETER} He is behind the glowing DJ decks, one hand on a fader, arm raised, magenta and acid-green lasers and haze behind him. His face is large, sharp and clearly visible — this is a character reference so he must be unmistakable, not a silhouette. ${STYLE} ${NEG}` },
 ]
 
 // ---- STORY / CITY SCENES (edit — reuse the refs so faces stay consistent) ----

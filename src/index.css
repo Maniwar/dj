@@ -464,6 +464,28 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .tbtn, .knob-body { box-shadow: 0 5px 10px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.6); }
 .tbtn.lyr.on { background: linear-gradient(180deg, #ff6ec7, #b0186a); color: #fff; }
 
+/* ---- MOBILE: dock the player as a compact, touch-friendly bottom bar (no drag/tilt) ---- */
+@media (max-width: 640px) {
+  .player.mobile {
+    left: 0; right: 0; top: auto; bottom: 0; width: 100%;
+    border-radius: 14px 14px 0 0; touch-action: auto; transform: none;
+    box-shadow: 0 -12px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,0,0,0.6), inset 0 2px 0 rgba(255,255,255,0.22);
+  }
+  .player.mobile.minimized { width: 100%; }
+  .player.mobile::after { display: none; }
+  .player.mobile .player-title { cursor: default; border-radius: 0; }
+  /* flatten the 3D translateZ stack on mobile (perf + no tilt) */
+  .player.mobile .player-title, .player.mobile .lcd, .player.mobile .seek,
+  .player.mobile .transport, .player.mobile .bootleg { transform: none; }
+  .player.mobile .player-body { padding: 8px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+    gap: 7px; max-height: 56vh; overflow-y: auto; }
+  .player.mobile .spectrum-canvas { height: 34px; }
+  .player.mobile .transport { gap: 6px; flex-wrap: wrap; }
+  .player.mobile .tbtn { flex: 1 1 44px; height: 44px; }   /* bigger touch targets */
+  .player.mobile .tbtn.play { flex: 1.5 1 56px; }
+  .player.mobile .knobs { margin-left: auto; gap: 16px; }
+}
+
 /* =========================================================
    LYRIC MARQUEE — the songs' voice running down the page
    ========================================================= */
