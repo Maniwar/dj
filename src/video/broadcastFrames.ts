@@ -6,12 +6,14 @@
 import manifest from '../data/tracks.json'
 import type { Track } from '../data/types'
 
-// Only the frames that regenerated as raw PHOTOREAL rave (leopard-print fans, no cheesy
-// dude). club-vip / club-booth are excluded until Gemini credits are topped up.
+// All five mainstage frames — now character-locked (Kiki on the decks, Dieter beside her,
+// the leopard crew up front) via Seedream v5.0 Pro edit. Beat-cut between these.
 const CLUB = [
+  '/assets/video/frames/club-booth.jpg', // Kiki commands the decks with Dieter — the money shot
   '/assets/video/frames/club-crowd.jpg',
   '/assets/video/frames/club-podium.jpg',
   '/assets/video/frames/club-floor.jpg',
+  '/assets/video/frames/club-vip.jpg',
 ]
 
 export type Scene = {

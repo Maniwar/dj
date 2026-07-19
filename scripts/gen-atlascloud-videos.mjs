@@ -105,24 +105,35 @@ async function poll(id, { tries = 120, delay = 5000 } = {}) {
   throw new Error(`job ${id} timed out`)
 }
 
+async function genClip(clip) {
+  const track = tracks.find((t) => t.slug === clip.trackSlug) || tracks[0]
+  const file = track.versions[0].file
+  try {
+    if (!publicMp3Base) throw new Error('PUBLIC_MP3_BASE not set (AtlasCloud must fetch the track by URL)')
+    const audioRef = `${publicMp3Base.replace(/\/$/, '')}/${encodeURIComponent(file)}`
+    const id = await submit(clip, audioRef)
+    const mp4 = await poll(id)
+    console.log(`  ✓ ${clip.city}  ⟵  "${track.title}"  ->  ${mp4}`)
+    return { ...clip, seed: SEED, trackSlug: track.slug, status: 'ready', mp4Url: mp4 }
+  } catch (e) {
+    console.log(`  ✗ ${clip.city} — ${e.message.split('\n')[0]}`)
+    return { ...clip, seed: SEED, status: 'error', error: e.message }
+  }
+}
+
 async function main() {
-  const out = []
-  for (const clip of CLIPS) {
-    const track = tracks.find((t) => t.slug === clip.trackSlug) || tracks[0]
-    const file = track.versions[0].file
-    process.stdout.write(`  • ${clip.city}  ⟵  "${track.title}" ... `)
-    try {
-      if (!publicMp3Base) throw new Error('PUBLIC_MP3_BASE not set (AtlasCloud must fetch the track by URL)')
-      const audioRef = `${publicMp3Base.replace(/\/$/, '')}/${encodeURIComponent(file)}`
-      const id = await submit(clip, audioRef)
-      const mp4 = await poll(id)
-      out.push({ ...clip, seed: SEED, trackSlug: track.slug, status: 'ready', mp4Url: mp4 })
-      console.log('OK ->', mp4)
-    } catch (e) {
-      out.push({ ...clip, seed: SEED, status: 'error', error: e.message })
-      console.log('FAIL —', e.message.split('\n')[0])
+  // clips run in PARALLEL (each poll waits minutes, so serial would be very slow)
+  const CONCURRENCY = Number(process.env.GEN_CONCURRENCY || 4)
+  console.log(`[gen:videos] ${CLIPS.length} clip(s) · concurrency=${CONCURRENCY}`)
+  const out = new Array(CLIPS.length)
+  let cursor = 0
+  async function worker() {
+    while (cursor < CLIPS.length) {
+      const i = cursor++
+      out[i] = await genClip(CLIPS[i])
     }
   }
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, CLIPS.length) }, worker))
   writeFileSync(resolve(ROOT, 'src/data/atlascloud.results.json'), JSON.stringify({ model: MODEL, seed: SEED, clips: out }, null, 2))
   console.log('[gen:videos] wrote src/data/atlascloud.results.json')
 }

@@ -67,7 +67,13 @@ const REFS = [
 const K = 'public/assets/ref/kiki.jpg', C = 'public/assets/ref/crew.jpg', D = 'public/assets/ref/dieter.jpg'
 // Keep the referenced people/outfits identical; each scene is that SONG's gag, staged with
 // our cast (Kiki fronting, Dieter at the decks, the leopard crew up front). Funny + campy.
-const KEEP = 'Keep the EXACT same faces and outfits from the reference images — do not change the people.'
+// Lock IDENTITY only (face, hair, outfit) — but explicitly re-pose everyone for each scene,
+// otherwise Seedream copies the reference pose/arrangement and the same people keep striking
+// the identical stance in every shot.
+const KEEP = 'Use the SAME faces, hair colour and outfits as the people in the reference images, ' +
+  'but give each of them a NEW, DISTINCT, natural pose and action that fits THIS specific scene ' +
+  '(different body positions, gestures and expressions in every image). Do NOT copy their pose, ' +
+  'framing or arrangement from the reference photo — only their identity and wardrobe carry over.'
 const SCENES = [
   // ---- TOUR CITIES, each themed to the song bound to it ----
   { out: 'public/assets/tour/ibiza.jpg', size: '2720*1530', refs: [C, K], // Touch My Subwoofer
@@ -153,9 +159,18 @@ const mode = process.argv[2] === 'scenes' ? 'scenes' : 'refs'
 const only = process.argv[3]
 let jobs = mode === 'scenes' ? SCENES : REFS
 if (only) jobs = jobs.filter((x) => x.out.includes(only))
-console.log(`[gen:atlas-images] mode=${mode} · ${jobs.length} image(s)`)
-for (const job of jobs) {
-  process.stdout.write(`  • ${job.out} ... `)
-  try { await run(job, mode); console.log('OK') }
-  catch (e) { console.log('FAIL — ' + e.message.split('\n')[0]) }
+
+// Generate in PARALLEL with a concurrency cap (each edit/gen is an independent async job).
+const CONCURRENCY = Number(process.env.GEN_CONCURRENCY || 5)
+console.log(`[gen:atlas-images] mode=${mode} · ${jobs.length} image(s) · concurrency=${CONCURRENCY}`)
+let cursor = 0
+let ok = 0, fail = 0
+async function worker() {
+  while (cursor < jobs.length) {
+    const job = jobs[cursor++]
+    try { await run(job, mode); ok++; console.log(`  ✓ ${job.out}`) }
+    catch (e) { fail++; console.log(`  ✗ ${job.out} — ${e.message.split('\n')[0]}`) }
+  }
 }
+await Promise.all(Array.from({ length: Math.min(CONCURRENCY, jobs.length) }, worker))
+console.log(`[gen:atlas-images] done — ${ok} ok, ${fail} failed`)
