@@ -15,4 +15,5 @@ export const PERF = {
   isMobile,
   noShader: !has('shader') && (low || has('noshader') || isMobile),
   noReact: low || has('noreact'),
+  noBroadcast: has('nobroadcast'),
 }

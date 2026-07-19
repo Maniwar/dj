@@ -42,11 +42,12 @@ export default function SpectrumDisplay() {
 
       const freq = audioBus.freq
       const N = freq.length
-      // LOG frequency mapping: with a 2048 FFT the top half of a linear split lands in the
-      // 11–22kHz dead zone (no musical energy → dead bars) while all the bass/mid crams into
-      // the first few. Log-spaced bands over the *useful* range give every bar real signal.
-      const minBin = 1
-      const maxBin = Math.max(minBin + BARS, Math.floor(N * 0.58)) // cap below the empty highs
+      // Log-ish frequency mapping over the USEFUL range (a linear split wastes the top half
+      // on the 11–22kHz dead zone). Bands are CONTIGUOUS + monotonic (each starts where the
+      // last ended), so the sparse low end gives ~1 bin per bar and the top widens — every
+      // bar samples a different slice instead of the first few collapsing onto the same bin.
+      const minBin = 2
+      const maxBin = Math.max(minBin + BARS, Math.floor(N * 0.55))
       const logBase = Math.pow(maxBin / minBin, 1 / BARS)
       const gap = 2 * dpr
       const bw = (W - gap * (BARS - 1)) / BARS
@@ -54,15 +55,18 @@ export default function SpectrumDisplay() {
       const temp = audioBus.thermal.temperature
       const hot = Math.min(1, Math.max(0, (temp - 22) / 90))
 
+      let bandLo = minBin
       for (let i = 0; i < BARS; i++) {
-        const lo = Math.floor(minBin * Math.pow(logBase, i))
-        const hi = Math.min(N, Math.max(lo + 1, Math.floor(minBin * Math.pow(logBase, i + 1))))
+        let hi = Math.floor(minBin * Math.pow(logBase, i + 1))
+        if (hi <= bandLo) hi = bandLo + 1
+        if (hi > N) hi = N
         // peak within the band reads punchier than an average
         let m = 0
-        for (let j = lo; j < hi; j++) if (freq[j] > m) m = freq[j]
+        for (let j = bandLo; j < hi; j++) if (freq[j] > m) m = freq[j]
+        bandLo = hi
         let v = m / 255
         // noise floor + gamma + gain for a lively, wide dynamic range
-        v = Math.min(1, Math.pow(Math.max(0, v - 0.03), 0.6) * 1.3)
+        v = Math.min(1, Math.pow(Math.max(0, v - 0.03), 0.62) * 1.35)
         const bh = v * H
         const x = i * (bw + gap)
 

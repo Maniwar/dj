@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { audioBus } from '../audio/audioBus'
 import { withBase } from '../lib/asset'
+import { PERF } from '../lib/perfFlags'
 import { usePlayerStore } from '../state/usePlayerStore'
 import { useSiteStore } from '../state/useSiteStore'
 import { sceneForTrack, hydrateRealVideo, type Scene } from './broadcastFrames'
@@ -97,6 +98,8 @@ export default function Broadcast() {
     return () => cancelAnimationFrame(raf)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reduced, scene.mp4, scene.key])
+
+  if (PERF.noBroadcast) return null // ?nobroadcast — isolate the footage layer when debugging
 
   return (
     <div
