@@ -61,7 +61,7 @@ body {
   border: 2px solid transparent; border-radius: 16px;
   background: var(--glass) padding-box, var(--grad-gilt-border) border-box;
   box-shadow: 0 30px 70px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,240,200,0.22);
-  backdrop-filter: blur(9px) saturate(1.15);
+  -webkit-backdrop-filter: blur(9px) saturate(1.15); backdrop-filter: blur(9px) saturate(1.15);
 }
 
 /* leopard print — used as opulent trim/accents, not wall-to-wall */
@@ -115,6 +115,20 @@ body {
   36% { filter: hue-rotate(-22deg) brightness(0.7); transform: translateX(-4px); } 100% { filter: none; transform: none; }
 }
 @media (prefers-reduced-motion: reduce) { .bc-frame.on { animation: none; } .broadcast.glitch-cut { animation: none; } }
+/* MOBILE flicker fix: kill the per-beat white STROBE, the stepped grain jitter, the hard
+   glitch-cut flash and the CRT shake — those flashing effects read as flicker on phones. */
+@media (max-width: 768px) {
+  .bc-strobe { display: none; }
+  .bc-grain { animation: none; opacity: 0.045; }
+  .broadcast.glitch-cut { animation: none; }
+  .friction-overlay { animation: none; }
+  /* iOS Safari repaints backdrop-filter elements on every scroll frame -> flicker + jank.
+     Drop the blur on phones (the gilt border/shadow still reads as a glass panel). */
+  .gilt, .lore-card, .tour-card, .merch-card, .hero-gauge, .gb-post, .dates li, .karaoke {
+    -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+    background: rgba(8,9,14,0.9) padding-box, var(--grad-gilt-border) border-box;
+  }
+}
 
 /* NB: no transform on .content — a transformed ancestor breaks position:sticky (journey HUD).
    The Friction knob's shake lives on the CRT overlay instead. */
@@ -147,7 +161,7 @@ section { position: relative; padding: 9vh 6vw; }
   border: 2px solid transparent; border-radius: 2px;
   background: var(--glass) padding-box, var(--grad-gilt-border) border-box;
   box-shadow: 0 22px 55px rgba(0,0,0,0.65), 0 0 0 1px rgba(0,0,0,0.35);
-  backdrop-filter: blur(6px) saturate(1.05);
+  -webkit-backdrop-filter: blur(6px) saturate(1.05); backdrop-filter: blur(6px) saturate(1.05);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 .tour-card { overflow: hidden; }
@@ -388,7 +402,7 @@ section { position: relative; padding: 9vh 6vw; }
     linear-gradient(180deg, #12151c 0%, #0b0d13 10%, #06080c 100%) padding-box,
     var(--grad-gilt-border) border-box;
   box-shadow: 0 26px 70px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,240,200,0.3);
-  user-select: none; touch-action: none; transition: box-shadow 0.3s;
+  -webkit-user-select: none; user-select: none; touch-action: none; transition: box-shadow 0.3s;
 }
 .player.overheating { box-shadow: 0 26px 70px rgba(212,0,0,0.4), 0 0 46px rgba(255,90,60,0.4); }
 .player.cooling { box-shadow: 0 26px 70px rgba(120,220,255,0.4), 0 0 50px rgba(150,230,255,0.6); }
