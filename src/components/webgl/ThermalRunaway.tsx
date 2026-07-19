@@ -7,6 +7,7 @@ import { thermalVert, thermalFrag } from './thermalShader'
 
 const AMBIENT = 22
 const MAXT = 125
+const FREQ_BINS = 64
 
 const pointer = { x: 0.5, y: 0.5 }
 if (typeof window !== 'undefined') {
@@ -16,9 +17,19 @@ if (typeof window !== 'undefined') {
   })
 }
 
-function ThermalPlane() {
+function Mainstage() {
   const matRef = useRef<THREE.ShaderMaterial>(null)
   const { size, gl } = useThree()
+
+  // RGBA spectrum texture (universally supported) — the giant LED wall + lasers read it
+  const freqData = useMemo(() => new Uint8Array(FREQ_BINS * 4), [])
+  const freqTex = useMemo(() => {
+    const t = new THREE.DataTexture(freqData, FREQ_BINS, 1, THREE.RGBAFormat)
+    t.minFilter = THREE.LinearFilter
+    t.magFilter = THREE.LinearFilter
+    t.needsUpdate = true
+    return t
+  }, [freqData])
 
   const uniforms = useMemo(
     () => ({
@@ -34,8 +45,11 @@ function ThermalPlane() {
       uDew: { value: 0 },
       uOverclock: { value: 0 },
       uFriction: { value: 0.1 },
+      uSauna: { value: 0 },
+      uFreq: { value: freqTex },
+      uFreqCount: { value: FREQ_BINS },
     }),
-    [],
+    [freqTex],
   )
 
   useEffect(() => {
@@ -49,6 +63,21 @@ function ThermalPlane() {
     u.uTime.value += dt
     const b = audioBus.bands
     const t = audioBus.thermal
+    // push downsampled FFT into the texture for the LED wall
+    const src = audioBus.freq
+    const step = Math.max(1, Math.floor(src.length / FREQ_BINS))
+    for (let i = 0; i < FREQ_BINS; i++) {
+      let m = 0
+      for (let j = 0; j < step; j++) m += src[i * step + j] || 0
+      const v = Math.min(255, (m / step) * 1.25)
+      const o = i * 4
+      freqData[o] = v
+      freqData[o + 1] = v
+      freqData[o + 2] = v
+      freqData[o + 3] = 255
+    }
+    freqTex.needsUpdate = true
+
     u.uBass.value = b.bass
     u.uLevel.value = b.level
     u.uTreble.value = b.treble
@@ -57,8 +86,9 @@ function ThermalPlane() {
     u.uHumidity.value = t.humidity
     u.uDew.value = t.dewPointHit ? 1 : Math.max(0, u.uDew.value - dt * 1.5)
     u.uOverclock.value = t.overclock
-    u.uFriction.value = useSiteStore.getState().friction
-    // ease the cursor hotspot
+    const st = useSiteStore.getState()
+    u.uFriction.value = st.friction
+    u.uSauna.value = st.saunaMode ? 1 : 0
     u.uMouse.value.x += (pointer.x - u.uMouse.value.x) * Math.min(1, dt * 6)
     u.uMouse.value.y += (pointer.y - u.uMouse.value.y) * Math.min(1, dt * 6)
   })
@@ -80,10 +110,7 @@ function ThermalPlane() {
 
 export default function ThermalRunaway() {
   const reduced = useSiteStore((s) => s.reducedMotion)
-  if (reduced) {
-    // graceful static fallback: no animation loop
-    return <div className="thermal-fallback" aria-hidden />
-  }
+  if (reduced) return <div className="thermal-fallback" aria-hidden />
   return (
     <div className="thermal-canvas" aria-hidden>
       <Canvas
@@ -91,7 +118,7 @@ export default function ThermalRunaway() {
         dpr={[1, 1.75]}
         frameloop="always"
       >
-        <ThermalPlane />
+        <Mainstage />
       </Canvas>
     </div>
   )

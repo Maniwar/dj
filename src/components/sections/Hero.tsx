@@ -1,5 +1,6 @@
 import { useThermalReadout } from '../../hooks/useThermalReadout'
 import { useSiteStore } from '../../state/useSiteStore'
+import { Crest } from '../Ornaments'
 
 export default function Hero() {
   const thermal = useThermalReadout()
@@ -9,23 +10,34 @@ export default function Hero() {
   return (
     <section className="hero" id="top">
       <div className="hero-inner">
-        <div className="eyebrow">EUROBEAT RECORDS PRESENTS · CAT# EBR-2002-💦</div>
+        <div className="hero-crest">
+          <Crest />
+        </div>
+        <div className="eyebrow">Eurobeat Records · Cat # EBR-2002-💦 · 50,000 Capacity · Sold Out</div>
         <h1 className="hero-title">
-          <span className="drip">CLUB HUMIDITY</span>
+          <span className="drip gold-text">CLUB HUMIDITY</span>
         </h1>
         <h2 className="hero-sub">THE MOIST MIX 2002 · UNFILTERED EXCESS</h2>
         <p className="hero-artists">
           <b>DJ WOLFGANG</b> &amp; <b>KIKI G</b> <span className="aka">— System Overload —</span>
         </p>
 
+        <div className="hero-flex">
+          <span>🐆 LEOPARD-CLAD</span>
+          <span>🏎 FERRARI-ESCORTED</span>
+          <span>🛥 YACHT-CERTIFIED</span>
+          <span>🍾 CHAMPAGNE-COOLED</span>
+          <span>💦 100% MOIST</span>
+        </div>
+
         <div className="hero-gauge">
-          <div className="gauge-label">RIG STATUS</div>
+          <div className="gauge-label">MAINSTAGE RIG STATUS</div>
           <div className="gauge-bar">
             <span
               className="gauge-fill"
               style={{
                 width: `${hot * 100}%`,
-                background: `linear-gradient(90deg,#12e0c0,#ffd84d ${60 - hot * 20}%,#ff2e9a)`,
+                background: `linear-gradient(90deg,#0c6b47,#e6c05a ${60 - hot * 20}%,#d40000)`,
               }}
             />
             <span className="gauge-dew" style={{ left: '82%' }} title="DEW POINT">

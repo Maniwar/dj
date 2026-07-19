@@ -12,6 +12,7 @@ import Guestbook from './components/sections/Guestbook'
 import TourArchive from './components/sections/TourArchive'
 import HallOfFame from './components/sections/HallOfFame'
 import Merch from './components/sections/Merch'
+import { BrandBar, Divider, Crest } from './components/Ornaments'
 import { useSiteStore } from './state/useSiteStore'
 
 export default function App() {
@@ -27,14 +28,20 @@ export default function App() {
       <FrictionOverlay />
 
       <div className="content">
+        <BrandBar />
         <Hero />
+        <Divider mark="❈" />
         <Lore />
+        <Divider mark="✦" />
         <Tracklist />
         <Guestbook />
+        <Divider mark="❈" />
         <TourArchive />
+        <Divider mark="✦" />
         <HallOfFame />
         <Merch />
         <footer className="site-footer">
+          <Crest small />
           <div className="marquee-track slow">
             <div className="marquee-run">
               STAY MOIST · DRINK WATER · THE SYNTHESIZER IS SO BIG · STAY MOIST · MIND THE BASS ·

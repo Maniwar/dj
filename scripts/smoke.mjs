@@ -40,7 +40,8 @@ await logon.click()
 
 // wait for boot console to finish -> hero visible
 await page.waitForSelector('.hero', { timeout: 8000 })
-await page.waitForTimeout(1800)
+await page.waitForFunction(() => !document.querySelector('.boot-gate'), { timeout: 9000 }).catch(() => {})
+await page.waitForTimeout(900)
 await page.screenshot({ path: `${OUT}/smoke-2-hero.png`, fullPage: false })
 
 // probes
@@ -70,6 +71,11 @@ await page.waitForTimeout(400)
 const detents = page.locator('.player .bootleg .detent')
 if (await detents.count() > 1) await detents.nth(1).click()
 await page.waitForTimeout(400)
+
+// tour section (real Gemini posters)
+await page.locator('.tour').scrollIntoViewIfNeeded()
+await page.waitForTimeout(1200)
+await page.screenshot({ path: `${OUT}/smoke-4-tour.png` })
 
 // scroll through the whole page
 await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
