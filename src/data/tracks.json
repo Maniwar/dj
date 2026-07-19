@@ -1,0 +1,529 @@
+{
+  "generatedFrom": "mp3/",
+  "trackCount": 19,
+  "fileCount": 39,
+  "tracks": [
+    {
+      "slug": "abduct-me-baby",
+      "title": "Abduct Me Baby",
+      "versionCount": 2,
+      "hasBootleg": true,
+      "defaultVersionId": "abduct-me-baby--v0",
+      "versions": [
+        {
+          "id": "abduct-me-baby--v0",
+          "label": "A-Side · Studio Mix",
+          "badge": "A-SIDE",
+          "vibe": "The official multi-platinum cut, pressed clean.",
+          "src": "/mp3/Abduct%20Me%20Baby.mp3",
+          "file": "Abduct Me Baby.mp3",
+          "variantIndex": 0
+        },
+        {
+          "id": "abduct-me-baby--v1",
+          "label": "White-Label Bootleg",
+          "badge": "BOOTLEG",
+          "vibe": "Ripped from a sweaty dubplate. Unmastered. Illegal. Superior.",
+          "src": "/mp3/Abduct%20Me%20Baby_1.mp3",
+          "file": "Abduct Me Baby_1.mp3",
+          "variantIndex": 1
+        }
+      ]
+    },
+    {
+      "slug": "bite-me-in-the-dark",
+      "title": "Bite Me in the Dark",
+      "versionCount": 2,
+      "hasBootleg": true,
+      "defaultVersionId": "bite-me-in-the-dark--v0",
+      "versions": [
+        {
+          "id": "bite-me-in-the-dark--v0",
+          "label": "A-Side · Studio Mix",
+          "badge": "A-SIDE",
+          "vibe": "The official multi-platinum cut, pressed clean.",
+          "src": "/mp3/Bite%20Me%20in%20the%20Dark.mp3",
+          "file": "Bite Me in the Dark.mp3",
+          "variantIndex": 0
+        },
+        {
+          "id": "bite-me-in-the-dark--v1",
+          "label": "White-Label Bootleg",
+          "badge": "BOOTLEG",
+          "vibe": "Ripped from a sweaty dubplate. Unmastered. Illegal. Superior.",
+          "src": "/mp3/Bite%20Me%20in%20the%20Dark_1.mp3",
+          "file": "Bite Me in the Dark_1.mp3",
+          "variantIndex": 1
+        }
+      ]
+    },
+    {
+      "slug": "ciao-ciao-afterparty",
+      "title": "Ciao Ciao Afterparty",
+      "versionCount": 2,
+      "hasBootleg": true,
+      "defaultVersionId": "ciao-ciao-afterparty--v0",
+      "versions": [
+        {
+          "id": "ciao-ciao-afterparty--v0",
+          "label": "A-Side · Studio Mix",
+          "badge": "A-SIDE",
+          "vibe": "The official multi-platinum cut, pressed clean.",
+          "src": "/mp3/Ciao%20Ciao%20Afterparty.mp3",
+          "file": "Ciao Ciao Afterparty.mp3",
+          "variantIndex": 0
+        },
+        {
+          "id": "ciao-ciao-afterparty--v1",
+          "label": "White-Label Bootleg",
+          "badge": "BOOTLEG",
+          "vibe": "Ripped from a sweaty dubplate. Unmastered. Illegal. Superior.",
+          "src": "/mp3/Ciao%20Ciao%20Afterparty_1.mp3",
+          "file": "Ciao Ciao Afterparty_1.mp3",
+          "variantIndex": 1
+        }
+      ]
+    },
+    {
+      "slug": "euro-airways",
+      "title": "Euro Airways",
+      "versionCount": 2,
+      "hasBootleg": true,
+      "defaultVersionId": "euro-airways--v0",
+      "versions": [
+        {
+          "id": "euro-airways--v0",
+          "label": "A-Side · Studio Mix",
+          "badge": "A-SIDE",
+          "vibe": "The official multi-platinum cut, pressed clean.",
+          "src": "/mp3/Euro%20Airways.mp3",
+          "file": "Euro Airways.mp3",
+          "variantIndex": 0
+        },
+        {
+          "id": "euro-airways--v1",
+          "label": "White-Label Bootleg",
+          "badge": "BOOTLEG",
+          "vibe": "Ripped from a sweaty dubplate. Unmastered. Illegal. Superior.",
+          "src": "/mp3/Euro%20Airways_1.mp3",
+          "file": "Euro Airways_1.mp3",
+          "variantIndex": 1
+        }
+      ]
+    },
+    {
+      "slug": "euro-trash",
+      "title": "Euro-Trash",
+      "versionCount": 2,
+      "hasBootleg": true,
+      "defaultVersionId": "euro-trash--v0",
+      "versions": [
+        {
+          "id": "euro-trash--v0",
+          "label": "A-Side · Studio Mix",
+          "badge": "A-SIDE",
+          "vibe": "The official multi-platinum cut, pressed clean.",
+          "src": "/mp3/Euro-Trash.mp3",
+          "file": "Euro-Trash.mp3",
+          "variantIndex": 0
+        },
+        {
+          "id": "euro-trash--v1",
+          "label": "White-Label Bootleg",
+          "badge": "BOOTLEG",
+          "vibe": "Ripped from a sweaty dubplate. Unmastered. Illegal. Superior.",
+          "src": "/mp3/Euro-Trash_1.mp3",
+          "file": "Euro-Trash_1.mp3",
+          "variantIndex": 1
+        }
+      ]
+    },
+    {
+      "slug": "firemans-disco",
+      "title": "Firemans Disco",
+      "versionCount": 2,
+      "hasBootleg": true,
+      "defaultVersionId": "firemans-disco--v0",
+      "versions": [
+        {
+          "id": "firemans-disco--v0",
+          "label": "A-Side · Studio Mix",
+          "badge": "A-SIDE",
+          "vibe": "The official multi-platinum cut, pressed clean.",
+          "src": "/mp3/Firemans%20Disco.mp3",
+          "file": "Firemans Disco.mp3",
+          "variantIndex": 0
+        },
+        {
+          "id": "firemans-disco--v1",
+          "label": "White-Label Bootleg",
+          "badge": "BOOTLEG",
+          "vibe": "Ripped from a sweaty dubplate. Unmastered. Illegal. Superior.",
+          "src": "/mp3/Firemans%20Disco_1.mp3",
+          "file": "Firemans Disco_1.mp3",
+          "variantIndex": 1
+        }
+      ]
+    },
+    {
+      "slug": "patient-zero",
+      "title": "Patient Zero",
+      "versionCount": 2,
+      "hasBootleg": true,
+      "defaultVersionId": "patient-zero--v0",
+      "versions": [
+        {
+          "id": "patient-zero--v0",
+          "label": "A-Side · Studio Mix",
+          "badge": "A-SIDE",
+          "vibe": "The official multi-platinum cut, pressed clean.",
+          "src": "/mp3/Patient%20Zero.mp3",
+          "file": "Patient Zero.mp3",
+          "variantIndex": 0
+        },
+        {
+          "id": "patient-zero--v1",
+          "label": "White-Label Bootleg",
+          "badge": "BOOTLEG",
+          "vibe": "Ripped from a sweaty dubplate. Unmastered. Illegal. Superior.",
+          "src": "/mp3/Patient%20Zero_1.mp3",
+          "file": "Patient Zero_1.mp3",
+          "variantIndex": 1
+        }
+      ]
+    },
+    {
+      "slug": "pump-my-iron",
+      "title": "Pump My Iron",
+      "versionCount": 2,
+      "hasBootleg": true,
+      "defaultVersionId": "pump-my-iron--v0",
+      "versions": [
+        {
+          "id": "pump-my-iron--v0",
+          "label": "A-Side · Studio Mix",
+          "badge": "A-SIDE",
+          "vibe": "The official multi-platinum cut, pressed clean.",
+          "src": "/mp3/Pump%20My%20Iron.mp3",
+          "file": "Pump My Iron.mp3",
+          "variantIndex": 0
+        },
+        {
+          "id": "pump-my-iron--v1",
+          "label": "White-Label Bootleg",
+          "badge": "BOOTLEG",
+          "vibe": "Ripped from a sweaty dubplate. Unmastered. Illegal. Superior.",
+          "src": "/mp3/Pump%20My%20Iron_1.mp3",
+          "file": "Pump My Iron_1.mp3",
+          "variantIndex": 1
+        }
+      ]
+    },
+    {
+      "slug": "reboot-my-heart",
+      "title": "Reboot My Heart",
+      "versionCount": 2,
+      "hasBootleg": true,
+      "defaultVersionId": "reboot-my-heart--v0",
+      "versions": [
+        {
+          "id": "reboot-my-heart--v0",
+          "label": "A-Side · Studio Mix",
+          "badge": "A-SIDE",
+          "vibe": "The official multi-platinum cut, pressed clean.",
+          "src": "/mp3/Reboot%20My%20Heart.mp3",
+          "file": "Reboot My Heart.mp3",
+          "variantIndex": 0
+        },
+        {
+          "id": "reboot-my-heart--v1",
+          "label": "White-Label Bootleg",
+          "badge": "BOOTLEG",
+          "vibe": "Ripped from a sweaty dubplate. Unmastered. Illegal. Superior.",
+          "src": "/mp3/Reboot%20My%20Heart_1.mp3",
+          "file": "Reboot My Heart_1.mp3",
+          "variantIndex": 1
+        }
+      ]
+    },
+    {
+      "slug": "sha-sha-shameless",
+      "title": "Sha-Sha-Shameless",
+      "versionCount": 2,
+      "hasBootleg": true,
+      "defaultVersionId": "sha-sha-shameless--v0",
+      "versions": [
+        {
+          "id": "sha-sha-shameless--v0",
+          "label": "A-Side · Studio Mix",
+          "badge": "A-SIDE",
+          "vibe": "The official multi-platinum cut, pressed clean.",
+          "src": "/mp3/Sha-Sha-Shameless.mp3",
+          "file": "Sha-Sha-Shameless.mp3",
+          "variantIndex": 0
+        },
+        {
+          "id": "sha-sha-shameless--v1",
+          "label": "White-Label Bootleg",
+          "badge": "BOOTLEG",
+          "vibe": "Ripped from a sweaty dubplate. Unmastered. Illegal. Superior.",
+          "src": "/mp3/Sha-Sha-Shameless_1.mp3",
+          "file": "Sha-Sha-Shameless_1.mp3",
+          "variantIndex": 1
+        }
+      ]
+    },
+    {
+      "slug": "shameless-in-the-luxury-car",
+      "title": "Shameless in the Luxury Car",
+      "versionCount": 2,
+      "hasBootleg": true,
+      "defaultVersionId": "shameless-in-the-luxury-car--v0",
+      "versions": [
+        {
+          "id": "shameless-in-the-luxury-car--v0",
+          "label": "A-Side · Studio Mix",
+          "badge": "A-SIDE",
+          "vibe": "The official multi-platinum cut, pressed clean.",
+          "src": "/mp3/Shameless%20in%20the%20Luxury%20Car.mp3",
+          "file": "Shameless in the Luxury Car.mp3",
+          "variantIndex": 0
+        },
+        {
+          "id": "shameless-in-the-luxury-car--v1",
+          "label": "White-Label Bootleg",
+          "badge": "BOOTLEG",
+          "vibe": "Ripped from a sweaty dubplate. Unmastered. Illegal. Superior.",
+          "src": "/mp3/Shameless%20in%20the%20Luxury%20Car_1.mp3",
+          "file": "Shameless in the Luxury Car_1.mp3",
+          "variantIndex": 1
+        }
+      ]
+    },
+    {
+      "slug": "shameless-in-the-navy",
+      "title": "Shameless in the Navy",
+      "versionCount": 1,
+      "hasBootleg": false,
+      "defaultVersionId": "shameless-in-the-navy--v0",
+      "versions": [
+        {
+          "id": "shameless-in-the-navy--v0",
+          "label": "A-Side · Studio Mix",
+          "badge": "A-SIDE",
+          "vibe": "The official multi-platinum cut, pressed clean.",
+          "src": "/mp3/Shameless%20in%20the%20Navy.mp3",
+          "file": "Shameless in the Navy.mp3",
+          "variantIndex": 0
+        }
+      ]
+    },
+    {
+      "slug": "shameless-little-mechanic",
+      "title": "Shameless Little Mechanic",
+      "versionCount": 2,
+      "hasBootleg": true,
+      "defaultVersionId": "shameless-little-mechanic--v0",
+      "versions": [
+        {
+          "id": "shameless-little-mechanic--v0",
+          "label": "A-Side · Studio Mix",
+          "badge": "A-SIDE",
+          "vibe": "The official multi-platinum cut, pressed clean.",
+          "src": "/mp3/Shameless%20Little%20Mechanic.mp3",
+          "file": "Shameless Little Mechanic.mp3",
+          "variantIndex": 0
+        },
+        {
+          "id": "shameless-little-mechanic--v1",
+          "label": "White-Label Bootleg",
+          "badge": "BOOTLEG",
+          "vibe": "Ripped from a sweaty dubplate. Unmastered. Illegal. Superior.",
+          "src": "/mp3/Shameless%20Little%20Mechanic_1.mp3",
+          "file": "Shameless Little Mechanic_1.mp3",
+          "variantIndex": 1
+        }
+      ]
+    },
+    {
+      "slug": "shameless-on-the-floor",
+      "title": "Shameless on the Floor",
+      "versionCount": 2,
+      "hasBootleg": true,
+      "defaultVersionId": "shameless-on-the-floor--v0",
+      "versions": [
+        {
+          "id": "shameless-on-the-floor--v0",
+          "label": "A-Side · Studio Mix",
+          "badge": "A-SIDE",
+          "vibe": "The official multi-platinum cut, pressed clean.",
+          "src": "/mp3/Shameless%20on%20the%20Floor.mp3",
+          "file": "Shameless on the Floor.mp3",
+          "variantIndex": 0
+        },
+        {
+          "id": "shameless-on-the-floor--v1",
+          "label": "White-Label Bootleg",
+          "badge": "BOOTLEG",
+          "vibe": "Ripped from a sweaty dubplate. Unmastered. Illegal. Superior.",
+          "src": "/mp3/Shameless%20on%20the%20Floor_1.mp3",
+          "file": "Shameless on the Floor_1.mp3",
+          "variantIndex": 1
+        }
+      ]
+    },
+    {
+      "slug": "synthesizer-is-so-big",
+      "title": "Synthesizer Is So Big",
+      "versionCount": 4,
+      "hasBootleg": true,
+      "defaultVersionId": "synthesizer-is-so-big--v0",
+      "versions": [
+        {
+          "id": "synthesizer-is-so-big--v0",
+          "label": "A-Side · Studio Mix",
+          "badge": "A-SIDE",
+          "vibe": "The official multi-platinum cut, pressed clean.",
+          "src": "/mp3/Synthesizer%20Is%20So%20Big.mp3",
+          "file": "Synthesizer Is So Big.mp3",
+          "variantIndex": 0
+        },
+        {
+          "id": "synthesizer-is-so-big--v1",
+          "label": "White-Label Bootleg",
+          "badge": "BOOTLEG",
+          "vibe": "Ripped from a sweaty dubplate. Unmastered. Illegal. Superior.",
+          "src": "/mp3/Synthesizer%20Is%20So%20Big_1.mp3",
+          "file": "Synthesizer Is So Big_1.mp3",
+          "variantIndex": 1
+        },
+        {
+          "id": "synthesizer-is-so-big--v2",
+          "label": "Basement VIP Edit",
+          "badge": "VIP",
+          "vibe": "Wolfgang re-patched this at 4am in the soundproofed basement.",
+          "src": "/mp3/Synthesizer%20Is%20So%20Big_2.mp3",
+          "file": "Synthesizer Is So Big_2.mp3",
+          "variantIndex": 2
+        },
+        {
+          "id": "synthesizer-is-so-big--v3",
+          "label": "Sauna Dub",
+          "badge": "DUB",
+          "vibe": "Recorded at 98% humidity. You can hear the coals.",
+          "src": "/mp3/Synthesizer%20Is%20So%20Big_3.mp3",
+          "file": "Synthesizer Is So Big_3.mp3",
+          "variantIndex": 3
+        }
+      ]
+    },
+    {
+      "slug": "the-basement-vip",
+      "title": "The Basement VIP",
+      "versionCount": 2,
+      "hasBootleg": true,
+      "defaultVersionId": "the-basement-vip--v0",
+      "versions": [
+        {
+          "id": "the-basement-vip--v0",
+          "label": "A-Side · Studio Mix",
+          "badge": "A-SIDE",
+          "vibe": "The official multi-platinum cut, pressed clean.",
+          "src": "/mp3/The%20Basement%20VIP.mp3",
+          "file": "The Basement VIP.mp3",
+          "variantIndex": 0
+        },
+        {
+          "id": "the-basement-vip--v1",
+          "label": "White-Label Bootleg",
+          "badge": "BOOTLEG",
+          "vibe": "Ripped from a sweaty dubplate. Unmastered. Illegal. Superior.",
+          "src": "/mp3/The%20Basement%20VIP_1.mp3",
+          "file": "The Basement VIP_1.mp3",
+          "variantIndex": 1
+        }
+      ]
+    },
+    {
+      "slug": "touch-my-subwoofer",
+      "title": "Touch My Subwoofer",
+      "versionCount": 2,
+      "hasBootleg": true,
+      "defaultVersionId": "touch-my-subwoofer--v0",
+      "versions": [
+        {
+          "id": "touch-my-subwoofer--v0",
+          "label": "A-Side · Studio Mix",
+          "badge": "A-SIDE",
+          "vibe": "The official multi-platinum cut, pressed clean.",
+          "src": "/mp3/Touch%20My%20Subwoofer.mp3",
+          "file": "Touch My Subwoofer.mp3",
+          "variantIndex": 0
+        },
+        {
+          "id": "touch-my-subwoofer--v1",
+          "label": "White-Label Bootleg",
+          "badge": "BOOTLEG",
+          "vibe": "Ripped from a sweaty dubplate. Unmastered. Illegal. Superior.",
+          "src": "/mp3/Touch%20My%20Subwoofer_1.mp3",
+          "file": "Touch My Subwoofer_1.mp3",
+          "variantIndex": 1
+        }
+      ]
+    },
+    {
+      "slug": "tutti-frutti",
+      "title": "Tutti-Frutti",
+      "versionCount": 2,
+      "hasBootleg": true,
+      "defaultVersionId": "tutti-frutti--v0",
+      "versions": [
+        {
+          "id": "tutti-frutti--v0",
+          "label": "A-Side · Studio Mix",
+          "badge": "A-SIDE",
+          "vibe": "The official multi-platinum cut, pressed clean.",
+          "src": "/mp3/Tutti-Frutti.mp3",
+          "file": "Tutti-Frutti.mp3",
+          "variantIndex": 0
+        },
+        {
+          "id": "tutti-frutti--v1",
+          "label": "White-Label Bootleg",
+          "badge": "BOOTLEG",
+          "vibe": "Ripped from a sweaty dubplate. Unmastered. Illegal. Superior.",
+          "src": "/mp3/Tutti-Frutti_1.mp3",
+          "file": "Tutti-Frutti_1.mp3",
+          "variantIndex": 1
+        }
+      ]
+    },
+    {
+      "slug": "winter-time-romance",
+      "title": "Winter Time Romance",
+      "versionCount": 2,
+      "hasBootleg": true,
+      "defaultVersionId": "winter-time-romance--v0",
+      "versions": [
+        {
+          "id": "winter-time-romance--v0",
+          "label": "A-Side · Studio Mix",
+          "badge": "A-SIDE",
+          "vibe": "The official multi-platinum cut, pressed clean.",
+          "src": "/mp3/Winter%20Time%20Romance.mp3",
+          "file": "Winter Time Romance.mp3",
+          "variantIndex": 0
+        },
+        {
+          "id": "winter-time-romance--v1",
+          "label": "White-Label Bootleg",
+          "badge": "BOOTLEG",
+          "vibe": "Ripped from a sweaty dubplate. Unmastered. Illegal. Superior.",
+          "src": "/mp3/Winter%20Time%20Romance_1.mp3",
+          "file": "Winter Time Romance_1.mp3",
+          "variantIndex": 1
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+node_modules
+dist
+.smoke
+smoke-shots
+*.log
+.DS_Store
+.vite
