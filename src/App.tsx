@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { AudioProvider } from './audio/AudioProvider'
+import Broadcast from './video/Broadcast'
 import ThermalRunaway from './components/webgl/ThermalRunaway'
 import FrictionOverlay from './components/FrictionOverlay'
 import BootGate from './components/BootGate'
@@ -24,6 +25,7 @@ export default function App() {
 
   return (
     <AudioProvider>
+      <Broadcast />
       <ThermalRunaway />
       <FrictionOverlay />
 

@@ -114,7 +114,12 @@ export default function ThermalRunaway() {
   return (
     <div className="thermal-canvas" aria-hidden>
       <Canvas
-        gl={{ antialias: false, alpha: false, powerPreference: 'high-performance' }}
+        gl={{
+          antialias: false,
+          alpha: true,
+          premultipliedAlpha: false,
+          powerPreference: 'high-performance',
+        }}
         dpr={[1, 1.75]}
         frameloop="always"
       >

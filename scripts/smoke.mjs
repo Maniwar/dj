@@ -77,9 +77,9 @@ await page.locator('.tour').scrollIntoViewIfNeeded()
 await page.waitForTimeout(1200)
 await page.screenshot({ path: `${OUT}/smoke-4-tour.png` })
 
-// scroll through the whole page
-await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
-await page.waitForTimeout(1500)
+// merch + footer (scroll them into view rather than overshooting the page end)
+await page.locator('.merch').scrollIntoViewIfNeeded()
+await page.waitForTimeout(1200)
 await page.screenshot({ path: `${OUT}/smoke-3-bottom.png` })
 await page.evaluate(() => window.scrollTo(0, 0))
 

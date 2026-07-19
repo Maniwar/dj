@@ -209,6 +209,11 @@ export const thermalFrag = /* glsl */ `
     col -= sin(uv.y*uRes.y*1.2)*0.02*uFriction;      // scanlines with friction
     col *= smoothstep(1.25, 0.30, length(uv-0.5));   // vignette
 
-    gl_FragColor = vec4(max(col,0.0), 1.0);
+    // Composite as a SCREEN-blend light layer over the Broadcast footage: dark areas
+    // become transparent (video shows through), bright lights (lasers/pyro/LED/god-rays)
+    // glow on top. A small base keeps a faint festival wash everywhere.
+    vec3 outc = max(col, 0.0);
+    float a = clamp(dot(outc, vec3(0.34, 0.5, 0.16)) * 1.2 + 0.08, 0.0, 1.0);
+    gl_FragColor = vec4(outc, a);
   }
 `

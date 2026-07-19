@@ -77,6 +77,33 @@ const JOBS = [
       'sauna-club where SYSTEM OVERLOAD short-circuited into existence — thick steam, glowing coals, condensation, ' +
       'gold and leopard accents, a cedar bucket, euphoric faces. Timestamp "BERLIN 2004". ' + STYLE + ' ' + NEG,
   },
+  // ---- CLUB-ATMOSPHERE FRAMES for the persistent Broadcast layer (beat-cut between these) ----
+  {
+    out: 'public/assets/video/frames/club-crowd.jpg', aspect: '16:9',
+    prompt: 'First-person camcorder view pushing through a packed sweaty luxury nightclub crowd, hundreds of ' +
+      'raised hands and phone flashes, green and magenta lasers slicing through fog toward a gilded DJ booth. ' + STYLE + ' ' + NEG,
+  },
+  {
+    out: 'public/assets/video/frames/club-podium.jpg', aspect: '16:9',
+    prompt: 'Three glamorous women in leopard-print dresses dancing wildly on a raised gold podium, champagne ' +
+      'spraying, gold confetti falling, lasers and strobes, euphoric, mid-scream. ' + STYLE + ' ' + NEG,
+  },
+  {
+    out: 'public/assets/video/frames/club-vip.jpg', aspect: '16:9',
+    prompt: 'VIP bottle-service booth dripping in gold and leopard upholstery, sparklers on champagne magnums, ' +
+      'the same three glamorous women toasting and laughing, moody club lighting, humid haze. ' + STYLE + ' ' + NEG,
+  },
+  {
+    out: 'public/assets/video/frames/club-floor.jpg', aspect: '16:9',
+    prompt: 'Wide shot of a heaving Love-Parade-scale dancefloor under a giant LED wall and laser truss, ' +
+      'fog, gold confetti, thousands of silhouettes with hands up, mega-festival energy. ' + STYLE + ' ' + NEG,
+  },
+  {
+    out: 'public/assets/video/frames/club-booth.jpg', aspect: '16:9',
+    prompt: 'DJ WOLFGANG (tanned European man, tiny moustache, cheap chrome sunglasses, open leather jacket) ' +
+      'and KIKI G (blonde woman, silver chrome crop top, glossy Y2K makeup) commanding a gilded DJ booth, ' +
+      'hands in the air, pyro behind them, adoring crowd in front. ' + STYLE + ' ' + NEG,
+  },
 ]
 
 async function generate(job) {

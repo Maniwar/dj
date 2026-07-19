@@ -1,0 +1,6 @@
+{
+  "note": "Placeholder. Overwritten by `npm run gen:videos` (AtlasCloud) on an unblocked network. Until then the Broadcast plays the Gemini-still montage.",
+  "model": "bytedance/seedance-2.0/reference-to-video",
+  "seed": 480917,
+  "clips": []
+}
