@@ -16,7 +16,7 @@
 // NOTE: this build environment's egress policy blocks api.atlascloud.ai (403). Run this
 // from an unblocked network (your machine / CI). It fails fast with a clear message here.
 
-import { writeFileSync, readFileSync } from 'node:fs'
+import { writeFileSync, readFileSync, existsSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -65,20 +65,33 @@ async function uploadAsset(_path) {
   throw new Error('set PUBLIC_MP3_BASE to a publicly reachable /mp3 URL, or implement asset upload')
 }
 
-async function submit(clip, audioRef, posterAudioTrack) {
-  const prompt = `${clip.scene}. ${CHARACTER_LOCK} Their dancing hits exactly on the beat of the provided audio. ${STYLE}`
+// base64 a local still so the clip ANIMATES that exact generated scene (character-locked by
+// the image itself — same faces/outfits as the site's stills).
+function toDataUrl(relPath) {
+  const p = resolve(ROOT, relPath)
+  if (!existsSync(p)) return null
+  return `data:image/jpeg;base64,${readFileSync(p).toString('base64')}`
+}
+
+async function submit(clip, audioRef) {
+  const still = toDataUrl(`public/assets/tour/${clip.id}.jpg`)
+  const prompt = still
+    ? `Animate the exact scene and the exact same people and outfits shown in image 1 — they dance and party energetically, perfectly in time to the provided music; the camera drifts, lasers sweep, champagne and confetti fly. ${clip.scene}. ${STYLE}`
+    : `${clip.scene}. ${CHARACTER_LOCK} Their dancing hits exactly on the beat of the provided audio. ${STYLE}`
   const body = {
     model: MODEL,
     prompt,
-    reference_audios: [audioRef], // the actual track -> generation follows its energy/tempo
+    ...(still ? { reference_images: [still] } : {}), // lock characters to the still
+    reference_audios: [audioRef], // the actual track -> motion follows its energy/tempo
     duration: 10,                 // 4..15s per clip (stitch for longer)
     resolution: '1080p',
     ratio: '16:9',
     generate_audio: false,        // SILENT — the site plays the real MP3
-    seed: SEED,                   // locked super-fan identity
+    seed: SEED,                   // locked identity
+    watermark: false,
   }
   const r = await j(`${API}/model/generateVideo`, { method: 'POST', headers: H, body: JSON.stringify(body) })
-  return r.prediction_id || r.id
+  return r.prediction_id || r.id || r.data?.id
 }
 
 async function poll(id, { tries = 120, delay = 5000 } = {}) {

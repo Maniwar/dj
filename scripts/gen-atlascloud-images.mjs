@@ -47,10 +47,10 @@ const TRIO = 'The three super-fans: (A) tall deep-tan woman, long dark hair, LEO
   'leopard hot pants, big gold hoops; (B) petite woman, platinum hair with pink tips, holographic-silver bikini ' +
   'top + shorts, stacked glow bracelets; (C) freckled woman, copper curls, chrome halter top + denim micro shorts, ' +
   'a whistle. All leopard/gold/glitter, drenched in sweat, euphoric, screaming.'
-const DIETER = 'DJ DIETER: a broad, deeply tanned older European man about 55, balding with slicked-back thinning ' +
-  'hair and heavy grey stubble, a sleazy confident smirk, glistening with sweat, wearing an unbuttoned shiny ' +
-  'silk shirt (or a metallic tracksuit jacket) with a thick gold chain, headphones slung around his neck, hands ' +
-  'on the decks. NOT a leather jacket, NOT sunglasses, NOT a handlebar-moustache catalog model.'
+const DIETER = 'DJ DIETER: a sleazy campy 2000s Eurodance heart-throb in his late 30s (Gunther vibe), tanned, ' +
+  'slicked-back dark hair, a THIN pencil MOUSTACHE, cheap flashy Euro wraparound SUNGLASSES, an open black ' +
+  'LEATHER JACKET over a bare tanned chest with a thick gold chain, headphones around his neck, a greasy ' +
+  'confident smirk, glistening with sweat, hands on the DJ decks.'
 
 // ---- REFERENCE SHEET (text-to-image) ----
 const REFS = [
@@ -65,19 +65,30 @@ const REFS = [
 // ---- STORY / CITY SCENES (edit — reuse the refs so faces stay consistent) ----
 // Each references specific ref images by index in the prompt ("woman in image 1", etc.).
 const K = 'public/assets/ref/kiki.jpg', C = 'public/assets/ref/crew.jpg', D = 'public/assets/ref/dieter.jpg'
+// Keep the referenced people/outfits identical; each scene is that SONG's gag, staged with
+// our cast (Kiki fronting, Dieter at the decks, the leopard crew up front). Funny + campy.
+const KEEP = 'Keep the EXACT same faces and outfits from the reference images — do not change the people.'
 const SCENES = [
-  { out: 'public/assets/tour/ibiza.jpg', size: '2720*1530', refs: [C, K],
-    prompt: `Keep the exact same people and outfits from the reference images. The leopard trio (image 1) and the silver-clad blonde (image 2) go wild at an open-air Ibiza superclub at sunrise: foam cannons, palm silhouettes, a mega-yacht on the horizon, champagne spray. ${WARDROBE} ${STYLE} ${NEG}` },
-  { out: 'public/assets/tour/tokyo.jpg', size: '2720*1530', refs: [C, K],
-    prompt: `Same people/outfits as the references. The leopard trio (image 1) and silver blonde (image 2) rave in a tiny neon Tokyo micro-club, rain-slicked windows, kanji neon, a red Ferrari in the wet street outside. ${WARDROBE} ${STYLE} ${NEG}` },
-  { out: 'public/assets/tour/miami.jpg', size: '2720*1530', refs: [C, K],
-    prompt: `Same people/outfits as the references. The leopard trio (image 1) and silver blonde (image 2) party on a Miami rooftop pool deck at pink sunset, docked mega-yacht, gold Ferrari, champagne towers, ocean humidity. ${WARDROBE} ${STYLE} ${NEG}` },
-  { out: 'public/assets/tour/berlin.jpg', size: '2720*1530', refs: [C, K],
-    prompt: `Same people/outfits as the references. The leopard trio (image 1) and silver blonde (image 2) in a wood-panelled Berlin sauna-warehouse club, thick steam, glowing coals, condensation, a cedar bucket. ${WARDROBE} ${STYLE} ${NEG}` },
-  { out: 'public/assets/video/frames/club-booth.jpg', size: '2720*1530', refs: [K, C, D],
-    prompt: `Same people/outfits as the references. KIKI G (image 1) commands the DJ decks with one arm up; the leopard super-fans (image 2) scream and reach toward her; DJ Dieter (image 3) is the dark silhouette behind. Lasers, fog, sweat. ${WARDROBE} ${STYLE} ${NEG}` },
-  { out: 'public/assets/video/frames/club-vip.jpg', size: '2720*1530', refs: [C],
-    prompt: `Same people/outfits as the reference. The leopard trio (image 1) in a VIP bottle-service booth, sparklers on champagne magnums, toasting and screaming with joy, humid haze, lasers. ${WARDROBE} ${STYLE} ${NEG}` },
+  // ---- TOUR CITIES, each themed to the song bound to it ----
+  { out: 'public/assets/tour/ibiza.jpg', size: '2720*1530', refs: [C, K], // Touch My Subwoofer
+    prompt: `${KEEP} FUNNY campy scene: the leopard trio (image 1) and silver-blonde Kiki (image 2) drape themselves over a COLOSSAL wall of subwoofer speakers at a white open-air Ibiza superclub at sunrise, pressing their bodies to the giant speaker cones to "feel the bass", foam and champagne spray, palm silhouettes, a mega-yacht on the horizon. ${WARDROBE} ${STYLE} ${NEG}` },
+  { out: 'public/assets/tour/tokyo.jpg', size: '2720*1530', refs: [C, K, D], // Euro Airways
+    prompt: `${KEEP} ABSURD funny scene: a cramped neon Tokyo micro-club dressed as an AIRPLANE CABIN — the leopard trio (image 1) buckled into tiny airline seats screaming with champagne, Kiki (image 2) as a squeaky silver flight-attendant handing out drinks, DJ Dieter (image 3) as the sleazy grinning "captain" at the cockpit/decks, lit seatbelt signs, rain-slicked windows, a red Ferrari outside. Turbulence chaos. ${WARDROBE} ${STYLE} ${NEG}` },
+  { out: 'public/assets/tour/miami.jpg', size: '2720*1530', refs: [C, K, D], // Pump My Iron
+    prompt: `${KEEP} RIDICULOUS funny scene: a neon-spandex GYM rave on a Miami rooftop pool deck at pink sunset — the leopard trio (image 1) and Kiki (image 2) in glitter workout gear pumping chrome dumbbells and flexing, dripping sweat, DJ Dieter (image 3) grinning as their spotter at the decks, a gold Ferrari and mega-yacht below, champagne towers. ${WARDROBE} ${STYLE} ${NEG}` },
+  { out: 'public/assets/tour/berlin.jpg', size: '2720*1530', refs: [C, K, D], // The Basement VIP
+    prompt: `${KEEP} DEADPAN funny scene: a dingy Berlin basement "VIP" behind a red velvet rope — mops, buckets and exposed pipes in the corner, the leopard trio (image 1) and Kiki (image 2) acting ultra-glamorous and exclusive among the cleaning supplies, DJ Dieter (image 3) guarding the rope, steam, one lonely disco light. ${WARDROBE} ${STYLE} ${NEG}` },
+  // ---- MAINSTAGE / BROADCAST club frames (current-track fallback) — cast on stage ----
+  { out: 'public/assets/video/frames/club-booth.jpg', size: '2720*1530', refs: [K, D, C],
+    prompt: `${KEEP} KIKI G (image 1) commands the DJ decks in her silver two-piece, arm thrown up; DJ Dieter (image 2) leans in sleazily beside her at the decks; the leopard trio (image 3) scream and reach up from the front row. Lasers, fog, sweat, champagne. ${STYLE} ${NEG}` },
+  { out: 'public/assets/video/frames/club-crowd.jpg', size: '2720*1530', refs: [D, K],
+    prompt: `${KEEP} First-person camcorder push through a packed sweaty rave crowd toward the mainstage, where KIKI (image 2) fronts in silver and DJ Dieter (image 1) works the decks behind her; hundreds of raised hands and phone flashes, green and magenta lasers through fog. ${STYLE} ${NEG}` },
+  { out: 'public/assets/video/frames/club-podium.jpg', size: '2720*1530', refs: [C, K],
+    prompt: `${KEEP} The leopard trio (image 1) dance wildly on a raised gold podium with Kiki (image 2) up front in silver, champagne spraying, gold confetti falling, mid-scream, strobes and lasers. ${WARDROBE} ${STYLE} ${NEG}` },
+  { out: 'public/assets/video/frames/club-floor.jpg', size: '2720*1530', refs: [D, K],
+    prompt: `${KEEP} Wide festival-scale dancefloor, thousands of silhouettes with hands up; on the distant lit mainstage KIKI (image 2) is at the decks in a spotlight with DJ Dieter (image 1); giant laser truss, fog, gold confetti. ${STYLE} ${NEG}` },
+  { out: 'public/assets/video/frames/club-vip.jpg', size: '2720*1530', refs: [C, K],
+    prompt: `${KEEP} The leopard trio (image 1) and Kiki (image 2) in a VIP bottle-service booth, sparklers on champagne magnums, toasting and screaming with joy, humid haze, lasers. ${WARDROBE} ${STYLE} ${NEG}` },
 ]
 
 async function j(url, opts) {
