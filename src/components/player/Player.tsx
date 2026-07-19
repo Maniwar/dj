@@ -34,7 +34,10 @@ export default function Player() {
   // ---- draggable window (desktop) / docked bottom bar (mobile) ----
   const [pos, setPos] = useState<{ x: number; y: number }>({ x: 24, y: 0 })
   const [placed, setPlaced] = useState(false)
-  const [minimized, setMinimized] = useState(false)
+  // start collapsed on phones — the full player eats ~40% of a mobile screen
+  const [minimized, setMinimized] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches,
+  )
   const dragRef = useRef<{ dx: number; dy: number } | null>(null)
   const winRef = useRef<HTMLDivElement>(null)
   // On phones the draggable/tilting 348px window is too big and blocks scroll — dock it as a

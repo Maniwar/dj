@@ -54,6 +54,9 @@ export default function Lore() {
               key={s.id}
               data-active={i === active}
             >
+              {/* blurred backdrop fills the frame; the sharp image is CONTAINED on top so
+                  the characters are never cropped at any window width */}
+              <div className="lore-bg-blur" style={{ backgroundImage: `url(${withBase(s.image)})` }} />
               <div className="lore-bg" style={{ backgroundImage: `url(${withBase(s.image)})` }} />
               <div className="lore-scan" aria-hidden />
               <div className="lore-panel">

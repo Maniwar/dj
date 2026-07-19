@@ -105,10 +105,18 @@ export default function TourJourney() {
                   aria-hidden
                 />
               ) : (
-                <div
-                  className="journey-bg"
-                  style={{ backgroundImage: c.posterUrl ? `url(${withBase(c.posterUrl)})` : undefined }}
-                />
+                <>
+                  {/* blurred backdrop + contained sharp image so the crew is never cropped
+                      off the edges at narrower window widths */}
+                  <div
+                    className="journey-bg-blur"
+                    style={{ backgroundImage: c.posterUrl ? `url(${withBase(c.posterUrl)})` : undefined }}
+                  />
+                  <div
+                    className="journey-bg"
+                    style={{ backgroundImage: c.posterUrl ? `url(${withBase(c.posterUrl)})` : undefined }}
+                  />
+                </>
               )}
               <div className="journey-scan" aria-hidden />
               <div className="journey-card">
