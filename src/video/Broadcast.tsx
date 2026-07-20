@@ -27,7 +27,9 @@ export default function Broadcast() {
   const [showA, setShowA] = useState(true) // which layer is on top (crossfade A/B)
   const [aSrc, setASrc] = useState(scene.frames[0])
   const [bSrc, setBSrc] = useState(scene.frames[1 % scene.frames.length])
-  const useVideo = !!scene.mp4 && videoEnabled // real mp4 background, unless toggled off
+  const [vidIdx, setVidIdx] = useState(0)
+  const vids = scene.mp4s ?? (scene.mp4 ? [scene.mp4] : [])
+  const useVideo = vids.length > 0 && videoEnabled // real mp4 background(s), unless toggled off
 
   const rootRef = useRef<HTMLDivElement>(null)
   const lastCut = useRef(0)
@@ -56,6 +58,7 @@ export default function Broadcast() {
     setScene(next)
     idxRef.current = 0
     setFrameIdx(0)
+    setVidIdx(0)
     setASrc(next.frames[0])
     setBSrc(next.frames[1 % next.frames.length])
     setShowA(true)
@@ -126,7 +129,16 @@ export default function Broadcast() {
       data-city={scene.city}
     >
       {useVideo ? (
-        <video className="bc-video" src={withBase(scene.mp4)} autoPlay muted loop playsInline />
+        <video
+          key={vids[vidIdx % vids.length]}
+          className="bc-video"
+          src={withBase(vids[vidIdx % vids.length])}
+          autoPlay
+          muted
+          playsInline
+          loop={vids.length === 1}
+          onEnded={() => vids.length > 1 && setVidIdx((i) => (i + 1) % vids.length)}
+        />
       ) : (
         <>
           {/* stable divs (no key on src change) so a beat-cut swaps the backgroundImage

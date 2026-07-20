@@ -20,7 +20,8 @@ export type Scene = {
   key: string
   city: string
   frames: string[] // stills to beat-cut between
-  mp4?: string // filled from atlascloud.results.json when real video exists
+  mp4?: string // first real video (back-compat)
+  mp4s?: string[] // all real videos for this scene (the mainstage cycles through several)
 }
 
 export const SCENES: Record<string, Scene> = {
@@ -52,8 +53,17 @@ export async function hydrateRealVideo(): Promise<void> {
   try {
     const mod = await import('../data/atlascloud.results.json')
     const clips = (mod as any).default?.clips ?? (mod as any).clips ?? []
+    const clubVids: string[] = []
     for (const c of clips) {
-      if (c.status === 'ready' && c.mp4Url && SCENES[c.id]) SCENES[c.id].mp4 = c.mp4Url
+      if (c.status !== 'ready' || !c.mp4Url) continue
+      if (SCENES[c.id]) SCENES[c.id].mp4 = c.mp4Url // club(booth)/ibiza/tokyo/miami/berlin
+      // the mainstage cycles through ALL the club-frame videos
+      if (c.id === 'club' || (typeof c.id === 'string' && c.id.startsWith('club-'))) clubVids.push(c.mp4Url)
+    }
+    if (clubVids.length) SCENES.club.mp4s = clubVids
+    // cities: expose their single video as a one-element list too, so the player has one code path
+    for (const id of ['ibiza', 'tokyo', 'miami', 'berlin']) {
+      if (SCENES[id]?.mp4) SCENES[id].mp4s = [SCENES[id].mp4!]
     }
   } catch {
     /* no results yet — stills-only montage */

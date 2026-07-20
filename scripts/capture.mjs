@@ -20,7 +20,7 @@ const browser = await chromium.launch({
     '--ignore-gpu-blocklist', '--enable-webgl', '--autoplay-policy=no-user-gesture-required'],
 })
 const ctx = await browser.newContext({
-  viewport: { width: 390, height: 844 },
+  viewport: { width: Number(process.env.CAP_W||390), height: Number(process.env.CAP_H||844) },
   deviceScaleFactor: 2,
   isMobile: true,
   hasTouch: true,

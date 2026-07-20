@@ -43,6 +43,46 @@
       "city": "THE MAINSTAGE",
       "status": "ready",
       "mp4Url": "/assets/video/club.mp4"
+    },
+    {
+      "id": "club-crowd",
+      "status": "ready",
+      "mp4Url": "/assets/video/club-crowd.mp4"
+    },
+    {
+      "id": "club-podium",
+      "status": "ready",
+      "mp4Url": "/assets/video/club-podium.mp4"
+    },
+    {
+      "id": "club-floor",
+      "status": "ready",
+      "mp4Url": "/assets/video/club-floor.mp4"
+    },
+    {
+      "id": "club-vip",
+      "status": "ready",
+      "mp4Url": "/assets/video/club-vip.mp4"
+    },
+    {
+      "id": "lore-munich",
+      "status": "ready",
+      "mp4Url": "/assets/video/lore-munich.mp4"
+    },
+    {
+      "id": "lore-stockholm",
+      "status": "ready",
+      "mp4Url": "/assets/video/lore-stockholm.mp4"
+    },
+    {
+      "id": "lore-sauna",
+      "status": "ready",
+      "mp4Url": "/assets/video/lore-sauna.mp4"
+    },
+    {
+      "id": "lore-doctrine",
+      "status": "ready",
+      "mp4Url": "/assets/video/lore-doctrine.mp4"
     }
   ]
 }

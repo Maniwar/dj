@@ -292,6 +292,8 @@ section { position: relative; padding: 9vh 6vw; }
 .lore-bg { position: absolute; inset: 0; background-size: cover; background-position: center; background-color: #0a0a12;
   filter: brightness(0.7) contrast(1.08) saturate(1.2); will-change: transform; }
 .lore-stop.hero .lore-bg { background-position: center; } /* hero portraits are centered + crop-safe */
+.lore-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  filter: brightness(0.7) contrast(1.08) saturate(1.2); background: #0a0a12; }
 .lore-stop[data-active="true"] .lore-bg { animation: kbPan 30s ease-in-out infinite alternate; }
 @keyframes kbPan { from { transform: scale(1.14) translate(-2%, -3%); } to { transform: scale(1.14) translate(2%, 3%); } }
 .lore-scan { position: absolute; inset: 0; pointer-events: none;
