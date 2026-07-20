@@ -13,3 +13,7 @@ smoke-shots
 
 # intermediate uncompressed video renders (we commit the compressed .mp4)
 *.raw.mp4
+
+# QA screenshot output
+ultrawide-shots/
+smoke-shots/

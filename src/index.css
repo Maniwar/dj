@@ -292,6 +292,13 @@ section { position: relative; padding: 9vh 6vw; }
 .lore-bg { position: absolute; inset: 0; background-size: cover; background-position: center; background-color: #0a0a12;
   filter: brightness(0.7) contrast(1.08) saturate(1.2); }
 .lore-stop.hero .lore-bg { background-position: center; filter: none; } /* centered + crop-safe; filter moved off the animated layer (see .lore-stop.hero .lore-scan) so the Ken-Burns is a clean, smooth GPU texture */
+/* Extreme-wide (>= 21:9) desktops: full-bleed COVER on the SQUARE hero portraits scales to
+   width and crops ~70% of the height; center-anchoring lands that on the torso and lops the
+   head off. Bias the crop upward so the face stays framed (head-and-shoulders). The wide 16:9
+   scene/tour images don't need this — only the two square hero portraits do. */
+@media (min-aspect-ratio: 2/1) {
+  .lore-stop.hero .lore-bg { background-position: center 30%; }
+}
 /* heroes: barely-there Ken-Burns (start at full cover, no zoom) so the whole head + margin
    stays in frame — the 14% kbPan zoom was clipping the crown of the head. */
 .lore-stop.hero[data-active="true"] .lore-bg { animation: kbHero 15s ease-in-out infinite alternate; }
