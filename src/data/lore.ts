@@ -20,7 +20,7 @@ export const LORE_STOPS: LoreStop[] = [
     eyebrow: 'THE STAR · VOCALS · ATTITUDE · LIQUID COOLING',
     title: 'KIKI G',
     accent: 'kiki',
-    image: '/assets/ref/kiki.jpg',
+    image: '/assets/lore/kiki-hero.jpg',
     body: `Squeaky enough to shatter a champagne flute at forty paces. Discovered routing a fourteen-person LAN party while pouring a perfect foam heart — on roller skates — at Stockholm's premier dial-up cyber café. Wears silver because gold is for people who peaked. Has never once, not for a single second, been impressed by Dieter — which is the only reason this band still exists. Personally responsible for 100% of the moisture.`,
   },
   {
@@ -29,7 +29,7 @@ export const LORE_STOPS: LoreStop[] = [
     eyebrow: 'THE MAESTRO · DECKS · SPOKEN WORD · THERMAL VIOLATIONS',
     title: 'DJ DIETER',
     accent: 'dieter',
-    image: '/assets/ref/dieter.jpg',
+    image: '/assets/lore/dieter-hero.jpg',
     body: `Former MIDI-workstation salesman of Munich; keeps all forty-one framed noise complaints above the decks. Believes — with his whole bare chest — that he IS a synthesizer. Communicates exclusively via a deep sleazy whisper and one thin, decisive moustache. The leather jacket has never been zipped. The sunglasses have never come off. Not even in the sauna. ESPECIALLY not in the sauna.`,
   },
   {
