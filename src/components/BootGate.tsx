@@ -21,6 +21,21 @@ export default function BootGate() {
   const audio = useAudio()
   const [line, setLine] = useState(0)
 
+  // Lock page scroll while the gate/boot overlay covers the screen — the fixed overlay hides
+  // the page but the document behind it was still scrollable. Restore on log-on.
+  useEffect(() => {
+    if (loggedOn && !booting) return
+    const html = document.documentElement
+    const body = document.body
+    const prev = { html: html.style.overflow, body: body.style.overflow }
+    html.style.overflow = 'hidden'
+    body.style.overflow = 'hidden'
+    return () => {
+      html.style.overflow = prev.html
+      body.style.overflow = prev.body
+    }
+  }, [loggedOn, booting])
+
   useEffect(() => {
     if (!booting) return
     setLine(0)

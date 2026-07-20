@@ -97,10 +97,10 @@ body {
 .broadcast.idle { filter: brightness(0.45) saturate(1.05); }
 .bc-frame { position: absolute; inset: -5%; background-size: cover; background-position: center; opacity: 0;
   transition: opacity 0.3s ease; filter: brightness(0.6) saturate(1.28) contrast(1.08); will-change: transform, opacity; }
-.bc-frame.on { opacity: 1; animation: kenburns 7.5s ease-out both; }
-@keyframes kenburns { from { transform: scale(1.03) translate(0,0); } to { transform: scale(1.15) translate(-2%, -1.5%); } }
-/* slow, continuous, ping-pong Ken-Burns for the static mobile background (motion, no flicker) */
-@keyframes kenburnsLoop { 0% { transform: scale(1.06) translate(0,0); } 100% { transform: scale(1.16) translate(-2.5%, -2%); } }
+/* Pronounced per-frame Ken-Burns (both desktop beat-cuts + mobile slow rotation): a clear
+   1.05 -> 1.2 zoom + drift over ~6.5s so each still visibly moves within its time on screen. */
+.bc-frame.on { opacity: 1; animation: kenburns 6.5s ease-out both; }
+@keyframes kenburns { from { transform: scale(1.05) translate(0,0); } to { transform: scale(1.2) translate(-3%, -2%); } }
 .bc-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.68) saturate(1.2); }
 .bc-strobe { position: absolute; inset: 0; background: #fff; opacity: calc(var(--beat) * 0.18); mix-blend-mode: screen; }
 .bc-grain { position: absolute; inset: -150%; opacity: 0.07; mix-blend-mode: overlay; animation: grainshift 0.5s steps(2) infinite;
@@ -124,10 +124,10 @@ body {
   .bc-grain { animation: none; opacity: 0.045; }
   .broadcast.glitch-cut { animation: none; }
   .friction-overlay { animation: none; }
-  /* Mobile (iOS + Android): the flicker was the rapid CROSSFADES + blend-modes, not motion.
-     Keep a single static frame (no cuts) but give it a slow CONTINUOUS Ken-Burns so the
-     background isn't frozen — a lone transform is compositor-friendly and doesn't flicker. */
-  .bc-frame.on { animation: kenburnsLoop 26s ease-in-out infinite alternate; }
+  /* Mobile (iOS + Android): the flicker was the RAPID crossfades + blend-modes, not motion.
+     Stills now rotate on a slow 6.5s interval (see Broadcast.tsx) and use the per-cut Ken-Burns
+     above — one gentle crossfade, no strobe/glitch/blend — so the background moves AND varies
+     without flickering. */
   .bc-scan { mix-blend-mode: normal; opacity: 0.2; }
   .thermal-canvas { mix-blend-mode: normal; }
   .bc-rec { animation: none; }
@@ -294,19 +294,21 @@ section { position: relative; padding: 9vh 6vw; }
 .lore-stop.hero .lore-bg { background-position: center; } /* hero portraits are centered + crop-safe */
 /* heroes: barely-there Ken-Burns (start at full cover, no zoom) so the whole head + margin
    stays in frame — the 14% kbPan zoom was clipping the crown of the head. */
-.lore-stop.hero[data-active="true"] .lore-bg { animation: kbHero 26s ease-in-out infinite alternate; }
-/* Visible Ken-Burns for the hero intros (always stills, both video modes): a slow ~1.04->1.09
-   zoom + horizontal drift, biased DOWNWARD (positive Y) so the crown of the head gains room
-   rather than clipping. Stays under the ~1.14 zoom that clipped, and the min 1.04 scale covers
-   the ±1.6% pan so no background edge is ever revealed. */
+.lore-stop.hero[data-active="true"] .lore-bg { animation: kbHero 22s ease-in-out infinite alternate; }
+/* Hero intros (always stills, both video modes). Starts at the RESTING transform (identity) so
+   there's no pop when the slide activates, then eases to a clear 1.1 zoom + down-right drift.
+   The downward (positive Y) bias gives the crown of the head room; the translate stays under the
+   growing overscan so no background edge is ever revealed. */
 @keyframes kbHero {
-  from { transform: scale(1.04) translate(-1.6%, 0.3%); }
-  to   { transform: scale(1.09) translate(1.6%, 1.6%); }
+  from { transform: scale(1) translate(0, 0); }
+  to   { transform: scale(1.1) translate(2.5%, 2%); }
 }
 .lore-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
   filter: brightness(0.7) contrast(1.08) saturate(1.2); background: #0a0a12; }
-.lore-stop[data-active="true"] .lore-bg { animation: kbPan 30s ease-in-out infinite alternate; }
-@keyframes kbPan { from { transform: scale(1.14) translate(-2%, -3%); } to { transform: scale(1.14) translate(2%, 3%); } }
+.lore-stop[data-active="true"] .lore-bg { animation: kbPan 26s ease-in-out infinite alternate; }
+/* Story chapters: also start at the resting transform (no activation pop), then ease to a 1.14
+   zoom + diagonal drift. */
+@keyframes kbPan { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.14) translate(-3%, 2%); } }
 .lore-scan { position: absolute; inset: 0; pointer-events: none;
   background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0 2px, transparent 2px 4px),
     radial-gradient(135% 100% at 50% 45%, transparent 55%, rgba(3,3,8,0.4) 100%); }

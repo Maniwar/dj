@@ -92,9 +92,16 @@ export default function Broadcast() {
   }
 
   useEffect(() => {
-    // reduced motion, a real video, OR mobile -> no still-cutting. On phones the rapid
-    // full-screen crossfades are the flicker source, so hold a single static frame there.
-    if (reduced || useVideo || PERF.isMobile) return
+    if (reduced || useVideo) return
+    // Mobile: rotate the stills on a SLOW fixed interval (not beat-driven). The old flicker was
+    // the RAPID per-beat crossfades — one gentle crossfade every 6.5s gives real variety and
+    // stays flicker-free (the harsh strobe/glitch/blend effects remain disabled on phones).
+    if (PERF.isMobile) {
+      const iv = window.setInterval(() => {
+        if (audioBus.playing) doCut()
+      }, 6500)
+      return () => window.clearInterval(iv)
+    }
     let raf = 0
     let prev = performance.now()
     const loop = (now: number) => {
