@@ -11,7 +11,9 @@ import results from '../../data/atlascloud.results.json'
 // character (Kiki=magenta, Dieter=blue, both=acid).
 export default function Lore() {
   const secRef = useRef<HTMLElement>(null)
-  const [active, setActive] = useState(0)
+  // -1 = nothing active yet, so a stop's entrance animation only plays once it actually
+  // crosses into view (starting at 0 consumed stop 0's fade-in while off-screen).
+  const [active, setActive] = useState(-1)
   const stops = LORE_STOPS
   const videoEnabled = useSiteStore((s) => s.videoEnabled)
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
@@ -28,26 +30,23 @@ export default function Lore() {
   useEffect(() => {
     const el = secRef.current
     if (!el) return
-    let raf = 0
-    const update = () => {
-      const rect = el.getBoundingClientRect()
-      const total = el.offsetHeight - window.innerHeight
-      const scrolled = Math.min(Math.max(-rect.top, 0), Math.max(1, total))
-      const p = total > 0 ? scrolled / total : 0
-      setActive(Math.min(stops.length - 1, Math.floor(p * stops.length + 0.0001)))
-    }
-    const onScroll = () => {
-      cancelAnimationFrame(raf)
-      raf = requestAnimationFrame(update)
-    }
-    update()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll)
-    return () => {
-      cancelAnimationFrame(raf)
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onScroll)
-    }
+    const items = Array.from(el.querySelectorAll<HTMLElement>('.lore-stop'))
+    if (!items.length) return
+    // A stop becomes active the moment it crosses the viewport's vertical centre. The
+    // collapsed root (-50% top & bottom) is a single centre line, so exactly one contiguous
+    // 100vh stop straddles it at a time — the entrance animation fires on the way DOWN and UP,
+    // and never off-screen. Works identically on desktop and mobile (no scroll-math / no
+    // address-bar resize glitches).
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) setActive(items.indexOf(e.target as HTMLElement))
+        }
+      },
+      { rootMargin: '-50% 0px -50% 0px', threshold: 0 },
+    )
+    items.forEach((it) => io.observe(it))
+    return () => io.disconnect()
   }, [stops.length])
 
   // single-decode: only the active stop's video plays
