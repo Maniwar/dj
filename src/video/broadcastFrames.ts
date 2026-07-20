@@ -11,8 +11,11 @@ import type { Track } from '../data/types'
 const CLUB = [
   '/assets/video/frames/club-booth.jpg', // Kiki commands the decks with Dieter — the money shot
   '/assets/video/frames/club-crowd.jpg',
+  '/assets/video/frames/variants/club-floor-v1.jpg', // duo at booth, screens mirror them
   '/assets/video/frames/club-podium.jpg',
-  '/assets/video/frames/club-floor.jpg',
+  '/assets/video/frames/variants/club-floor-v2.jpg', // Dieter center, Kiki on both screens
+  '/assets/video/frames/club-floor.jpg', // V4 — duo at booth, abstract laser screens
+  '/assets/video/frames/variants/club-floor-v3.jpg', // duo hero, abstract side screens
   '/assets/video/frames/club-vip.jpg',
 ]
 
