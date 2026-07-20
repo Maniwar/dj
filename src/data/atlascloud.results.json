@@ -1,6 +1,42 @@
 {
-  "note": "Placeholder. Overwritten by `npm run gen:videos` (AtlasCloud) on an unblocked network. Until then the Broadcast plays the Gemini-still montage.",
   "model": "bytedance/seedance-2.0/reference-to-video",
   "seed": 480917,
-  "clips": []
+  "clips": [
+    {
+      "id": "ibiza",
+      "trackSlug": "touch-my-subwoofer",
+      "city": "IBIZA",
+      "scene": "open-air white-terrace Ibiza superclub at sunrise, foam cannons, palm silhouettes, a mega-yacht on the horizon, gold baroque DJ booth",
+      "seed": 480917,
+      "status": "error",
+      "error": "job 3800ee707b43498b91b0d40baa008cb7 timed out"
+    },
+    {
+      "id": "tokyo",
+      "trackSlug": "euro-airways",
+      "city": "TOKYO",
+      "scene": "tiny neon Tokyo micro-club, rain-slicked windows, kanji neon, low ceiling, a red Ferrari in the wet street outside",
+      "seed": 480917,
+      "status": "ready",
+      "mp4Url": "/assets/video/tokyo.mp4"
+    },
+    {
+      "id": "miami",
+      "trackSlug": "pump-my-iron",
+      "city": "MIAMI",
+      "scene": "Miami rooftop pool deck at pink sunset, infinity pool, docked mega-yacht, a gold Ferrari, champagne towers",
+      "seed": 480917,
+      "status": "ready",
+      "mp4Url": "/assets/video/miami.mp4"
+    },
+    {
+      "id": "berlin",
+      "trackSlug": "the-basement-vip",
+      "city": "BERLIN",
+      "scene": "wood-panelled Berlin sauna-warehouse club, thick steam, glowing coals, condensation, a cedar bucket",
+      "seed": 480917,
+      "status": "ready",
+      "mp4Url": "/assets/video/berlin.mp4"
+    }
+  ]
 }

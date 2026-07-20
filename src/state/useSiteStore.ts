@@ -8,11 +8,13 @@ type SiteState = {
   reducedMotion: boolean
   hits: number // fake 2004 hit-counter
   lyricsOpen: boolean // karaoke panel visibility
+  videoEnabled: boolean // play the real muted mp4 backgrounds vs the Ken-Burns stills
   logOn: () => void
   finishBoot: () => void
   setFriction: (v: number) => void
   toggleSauna: () => void
   toggleLyrics: () => void
+  toggleVideo: () => void
   bumpHits: () => void
 }
 
@@ -28,10 +30,12 @@ export const useSiteStore = create<SiteState>((set) => ({
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true,
   hits: seededHits,
   lyricsOpen: false,
+  videoEnabled: true,
   logOn: () => set({ loggedOn: true, booting: true }),
   finishBoot: () => set({ booting: false }),
   setFriction: (v) => set({ friction: Math.max(0, Math.min(1, v)) }),
   toggleSauna: () => set((s) => ({ saunaMode: !s.saunaMode })),
   toggleLyrics: () => set((s) => ({ lyricsOpen: !s.lyricsOpen })),
+  toggleVideo: () => set((s) => ({ videoEnabled: !s.videoEnabled })),
   bumpHits: () => set((s) => ({ hits: s.hits + Math.floor(1 + Math.random() * 3) })),
 }))

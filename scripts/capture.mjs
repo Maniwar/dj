@@ -29,13 +29,25 @@ const ctx = await browser.newContext({
 const page = await ctx.newPage()
 await page.goto(URL, { waitUntil: 'networkidle' })
 await page.locator('.logon-btn').click({ timeout: 5000 }).catch(() => {})
-await page.waitForSelector('.boot-gate', { state: 'detached', timeout: 14000 }).catch(() => {})
-await page.waitForTimeout(3000) // let footage + playback + EQ get going
-await page.screenshot({ path: `${OUT}/mobile-top.png` })
-// scroll a bit to see mid page + confirm rail hidden / player docked
-await page.evaluate(() => window.scrollTo(0, window.innerHeight * 2))
-await page.waitForTimeout(1200)
-await page.screenshot({ path: `${OUT}/mobile-mid.png` })
+await page.waitForTimeout(7500) // dial-up boot console dismisses itself after ~6s
+async function shot(name, sel, idx = 0) {
+  const ok = await page.evaluate(
+    ({ sel, idx }) => {
+      const el = document.querySelectorAll(sel)[idx]
+      if (!el) return false
+      el.scrollIntoView({ block: 'start' })
+      return true
+    },
+    { sel, idx },
+  )
+  await page.waitForTimeout(850)
+  await page.screenshot({ path: `${OUT}/${name}.png` })
+  return ok
+}
+await shot('m-lore-kiki', '.lore-stop', 0)
+await shot('m-lore-dieter', '.lore-stop', 1)
+await shot('m-tour-tokyo', '.journey-stop', 1)
+await shot('m-tour-berlin', '.journey-stop', 3)
 const info = await page.evaluate(() => {
   const p = document.querySelector('.player')
   const rail = document.querySelector('.tour-rail')

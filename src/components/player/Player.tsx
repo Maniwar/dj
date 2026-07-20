@@ -26,6 +26,8 @@ export default function Player() {
   const setFriction = useSiteStore((s) => s.setFriction)
   const toggleLyrics = useSiteStore((s) => s.toggleLyrics)
   const lyricsOpen = useSiteStore((s) => s.lyricsOpen)
+  const videoEnabled = useSiteStore((s) => s.videoEnabled)
+  const toggleVideo = useSiteStore((s) => s.toggleVideo)
   const thermal = useThermalReadout()
 
   const track = getTrack(slug)
@@ -183,6 +185,14 @@ export default function Player() {
               title="Karaoke / lyrics"
             >
               🎤
+            </button>
+            <button
+              className={`tbtn vid ${videoEnabled ? 'on' : ''}`}
+              onClick={toggleVideo}
+              aria-label="Toggle video backgrounds"
+              title={videoEnabled ? 'Video ON — tap for stills' : 'Stills — tap for video'}
+            >
+              🎬
             </button>
             <div className="knobs">
               <Knob label="VOL" value={volume} onChange={(v) => audio.setVolume(v)} color="#12e0c0" />

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { TOUR_CLIPS } from '../../data/tour.manifest'
 import { SCENES, hydrateRealVideo } from '../../video/broadcastFrames'
 import { withBase } from '../../lib/asset'
+import { useSiteStore } from '../../state/useSiteStore'
 
 // Vehicle for each leg of the world tour — the crew travels city to city as you scroll.
 const VEHICLES: Record<string, { icon: string; verb: string }> = {
@@ -18,6 +19,7 @@ export default function TourJourney() {
   // atlascloud.results.json via the hydrated SCENES, matching the Broadcast's source of truth.
   const [videoMap, setVideoMap] = useState<Record<string, string>>({})
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
+  const videoEnabled = useSiteStore((s) => s.videoEnabled)
   const cities = TOUR_CLIPS
 
   // Pull in real videos once (if the results file has ready clips). A city's stop swaps its
@@ -87,7 +89,7 @@ export default function TourJourney() {
 
       <div className="journey-stops">
         {cities.map((c, i) => {
-          const mp4 = videoMap[c.id]
+          const mp4 = videoEnabled ? videoMap[c.id] : undefined
           return (
             <div className="journey-stop" key={c.id} data-active={i === active}>
               {mp4 ? (

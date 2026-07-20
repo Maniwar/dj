@@ -20,12 +20,14 @@ export default function Broadcast() {
   const slug = usePlayerStore((s) => s.currentTrackSlug)
   const loggedOn = useSiteStore((s) => s.loggedOn)
   const reduced = useSiteStore((s) => s.reducedMotion)
+  const videoEnabled = useSiteStore((s) => s.videoEnabled)
 
   const [scene, setScene] = useState<Scene>(() => sceneForTrack(null))
   const [frameIdx, setFrameIdx] = useState(0)
   const [showA, setShowA] = useState(true) // which layer is on top (crossfade A/B)
   const [aSrc, setASrc] = useState(scene.frames[0])
   const [bSrc, setBSrc] = useState(scene.frames[1 % scene.frames.length])
+  const useVideo = !!scene.mp4 && videoEnabled // real mp4 background, unless toggled off
 
   const rootRef = useRef<HTMLDivElement>(null)
   const lastCut = useRef(0)
@@ -89,7 +91,7 @@ export default function Broadcast() {
   useEffect(() => {
     // reduced motion, a real video, OR mobile -> no still-cutting. On phones the rapid
     // full-screen crossfades are the flicker source, so hold a single static frame there.
-    if (reduced || scene.mp4 || PERF.isMobile) return
+    if (reduced || useVideo || PERF.isMobile) return
     let raf = 0
     let prev = performance.now()
     const loop = (now: number) => {
@@ -112,7 +114,7 @@ export default function Broadcast() {
     raf = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(raf)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reduced, scene.mp4, scene.key])
+  }, [reduced, useVideo, scene.key])
 
   if (PERF.noBroadcast) return null // ?nobroadcast — isolate the footage layer when debugging
 
@@ -123,7 +125,7 @@ export default function Broadcast() {
       aria-hidden
       data-city={scene.city}
     >
-      {scene.mp4 ? (
+      {useVideo ? (
         <video className="bc-video" src={withBase(scene.mp4)} autoPlay muted loop playsInline />
       ) : (
         <>
