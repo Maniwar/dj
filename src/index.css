@@ -291,7 +291,7 @@ section { position: relative; padding: 9vh 6vw; }
    AND drifts to reveal the cropped edges over time (works at every width, incl. mobile). */
 .lore-bg { position: absolute; inset: 0; background-size: cover; background-position: center; background-color: #0a0a12;
   filter: brightness(0.7) contrast(1.08) saturate(1.2); }
-.lore-stop.hero .lore-bg { background-position: center; } /* hero portraits are centered + crop-safe */
+.lore-stop.hero .lore-bg { background-position: center; filter: none; } /* centered + crop-safe; filter moved off the animated layer (see .lore-stop.hero .lore-scan) so the Ken-Burns is a clean, smooth GPU texture */
 /* heroes: barely-there Ken-Burns (start at full cover, no zoom) so the whole head + margin
    stays in frame — the 14% kbPan zoom was clipping the crown of the head. */
 .lore-stop.hero[data-active="true"] .lore-bg { animation: kbHero 15s ease-in-out infinite alternate; }
@@ -314,6 +314,16 @@ section { position: relative; padding: 9vh 6vw; }
 .lore-scan { position: absolute; inset: 0; pointer-events: none;
   background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0 2px, transparent 2px 4px),
     radial-gradient(135% 100% at 50% 45%, transparent 55%, rgba(3,3,8,0.4) 100%); }
+/* HERO slides only: the darkening was moved OFF the animated .lore-bg (a filter forces a repaint
+   as it Ken-Burns) onto this STATIC overlay. A flat 0.3 black layer is mathematically identical
+   to brightness(0.7), so the look is unchanged while the hero image stays a clean transform-only
+   GPU texture — the last paint cost on the hero Ken-Burns, gone. */
+.lore-stop.hero .lore-scan {
+  background:
+    linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0 2px, transparent 2px 4px),
+    radial-gradient(135% 100% at 50% 45%, transparent 55%, rgba(3,3,8,0.4) 100%);
+}
 /* copy panel SLIDES IN horizontally from its side as the stop becomes active */
 .lore-panel { position: relative; z-index: 2; width: min(48vw, 620px); padding: 2.1rem 2.4rem;
   opacity: 0; transition: opacity 0.75s ease, transform 0.8s cubic-bezier(0.2,0.85,0.2,1); }
