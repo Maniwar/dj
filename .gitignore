@@ -10,3 +10,6 @@ smoke-shots
 .env
 .env.*
 !.env.example
+
+# intermediate uncompressed video renders (we commit the compressed .mp4)
+*.raw.mp4

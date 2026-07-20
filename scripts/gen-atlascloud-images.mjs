@@ -38,7 +38,11 @@ const NEG =
   'It must look like a REAL PHOTOGRAPH — NOT illustration, cartoon, anime, CGI, 3D render, airbrushed or ' +
   'AI-smooth. NO one-piece dress, NO gown, NO bodysuit, NO leotard, NO catsuit, NO cocktail dress, NO ' +
   'evening dress — tops and bottoms must be visibly SEPARATE garments. No text, letters, logos, watermark, ' +
-  'numbers. No extra limbs, no deformed hands, no plastic skin. Nothing explicit or nude.'
+  'numbers. No extra limbs, no plastic skin. Nothing explicit or nude. HANDS: every visible hand must be ' +
+  'anatomically correct and relaxed with EXACTLY FIVE fingers — NO extra or missing fingers, NO fused, ' +
+  'twisted, warped, bent-backwards or melting hands, NO claw hands. Prefer hands doing a clear defined action ' +
+  '(holding a mic, on the decks, holding a glass) over splayed free-floating fingers, and keep the foreground ' +
+  'clear of a wall of raised hands.'
 
 // Canonical cast — described identically everywhere so identity stays locked.
 const KIKI = 'KIKI G, the blonde star: shoulder-length platinum-blonde hair, smudged glam Y2K makeup, a ' +
@@ -92,7 +96,7 @@ const SCENES = [
   { out: 'public/assets/video/frames/club-podium.jpg', size: '2720*1530', refs: [C, K],
     prompt: `${KEEP} INSIDE a packed nightclub: the leopard trio (image 1) and Kiki (image 2) dance on a small raised DJ STAGE RISER / go-go platform above the crowd, with chrome railings, champagne spraying, gold confetti, strobes and lasers overhead. It is clearly an indoor club stage — NOT a mountain, NOT any outdoor landscape or terrain. ${WARDROBE} ${STYLE} ${NEG}` },
   { out: 'public/assets/video/frames/club-floor.jpg', size: '2720*1530', refs: [K, D],
-    prompt: `${KEEP} Wide festival-scale INDOOR club mainstage seen from the crowd: TWO GIANT LED JUMBOTRON SCREENS flank the DJ booth showing huge live close-ups of KIKI (image 1, silver crop top) and DJ DIETER (image 2, leather jacket + sunglasses) (each figure stays fully WITHIN its screen bezel, arms not crossing the frame); big laser truss overhead, fog, gold confetti. Keep hands out of the foreground. ${STYLE} ${NEG}` },
+    prompt: `${KEEP} Wide festival-scale INDOOR club mainstage seen from the crowd: TWO GIANT LED JUMBOTRON SCREENS flank the DJ booth. LEFT screen shows a live close-up of KIKI (image 1, silver crop top) singing with BOTH HANDS wrapped around a microphone held to her mouth; RIGHT screen shows DJ DIETER (image 2, leather jacket + sunglasses) with both hands down on the DJ decks/faders. Each figure stays fully WITHIN its rectangular screen bezel, nothing crossing the frame edge. The crowd is a dark low SILHOUETTE of the backs of heads along the bottom — NOT a wall of raised hands, keep the foreground free of hands entirely. Big laser truss overhead, fog, gold confetti. ${STYLE} ${NEG}` },
   { out: 'public/assets/video/frames/club-vip.jpg', size: '2720*1530', refs: [C, K],
     prompt: `${KEEP} The leopard trio (image 1) and Kiki (image 2) in a VIP bottle-service booth, sparklers on champagne magnums, toasting and screaming with joy, humid haze, lasers. ${WARDROBE} ${STYLE} ${NEG}` },
   // ---- LORE story beats (match the Origin scroll-journey chapters) ----
