@@ -37,6 +37,12 @@
       "seed": 480917,
       "status": "ready",
       "mp4Url": "/assets/video/berlin.mp4"
+    },
+    {
+      "id": "club",
+      "city": "THE MAINSTAGE",
+      "status": "ready",
+      "mp4Url": "/assets/video/club.mp4"
     }
   ]
 }
