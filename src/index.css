@@ -294,8 +294,15 @@ section { position: relative; padding: 9vh 6vw; }
 .lore-stop.hero .lore-bg { background-position: center; } /* hero portraits are centered + crop-safe */
 /* heroes: barely-there Ken-Burns (start at full cover, no zoom) so the whole head + margin
    stays in frame — the 14% kbPan zoom was clipping the crown of the head. */
-.lore-stop.hero[data-active="true"] .lore-bg { animation: kbHero 34s ease-in-out infinite alternate; }
-@keyframes kbHero { from { transform: scale(1) translateY(0); } to { transform: scale(1.05) translateY(-2%); } }
+.lore-stop.hero[data-active="true"] .lore-bg { animation: kbHero 26s ease-in-out infinite alternate; }
+/* Visible Ken-Burns for the hero intros (always stills, both video modes): a slow ~1.04->1.09
+   zoom + horizontal drift, biased DOWNWARD (positive Y) so the crown of the head gains room
+   rather than clipping. Stays under the ~1.14 zoom that clipped, and the min 1.04 scale covers
+   the ±1.6% pan so no background edge is ever revealed. */
+@keyframes kbHero {
+  from { transform: scale(1.04) translate(-1.6%, 0.3%); }
+  to   { transform: scale(1.09) translate(1.6%, 1.6%); }
+}
 .lore-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
   filter: brightness(0.7) contrast(1.08) saturate(1.2); background: #0a0a12; }
 .lore-stop[data-active="true"] .lore-bg { animation: kbPan 30s ease-in-out infinite alternate; }
