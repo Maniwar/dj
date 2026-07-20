@@ -37,11 +37,19 @@ export default function Lore() {
     // 100vh stop straddles it at a time — the entrance animation fires on the way DOWN and UP,
     // and never off-screen. Works identically on desktop and mobile (no scroll-math / no
     // address-bar resize glitches).
+    // Track which stops currently straddle the centre line. active = the one in view, or -1
+    // when the whole section is off-screen — so leaving (e.g. scrolling back to the top) resets
+    // the cards and re-entering re-plays their fade-in, in BOTH directions.
+    const visible = new Set<number>()
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
-          if (e.isIntersecting) setActive(items.indexOf(e.target as HTMLElement))
+          const idx = items.indexOf(e.target as HTMLElement)
+          if (idx < 0) continue
+          if (e.isIntersecting) visible.add(idx)
+          else visible.delete(idx)
         }
+        setActive(visible.size ? Math.min(...visible) : -1)
       },
       { rootMargin: '-50% 0px -50% 0px', threshold: 0 },
     )

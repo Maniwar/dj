@@ -290,11 +290,11 @@ section { position: relative; padding: 9vh 6vw; }
    cropped at any aspect (ultrawide-short cuts top/bottom); a slow Ken-Burns pan adds motion
    AND drifts to reveal the cropped edges over time (works at every width, incl. mobile). */
 .lore-bg { position: absolute; inset: 0; background-size: cover; background-position: center; background-color: #0a0a12;
-  filter: brightness(0.7) contrast(1.08) saturate(1.2); will-change: transform; }
+  filter: brightness(0.7) contrast(1.08) saturate(1.2); }
 .lore-stop.hero .lore-bg { background-position: center; } /* hero portraits are centered + crop-safe */
 /* heroes: barely-there Ken-Burns (start at full cover, no zoom) so the whole head + margin
    stays in frame — the 14% kbPan zoom was clipping the crown of the head. */
-.lore-stop.hero[data-active="true"] .lore-bg { animation: kbHero 22s ease-in-out infinite alternate; }
+.lore-stop.hero[data-active="true"] .lore-bg { animation: kbHero 15s ease-in-out infinite alternate; }
 /* Hero intros (always stills, both video modes). Starts at the RESTING transform (identity) so
    there's no pop when the slide activates, then eases to a clear 1.1 zoom + down-right drift.
    The downward (positive Y) bias gives the crown of the head room; the translate stays under the
@@ -305,7 +305,9 @@ section { position: relative; padding: 9vh 6vw; }
 }
 .lore-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
   filter: brightness(0.7) contrast(1.08) saturate(1.2); background: #0a0a12; }
-.lore-stop[data-active="true"] .lore-bg { animation: kbPan 26s ease-in-out infinite alternate; }
+/* Promote ONLY the active slide (was on all 6 .lore-bg at once, which blew the compositor layer
+   budget and forced main-thread animation = the choppiness). One promoted layer at a time. */
+.lore-stop[data-active="true"] .lore-bg { animation: kbPan 18s ease-in-out infinite alternate; will-change: transform; }
 /* Story chapters: also start at the resting transform (no activation pop), then ease to a 1.14
    zoom + diagonal drift. */
 @keyframes kbPan { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.14) translate(-3%, 2%); } }
