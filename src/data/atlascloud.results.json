@@ -8,8 +8,8 @@
       "city": "IBIZA",
       "scene": "open-air white-terrace Ibiza superclub at sunrise, foam cannons, palm silhouettes, a mega-yacht on the horizon, gold baroque DJ booth",
       "seed": 480917,
-      "status": "error",
-      "error": "job 3800ee707b43498b91b0d40baa008cb7 timed out"
+      "status": "ready",
+      "mp4Url": "/assets/video/ibiza.mp4"
     },
     {
       "id": "tokyo",
