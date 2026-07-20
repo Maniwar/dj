@@ -286,10 +286,14 @@ section { position: relative; padding: 9vh 6vw; }
    the contained scene (so nobody's cropped AND the space isn't wasted). A soft feathered mask
    fades the sharp image into the party at its edges. */
 .lore-bg-blur { display: none; }
-/* full-bleed cover so the scene is BIG; scenes are composed portrait-safe so cover doesn't
-   cut the characters even on a phone */
+/* full-bleed cover so the scene is BIG. HERO portraits anchor to the TOP so the head is never
+   cropped at any aspect (ultrawide-short cuts top/bottom); a slow Ken-Burns pan adds motion
+   AND drifts to reveal the cropped edges over time (works at every width, incl. mobile). */
 .lore-bg { position: absolute; inset: 0; background-size: cover; background-position: center; background-color: #0a0a12;
-  filter: brightness(0.7) contrast(1.08) saturate(1.2); }
+  filter: brightness(0.7) contrast(1.08) saturate(1.2); will-change: transform; }
+.lore-stop.hero .lore-bg { background-position: center top; }
+.lore-stop[data-active="true"] .lore-bg { animation: kbPan 30s ease-in-out infinite alternate; }
+@keyframes kbPan { from { transform: scale(1.14) translate(-2%, -3%); } to { transform: scale(1.14) translate(2%, 3%); } }
 .lore-scan { position: absolute; inset: 0; pointer-events: none;
   background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0 2px, transparent 2px 4px),
     radial-gradient(135% 100% at 50% 45%, transparent 55%, rgba(3,3,8,0.4) 100%); }
@@ -666,3 +670,19 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .rail-pct { font-family: 'Courier New', monospace; font-size: 0.6rem; color: var(--champagne); }
 @media (max-width: 640px) { .tour-rail { right: 6px; height: 68vh; } .rail-track { width: 18px; } .rail-vehicle { font-size: 1.2rem; } }
 @media (prefers-reduced-motion: reduce) { .tour-rail { transition: opacity 0.3s ease; } }
+
+/* LANDSCAPE / short viewports (phones on their side): the big headers eat the whole screen,
+   so scale them to viewport HEIGHT and tighten the sticky title bars. */
+@media (orientation: landscape) and (max-height: 560px) {
+  .lore-title, .journey-title { padding: 2vh 5vw 1vh; }
+  .section-title { font-size: clamp(1.3rem, 7vh, 2.1rem); margin-bottom: 0.4rem; }
+  .section-kicker { font-size: clamp(0.7rem, 3vh, 1rem); margin-bottom: 1rem; }
+  .lore-name { font-size: clamp(1.4rem, 10vh, 2.6rem); margin-bottom: 0.5rem; }
+  .lore-name.hero { font-size: clamp(1.8rem, 15vh, 3.4rem); }
+  .lore-body { font-size: clamp(0.85rem, 4vh, 1.1rem); line-height: 1.35; }
+  .lore-eyebrow, .journey-leg { font-size: 0.55rem; margin-bottom: 0.4rem; }
+  .journey-city { font-size: clamp(2rem, 18vh, 5rem); }
+  .journey-blurb { font-size: clamp(0.9rem, 4vh, 1.2rem); }
+  .lore-stop { align-items: center; padding: 8vh 0; }
+  .lore-panel { margin-bottom: 0; }
+}
