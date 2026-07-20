@@ -104,6 +104,12 @@ const SCENES = [
     prompt: `${KEEP} FUNNY origin moment: Kiki (image 1) and DJ Dieter (image 2) in a steamy wood-panelled Berlin sauna — Dieter's waterproof drum machine sparks and overheats while Kiki dumps a cedar bucket of water on the glowing coals, an enormous burst of steam, both drenched, comedic. ${STYLE} ${NEG}` },
   { out: 'public/assets/lore/doctrine.jpg', size: '2720*1530', refs: [K, D],
     prompt: `${KEEP} DEADPAN FUNNY: Kiki (image 1) and DJ Dieter (image 2) signing a soggy dripping record-contract napkin at a small table, two sound engineers in rain ponchos behind them, a cedar bucket and a tube of thermal paste on the table, humid haze. ${STYLE} ${NEG}` },
+  // ---- HERO PORTRAITS for the Lore hero pages: face CENTERED with generous margin on ALL
+  //      sides so full-bleed cover keeps the face at ANY resolution/aspect (no head-chop). ----
+  { out: 'public/assets/lore/kiki-hero.jpg', size: '2048*2048', refs: [K],
+    prompt: `${KEEP} A dramatic HERO PORTRAIT of Kiki (image 1). Compose her head and upper body CENTERED in the square frame, looking toward camera, with GENEROUS empty margin and laser haze on ALL FOUR sides (clear space above her hair, below her chest, and to her left and right) so the shot survives being cropped to any aspect ratio — wide, tall or square — without ever cutting her face. Silver two-piece, confident, sweaty, magenta/green lasers behind. Symmetrical, centered, crop-safe. ${STYLE} ${NEG}` },
+  { out: 'public/assets/lore/dieter-hero.jpg', size: '2048*2048', refs: [D],
+    prompt: `${KEEP} A dramatic HERO PORTRAIT of DJ DIETER (image 1). Compose his head and upper body CENTERED in the square frame, facing camera, with GENEROUS empty margin and laser haze on ALL FOUR sides (clear space above his hair, below his chest, left and right) so it survives being cropped to any aspect ratio without cutting his face. Blond hair, thin moustache, cheap Euro sunglasses, open leather jacket, gold chain, greasy grin. Symmetrical, centered, crop-safe. ${STYLE} ${NEG}` },
 ]
 
 async function j(url, opts) {

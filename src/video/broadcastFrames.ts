@@ -31,16 +31,19 @@ export const SCENES: Record<string, Scene> = {
   berlin: { key: 'berlin', city: 'BERLIN', frames: ['/assets/tour/berlin.jpg', ...CLUB] },
 }
 
-const ROTATION = ['club', 'ibiza', 'club', 'tokyo', 'club', 'miami', 'club', 'berlin']
-const TRACKS = (manifest as { tracks: Track[] }).tracks
-
-// deterministic track -> scene, so the same song always shows the same city
-const trackScene = new Map<string, string>()
-TRACKS.forEach((t, i) => trackScene.set(t.slug, ROTATION[i % ROTATION.length]))
+// The MAINSTAGE (club) is the default home scene. Only the four city-bound songs show their
+// city; every other track (and the home/first load) shows the mainstage — so the first
+// impression is the band on the decks, not a random tour city.
+const CITY_TRACK: Record<string, string> = {
+  'touch-my-subwoofer': 'ibiza',
+  'euro-airways': 'tokyo',
+  'pump-my-iron': 'miami',
+  'the-basement-vip': 'berlin',
+}
 
 export function sceneForTrack(slug: string | null): Scene {
   if (!slug) return SCENES.club
-  return SCENES[trackScene.get(slug) ?? 'club'] ?? SCENES.club
+  return SCENES[CITY_TRACK[slug] ?? 'club'] ?? SCENES.club
 }
 
 // Merge AtlasCloud results (if present) so scenes gain real muted mp4s. Optional file —
