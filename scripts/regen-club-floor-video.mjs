@@ -44,8 +44,10 @@ async function j(url, opts) {
 async function poll(id, { tries = 150, delay = 5000 } = {}) {
   for (let i = 0; i < tries; i++) {
     const r = await j(`${API}/model/prediction/${id}`, { headers: H })
-    const s = (r.status || '').toLowerCase()
-    if (s === 'completed' || s === 'succeeded') return r.outputs?.[0]
+    // the video prediction response nests under `data` — check both shapes
+    const s = (r.status || r.data?.status || '').toLowerCase()
+    const out = (r.outputs || r.data?.outputs || [])[0]
+    if (s === 'completed' || s === 'succeeded') return out
     if (s === 'failed' || s === 'error') throw new Error(`job ${id} failed: ${JSON.stringify(r).slice(0, 200)}`)
     process.stdout.write('.')
     await new Promise((res) => setTimeout(res, delay))
