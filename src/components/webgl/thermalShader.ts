@@ -32,6 +32,7 @@ export const thermalFrag = /* glsl */ `
   uniform float uBuild;   // rising energy -> the rig gets hotter
   uniform float uDrop;    // release   -> everything blows open
   uniform vec3  uAccent;  // the colour of the section you're currently in
+  uniform float uQuality; // 1 = full rig, 0 = phone tier (skips the expensive passes)
   uniform float uTemp;
   uniform float uHumidity;
   uniform float uDew;
@@ -119,8 +120,32 @@ export const thermalFrag = /* glsl */ `
     // through a build-up so the room feels like it's filling before the drop
     col += vec3(0.5,0.3,0.6) * fbm(uv*3.0 - uTime*0.05) * (uLevel*0.13 + uBeat*0.1 + uBuild*0.22);
 
-    // CONDENSATION beading over the whole "lens" — the humidity signature
-    float beads = droplets(uv, 0.04 + uHumidity*0.30);
+    // ---- LED WALL ----
+    // The FFT is downsampled and uploaded to the GPU every frame, but nothing ever read it —
+    // pure wasted work. It's now the stage's LED strip: real spectrum, one texture fetch.
+    float spec = texture2D(uFreq, vec2(uv.x, 0.5)).r;
+    float barH = 0.018 + spec * 0.11; // a strip along the stage lip, not a wall up the screen
+    float ledGapY = step(0.30, fract(uv.y * 90.0));  // the gaps between LED rows
+    float ledGapX = step(0.16, fract(uv.x * 130.0)); // ...and between columns
+    vec3 wallCol = mix(uAccent, vec3(1.0), 0.22);
+    col += wallCol * step(uv.y, barH) * ledGapY * ledGapX * (0.32 + uBeat*0.45 + uDrop*0.7);
+    // and the light the wall throws back up into the haze
+    col += wallCol * step(uv.y, barH + 0.09) * smoothstep(barH + 0.09, barH, uv.y)
+           * (0.04 + uLevel*0.05);
+
+    // DROP = pyro. Rays fire out of the middle for the length of the release.
+    if (uDrop > 0.01) {
+      float ang = atan(p.y, p.x);
+      float rays = pow(abs(sin(ang*9.0 + uTime*1.6)), 22.0);
+      col += vec3(1.0,0.72,0.34) * rays * uDrop * (1.0 - smoothstep(0.0, 0.85, r)) * 1.15;
+    }
+
+    // CONDENSATION beading over the whole "lens" — the humidity signature.
+    // droplets() is 3 nested layers of hashing, by far the most expensive thing here, so the
+    // phone tier skips it entirely. Branching on a uniform is coherent across every pixel, so
+    // the GPU really does skip the work rather than executing both sides.
+    float beads = 0.0;
+    if (uQuality > 0.5) beads = droplets(uv, 0.04 + uHumidity*0.30);
     col += vec3(0.8,0.9,1.0) * beads * 0.35;
 
     // liquid-cooling wash on dew point

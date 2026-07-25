@@ -556,7 +556,7 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 :root {
   /* the KICK throws headings up; the DOWNBEAT (every 4th) throws them noticeably higher, so
      the motion has bar structure instead of one identical thump forever */
-  --beat-lift: calc((var(--m-beat) + var(--m-down, 0) * 0.8) * -7px);
+  --beat-lift: calc((var(--m-beat) + var(--m-down, 0) * 0.8 + var(--m-drop, 0) * 1.2) * -7px);
   /* neon rides the kick, and the whole rig gets HOTTER through a build-up */
   --beat-glow: calc((var(--m-beat) + var(--m-build, 0) * 0.7) * 46px);
 }
@@ -577,6 +577,12 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .bc-grain { opacity: calc(0.05 + var(--m-hat, 0) * 0.07); }
 /* HATS = sparkle on the small accent type (top-end detail, so top-end text) */
 .journey-seed, .lore-tag { opacity: calc(0.75 + var(--m-hat, 0) * 0.25); }
+/* KICK = a camera PUSH on the scene itself, and a bigger shove on the drop. This rides the
+   independent `scale` property so it composes with each layer's Ken-Burns `transform` rather
+   than overwriting it. Never goes below 1, so no background edge is ever revealed. */
+.lore-bg { scale: calc(1 + var(--m-beat, 0) * 0.05 + var(--m-drop, 0) * 0.06); }
+.bc-frame { scale: calc(1 + var(--m-beat, 0) * 0.035 + var(--m-drop, 0) * 0.05); }
+.bc-video, .lore-video, .journey-video { scale: calc(1 + var(--m-beat, 0) * 0.03 + var(--m-drop, 0) * 0.05); }
 /* (the light bars and the tour-rail vehicle are accented at their own rules further down —
     both are re-declared later in this file, so setting them here would be overridden) */
 /* NB: .section-title is gradient-CLIPPED text (color: transparent), so a text-shadow would
@@ -590,7 +596,7 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    transform — composited, free, and now crisp because the envelope has a real onset attack. */
 .section-title {
   transform: skewX(-5deg) translateY(var(--beat-lift))
-             scale(calc(1 + var(--m-beat) * 0.1 + var(--m-down, 0) * 0.05));
+             scale(calc(1 + var(--m-beat) * 0.1 + var(--m-down, 0) * 0.05 + var(--m-drop, 0) * 0.09));
   filter: drop-shadow(0 3px 0 rgba(0,0,0,0.6))
           drop-shadow(0 0 calc(10px + var(--beat-glow)) rgba(255,31,143,0.65))
           drop-shadow(0 0 50px rgba(20,224,255,0.25)); }
@@ -772,7 +778,8 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   background: rgba(0,0,0,0.4); }
 .journey-city { font-family: 'Anton', sans-serif; font-size: clamp(3.4rem, 15vw, 11rem); line-height: 0.86; margin: 0;
   text-transform: uppercase;
-  transform: skewX(-5deg) translateY(var(--beat-lift)) scale(calc(1 + var(--m-beat) * 0.1));
+  transform: skewX(-5deg) translateY(var(--beat-lift))
+             scale(calc(1 + var(--m-beat) * 0.1 + var(--m-drop, 0) * 0.09));
   background: var(--grad-gold); background-size: 100% 220%; -webkit-background-clip: text; background-clip: text; color: transparent;
   -webkit-text-stroke: 1.5px rgba(255,255,255,0.3);
   filter: drop-shadow(0 3px 0 rgba(0,0,0,0.6)) drop-shadow(0 0 calc(20px + var(--m-beat)*40px) rgba(255,31,143,0.5)); }

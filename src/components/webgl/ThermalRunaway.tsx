@@ -53,6 +53,7 @@ function Mainstage() {
       uBuild: { value: 0 },
       uDrop: { value: 0 },
       uAccent: { value: new THREE.Vector3(1.0, 0.12, 0.56) },
+      uQuality: { value: PERF.isMobile ? 0 : 1 }, // phones skip the costliest shader passes
       uTemp: { value: 0 },
       uHumidity: { value: 0.35 },
       uDew: { value: 0 },

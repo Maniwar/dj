@@ -66,7 +66,7 @@ export const LORE_STOPS: LoreStop[] = [
     title: 'THE MOISTURE DOCTRINE',
     accent: 'both',
     image: '/assets/lore/doctrine.jpg',
-    body: `They signed to Eurobeat Records on a napkin too damp to read. The rider: one working sauna, one cedar bucket, and thermal paste "for emergencies." "Club Humidity" was mixed entirely at 94% humidity. The engineers wore ponchos. The masters still smell faintly of eucalyptus.`,
+    body: `They signed to Eurobeat Records on a napkin too damp to read. The rider: one working sauna, one cedar bucket, and thermal paste "for emergencies." "Club Humidity" was mixed entirely at 94% relative humidity — which is why the engineers worked in clear plastic ponchos, hoods up, as condensation ran off the ceiling and rained onto the mixing desk. Two consoles were lost. The masters still smell faintly of eucalyptus.`,
   },
 ]
 
