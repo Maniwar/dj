@@ -30,8 +30,10 @@ export default function Player() {
   const toggleVideo = useSiteStore((s) => s.toggleVideo)
   const lyricStyle = useSiteStore((s) => s.lyricStyle)
   const cycleLyricStyle = useSiteStore((s) => s.cycleLyricStyle)
+  const toggleVisualizer = useSiteStore((s) => s.toggleVisualizer)
   const thermal = useThermalReadout()
 
+  const tracks = usePlayerStore((s) => s.tracks)
   const track = getTrack(slug)
   const version = getVersion(slug, versionId)
 
@@ -39,6 +41,7 @@ export default function Player() {
   const [pos, setPos] = useState<{ x: number; y: number }>({ x: 24, y: 0 })
   const [placed, setPlaced] = useState(false)
   // start collapsed on phones — the full player eats ~40% of a mobile screen
+  const [playlistOpen, setPlaylistOpen] = useState(false)
   const [minimized, setMinimized] = useState(
     () => typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches,
   )
@@ -204,6 +207,23 @@ export default function Player() {
             >
               🅰
             </button>
+            <button
+              className={`tbtn plist ${playlistOpen ? 'on' : ''}`}
+              onClick={() => setPlaylistOpen((o) => !o)}
+              aria-label="Playlist"
+              aria-expanded={playlistOpen}
+              title={`Playlist — ${tracks.length} tracks`}
+            >
+              ☰
+            </button>
+            <button
+              className="tbtn viz"
+              onClick={toggleVisualizer}
+              aria-label="Full-screen visualizer"
+              title="Visualizer — the page steps aside (V)"
+            >
+              ⛶
+            </button>
             <div className="knobs">
               <Knob label="VOL" value={volume} onChange={(v) => audio.setVolume(v)} color="#12e0c0" />
               <Knob
@@ -214,6 +234,25 @@ export default function Player() {
               />
             </div>
           </div>
+
+          {playlistOpen && (
+            // Winamp had a playlist window; with 19 tracks, prev/next alone means hunting.
+            <ol className="playlist" aria-label="Playlist">
+              {tracks.map((t, i) => (
+                <li key={t.slug}>
+                  <button
+                    className={`pl-row ${t.slug === slug ? 'on' : ''}`}
+                    onClick={() => audio.playTrack(t.slug)}
+                    aria-current={t.slug === slug ? 'true' : undefined}
+                  >
+                    <span className="pl-n">{String(i + 1).padStart(2, '0')}</span>
+                    <span className="pl-t">{t.title}</span>
+                    {t.hasBootleg && <span className="pl-b" title="bootleg available">◈</span>}
+                  </button>
+                </li>
+              ))}
+            </ol>
+          )}
 
           <BootlegSwitch track={track} currentVersionId={versionId} />
         </div>

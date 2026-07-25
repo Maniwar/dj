@@ -47,6 +47,8 @@ type SiteState = {
   setAccent: (a: AccentKey) => void
   lyricStyle: LyricStyle // viewer's choice of how sung words are drawn
   cycleLyricStyle: () => void
+  visualizer: boolean // full-screen takeover: the page falls away and the rig performs
+  toggleVisualizer: () => void
   logOn: () => void
   finishBoot: () => void
   setFriction: (v: number) => void
@@ -72,6 +74,8 @@ export const useSiteStore = create<SiteState>((set) => ({
   accent: 'default',
   setAccent: (a) => set((s) => (s.accent === a ? s : { accent: a })), // no-op re-renders avoided
   lyricStyle: initialLyricStyle(),
+  visualizer: false,
+  toggleVisualizer: () => set((s) => ({ visualizer: !s.visualizer })),
   cycleLyricStyle: () =>
     set((s) => {
       const next = LYRIC_STYLES[(LYRIC_STYLES.indexOf(s.lyricStyle) + 1) % LYRIC_STYLES.length]

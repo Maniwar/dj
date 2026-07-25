@@ -18,6 +18,7 @@ import AudioReactive from './components/AudioReactive'
 import LyricMarquee from './components/LyricMarquee'
 import LyricStage from './components/LyricStage'
 import SectionCut from './components/SectionCut'
+import VisualizerMode from './components/VisualizerMode'
 import TourRail from './components/TourRail'
 import Lyrics from './components/player/Lyrics'
 import { useSiteStore } from './state/useSiteStore'
@@ -36,6 +37,7 @@ export default function App() {
       <ThermalRunaway />
       <LyricStage />
       <SectionCut />
+      <VisualizerMode />
       <FrictionOverlay />
 
       <div className="content">

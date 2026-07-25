@@ -115,11 +115,24 @@ export const thermalFrag = /* glsl */ `
   // the time, which is why it read as a constant wash instead of a show. Now each group answers
   // to a different part of the kit, so lights come in and drop out with the music.
   float beamGain(float fi, float pat){
-    if (fi < 1.5) return 0.30 + uBeat*1.15;                          // overhead: the backbone, on the kick
-    if (fi < 3.5) return 0.10 + uSnare*1.9 + uDrop*1.2;              // corners: SNAP on the backbeat
-    if (fi < 5.5) return 0.05 + uBuild*1.8 + uLevel*0.35;            // floor: swells through a build
-    if (fi < 6.5) return (0.20 + uBeat*0.8) * step(1.0, mod(pat,2.0)); // side tower: every other cue
-    return 0.06 + uDown*1.1 + uDrop*2.2 + uVocal*0.9;                // centre: accents + the VOCAL
+    // Base level per group — which part of the kit each fixture answers to.
+    float g;
+    if (fi < 1.5)      g = 0.30 + uBeat*1.15;                          // overhead: on the kick
+    else if (fi < 3.5) g = 0.10 + uSnare*1.9 + uDrop*1.2;              // corners: SNAP on the backbeat
+    else if (fi < 5.5) g = 0.05 + uBuild*1.8 + uLevel*0.35;            // floor: swells through a build
+    else if (fi < 6.5) g = (0.20 + uBeat*0.8) * step(1.0, mod(pat,2.0)); // side tower: alternate cues
+    else               g = 0.06 + uDown*1.1 + uDrop*2.2 + uVocal*0.9;  // centre: accents + vocal
+
+    // HERO BEAMS. Every fixture running at the same level is a wash, not a show — a real rig
+    // has one or two heads punching far harder than the rest, and which ones changes with the
+    // cue. Two fixtures per cue are picked deterministically from the song + cue, driven up
+    // hard, while the rest sit back — so the eye has something to follow.
+    float pick = mod(fi + floor(pat) * 2.0 + floor(uSong * 8.0), 8.0);
+    float hero = step(pick, 1.5);                       // 2 of the 8 are heroes this cue
+    g *= mix(0.55, 2.6, hero);                          // the gap between hero and fill is wide
+    // and the heroes flare harder still on the hit
+    g += hero * (uBeat*0.9 + uDown*0.7 + uDrop*1.6);
+    return g;
   }
 
   vec3 rig(vec2 q, float sweep, float fan, float pat){

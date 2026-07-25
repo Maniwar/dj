@@ -638,6 +638,61 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   .hero-title { filter: drop-shadow(0 0 calc(6px + var(--m-beat) * 26px) rgba(255,31,143,0.6)); }
 }
 
+/* ---- PLAYLIST (Winamp's other window) ---- */
+.playlist {
+  list-style: none; margin: .5rem 0 0; padding: 4px; max-height: 168px; overflow-y: auto;
+  background: #06120b; border: 1px solid var(--gold-deep); border-radius: 4px;
+  scrollbar-width: thin;
+}
+.pl-row {
+  display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
+  font-family: 'Courier New', monospace; font-size: .68rem; letter-spacing: .02em;
+  color: #6ef0a8; background: transparent; border: 0; cursor: pointer;
+  padding: 3px 6px; border-radius: 2px;
+}
+.pl-row:hover { background: rgba(110,240,168,.12); color: #b6ffd6; }
+.pl-row.on { background: var(--gold-deep); color: #fff2c8; }
+.pl-row:focus-visible { outline: 1px solid var(--gold); outline-offset: -1px; }
+.pl-n { opacity: .6; font-variant-numeric: tabular-nums; }
+.pl-t { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.pl-b { color: var(--ferrari); font-size: .6rem; }
+
+/* =========================================================
+   VISUALIZER TAKEOVER — the page steps out of the way
+   Only hides what's in the way; the rig, the beat grid and the lyric line keep running exactly
+   as they already were, so there's no second render path to keep in sync.
+   ========================================================= */
+:root.viz-on .content,
+:root.viz-on .tour-rail,
+:root.viz-on .player,
+:root.viz-on .karaoke { opacity: 0; pointer-events: none; transition: opacity .5s ease; }
+:root.viz-on body { overflow: hidden; }
+/* the lyric moves to centre stage and gets much bigger — it's the only text left */
+:root.viz-on .lyric-stage {
+  left: 6vw; right: 6vw; bottom: 50%; transform: translateY(50%);
+  transition: none;
+}
+:root.viz-on .ls-line { font-size: clamp(2rem, 7vw, 5.5rem); }
+
+.viz-hud {
+  position: fixed; inset: auto 0 0 0; z-index: 80;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 1rem 1.4rem; pointer-events: none;
+}
+.viz-now {
+  font-family: 'Oswald', sans-serif; font-size: .72rem; letter-spacing: .3em;
+  text-transform: uppercase; color: var(--gold-hi);
+  text-shadow: 0 0 calc(6px + var(--m-beat,0) * 20px) var(--magenta);
+}
+.viz-exit {
+  pointer-events: auto; font-family: 'Oswald', sans-serif; font-size: .62rem;
+  letter-spacing: .22em; text-transform: uppercase; cursor: pointer;
+  color: #cfd8e3; background: rgba(6,4,10,.6); border: 1px solid var(--edge);
+  border-radius: 999px; padding: .45rem 1rem;
+}
+.viz-exit:hover { color: #fff; border-color: var(--magenta); }
+.viz-exit:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
 /* =========================================================
    SECTION CUT — a directed transition, fired on the downbeat
    A hard light-sweep across the frame plus a one-frame flash. Deliberately short (~420ms):
