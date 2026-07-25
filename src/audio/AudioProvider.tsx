@@ -129,7 +129,27 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       audioBus.playing = false
       set({ isPlaying: false })
     }
-    const onEnded = () => controller.next()
+    const onEnded = () => {
+      // REPEAT holds the current track; SHUFFLE picks a different one at random. Without these
+      // the album could only ever be played straight through, which for 19 tracks is a lot of
+      // clicking to hear the one you want twice.
+      const st = useSiteStore.getState()
+      const el2 = elRef.current
+      if (st.repeat && el2) {
+        el2.currentTime = 0
+        void el2.play()
+        return
+      }
+      if (st.shuffle) {
+        const all = usePlayerStore.getState().tracks
+        const cur = usePlayerStore.getState().currentTrackSlug
+        const pool = all.filter((t) => t.slug !== cur)
+        const pick = pool[Math.floor(Math.random() * pool.length)] ?? all[0]
+        controller.playTrack(pick.slug)
+        return
+      }
+      controller.next()
+    }
     el.addEventListener('timeupdate', onTime)
     el.addEventListener('durationchange', onDur)
     el.addEventListener('play', onPlay)

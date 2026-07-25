@@ -506,7 +506,21 @@ section { position: relative; padding: 9vh 6vw; }
 .lcd-badge.oc { background: #06333a; color: #9fe; }
 .lcd-title { flex: 1; overflow: hidden; white-space: nowrap; }
 .marquee { display: inline-block; animation: marquee 12s linear infinite; color: var(--gold-hi); font-family: 'Courier New', monospace; font-size: 0.78rem; text-shadow: 0 0 6px rgba(230,192,90,0.6); }
-.spectrum-canvas { width: 100%; height: 56px; display: block; margin-top: 6px; background: #06140a; border-radius: 4px; }
+/* The analyser is a button now — click to cycle visualisation, like Winamp's. Reset the button
+   chrome so it still reads as part of the LCD rather than a control bolted on top. */
+.spectrum-wrap {
+  position: relative; display: block; width: 100%; padding: 0; margin-top: 6px;
+  border: 0; background: none; cursor: pointer; border-radius: 4px;
+}
+.spectrum-wrap:focus-visible { outline: 1px solid var(--gold); outline-offset: 2px; }
+.spectrum-canvas { width: 100%; height: 56px; display: block; background: #06140a; border-radius: 4px; }
+.spectrum-tag {
+  position: absolute; right: 5px; bottom: 3px; pointer-events: none;
+  font-family: 'Courier New', monospace; font-size: 0.5rem; letter-spacing: 0.08em;
+  color: rgba(110,240,168,0.5); text-transform: uppercase;
+  opacity: 0; transition: opacity 0.18s ease;
+}
+.spectrum-wrap:hover .spectrum-tag, .spectrum-wrap:focus-visible .spectrum-tag { opacity: 1; }
 .lcd-meta { display: flex; justify-content: space-between; align-items: center; font-family: 'Courier New', monospace; font-size: 0.62rem; color: var(--gold-hi); margin-top: 4px; gap: 6px; }
 .thermal-mini { color: var(--champagne); text-align: center; flex: 1; }
 .seek { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 999px; background: linear-gradient(90deg, var(--gold) var(--pct,0%), #1a0f05 var(--pct,0%)); cursor: pointer; }
@@ -520,6 +534,9 @@ section { position: relative; padding: 9vh 6vw; }
 .tbtn { width: 40px; height: 36px; border-radius: 8px; border: 1px solid var(--gold-shadow); background: linear-gradient(180deg, #e8eef5, #9fb0c0 50%, #5a6672); color: #0d1017; font-size: 0.9rem; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.6); }
 .tbtn:active { transform: translateY(1px); }
 .tbtn.play { width: 48px; font-size: 1.05rem; }
+/* shuffle/repeat sit in the transport but shouldn't compete with the main buttons */
+.tbtn.sm { width: 30px; height: 30px; font-size: 0.72rem; }
+.tbtn.on { background: linear-gradient(180deg, #ffe9a8, #e0b64f 50%, #8a6a1e); box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 0 8px rgba(255,200,90,0.5); }
 .knobs { margin-left: auto; display: flex; gap: 10px; }
 .knob-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .knob-body { position: relative; border-radius: 50%; background: conic-gradient(from 0deg, #1a1e26, #6b7681, #1a1e26); box-shadow: inset 0 2px 4px rgba(255,240,200,0.4), inset 0 -3px 6px rgba(0,0,0,0.6), 0 2px 4px rgba(0,0,0,0.5); cursor: ns-resize; touch-action: none; }

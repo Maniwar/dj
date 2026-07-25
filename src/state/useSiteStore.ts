@@ -29,9 +29,27 @@ export const LYRIC_STYLE_LABEL: Record<LyricStyle, string> = {
 }
 const STORE_KEY = 'so.lyricStyle'
 function initialLyricStyle(): LyricStyle {
-  if (typeof localStorage === 'undefined') return 'hair'
+  // 'core' = white letters with the singer's colour in the glow — the most legible of the five
+  // over moving footage, which is why it's the default.
+  if (typeof localStorage === 'undefined') return 'core'
   const v = localStorage.getItem(STORE_KEY) as LyricStyle | null
-  return v && (LYRIC_STYLES as readonly string[]).includes(v) ? v : 'hair'
+  return v && (LYRIC_STYLES as readonly string[]).includes(v) ? v : 'core'
+}
+
+// Winamp let you click the analyser to cycle visualisations; this does the same.
+export const VIZ_MODES = ['bars', 'mirror', 'scope', 'dots'] as const
+export type VizMode = (typeof VIZ_MODES)[number]
+export const VIZ_LABEL: Record<VizMode, string> = {
+  bars: 'Spectrum',
+  mirror: 'Mirror',
+  scope: 'Oscilloscope',
+  dots: 'Peak dots',
+}
+const VIZ_KEY = 'so.vizMode'
+function initialViz(): VizMode {
+  if (typeof localStorage === 'undefined') return 'bars'
+  const v = localStorage.getItem(VIZ_KEY) as VizMode | null
+  return v && (VIZ_MODES as readonly string[]).includes(v) ? v : 'bars'
 }
 
 type SiteState = {
@@ -49,6 +67,12 @@ type SiteState = {
   cycleLyricStyle: () => void
   visualizer: boolean // full-screen takeover: the page falls away and the rig performs
   toggleVisualizer: () => void
+  vizMode: VizMode // which analyser visualisation the player is showing
+  cycleVizMode: () => void
+  shuffle: boolean // play the album in a random order
+  repeat: boolean // loop the current track instead of advancing
+  toggleShuffle: () => void
+  toggleRepeat: () => void
   logOn: () => void
   finishBoot: () => void
   setFriction: (v: number) => void
@@ -76,6 +100,21 @@ export const useSiteStore = create<SiteState>((set) => ({
   lyricStyle: initialLyricStyle(),
   visualizer: false,
   toggleVisualizer: () => set((s) => ({ visualizer: !s.visualizer })),
+  vizMode: initialViz(),
+  shuffle: false,
+  repeat: false,
+  toggleShuffle: () => set((s) => ({ shuffle: !s.shuffle })),
+  toggleRepeat: () => set((s) => ({ repeat: !s.repeat })),
+  cycleVizMode: () =>
+    set((s) => {
+      const next = VIZ_MODES[(VIZ_MODES.indexOf(s.vizMode) + 1) % VIZ_MODES.length]
+      try {
+        localStorage.setItem(VIZ_KEY, next)
+      } catch {
+        /* private mode — the choice just won't persist */
+      }
+      return { vizMode: next }
+    }),
   cycleLyricStyle: () =>
     set((s) => {
       const next = LYRIC_STYLES[(LYRIC_STYLES.indexOf(s.lyricStyle) + 1) % LYRIC_STYLES.length]

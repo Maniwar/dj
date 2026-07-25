@@ -31,6 +31,10 @@ export default function Player() {
   const lyricStyle = useSiteStore((s) => s.lyricStyle)
   const cycleLyricStyle = useSiteStore((s) => s.cycleLyricStyle)
   const toggleVisualizer = useSiteStore((s) => s.toggleVisualizer)
+  const shuffle = useSiteStore((s) => s.shuffle)
+  const repeat = useSiteStore((s) => s.repeat)
+  const toggleShuffle = useSiteStore((s) => s.toggleShuffle)
+  const toggleRepeat = useSiteStore((s) => s.toggleRepeat)
   const thermal = useThermalReadout()
 
   const tracks = usePlayerStore((s) => s.tracks)
@@ -61,10 +65,12 @@ export default function Player() {
 
   useEffect(() => {
     if (placed) return
-    // dock bottom-left on first mount
-    const w = 340
-    const h = 300
-    setPos({ x: 24, y: window.innerHeight - h - 24 })
+    // Dock bottom-left on first mount using the player's REAL height. This assumed a fixed
+    // 300px, but the window grew (tools row, bootleg switch) and the stale assumption left the
+    // A-SIDE / BOOTLEG version switch hanging below the fold on first boot. Clamped so the whole
+    // window still fits on a short viewport.
+    const h = winRef.current?.offsetHeight ?? 360
+    setPos({ x: 24, y: Math.max(8, window.innerHeight - h - 20) })
     setPlaced(true)
   }, [placed])
 
@@ -100,6 +106,27 @@ export default function Player() {
     el.style.setProperty('--ry', '0deg')
     el.style.setProperty('--rx', '0deg')
   }
+
+  // Keyboard control. Space is the one everyone reaches for in a player and it did nothing;
+  // arrows scrub. Skipped while typing in a field, and preventDefault on Space so the page
+  // doesn't scroll underneath.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null
+      if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return
+      if (!useSiteStore.getState().loggedOn) return
+      if (e.code === 'Space') {
+        e.preventDefault()
+        audio.toggle()
+      } else if (e.key === 'ArrowRight') {
+        audio.seek(Math.min(usePlayerStore.getState().duration, usePlayerStore.getState().currentTime + 5))
+      } else if (e.key === 'ArrowLeft') {
+        audio.seek(Math.max(0, usePlayerStore.getState().currentTime - 5))
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [audio])
 
   const pct = duration ? (currentTime / duration) * 100 : 0
   const overheating = thermal.temperature > 78
@@ -182,6 +209,24 @@ export default function Player() {
             </button>
             <button className="tbtn" onClick={() => audio.next()} aria-label="Next">
               ⏭
+            </button>
+            <button
+              className={`tbtn sm ${shuffle ? 'on' : ''}`}
+              onClick={toggleShuffle}
+              aria-pressed={shuffle}
+              aria-label="Shuffle"
+              title={shuffle ? 'Shuffle ON' : 'Shuffle off'}
+            >
+              🔀
+            </button>
+            <button
+              className={`tbtn sm ${repeat ? 'on' : ''}`}
+              onClick={toggleRepeat}
+              aria-pressed={repeat}
+              aria-label="Repeat track"
+              title={repeat ? 'Repeat ON — this track loops' : 'Repeat off'}
+            >
+              🔁
             </button>
             <div className="knobs">
               <Knob label="VOL" value={volume} onChange={(v) => audio.setVolume(v)} color="#12e0c0" />

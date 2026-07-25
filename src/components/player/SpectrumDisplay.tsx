@@ -1,15 +1,23 @@
 import { useEffect, useRef } from 'react'
 import { audioBus } from '../../audio/audioBus'
 import { usePlayerStore } from '../../state/usePlayerStore'
+import { useSiteStore, VIZ_LABEL } from '../../state/useSiteStore'
 
 const BARS = 40
 
-// Real-time spectrum analyzer painted straight from the AudioBus (no React state).
+// Real-time analyser painted straight from the AudioBus (no React state per frame).
+// Click it to cycle visualisations, the way Winamp's did — spectrum, mirrored, oscilloscope,
+// peak dots. The choice is remembered per viewer.
 export default function SpectrumDisplay() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const peaksRef = useRef<number[]>(new Array(BARS).fill(0))
   const valsRef = useRef<number[]>(new Array(BARS).fill(0))
   const agcRef = useRef(0.35) // running peak for auto-gain normalization
+  const mode = useSiteStore((s) => s.vizMode)
+  const cycle = useSiteStore((s) => s.cycleVizMode)
+  // The draw loop must NOT restart when the mode changes, so it reads the mode from a ref.
+  const modeRef = useRef(mode)
+  modeRef.current = mode
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -44,6 +52,26 @@ export default function SpectrumDisplay() {
 
       const freq = audioBus.freq
       const N = freq.length
+      const temp = audioBus.thermal.temperature
+      const hot = Math.min(1, Math.max(0, (temp - 22) / 90))
+      const m = modeRef.current
+
+      // ---- OSCILLOSCOPE: the raw waveform; no band analysis needed ----
+      if (m === 'scope') {
+        const t = audioBus.time
+        ctx.lineWidth = 1.6 * dpr
+        ctx.strokeStyle = `rgb(${60 + hot * 180}, 255, ${190 - hot * 130})`
+        ctx.beginPath()
+        for (let i = 0; i < t.length; i += 2) {
+          const x = (i / t.length) * W
+          const y = H / 2 + ((t[i] - 128) / 128) * (H * 0.46)
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
+        }
+        ctx.stroke()
+        raf = requestAnimationFrame(draw)
+        return
+      }
+
       // Log-ish frequency mapping over the USEFUL range (a linear split wastes the top half
       // on the 11–22kHz dead zone). Bands are CONTIGUOUS + monotonic (each starts where the
       // last ended), so the sparse low end gives ~1 bin per bar and the top widens — every
@@ -54,8 +82,6 @@ export default function SpectrumDisplay() {
       const gap = 2 * dpr
       const bw = (W - gap * (BARS - 1)) / BARS
       const peaks = peaksRef.current
-      const temp = audioBus.thermal.temperature
-      const hot = Math.min(1, Math.max(0, (temp - 22) / 90))
 
       // Pass 1: average energy per contiguous log band + track the frame's loudest band.
       const vals = valsRef.current
@@ -81,16 +107,37 @@ export default function SpectrumDisplay() {
       for (let i = 0; i < BARS; i++) {
         // normalize to the running peak; gamma>1 opens the gap between loud and quiet bars
         const v = Math.min(1, Math.pow(vals[i] / ref, 1.35))
-        const bh = v * H
         const x = i * (bw + gap)
 
+        if (m === 'dots') {
+          // Peak-only: just the cap, floating on its own decay. Sparse, and the spectral shape
+          // reads at a glance without a wall of colour.
+          peaks[i] = Math.max(peaks[i] - 1.2 * dpr, v * H)
+          ctx.fillStyle = `rgb(255, ${210 - hot * 130}, ${130 + hot * 80})`
+          ctx.fillRect(x, H - peaks[i] - 2 * dpr, bw, 2.5 * dpr)
+          continue
+        }
+
+        if (m === 'mirror') {
+          // Mirrored about the centre line — the classic hi-fi analyser look.
+          const half = (v * H) / 2
+          const grad = ctx.createLinearGradient(0, H / 2 - half, 0, H / 2 + half)
+          grad.addColorStop(0, `rgb(255, ${200 - hot * 120}, ${120 + hot * 80})`)
+          grad.addColorStop(0.5, `rgb(${40 + hot * 180}, 255, ${180 - hot * 120})`)
+          grad.addColorStop(1, `rgb(255, ${200 - hot * 120}, ${120 + hot * 80})`)
+          ctx.fillStyle = grad
+          ctx.fillRect(x, H / 2 - half, bw, half * 2)
+          continue
+        }
+
+        // default: bars rising from the floor, with falling peak caps
+        const bh = v * H
         const grad = ctx.createLinearGradient(0, H, 0, H - bh)
         grad.addColorStop(0, `rgb(${40 + hot * 180}, 255, ${180 - hot * 120})`)
         grad.addColorStop(1, `rgb(255, ${200 - hot * 120}, ${120 + hot * 80})`)
         ctx.fillStyle = grad
         ctx.fillRect(x, H - bh, bw, bh)
 
-        // peak caps
         peaks[i] = Math.max(peaks[i] - 1.5 * dpr, bh)
         ctx.fillStyle = 'rgba(255,255,255,0.85)'
         ctx.fillRect(x, H - peaks[i] - 2 * dpr, bw, 2 * dpr)
@@ -119,5 +166,16 @@ export default function SpectrumDisplay() {
     }
   }, [])
 
-  return <canvas ref={canvasRef} className="spectrum-canvas" aria-hidden />
+  return (
+    <button
+      type="button"
+      className="spectrum-wrap"
+      onClick={cycle}
+      aria-label={`Visualisation: ${VIZ_LABEL[mode]} — click to change`}
+      title={`${VIZ_LABEL[mode]} — click to change`}
+    >
+      <canvas ref={canvasRef} className="spectrum-canvas" aria-hidden />
+      <span className="spectrum-tag">{VIZ_LABEL[mode]}</span>
+    </button>
+  )
 }
