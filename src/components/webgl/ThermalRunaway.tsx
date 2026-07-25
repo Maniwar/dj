@@ -46,6 +46,12 @@ function Mainstage() {
       uLevel: { value: 0 },
       uTreble: { value: 0 },
       uBeat: { value: 0 },
+      uSnare: { value: 0 },
+      uHat: { value: 0 },
+      uDown: { value: 0 },
+      uBar: { value: 0 },
+      uBuild: { value: 0 },
+      uDrop: { value: 0 },
       uTemp: { value: 0 },
       uHumidity: { value: 0.35 },
       uDew: { value: 0 },
@@ -90,7 +96,18 @@ function Mainstage() {
     u.uBass.value = boost(b.bass, 1.7, 0.78)
     u.uLevel.value = boost(b.level, 1.7, 0.8)
     u.uTreble.value = boost(b.treble, 1.75, 0.8)
-    u.uBeat.value = boost(b.beat, 1.7, 0.68)
+    // The kit + song structure drive the light rig: the beams sweep in musical time (uBar),
+    // the strobe answers on the backbeat, hats glitter, and builds/drops shape the room.
+    // These arrive pre-shaped from the onset detectors, so they are NOT boosted — boosting a
+    // clean 0..1 envelope just clips it and washes the dynamics out.
+    const mu = audioBus.music
+    u.uBeat.value = b.beat
+    u.uSnare.value = b.snare
+    u.uHat.value = b.hat
+    u.uDown.value = mu.downbeat
+    u.uBar.value = mu.barPhase
+    u.uBuild.value = mu.build
+    u.uDrop.value = mu.drop
     u.uTemp.value = (t.temperature - AMBIENT) / (MAXT - AMBIENT)
     u.uHumidity.value = t.humidity
     u.uDew.value = t.dewPointHit ? 1 : Math.max(0, u.uDew.value - dt * 1.5)

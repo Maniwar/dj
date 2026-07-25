@@ -25,6 +25,12 @@ export const thermalFrag = /* glsl */ `
   uniform float uLevel;
   uniform float uTreble;
   uniform float uBeat;
+  uniform float uSnare;   // backbeat  -> strobe
+  uniform float uHat;     // hi-hats   -> sparkle
+  uniform float uDown;    // every 4th -> the big accent
+  uniform float uBar;     // 0..1 through the bar -> the SWEEP
+  uniform float uBuild;   // rising energy -> the rig gets hotter
+  uniform float uDrop;    // release   -> everything blows open
   uniform float uTemp;
   uniform float uHumidity;
   uniform float uDew;
@@ -70,22 +76,43 @@ export const thermalFrag = /* glsl */ `
     // thin sweeping laser streaks (magenta / acid-green / blue / cyan), HARD beat-reactive:
     // each kick jolts the sweep, fattens the beam, and flares its brightness so the lasers
     // visibly punch on the beat instead of drifting.
-    for(int i=0;i<4;i++){
+    // The beams used to sweep on sin(uTime) — wall-clock time, so they drifted against the
+    // music no matter how hard they flashed. They now sweep in MUSICAL time: uBar carries the
+    // position through the bar, so one full scissor of the rig == one bar, and the fan kicks
+    // to a new spread on the downbeat. That's what makes it read as choreography.
+    float sweep = uBar * 6.2831853;
+    float fan = 0.34 + uBuild*0.22 + uDown*0.16;   // rig opens up as the energy climbs
+    for(int i=0;i<6;i++){
       float fi=float(i);
-      // smooth continuous sweep (a touch faster so it reads lively), with only a small
-      // beat nudge — the beat punch lives in brightness + beam width below, not a big jump.
-      float a = (fi-1.5)*0.42 + sin(uTime*(0.85+fi*0.28))*0.62 + uBeat*0.18;
+      float a = (fi-2.5)*fan + sin(sweep + fi*1.04)*(0.55 + uBuild*0.35);
       vec2 dir = vec2(cos(a), sin(a));
       float d = abs(dot(p, vec2(dir.y,-dir.x)));
-      float w = 0.0032 + uBeat*0.013 + uBass*0.004;             // beam fattens on the beat
+      float w = 0.0030 + uBeat*0.012 + uBass*0.004 + uDrop*0.02; // fattens on the hit
       float streak = smoothstep(w, 0.0, d);
       vec3 lc = fi<0.5 ? vec3(1.0,0.12,0.56)
               : (fi<1.5 ? vec3(0.39,1.0,0.18)
-              : (fi<2.5 ? vec3(0.08,0.88,1.0) : vec3(0.65,0.3,1.0)));
-      col += lc * streak * (0.1 + uTreble*0.42 + uBeat*1.35);   // dim base -> flares on kicks
+              : (fi<2.5 ? vec3(0.08,0.88,1.0)
+              : (fi<3.5 ? vec3(0.65,0.3,1.0)
+              : (fi<4.5 ? vec3(1.0,0.12,0.56) : vec3(0.39,1.0,0.18)))));
+      col += lc * streak * (0.08 + uHat*0.5 + uBeat*1.25 + uBuild*0.5 + uDrop*1.6);
     }
-    // volumetric haze bloom that breathes with the level AND pulses on the beat
-    col += vec3(0.5,0.3,0.6) * fbm(uv*3.0 - uTime*0.05) * (uLevel*0.13 + uBeat*0.1);
+
+    float r = length(p);
+    // KICK = a physical shove: a ring blown outward through the haze on every kick. uBeat
+    // decays 1->0, so the ring expands as the hit dies away.
+    float ring = smoothstep(0.035, 0.0, abs(r - (1.0-uBeat)*0.55)) * uBeat;
+    col += vec3(1.0,0.35,0.75) * ring * 0.5;
+    // SNARE = the strobe answering the kick on the backbeat (a flat flash, no colour cast)
+    col += vec3(1.0) * uSnare * 0.11;
+    // HATS = fine sparkle in the air, resampled fast so it glitters rather than crawls
+    float sp = step(0.997 - uHat*0.02, hash(floor(uv*vec2(240.0,150.0)) + floor(uTime*34.0)));
+    col += vec3(0.85,1.0,1.0) * sp * uHat * 0.55;
+    // DROP = the whole room blows open
+    col += vec3(1.0,0.55,0.9) * uDrop * 0.3 * (1.0 - r);
+
+    // volumetric haze that breathes with the level, pulses on the kick, and THICKENS
+    // through a build-up so the room feels like it's filling before the drop
+    col += vec3(0.5,0.3,0.6) * fbm(uv*3.0 - uTime*0.05) * (uLevel*0.13 + uBeat*0.1 + uBuild*0.22);
 
     // CONDENSATION beading over the whole "lens" — the humidity signature
     float beads = droplets(uv, 0.04 + uHumidity*0.30);
