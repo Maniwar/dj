@@ -57,6 +57,14 @@ export default function Lore() {
     return () => io.disconnect()
   }, [stops.length])
 
+  // Hand the light rig this stop's colour (Kiki magenta / Dieter blue / together acid), and
+  // give it back when the section scrolls away, so the lasers belong to whoever's on screen.
+  useEffect(() => {
+    const setAccent = useSiteStore.getState().setAccent
+    const stop = active >= 0 ? stops[active] : null
+    setAccent(stop ? stop.accent : 'default')
+  }, [active, stops])
+
   // single-decode: only the active stop's video plays
   useEffect(() => {
     for (const [id, v] of Object.entries(videoRefs.current)) {

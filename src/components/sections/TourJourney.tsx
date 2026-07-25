@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { TOUR_CLIPS } from '../../data/tour.manifest'
 import { SCENES, hydrateRealVideo } from '../../video/broadcastFrames'
 import { withBase } from '../../lib/asset'
-import { useSiteStore } from '../../state/useSiteStore'
+import { ACCENTS, useSiteStore, type AccentKey } from '../../state/useSiteStore'
 
 // Vehicle for each leg of the world tour — the crew travels city to city as you scroll.
 const VEHICLES: Record<string, { icon: string; verb: string }> = {
@@ -54,6 +54,11 @@ export default function TourJourney() {
       el.style.setProperty('--journey', p.toFixed(4))
       const idx = Math.min(cities.length - 1, Math.floor(p * cities.length + 0.0001))
       setActive(idx) // React bails when unchanged
+      // Each city owns the light rig while you're travelling through it (Ibiza sunrise gold,
+      // Tokyo neon pink, Miami aqua, Berlin basement acid), handing it back on the way out.
+      const inView = rect.top < window.innerHeight && rect.bottom > 0
+      const city = cities[idx]?.id as AccentKey | undefined
+      useSiteStore.getState().setAccent(inView && city && city in ACCENTS ? city : 'default')
     }
     const onScroll = () => {
       cancelAnimationFrame(raf)

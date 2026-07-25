@@ -11,10 +11,12 @@ import { sceneForTrack, hydrateRealVideo, type Scene } from './broadcastFrames'
 // strobes. Always shows the CURRENT track's city. If a real AtlasCloud mp4 exists for the
 // scene, it plays that (muted) instead of the montage. The player's MP3 is the only sound.
 
-// Calmer cut cadence on mobile — rapid full-screen background swaps are what flicker on
-// phones. Keeps the effect (footage still cuts + Ken-Burns), just far less frantic.
-const MIN_CUT_MS = PERF.isMobile ? 1500 : 520 // don't cut faster than this even on dense beats
-const MAX_HOLD_MS = PERF.isMobile ? 6500 : 4200 // force a cut at least this often
+// Cuts land on PHRASE boundaries, not on whatever beat crossed a threshold. An editor cuts on
+// the 1 of a bar; cutting on arbitrary beats is what makes a montage read as noise instead of
+// as a music video. 8 beats = 2 bars (~3.5s at 138 BPM); phones hold a shot twice as long.
+const BEATS_PER_CUT = PERF.isMobile ? 16 : 8
+// Fallback only — used until a tempo is established (or if onset tracking loses the plot).
+const MAX_HOLD_MS = PERF.isMobile ? 8000 : 4600
 
 export default function Broadcast() {
   const slug = usePlayerStore((s) => s.currentTrackSlug)
@@ -35,6 +37,7 @@ export default function Broadcast() {
   const lastCut = useRef(0)
   const clock = useRef(0)
   const idxRef = useRef(0)
+  const lastBeatIdx = useRef(0) // so a cut fires once per phrase, not every frame of it
 
   useEffect(() => {
     hydrateRealVideo().then(() => setScene(sceneForTrack(slug)))
@@ -93,15 +96,6 @@ export default function Broadcast() {
 
   useEffect(() => {
     if (reduced || useVideo) return
-    // Mobile: rotate the stills on a SLOW fixed interval (not beat-driven). The old flicker was
-    // the RAPID per-beat crossfades — one gentle crossfade every 6.5s gives real variety and
-    // stays flicker-free (the harsh strobe/glitch/blend effects remain disabled on phones).
-    if (PERF.isMobile) {
-      const iv = window.setInterval(() => {
-        if (audioBus.playing) doCut()
-      }, 6500)
-      return () => window.clearInterval(iv)
-    }
     let raf = 0
     let prev = performance.now()
     const loop = (now: number) => {
@@ -109,16 +103,22 @@ export default function Broadcast() {
       prev = now
       clock.current += dt
       const sinceCut = now - lastCut.current
-      const beat = audioBus.bands.beat
-      const strong = beat > 0.35 && sinceCut > MIN_CUT_MS
-      const stale = sinceCut > MAX_HOLD_MS
-      if ((strong || stale) && audioBus.playing) {
+      // Cut on the DOWNBEAT of every other bar: watch the beat counter and fire the frame a new
+      // beat lands on a phrase boundary. Because beatIndex only advances on a detected kick,
+      // the cut is locked to the track rather than to a wall-clock timer.
+      const idx = audioBus.music.beatIndex
+      const newBeat = idx !== lastBeatIdx.current
+      lastBeatIdx.current = idx
+      const onPhrase = newBeat && idx > 0 && idx % BEATS_PER_CUT === 0
+      const stale = sinceCut > MAX_HOLD_MS // only bites before a tempo is known
+      if ((onPhrase || stale) && audioBus.playing) {
         lastCut.current = now
         doCut()
       }
-      // drive strobe + chroma via CSS vars from the live beat
+      // local chroma var kept in sync with the live kick (the strobe itself now answers on the
+      // SNARE via --m-snare, so this only feeds the broadcast layer's own tinting)
       const el = rootRef.current
-      if (el) el.style.setProperty('--beat', beat.toFixed(3))
+      if (el) el.style.setProperty('--beat', audioBus.bands.beat.toFixed(2))
       raf = requestAnimationFrame(loop)
     }
     raf = requestAnimationFrame(loop)

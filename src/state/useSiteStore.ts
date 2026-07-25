@@ -1,5 +1,20 @@
 import { create } from 'zustand'
 
+// The light rig takes its colour from wherever you are in the story, so the lasers belong to
+// the section instead of washing everything the same pink. Values are 0..1 RGB for the shader.
+export const ACCENTS = {
+  default: [1.0, 0.12, 0.56], // house magenta
+  kiki: [1.0, 0.12, 0.56], // she is the signal — magenta
+  dieter: [0.08, 0.88, 1.0], // he is the noise — cold blue
+  both: [0.39, 1.0, 0.18], // the sauna incident — acid
+  ibiza: [1.0, 0.55, 0.18], // sunrise gold
+  tokyo: [1.0, 0.15, 0.78], // neon pink
+  miami: [0.1, 0.95, 0.85], // pool aqua
+  berlin: [0.45, 1.0, 0.25], // basement acid
+} as const satisfies Record<string, readonly [number, number, number]>
+
+export type AccentKey = keyof typeof ACCENTS
+
 type SiteState = {
   loggedOn: boolean // has the user clicked LOG ON & PLUG IN?
   booting: boolean // dial-up handshake in progress
@@ -9,6 +24,8 @@ type SiteState = {
   hits: number // fake 2004 hit-counter
   lyricsOpen: boolean // karaoke panel visibility
   videoEnabled: boolean // play the real muted mp4 backgrounds vs the Ken-Burns stills
+  accent: AccentKey // which section owns the light rig right now
+  setAccent: (a: AccentKey) => void
   logOn: () => void
   finishBoot: () => void
   setFriction: (v: number) => void
@@ -31,6 +48,8 @@ export const useSiteStore = create<SiteState>((set) => ({
   hits: seededHits,
   lyricsOpen: false,
   videoEnabled: true,
+  accent: 'default',
+  setAccent: (a) => set((s) => (s.accent === a ? s : { accent: a })), // no-op re-renders avoided
   logOn: () => set({ loggedOn: true, booting: true }),
   finishBoot: () => set({ booting: false }),
   setFriction: (v) => set({ friction: Math.max(0, Math.min(1, v)) }),

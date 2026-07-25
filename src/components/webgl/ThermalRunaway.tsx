@@ -2,7 +2,7 @@ import { useRef, useMemo, useEffect } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { audioBus } from '../../audio/audioBus'
-import { useSiteStore } from '../../state/useSiteStore'
+import { ACCENTS, useSiteStore } from '../../state/useSiteStore'
 import { thermalVert, thermalFrag } from './thermalShader'
 import { PERF } from '../../lib/perfFlags'
 
@@ -52,6 +52,7 @@ function Mainstage() {
       uBar: { value: 0 },
       uBuild: { value: 0 },
       uDrop: { value: 0 },
+      uAccent: { value: new THREE.Vector3(1.0, 0.12, 0.56) },
       uTemp: { value: 0 },
       uHumidity: { value: 0.35 },
       uDew: { value: 0 },
@@ -108,6 +109,14 @@ function Mainstage() {
     u.uBar.value = mu.barPhase
     u.uBuild.value = mu.build
     u.uDrop.value = mu.drop
+    // Ease toward the current section's colour rather than snapping — a hard cut in the rig
+    // colour on a scroll boundary looks like a bug; a ~1s fade reads as the lighting following
+    // the story. (Same rate regardless of framerate.)
+    const target = ACCENTS[useSiteStore.getState().accent] ?? ACCENTS.default
+    const k = 1 - Math.exp(-dt / 0.35)
+    u.uAccent.value.x += (target[0] - u.uAccent.value.x) * k
+    u.uAccent.value.y += (target[1] - u.uAccent.value.y) * k
+    u.uAccent.value.z += (target[2] - u.uAccent.value.z) * k
     u.uTemp.value = (t.temperature - AMBIENT) / (MAXT - AMBIENT)
     u.uHumidity.value = t.humidity
     u.uDew.value = t.dewPointHit ? 1 : Math.max(0, u.uDew.value - dt * 1.5)

@@ -31,6 +31,7 @@ export const thermalFrag = /* glsl */ `
   uniform float uBar;     // 0..1 through the bar -> the SWEEP
   uniform float uBuild;   // rising energy -> the rig gets hotter
   uniform float uDrop;    // release   -> everything blows open
+  uniform vec3  uAccent;  // the colour of the section you're currently in
   uniform float uTemp;
   uniform float uHumidity;
   uniform float uDew;
@@ -94,6 +95,10 @@ export const thermalFrag = /* glsl */ `
               : (fi<2.5 ? vec3(0.08,0.88,1.0)
               : (fi<3.5 ? vec3(0.65,0.3,1.0)
               : (fi<4.5 ? vec3(1.0,0.12,0.56) : vec3(0.39,1.0,0.18)))));
+      // Pull most beams toward the SECTION's colour so the rig belongs to whatever you're
+      // reading — Kiki's pages go magenta, Dieter's cold blue, Ibiza sunrise gold. Alternating
+      // beams keep their own hue so the fan still reads as multi-coloured rather than flat.
+      lc = mix(lc, uAccent, mod(fi, 2.0) < 0.5 ? 0.78 : 0.30);
       col += lc * streak * (0.08 + uHat*0.5 + uBeat*1.25 + uBuild*0.5 + uDrop*1.6);
     }
 
