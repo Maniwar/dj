@@ -31,6 +31,9 @@ export default function LyricStage() {
   const song = slug ? SONGS[slug] : undefined
   // only sung lines — section markers ([CHORUS] etc.) aren't performed
   const lines = useMemo(() => (song?.lines ?? []).filter((l) => l.type === 'line'), [song])
+  // rough singing duration per line — word count, floored so one-word ad-libs still take time
+  const weights = useMemo(() => lines.map((l) => Math.max(2, l.text.trim().split(/\s+/).length)), [lines])
+  const totalWeight = useMemo(() => weights.reduce((a, b) => a + b, 0) || 1, [weights])
 
   useEffect(() => {
     idxRef.current = 0
@@ -48,7 +51,21 @@ export default function LyricStage() {
         lastBeat = beat
         const st = usePlayerStore.getState()
         const p = st.duration ? st.currentTime / st.duration : 0
-        const target = Math.max(0, Math.min(lines.length - 1, Math.floor(p * lines.length)))
+        // Best estimate available without real timestamps. Two corrections over a flat
+        // progress*lineCount mapping, which is what made it drift badly:
+        //  1) vocals don't span the whole file — there's an instrumental intro and an outro,
+        //     so map into a [LEAD_IN, TAIL_OUT] window instead of 0..1.
+        //  2) lines aren't equal length; a nine-word line takes longer to sing than "Mmm."
+        //     so position by cumulative WEIGHT rather than by line index.
+        const LEAD_IN = 0.06, TAIL_OUT = 0.94
+        const q = Math.max(0, Math.min(1, (p - LEAD_IN) / (TAIL_OUT - LEAD_IN)))
+        const want = q * totalWeight
+        let acc = 0
+        let target = lines.length - 1
+        for (let i = 0; i < weights.length; i++) {
+          acc += weights[i]
+          if (acc >= want) { target = i; break }
+        }
         if (target !== idxRef.current) {
           idxRef.current = target
           setIdx(target)
@@ -59,7 +76,7 @@ export default function LyricStage() {
     }
     raf = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(raf)
-  }, [lines])
+  }, [lines, weights, totalWeight])
 
   if (!loggedOn || lyricsOpen || reduced || !lines.length) return null
   const cur = lines[idx]
