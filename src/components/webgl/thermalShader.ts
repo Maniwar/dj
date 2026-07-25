@@ -105,6 +105,47 @@ export const thermalFrag = /* glsl */ `
     return c;
   }
 
+  // Per-light colour for the rig, blended toward the section's accent.
+  vec3 rigColour(float fi){
+    vec3 lc = fi<0.5 ? vec3(1.0,0.12,0.56)
+            : (fi<1.5 ? vec3(0.39,1.0,0.18)
+            : (fi<2.5 ? vec3(0.08,0.88,1.0)
+            : (fi<3.5 ? vec3(0.65,0.3,1.0) : vec3(1.0,0.12,0.56))));
+    return mix(lc, uAccent, mod(fi, 2.0) < 0.5 ? 0.78 : 0.30);
+  }
+
+  // ---- VOLUMETRIC MOVING HEADS ----
+  // The flat rig draws beams as lines on glass. These are actual CONES of light in 3D: we
+  // march a ray from the camera through a fog volume and accumulate how much of each cone it
+  // passes through. That's what produces real god rays — beams that widen with distance, fade
+  // into haze, cross each OTHER in depth, and land on the floor — which is the difference
+  // between "lasers drawn on a photo" and "a room with lights in it".
+  // The heads PAN with the bar and TILT down on the kick, like a real lighting desk.
+  vec3 volumetric(vec2 p, float sweep){
+    vec3 ro = vec3(0.0, 0.0, -1.7);
+    vec3 rd = normalize(vec3(p.x, p.y, 1.0));
+    vec3 acc = vec3(0.0);
+    float t = 0.35;
+    for(int s=0; s<20; s++){
+      vec3 pos = ro + rd*t;
+      // haze is thicker toward the floor and drifts slowly, so beams break up as they descend
+      float dens = (0.55 + 0.45*noise(pos.xz*1.6 + uTime*0.05)) * smoothstep(1.3, -0.5, pos.y);
+      for(int i=0; i<5; i++){
+        float fi = float(i);
+        vec3 lp = vec3((fi-2.0)*0.66, 1.05, 0.55);                  // truss above the stage
+        float pan  = sin(sweep + fi*1.25) * (0.6 + uBuild*0.3);     // sweeps across the bar
+        float tilt = -0.9 - uBeat*0.28;                             // punches down on the kick
+        vec3 cd = normalize(vec3(sin(pan), tilt, cos(pan)*0.4));
+        vec3 L = pos - lp;
+        float dist = length(L);
+        float cone = smoothstep(0.9885 - uBuild*0.012, 0.9997, dot(L/dist, cd));
+        acc += rigColour(fi) * cone * dens / (1.0 + dist*dist*1.7);
+      }
+      t += 0.17;
+    }
+    return acc * (0.30 + uBeat*0.85 + uDrop*1.6);
+  }
+
   void main(){
     vec2 uv = vUv;
     float aspect = uRes.x/max(1.0,uRes.y);
@@ -120,8 +161,15 @@ export const thermalFrag = /* glsl */ `
     // to a new spread on the downbeat. That's what makes it read as choreography.
     float sweep = uBar * 6.2831853;
     float fan = 0.34 + uBuild*0.22 + uDown*0.16;   // rig opens up as the energy climbs
+    // Flat rig for the sharp beam cores (and the whole rig on phones); the volumetric heads add
+    // the depth on top. Together: crisp beams that also occupy real space.
     vec3 beams = rig(p, sweep, fan);
-    col += beams;
+    col += beams * (uQuality > 0.5 ? 0.72 : 1.0);
+    if (uQuality > 0.5) {
+      vec3 vol = volumetric(p, sweep);
+      col += vol;
+      beams += vol; // dust should glitter in the volumetric shafts too
+    }
 
     // DUST hanging in the air. Motes drift slowly upward and are only visible where a beam
     // actually lands on them — which is what sells the beams as volumes of light rather than

@@ -122,15 +122,37 @@ class AudioBusImpl {
   // what the part actually plays at 138 BPM: kick ≈2.3 hits/sec, snare/clap on 2 & 4 ≈1.15,
   // hats in 8ths ≈4.6. Measured result: 2.27 / 1.13 / 4.57. The snare needs a HIGH threshold
   // (mids are crowded with vocals and synth stabs), the hats a very low one.
-  private kick = new OnsetDetector(1, 20, 0.5, 290, 170)
+  // 340ms refractory, not 290: swept offline against the real tracks. At 290 syncopated bass
+  // notes between the kicks slipped through and dragged the tempo estimate SHORT (139 BPM read
+  // as 146). 340 still passes every real kick (it allows up to 176 BPM) and pulled the measured
+  // tempo to 136–140 against a true 138, with beat-to-beat jitter falling from 0.55 to ~0.03.
+  private kick = new OnsetDetector(1, 20, 0.5, 340, 170)
   private snare = new OnsetDetector(70, 280, 3.0, 300, 140)
   private hat = new OnsetDetector(280, 500, 0.4, 60, 70)
 
-  // beat-timing / structure
+  // beat-timing / structure (phase-locked loop — see update())
   private beatGaps: number[] = []
   private lastBeatAt = 0
   private levelShort = 0
   private levelLong = 0
+  private period = 0 // ms between beats, once a tempo is established
+  private nextBeat = 0 // when the NEXT beat is due (predicted)
+  private locked = false // are we confidently riding the track's grid?
+  private lastOnsetAt = 0
+  private beatEnv = 0
+  private hinted = false // was the tempo supplied up-front by the track metadata?
+
+  // Every track ships its BPM in lyrics.json, so hand the grid its tempo instead of making it
+  // rediscover it. With a prior, the PLL only has to find the PHASE — it locks on the very
+  // first kick rather than after ~1.7s of listening, which is what made the opening bars of a
+  // newly-selected track feel hesitant.
+  setTempoHint(bpm: number) {
+    if (!(bpm > 60 && bpm < 220)) return
+    this.period = 60000 / bpm
+    this.hinted = true
+    this.locked = false // phase is unknown again — re-anchor on the next kick
+    this.beatGaps.length = 0
+  }
 
   attach(analyser: AnalyserNode) {
     this.analyser = analyser
@@ -170,11 +192,16 @@ class AudioBusImpl {
     level = level / (n * 255)
 
     // ---- the kit, detected separately ----
-    this.bands.beat = this.kick.update(f, now, dt, this.playing)
+    this.kick.update(f, now, dt, this.playing)
     this.bands.snare = this.snare.update(f, now, dt, this.playing)
     this.bands.hat = this.hat.update(f, now, dt, this.playing)
 
-    // ---- musical structure, from the timing of the kicks ----
+    // ---- BEAT GRID: a phase-locked loop, not raw detection ----
+    // Reacting to detected onsets alone means a kick that's masked in a dense mix, or a bar
+    // that drops the kick entirely, simply produces NO pulse — the visuals hesitate and slip
+    // out of sync. So once a tempo is established we run our own clock and PREDICT each beat,
+    // and use the detected onsets only to correct the clock's phase and tempo (exactly how a
+    // PLL locks to a signal). The pulse then stays perfectly even, and rides through breakdowns.
     const m = this.music
     if (this.kick.fired) {
       if (this.lastBeatAt) {
@@ -186,20 +213,73 @@ class AudioBusImpl {
         }
       }
       this.lastBeatAt = now
-      m.beatIndex++
-      // A 4-beat bar: accent the 1st beat. We can't know the true downbeat without deeper
-      // analysis, but a steady 4-count still reads as musical structure rather than a uniform
-      // strobe — the point is that every 4th hit is BIGGER.
-      if (m.beatIndex % 4 === 0) m.downbeat = 1
+      this.lastOnsetAt = now
     }
     // median gap -> tempo (median shrugs off the occasional missed or doubled beat)
     if (this.beatGaps.length >= 4) {
       const sorted = [...this.beatGaps].sort((x, y) => x - y)
       const medGap = sorted[Math.floor(sorted.length / 2)]
-      if (medGap > 0) m.bpm = Math.round(60000 / medGap)
+      // With a hint we trust the metadata and only allow refinement AROUND it, so one noisy
+      // stretch can't drag the grid off a tempo we already know is correct.
+      const lo = this.hinted ? this.period * 0.92 : 250
+      const hi = this.hinted ? this.period * 1.08 : 1000
+      if (medGap > lo && medGap < hi) {
+        this.period = this.period ? this.period * 0.85 + medGap * 0.15 : medGap
+      }
     }
-    const beatMs = m.bpm > 0 ? 60000 / m.bpm : 0
-    m.beatPhase = beatMs && this.lastBeatAt ? Math.min(1, (now - this.lastBeatAt) / beatMs) : 0
+
+    // Lock on once the tempo is trustworthy; unlock if the kicks stop (track change, silence),
+    // so we never keep pulsing a grid that no longer exists. With a tempo hint from the track
+    // metadata, the very first kick is enough to anchor the phase.
+    const enoughEvidence = this.hinted ? this.lastBeatAt > 0 : this.beatGaps.length >= 3
+    if (!this.locked && this.period > 0 && enoughEvidence) {
+      this.locked = true
+      this.nextBeat = this.lastBeatAt + this.period
+    }
+    if (this.locked && (now - this.lastOnsetAt > 2500 || !this.playing)) {
+      this.locked = false
+      this.beatGaps.length = 0
+    }
+
+    // Phase/tempo correction: when a real kick lands near where we predicted, nudge the clock
+    // toward it rather than jumping — a hard snap would itself read as a stutter.
+    if (this.locked && this.kick.fired) {
+      let err = now - this.nextBeat
+      while (err > this.period * 0.5) err -= this.period
+      while (err < -this.period * 0.5) err += this.period
+      // Phase ONLY. Letting the phase error also nudge the tempo compounds: a small consistent
+      // bias walks the period away every beat (measured 138 BPM drifting out to 146). Tempo
+      // comes from the robust median of recent gaps (and the metadata hint) instead.
+      if (Math.abs(err) < this.period * 0.35) this.nextBeat += err * 0.30
+    }
+
+    let beatEvent = false
+    if (this.locked) {
+      if (now >= this.nextBeat) {
+        beatEvent = true
+        this.nextBeat += this.period
+        // if we've fallen far behind (tab was backgrounded), resynchronise instead of firing
+        // a burst of catch-up beats
+        if (now - this.nextBeat > this.period * 2) this.nextBeat = now + this.period
+      }
+    } else if (this.kick.fired) {
+      beatEvent = true // not locked yet: stay responsive off raw detection
+    }
+
+    if (beatEvent) {
+      m.beatIndex++
+      // A 4-beat bar: accent the 1st beat. We can't know the true downbeat without deeper
+      // analysis, but a steady 4-count still reads as musical structure rather than a uniform
+      // strobe — the point is that every 4th hit is BIGGER.
+      if (m.beatIndex % 4 === 0) m.downbeat = 1
+      this.beatEnv = 1
+    }
+    this.beatEnv *= Math.exp(-dt / 170)
+    this.bands.beat = this.beatEnv
+
+    const beatMs = this.period || (m.bpm > 0 ? 60000 / m.bpm : 0)
+    const sinceBeat = this.locked ? beatMs - Math.max(0, this.nextBeat - now) : now - this.lastBeatAt
+    m.beatPhase = beatMs ? Math.min(1, Math.max(0, sinceBeat / beatMs)) : 0
     m.barPhase = ((m.beatIndex % 4) + m.beatPhase) / 4
     m.downbeat *= Math.exp(-dt / 260) // a longer tail than a plain kick — it's the big accent
 

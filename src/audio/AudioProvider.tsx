@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { audioBus } from './audioBus'
+import lyrics from '../data/lyrics.json'
 import { withBase } from '../lib/asset'
 import { useSiteStore } from '../state/useSiteStore'
 import {
@@ -190,6 +191,10 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     const version = getVersion(slug, versionId ?? track.defaultVersionId)
     if (!version) return
     usePlayerStore.getState()._set({ currentTrackSlug: slug, currentVersionId: version.id })
+    // Hand the beat grid this track's known tempo so it locks on the first kick instead of
+    // spending the opening bars working the tempo out.
+    const bpm = (lyrics as Record<string, { bpm?: number } | undefined>)[slug]?.bpm
+    if (bpm) audioBus.setTempoHint(bpm)
     loadAndMaybePlay(version.src, { seek: 0, play: true })
   }
 
