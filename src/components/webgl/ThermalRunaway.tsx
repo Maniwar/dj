@@ -57,6 +57,7 @@ function Mainstage() {
       uAccent: { value: new THREE.Vector3(1.0, 0.12, 0.56) },
       uQuality: { value: PERF.isMobile ? 0 : 1 }, // phones skip the costliest shader passes
       uSong: { value: 0 }, // per-track lighting design (stable hash of the slug)
+      uPattern: { value: 0 }, // which rig look is up; changes every 4 bars
       uTemp: { value: 0 },
       uHumidity: { value: 0.35 },
       uDew: { value: 0 },
@@ -124,6 +125,9 @@ function Mainstage() {
       for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) >>> 0
       u.uSong.value = (h % 1000) / 1000
     }
+    // Change the LOOK every 4 bars, on the bar line — so the rig moves from the overhead
+    // truss to the corners to floor uplights to side towers, like a desk running cues.
+    u.uPattern.value = Math.floor(mu.beatIndex / 16) % 4
     const target = ACCENTS[useSiteStore.getState().accent] ?? ACCENTS.default
     const k = 1 - Math.exp(-dt / 0.35)
     u.uAccent.value.x += (target[0] - u.uAccent.value.x) * k

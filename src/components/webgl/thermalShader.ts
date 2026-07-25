@@ -34,6 +34,7 @@ export const thermalFrag = /* glsl */ `
   uniform vec3  uAccent;  // the colour of the section you're currently in
   uniform float uQuality; // 1 = full rig, 0 = phone tier (skips the expensive passes)
   uniform float uSong;    // per-track lighting design: 0..1, derived from the track slug
+  uniform float uPattern; // which rig look is up: 0 overhead, 1 corners, 2 floor, 3 sides
   uniform float uTemp;
   uniform float uHumidity;
   uniform float uDew;
@@ -79,19 +80,43 @@ export const thermalFrag = /* glsl */ `
   // blurring and compositing every frame. Because this rig is procedural, the "blurred" version
   // is just the same distance field with a fatter falloff — same look, no extra passes, no
   // render targets, no new dependency.
-  vec3 rig(vec2 q, float sweep, float fan){
+  // WHERE each head is rigged, and which way it points. Everything used to pivot around the
+  // centre of the screen, so the lasers were forever a star bursting out of the middle. A real
+  // room has heads on the overhead truss, on the corners, uplights along the floor lip and
+  // towers at the sides — and the desk CHANGES the look every few bars. uPattern cycles those.
+  vec2 beamOrigin(float fi, float pat){
+    if (pat < 0.5) return vec2(((fi-2.5)/2.5)*0.55, 0.62);                  // overhead truss
+    if (pat < 1.5) return vec2(mod(fi,2.0) < 0.5 ? -0.95 : 0.95, 0.60);     // corner trusses
+    if (pat < 2.5) return vec2(((fi-2.5)/2.5)*0.72, -0.52);                 // floor uplights
+    return vec2(mod(fi,2.0) < 0.5 ? -1.05 : 1.05, ((fi-2.5)/2.5)*0.30);     // side towers
+  }
+  float beamAim(float fi, float pat){
+    if (pat < 0.5) return -1.5708;                                           // straight down
+    if (pat < 1.5) return mod(fi,2.0) < 0.5 ? -0.95 : -2.19;                 // inward + down
+    if (pat < 2.5) return 1.5708;                                            // straight up
+    return mod(fi,2.0) < 0.5 ? 0.0 : 3.1416;                                 // across the room
+  }
+
+  vec3 rig(vec2 q, float sweep, float fan, float pat){
     vec3 c = vec3(0.0);
     for(int i=0;i<6;i++){
       float fi=float(i);
-      float a = (fi-2.5)*fan + sin(sweep + fi*1.04)*(0.55 + uBuild*0.35);
+      vec2 org = beamOrigin(fi, pat);
+      float a = beamAim(fi, pat) + (fi-2.5)*fan*0.34
+              + sin(sweep + fi*1.04)*(0.5 + uBuild*0.32);
       vec2 dir = vec2(cos(a), sin(a));
-      float d = abs(dot(q, vec2(dir.y,-dir.x)));
+      vec2 rel = q - org;
+      float d = abs(dot(rel, vec2(dir.y,-dir.x)));
+      // A head throws a RAY, not an infinite line — mask to what's in front of the lens, and
+      // fall off with throw distance so the far end of the beam dies into the haze.
+      float fwd = smoothstep(-0.04, 0.18, dot(rel, dir));
+      float att = fwd / (1.0 + length(rel)*0.85);
       float w = 0.0030 + uBeat*0.012 + uBass*0.004 + uDrop*0.02; // fattens on the hit
-      float core = smoothstep(w, 0.0, d);
+      float core = smoothstep(w, 0.0, d) * att;
       // Halo width/strength are deliberately restrained: the alpha of this whole layer is its
       // own luminance, so an over-bright halo turns the overlay opaque and BURIES the footage
       // underneath. The footage is the star; the rig lights it.
-      float halo = smoothstep(w*9.0, 0.0, d);
+      float halo = smoothstep(w*9.0, 0.0, d) * att;
       vec3 lc = fi<0.5 ? vec3(1.0,0.12,0.56)
               : (fi<1.5 ? vec3(0.39,1.0,0.18)
               : (fi<2.5 ? vec3(0.08,0.88,1.0)
@@ -133,7 +158,10 @@ export const thermalFrag = /* glsl */ `
       float dens = (0.55 + 0.45*noise(pos.xz*1.6 + uTime*0.05)) * smoothstep(1.3, -0.5, pos.y);
       for(int i=0; i<5; i++){
         float fi = float(i);
-        vec3 lp = vec3((fi-2.0)*0.66, 1.05, 0.55);                  // truss above the stage
+        // the volumetric heads move with the look too, so the god rays come from wherever
+        // the rig currently is rather than always hanging over the middle
+        vec2 o2 = beamOrigin(fi, uPattern);
+        vec3 lp = vec3(o2.x*1.5, 0.35 + o2.y*1.1, 0.55);
         float pan  = sin(sweep + fi*1.25) * (0.6 + uBuild*0.3);     // sweeps across the bar
         float tilt = -0.9 - uBeat*0.28;                             // punches down on the kick
         vec3 cd = normalize(vec3(sin(pan), tilt, cos(pan)*0.4));
@@ -168,7 +196,7 @@ export const thermalFrag = /* glsl */ `
     float fan = (0.26 + uSong*0.22) + uBuild*0.22 + uDown*0.16;
     // Flat rig for the sharp beam cores (and the whole rig on phones); the volumetric heads add
     // the depth on top. Together: crisp beams that also occupy real space.
-    vec3 beams = rig(p, sweep, fan);
+    vec3 beams = rig(p, sweep, fan, uPattern);
     col += beams * (uQuality > 0.5 ? 0.72 : 1.0);
     if (uQuality > 0.5) {
       vec3 vol = volumetric(p, sweep);
@@ -200,7 +228,7 @@ export const thermalFrag = /* glsl */ `
       vec2 muv = vec2(uv.x, horizon + (horizon - uv.y));   // mirror across the floor line
       vec2 mp = vec2((muv.x-0.5)*aspect, muv.y-0.5);
       mp.x += sin(uv.y*70.0 - uTime*1.8) * 0.008 * (0.35 + uBass) * depth; // ripple
-      col += rig(mp, sweep, fan) * (1.0 - depth) * 0.5;
+      col += rig(mp, sweep, fan, uPattern) * (1.0 - depth) * 0.5;
     }
 
     float r = length(p);
@@ -224,19 +252,13 @@ export const thermalFrag = /* glsl */ `
     // through a build-up so the room feels like it's filling before the drop
     col += vec3(0.5,0.3,0.6) * fbm(uv*3.0 - uTime*0.05) * (uLevel*0.13 + uBeat*0.1 + uBuild*0.22);
 
-    // ---- LED WALL ----
-    // The FFT is downsampled and uploaded to the GPU every frame, but nothing ever read it —
-    // pure wasted work. It's now the stage's LED strip: real spectrum, one texture fetch.
+    // ---- STAGE LIP GLOW ----
+    // The FFT still drives the front of the stage, but as a soft SPECTRUM GLOW rather than a
+    // grid of LED cells — the cell pattern read as a pink checkerboard sitting on top of the
+    // photo instead of as part of the room.
     float spec = texture2D(uFreq, vec2(uv.x, 0.5)).r;
-    float barH = 0.018 + spec * 0.11; // a strip along the stage lip, not a wall up the screen
-    // Softened edges on the LED grid — hard step() gaps alias into harsh flickering squares.
-    float ledGapY = smoothstep(0.18, 0.42, fract(uv.y * 90.0));
-    float ledGapX = smoothstep(0.06, 0.26, fract(uv.x * 130.0));
-    vec3 wallCol = mix(uAccent, vec3(1.0), 0.22);
-    col += wallCol * step(uv.y, barH) * ledGapY * ledGapX * (0.32 + uBeat*0.45 + uDrop*0.7);
-    // and the light the wall throws back up into the haze
-    col += wallCol * step(uv.y, barH + 0.09) * smoothstep(barH + 0.09, barH, uv.y)
-           * (0.04 + uLevel*0.05);
+    float lip = 0.02 + spec * 0.10;
+    col += mix(uAccent, vec3(1.0), 0.25) * smoothstep(lip, 0.0, uv.y) * (0.18 + uBeat*0.3);
 
     // DROP = pyro. Rays fire out of the middle for the length of the release.
     if (uDrop > 0.01) {
@@ -260,33 +282,12 @@ export const thermalFrag = /* glsl */ `
     // overclock shimmer
     col += vec3(0.4,1.0,0.6) * uOverclock * 0.1 * (0.5+0.5*sin(uTime*8.0));
 
-    // ---- CROWD ----
-    // A silhouetted front row along the bottom that JUMPS on the kick. The whole site is shot
-    // from inside the crowd, so having actual heads between you and the stage is what puts you
-    // in the room rather than looking at a poster of it.
-    float headX = uv.x * 26.0;
-    float hid = floor(headX);
-    float bob = (0.012 + 0.03*hash(vec2(hid, 3.0))) * uBeat;      // each head on its own scale
-    float headTop = 0.055 + 0.05*hash(vec2(hid, 7.0)) + bob;
-    float dHead = length(vec2((fract(headX)-0.5)*0.55, (uv.y - headTop)));
-    // RIM light only. This layer's alpha is its own luminance, so it can add light but can
-    // never darken what's underneath — a filled silhouette would just punch a transparent hole
-    // in the rig. Backlit heads catching the stage light is what you'd actually see anyway.
-    float rim = smoothstep(0.150, 0.132, dHead) - smoothstep(0.132, 0.112, dHead);
-    col += uAccent * max(rim, 0.0) * (0.35 + uBeat*0.9);
+    // (A crowd layer lived here as rim-lit heads. On screen it read as a row of pink arcs
+    //  rather than people, so it's out — a fake crowd is worse than none over real footage.)
 
-    // ---- VHS ----
-    // The whole site is framed as leaked bootleg footage, so it should carry the artefacts of
-    // one: the head-switching noise band that lives at the very bottom of a VHS frame, tape
-    // tracking that wobbles the picture, and chroma that doesn't quite line up.
-    float headSwitch = smoothstep(0.018, 0.0, uv.y) * (0.35 + 0.65*hash(vec2(floor(uv.x*90.0), floor(uTime*24.0))));
-    col += vec3(0.55) * headSwitch * 0.5;
-    // tracking wobble — worst on the downbeat, like the tape is struggling to hold the picture
-    float track = sin(uv.y*140.0 + uTime*5.0) * 0.5 + 0.5;
-    col += vec3(0.35,0.32,0.4) * track * uDown * 0.10;
-    // occasional dropout streak
-    float drop = step(0.9975, hash(vec2(floor(uv.y*160.0), floor(uTime*6.0))));
-    col += vec3(0.8) * drop * 0.16;
+    // (A VHS pass lived here: head-switching band, tracking wobble, dropout streaks. Over
+    //  photographic footage it just read as dirt on the screen, so it's out. The existing
+    //  grain + scanlines below already carry the bootleg feel without the noise.)
 
     // grain (friction) + scanlines
     float grain = (hash(uv*uRes + uTime)-0.5)*(0.05+uFriction*0.2);

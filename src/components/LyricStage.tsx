@@ -12,9 +12,13 @@ const SONGS = lyricsData as unknown as Record<string, Song | undefined>
 // This puts the CURRENT line on screen for the whole site, as a performance rather than a
 // ticker: Dieter's lines come in cold and heavy, Kiki's hot and bouncing.
 //
-// There are no per-line timestamps in the data, so position still comes from playback progress
-// — but the line only ever CHANGES on a beat. Snapping the change to the grid is what makes it
-// feel sung instead of scrubbed, and it's only possible because the beat clock is exact.
+// HONEST LIMITATION: there are no per-line timestamps anywhere in the data, so this CANNOT be
+// true karaoke — position is estimated from playback progress. It therefore deliberately does
+// NOT claim to be the line being sung right now, and it no longer names a singer: the voice
+// field doesn't hold up across a track's different versions (A-side vs bootleg vs studio mix).
+// It presents the song's words as an ambient lyric card instead, changing every 2 bars so it
+// reads as atmosphere rather than a karaoke prompt that's visibly wrong.
+// Real sync would need forced alignment (timestamps generated from the audio itself).
 export default function LyricStage() {
   const slug = usePlayerStore((s) => s.currentTrackSlug)
   const loggedOn = useSiteStore((s) => s.loggedOn)
@@ -40,7 +44,7 @@ export default function LyricStage() {
     const loop = () => {
       const beat = audioBus.music.beatIndex
       // advance at most every other beat, and only ON a beat
-      if (beat !== lastBeat && beat % 2 === 0) {
+      if (beat !== lastBeat && beat % 8 === 0) {
         lastBeat = beat
         const st = usePlayerStore.getState()
         const p = st.duration ? st.currentTime / st.duration : 0
@@ -63,8 +67,7 @@ export default function LyricStage() {
   if (!cur) return null
 
   return (
-    <div className={`lyric-stage v-${cur.voice ?? 'both'}`} aria-live="polite">
-      <div className="ls-who">{cur.voice === 'kiki' ? 'KIKI G' : cur.voice === 'dieter' ? 'DJ DIETER' : 'SYSTEM OVERLOAD'}</div>
+    <div className="lyric-stage" aria-hidden>
       <div className="ls-line" key={nonce}>
         {cur.text.split(' ').map((w, i) => (
           // each word gets its own step in the entrance so the line reads like it's being sung.
