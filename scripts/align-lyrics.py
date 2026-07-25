@@ -61,22 +61,28 @@ def align_tokens(a, b):
 
     Returns {index into a: index into b} for matched pairs only.
     """
-    MATCH, MISMATCH, GAP = 1.0, -0.6, -0.35
+    # ASYMMETRIC gaps. The audio contains a great deal that the lyric sheet doesn't: stutter
+    # effects ("beat-beat-beat"), ad-libs, backing vocals, shouts. Skipping one of those HEARD
+    # tokens should be cheap. Leaving a real LYRIC word unanchored should not — that's what
+    # forces the fallback interpolation that makes a line's tail bunch up.
+    MATCH, MISMATCH = 1.0, -0.6
+    GAP_KNOWN = -0.55   # skipping a word we know is sung: expensive
+    GAP_HEARD = -0.12   # skipping something the recogniser heard but the sheet doesn't have
     n, m = len(a), len(b)
     if not n or not m:
         return {}
-    prev = [GAP * j for j in range(m + 1)]
+    prev = [GAP_HEARD * j for j in range(m + 1)]
     ptr = [bytearray(m + 1) for _ in range(n + 1)]
     for j in range(m + 1):
         ptr[0][j] = 2
     for i in range(1, n + 1):
-        cur = [prev[0] + GAP]
+        cur = [prev[0] + GAP_KNOWN]
         ptr[i][0] = 1
         ai = a[i - 1]
         for j in range(1, m + 1):
             d = prev[j - 1] + (MATCH if ai == b[j - 1] else MISMATCH)
-            u = prev[j] + GAP
-            l = cur[j - 1] + GAP
+            u = prev[j] + GAP_KNOWN   # skip a known word
+            l = cur[j - 1] + GAP_HEARD  # skip a heard token
             best, p = d, 0
             if u > best:
                 best, p = u, 1
@@ -241,9 +247,19 @@ def main():
                             for j in range(a_i + 1, b_i):
                                 ts[j] = a_t + (b_t - a_t) * ((j - a_i) / (b_i - a_i))
                     if last < n - 1:
-                        end = min(hi, ts[last] + 0.42 * (n - last))
+                        # Spread the unanchored tail at the pace this line is ACTUALLY being
+                        # sung — the median gap between its own anchored words — instead of a
+                        # fixed floor. Where the recogniser loses the vocal (a stuttered
+                        # "beat-beat-beat" effect, heavy processing, backing vocals) the tail is
+                        # guesswork either way, and guessing at the line's own tempo is far
+                        # closer than jamming the words together at the minimum spacing.
+                        deltas = [ts[anchored[k + 1]] - ts[anchored[k]]
+                                  for k in range(len(anchored) - 1)
+                                  if anchored[k + 1] - anchored[k] == 1]
+                        pace = sorted(deltas)[len(deltas) // 2] if deltas else 0.34
+                        pace = max(0.16, min(0.75, pace))
                         for j in range(last + 1, n):
-                            ts[j] = ts[last] + (end - ts[last]) * ((j - last) / (n - last))
+                            ts[j] = ts[last] + pace * (j - last)
                 else:
                     for j in range(n):
                         ts[j] = lo + (hi - lo) * (j / n)
