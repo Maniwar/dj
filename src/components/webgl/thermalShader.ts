@@ -288,8 +288,13 @@ export const thermalFrag = /* glsl */ `
     vec3 wallCol = mix(uAccent, vec3(1.0), 0.24);
     // the LED CELLS are back — this is the bottom spectrum you liked. Soft-edged so they don't
     // alias into harsh flicker, and nothing is drawn on top of them any more.
-    float cellY = smoothstep(0.16, 0.44, fract(uv.y * 92.0));
-    float cellX = smoothstep(0.06, 0.26, fract(uv.x * 128.0));
+    // Cell size is set in DEVICE PIXELS, not in UV space. Fixed UV divisions made each cell
+    // ~10px wide on a 1280px screen — chunky enough to read as huge pixels rather than an LED
+    // strip — and worse, they resized with the window. 4px cells look like a real LED matrix
+    // and stay that size at any resolution.
+    float cellPx = 4.0;
+    float cellY = smoothstep(0.12, 0.40, fract(uv.y * uRes.y / cellPx));
+    float cellX = smoothstep(0.12, 0.40, fract(uv.x * uRes.x / cellPx));
     col += wallCol * step(uv.y, lip) * cellY * cellX * (0.34 + uBeat*0.42 + uDrop*0.6);
     // soft spill of light up off the strip
     col += wallCol * step(uv.y, lip + 0.075) * smoothstep(lip + 0.075, lip, uv.y) * (0.05 + uLevel*0.05);
