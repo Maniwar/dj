@@ -7,26 +7,34 @@ export default function Knob({
   label,
   size = 46,
   color = '#ff2e9a',
+  onTap,
 }: {
   value: number
   onChange: (v: number) => void
   label: string
   size?: number
   color?: string
+  /** Fired on a CLICK — a press with no meaningful drag. Used for click-to-mute on VOL. */
+  onTap?: () => void
 }) {
-  const dragRef = useRef<{ y: number; v: number } | null>(null)
+  const dragRef = useRef<{ y: number; v: number; moved: boolean } | null>(null)
   const angle = -135 + value * 270
 
   const onPointerDown = (e: React.PointerEvent) => {
     ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
-    dragRef.current = { y: e.clientY, v: value }
+    dragRef.current = { y: e.clientY, v: value, moved: false }
   }
   const onPointerMove = (e: React.PointerEvent) => {
     if (!dragRef.current) return
     const dy = dragRef.current.y - e.clientY
+    // A few pixels of slop before it counts as a turn, so a click doesn't nudge the value and
+    // a real drag doesn't also fire the tap.
+    if (Math.abs(dy) > 3) dragRef.current.moved = true
+    if (!dragRef.current.moved) return
     onChange(Math.max(0, Math.min(1, dragRef.current.v + dy / 140)))
   }
   const onPointerUp = () => {
+    if (dragRef.current && !dragRef.current.moved) onTap?.()
     dragRef.current = null
   }
   const onWheel = (e: React.WheelEvent) => {

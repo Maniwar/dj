@@ -36,6 +36,19 @@ export default function Player() {
   const toggleShuffle = useSiteStore((s) => s.toggleShuffle)
   const toggleRepeat = useSiteStore((s) => s.toggleRepeat)
   const thermal = useThermalReadout()
+  // Click-to-mute remembers the level you were at, so unmuting returns you there rather than
+  // to some arbitrary default.
+  const preMuteRef = useRef(0.8)
+  // Opening a 19-track list scrolled to the top means hunting for what's playing.
+  const currentRowRef = useRef<HTMLButtonElement>(null)
+  const toggleMute = () => {
+    if (volume > 0.001) {
+      preMuteRef.current = volume
+      audio.setVolume(0)
+    } else {
+      audio.setVolume(preMuteRef.current || 0.8)
+    }
+  }
 
   const tracks = usePlayerStore((s) => s.tracks)
   const track = getTrack(slug)
@@ -44,11 +57,27 @@ export default function Player() {
   // ---- draggable window (desktop) / docked bottom bar (mobile) ----
   const [pos, setPos] = useState<{ x: number; y: number }>({ x: 24, y: 0 })
   const [placed, setPlaced] = useState(false)
+  // Where the viewer last dragged the window, and whether they rolled it up. Restored on the
+  // next visit — re-docking bottom-left every reload undoes a deliberate choice.
+  const savePlacement = (p: { x: number; y: number }, min: boolean) => {
+    try {
+      localStorage.setItem('so.player', JSON.stringify({ x: p.x, y: p.y, min }))
+    } catch {
+      /* private mode — placement just won't persist */
+    }
+  }
   // start collapsed on phones — the full player eats ~40% of a mobile screen
   const [playlistOpen, setPlaylistOpen] = useState(false)
-  const [minimized, setMinimized] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches,
-  )
+  const [minimized, setMinimized] = useState(() => {
+    if (typeof window === 'undefined') return false
+    try {
+      const raw = localStorage.getItem('so.player')
+      if (raw) return !!JSON.parse(raw).min
+    } catch {
+      /* fall through to the default */
+    }
+    return window.matchMedia('(max-width: 640px)').matches // phones start rolled up
+  })
   const dragRef = useRef<{ dx: number; dy: number } | null>(null)
   const winRef = useRef<HTMLDivElement>(null)
   // On phones the draggable/tilting 348px window is too big and blocks scroll — dock it as a
@@ -70,7 +99,24 @@ export default function Player() {
     // A-SIDE / BOOTLEG version switch hanging below the fold on first boot. Clamped so the whole
     // window still fits on a short viewport.
     const h = winRef.current?.offsetHeight ?? 360
-    setPos({ x: 24, y: Math.max(8, window.innerHeight - h - 20) })
+    let next = { x: 24, y: Math.max(8, window.innerHeight - h - 20) }
+    try {
+      const raw = localStorage.getItem('so.player')
+      if (raw) {
+        const saved = JSON.parse(raw)
+        if (typeof saved.x === 'number' && typeof saved.y === 'number') {
+          // Clamp to the CURRENT viewport: a position saved on a big monitor would otherwise
+          // put the window off-screen on a laptop, with no way to drag it back.
+          next = {
+            x: Math.max(4, Math.min(window.innerWidth - 80, saved.x)),
+            y: Math.max(4, Math.min(window.innerHeight - 40, saved.y)),
+          }
+        }
+      }
+    } catch {
+      /* unreadable — use the default dock */
+    }
+    setPos(next)
     setPlaced(true)
   }, [placed])
 
@@ -86,6 +132,7 @@ export default function Player() {
     setPos({ x, y })
   }
   const onTitleUp = () => {
+    if (dragRef.current) savePlacement(pos, minimized)
     dragRef.current = null
   }
 
@@ -128,6 +175,10 @@ export default function Player() {
     return () => window.removeEventListener('keydown', onKey)
   }, [audio])
 
+  useEffect(() => {
+    if (playlistOpen) currentRowRef.current?.scrollIntoView({ block: 'nearest' })
+  }, [playlistOpen, slug])
+
   const pct = duration ? (currentTime / duration) * 100 : 0
   const overheating = thermal.temperature > 78
   const cooling = thermal.dewPointHit
@@ -155,7 +206,12 @@ export default function Player() {
         <div className="title-btns">
           <button
             className="tb"
-            onClick={() => setMinimized((m) => !m)}
+            onClick={() =>
+              setMinimized((m) => {
+                savePlacement(pos, !m)
+                return !m
+              })
+            }
             aria-label={minimized ? 'Restore' : 'Minimize'}
             title={minimized ? 'Restore' : 'Roll up'}
           >
@@ -163,6 +219,21 @@ export default function Player() {
           </button>
         </div>
       </div>
+
+      {minimized && (
+        // Winamp's shade mode stayed useful when rolled up. Ours went completely blank, so a
+        // collapsed player was just a title bar you had to expand to do anything with.
+        <div className="player-shade">
+          <button className="tbtn sm" onClick={() => audio.toggle()} aria-label="Play/Pause">
+            {isPlaying ? '⏸' : '▶'}
+          </button>
+          <span className="shade-title">{track ? track.title : 'INSERT DISC'}</span>
+          <span className="shade-time">{fmt(currentTime)}</span>
+          <div className="shade-bar" aria-hidden>
+            <span style={{ width: `${pct}%` }} />
+          </div>
+        </div>
+      )}
 
       {!minimized && (
         <div className="player-body">
@@ -229,7 +300,13 @@ export default function Player() {
               🔁
             </button>
             <div className="knobs">
-              <Knob label="VOL" value={volume} onChange={(v) => audio.setVolume(v)} color="#12e0c0" />
+              <Knob
+                label={volume > 0.001 ? 'VOL' : 'MUTE'}
+                value={volume}
+                onChange={(v) => audio.setVolume(v)}
+                onTap={toggleMute}
+                color={volume > 0.001 ? '#12e0c0' : '#7a8590'}
+              />
               <Knob label="FRICTION" value={friction} onChange={setFriction} color="#ff2e9a" />
             </div>
           </div>
@@ -286,6 +363,7 @@ export default function Player() {
               {tracks.map((t, i) => (
                 <li key={t.slug}>
                   <button
+                    ref={t.slug === slug ? currentRowRef : undefined}
                     className={`pl-row ${t.slug === slug ? 'on' : ''}`}
                     onClick={() => audio.playTrack(t.slug)}
                     aria-current={t.slug === slug ? 'true' : undefined}
