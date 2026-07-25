@@ -85,16 +85,20 @@ export const thermalFrag = /* glsl */ `
   // room has heads on the overhead truss, on the corners, uplights along the floor lip and
   // towers at the sides — and the desk CHANGES the look every few bars. uPattern cycles those.
   vec2 beamOrigin(float fi, float pat){
-    if (pat < 0.5) return vec2(((fi-2.5)/2.5)*0.55, 0.62);                  // overhead truss
-    if (pat < 1.5) return vec2(mod(fi,2.0) < 0.5 ? -0.95 : 0.95, 0.60);     // corner trusses
-    if (pat < 2.5) return vec2(((fi-2.5)/2.5)*0.72, -0.52);                 // floor uplights
-    return vec2(mod(fi,2.0) < 0.5 ? -1.05 : 1.05, ((fi-2.5)/2.5)*0.30);     // side towers
+    // NB: every origin sits OUTSIDE the frame. A light source inside the picture puts its own
+    // blown-out hotspot on screen — six of those whited the page out completely.
+    if (pat < 0.5) return vec2(((fi-2.5)/2.5)*0.65, 1.05);                  // overhead truss
+    if (pat < 1.5) return vec2(mod(fi,2.0) < 0.5 ? -1.35 : 1.35, 1.00);     // corner trusses
+    if (pat < 2.5) return vec2(((fi-2.5)/2.5)*0.85, -1.00);                 // floor uplights
+    if (pat < 3.5) return vec2(mod(fi,2.0) < 0.5 ? -1.5 : 1.5, ((fi-2.5)/2.5)*0.35); // side towers
+    return vec2(0.0, 0.0);                                                  // classic centre burst
   }
   float beamAim(float fi, float pat){
     if (pat < 0.5) return -1.5708;                                           // straight down
     if (pat < 1.5) return mod(fi,2.0) < 0.5 ? -0.95 : -2.19;                 // inward + down
     if (pat < 2.5) return 1.5708;                                            // straight up
-    return mod(fi,2.0) < 0.5 ? 0.0 : 3.1416;                                 // across the room
+    if (pat < 3.5) return mod(fi,2.0) < 0.5 ? 0.0 : 3.1416;                  // across the room
+    return fi * 1.2566;                                                      // radiating outward
   }
 
   vec3 rig(vec2 q, float sweep, float fan, float pat){
@@ -110,7 +114,12 @@ export const thermalFrag = /* glsl */ `
       // A head throws a RAY, not an infinite line — mask to what's in front of the lens, and
       // fall off with throw distance so the far end of the beam dies into the haze.
       float fwd = smoothstep(-0.04, 0.18, dot(rel, dir));
-      float att = fwd / (1.0 + length(rel)*0.85);
+      // Fade IN away from the lens as well as out with distance: without the near-field term
+      // the pixels closest to each head saturate to white.
+      float len = length(rel);
+      // Small near-field radius only: enough to stop a blown-out blob AT the lens, but not so
+      // wide that it erases the centre-burst look (whose origin is the middle of the screen).
+      float att = fwd * smoothstep(0.0, 0.10, len) / (1.0 + len*0.9);
       float w = 0.0030 + uBeat*0.012 + uBass*0.004 + uDrop*0.02; // fattens on the hit
       float core = smoothstep(w, 0.0, d) * att;
       // Halo width/strength are deliberately restrained: the alpha of this whole layer is its
@@ -126,7 +135,7 @@ export const thermalFrag = /* glsl */ `
       // reading — Kiki's pages go magenta, Dieter's cold blue, Ibiza sunrise gold. Alternating
       // beams keep their own hue so the fan still reads as multi-coloured rather than flat.
       lc = mix(lc, uAccent, mod(fi, 2.0) < 0.5 ? 0.78 : 0.30);
-      c += lc * (core + halo*0.07) * (0.08 + uHat*0.5 + uBeat*1.25 + uBuild*0.5 + uDrop*1.6);
+      c += lc * (core + halo*0.06) * (0.09 + uHat*0.45 + uBeat*1.2 + uBuild*0.45 + uDrop*1.4);
     }
     return c;
   }
@@ -172,7 +181,7 @@ export const thermalFrag = /* glsl */ `
       }
       t += 0.17;
     }
-    return acc * (0.30 + uBeat*0.85 + uDrop*1.6);
+    return acc * (0.22 + uBeat*0.6 + uDrop*1.1);
   }
 
   void main(){
@@ -257,8 +266,15 @@ export const thermalFrag = /* glsl */ `
     // grid of LED cells — the cell pattern read as a pink checkerboard sitting on top of the
     // photo instead of as part of the room.
     float spec = texture2D(uFreq, vec2(uv.x, 0.5)).r;
-    float lip = 0.02 + spec * 0.10;
-    col += mix(uAccent, vec3(1.0), 0.25) * smoothstep(lip, 0.0, uv.y) * (0.18 + uBeat*0.3);
+    float lip = 0.022 + spec * 0.115;
+    vec3 wallCol = mix(uAccent, vec3(1.0), 0.24);
+    // the LED CELLS are back — this is the bottom spectrum you liked. Soft-edged so they don't
+    // alias into harsh flicker, and nothing is drawn on top of them any more.
+    float cellY = smoothstep(0.16, 0.44, fract(uv.y * 92.0));
+    float cellX = smoothstep(0.06, 0.26, fract(uv.x * 128.0));
+    col += wallCol * step(uv.y, lip) * cellY * cellX * (0.34 + uBeat*0.42 + uDrop*0.6);
+    // soft spill of light up off the strip
+    col += wallCol * step(uv.y, lip + 0.075) * smoothstep(lip + 0.075, lip, uv.y) * (0.05 + uLevel*0.05);
 
     // DROP = pyro. Rays fire out of the middle for the length of the release.
     if (uDrop > 0.01) {
@@ -292,11 +308,12 @@ export const thermalFrag = /* glsl */ `
     // grain (friction) + scanlines
     float grain = (hash(uv*uRes + uTime)-0.5)*(0.05+uFriction*0.2);
     col += grain;
-    col -= sin(uv.y*uRes.y*1.1)*0.015*uFriction;
 
     // alpha = luminance so dark areas are transparent (footage shows through)
-    vec3 outc = max(col, 0.0);
-    float a = clamp(dot(outc, vec3(0.34,0.5,0.16))*1.3, 0.0, 1.0);
+    // Hard ceiling on both brightness and alpha. Whatever the rig does, the footage underneath
+    // must stay readable — "sometimes you can't see anything" is never an acceptable state.
+    vec3 outc = min(max(col, 0.0), vec3(1.25));
+    float a = clamp(dot(outc, vec3(0.34,0.5,0.16))*1.15, 0.0, 0.62);
     gl_FragColor = vec4(outc, a);
   }
 `

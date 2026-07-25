@@ -127,7 +127,7 @@ function Mainstage() {
     }
     // Change the LOOK every 4 bars, on the bar line — so the rig moves from the overhead
     // truss to the corners to floor uplights to side towers, like a desk running cues.
-    u.uPattern.value = Math.floor(mu.beatIndex / 16) % 4
+    u.uPattern.value = Math.floor(mu.beatIndex / 16) % 5
     const target = ACCENTS[useSiteStore.getState().accent] ?? ACCENTS.default
     const k = 1 - Math.exp(-dt / 0.35)
     u.uAccent.value.x += (target[0] - u.uAccent.value.x) * k
