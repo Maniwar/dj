@@ -4,11 +4,15 @@
 DJ Dieter & Kiki G — and their multi-platinum, moisture-laden album
 _"Club Humidity — The Moist Mix 2002."_**
 
+### ▶ [**LOG ON & PLUG IN — maniwar.github.io/dj**](https://maniwar.github.io/dj/)
+
 An interactive, audio-reactive, deliberately excessive Y2K rave artifact: 19 real tracks
 behind a persistent streaming MP3 player, 13 character-locked AI music videos, a WebGL
 condensation layer, a scroll-driven origin story and world tour, and karaoke.
 
 > Parody. Lovingly. All moisture reserved.
+>
+> **Turn your sound on.** The site starts streaming the moment you log on.
 
 ---
 
@@ -40,10 +44,11 @@ masters), `capture.mjs` / `capture-ultrawide.mjs` / `perf.mjs` (QA), `smoke.mjs`
 
 **Stack:** React 18 · TypeScript · Vite · Three.js / react-three-fiber · Zustand · Web Audio API
 
-**Deploy:** every push to `main` builds and publishes to GitHub Pages via
-`.github/workflows/deploy.yml`. It's a *project* page, so the build sets `BASE_PATH=/dj/`
-and every asset URL goes through `withBase()` (`src/lib/asset.ts`) to resolve under the
-subpath.
+**Deploy:** live at **<https://maniwar.github.io/dj/>**. Every push to `main` builds and
+publishes there via `.github/workflows/deploy.yml`. It's a *project* page, so the build sets
+`BASE_PATH=/dj/` and every asset URL goes through `withBase()` (`src/lib/asset.ts`) to
+resolve under the subpath — which is why assets must never be referenced with a bare
+leading `/`.
 
 ---
 
