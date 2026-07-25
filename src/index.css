@@ -816,6 +816,17 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      the tour rail on the right */
   .lyric-stage { left: 4vw; right: 12vw; bottom: 104px; }
   .ls-next { display: none; }
+  /* The desktop clamp bottoms out at 1.1rem, which on a 390px phone left the lyric at 17.6px —
+     unreadable for what is meant to be the centrepiece. Scale it off the viewport instead. */
+  .ls-line { font-size: clamp(1.35rem, 6.4vw, 2.1rem); line-height: 1.06; }
+  /* On a phone the lyric is a fixed overlay sitting on whatever section happens to be scrolled
+     under it, so it needs its own ground to stay readable — a soft scrim, feathered at the
+     edges so it never looks like a box pasted over the page. */
+  .lyric-stage::before {
+    content: ""; position: absolute; inset: -0.6em -1.2em;
+    background: radial-gradient(75% 120% at 50% 50%, rgba(4,3,8,0.82), rgba(4,3,8,0) 72%);
+    z-index: -1; pointer-events: none;
+  }
 }
 @media (orientation: landscape) and (max-height: 560px) { .lyric-stage { display: none; } }
 
