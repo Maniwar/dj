@@ -4,7 +4,7 @@ import { useSiteStore } from '../../state/useSiteStore'
 import { lyricsFor } from '../../data/lyricLines'
 import timingsData from '../../data/lyricTimings.json'
 
-const TIMINGS = timingsData as unknown as Record<string, number[] | undefined>
+const TIMINGS = timingsData as unknown as Record<string, number[][] | undefined>
 
 // Karaoke teleprompter. Uses REAL per-line timestamps produced by forced alignment against
 // the audio (scripts/align-lyrics.py), keyed by version so a bootleg edit tracks its own
@@ -33,7 +33,7 @@ export default function Lyrics() {
     if (times && times.length) {
       let idx = 0
       for (let i = 0; i < times.length; i++) {
-        if (times[i] <= currentTime) idx = i
+        if (times[i]?.length && times[i][0] <= currentTime) idx = i
         else break
       }
       return Math.min(totalLines - 1, idx)

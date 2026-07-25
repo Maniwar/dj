@@ -58,6 +58,7 @@ function Mainstage() {
       uQuality: { value: PERF.isMobile ? 0 : 1 }, // phones skip the costliest shader passes
       uSong: { value: 0 }, // per-track lighting design (stable hash of the slug)
       uPattern: { value: 0 }, // which rig look is up; changes every 4 bars
+      uVocal: { value: 0 },   // impulse each time a sung word lands
       uTemp: { value: 0 },
       uHumidity: { value: 0.35 },
       uDew: { value: 0 },
@@ -114,6 +115,7 @@ function Mainstage() {
     u.uBar.value = mu.barPhase
     u.uBuild.value = mu.build
     u.uDrop.value = mu.drop
+    u.uVocal.value = audioBus.vocal
     // Ease toward the current section's colour rather than snapping — a hard cut in the rig
     // colour on a scroll boundary looks like a bug; a ~1s fade reads as the lighting following
     // the story. (Same rate regardless of framerate.)

@@ -35,6 +35,7 @@ export const thermalFrag = /* glsl */ `
   uniform float uQuality; // 1 = full rig, 0 = phone tier (skips the expensive passes)
   uniform float uSong;    // per-track lighting design: 0..1, derived from the track slug
   uniform float uPattern; // which rig look is up: 0 overhead, 1 corners, 2 floor, 3 sides
+  uniform float uVocal;   // a sung WORD just landed
   uniform float uTemp;
   uniform float uHumidity;
   uniform float uDew;
@@ -109,7 +110,7 @@ export const thermalFrag = /* glsl */ `
     if (fi < 3.5) return 0.10 + uSnare*1.9 + uDrop*1.2;              // corners: SNAP on the backbeat
     if (fi < 5.5) return 0.05 + uBuild*1.8 + uLevel*0.35;            // floor: swells through a build
     if (fi < 6.5) return (0.20 + uBeat*0.8) * step(1.0, mod(pat,2.0)); // side tower: every other cue
-    return 0.06 + uDown*1.1 + uDrop*2.2;                             // centre: ACCENT only, not a constant
+    return 0.06 + uDown*1.1 + uDrop*2.2 + uVocal*0.9;                // centre: accents + the VOCAL
   }
 
   vec3 rig(vec2 q, float sweep, float fan, float pat){
@@ -260,6 +261,13 @@ export const thermalFrag = /* glsl */ `
     // HATS = fine sparkle in the air, resampled fast so it glitters rather than crawls
     float sp = step(0.997 - uHat*0.02, hash(floor(uv*vec2(240.0,150.0)) + floor(uTime*34.0)));
     col += vec3(0.85,1.0,1.0) * sp * uHat * 0.55;
+    // THE VOCAL LIGHTS THE ROOM: every sung word throws a bloom up off the lyric line and
+    // shoves a ring outward, so the rig is answering the singing and not only the drum kit.
+    float ly = uv.y - 0.075;
+    col += uAccent * uVocal * 0.5 * exp(-abs(ly)*9.0) * (0.4 + uHat);
+    float vr = length(p - vec2(0.0, -0.42));
+    col += mix(uAccent, vec3(1.0), 0.4) * uVocal
+         * smoothstep(0.05, 0.0, abs(vr - (1.0-uVocal)*0.5)) * 0.45;
     // FOLLOW SPOT — a head that tracks your cursor. uMouse was already being smoothed every
     // frame and never read by anything; now the rig acknowledges you're in the room.
     vec2 mpos = vec2((uMouse.x-0.5)*aspect, uMouse.y-0.5);

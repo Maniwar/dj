@@ -109,6 +109,13 @@ class AudioBusImpl {
   music: Music = { bpm: 0, beatPhase: 0, barPhase: 0, beatIndex: 0, downbeat: 0, build: 0, drop: 0 }
   thermal: Thermal = { temperature: 22, humidity: 0.35, dewPointHit: false, overclock: 0 }
   playing = false
+  // Fires when a lyric WORD lands (LyricStage calls hitVocal from the aligned word timings).
+  // The light rig reads this, so the room flares on the vocal — not just on the drums.
+  vocal = 0
+
+  hitVocal() {
+    this.vocal = 1
+  }
 
   private analyser: AnalyserNode | null = null
   private prevBass = 0
@@ -274,6 +281,7 @@ class AudioBusImpl {
       if (m.beatIndex % 4 === 0) m.downbeat = 1
       this.beatEnv = 1
     }
+    this.vocal *= Math.exp(-dt / 190)
     this.beatEnv *= Math.exp(-dt / 170)
     this.bands.beat = this.beatEnv
 

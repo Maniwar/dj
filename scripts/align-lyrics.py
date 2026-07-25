@@ -28,6 +28,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 MP3_DIR = ROOT / "mp3"
 OUT = ROOT / "src" / "data" / "lyricTimings.json"
+CACHE = ROOT / ".align-cache"  # raw ASR word timings, so re-runs never re-transcribe
 MODEL = os.environ.get("ALIGN_MODEL", "small")
 ONLY = os.environ.get("ALIGN_ONLY")
 
@@ -69,20 +70,29 @@ def main():
             print(f"  ({n}/{len(jobs)}) {vid} — MISSING {path.name}", flush=True)
             continue
         t0 = time.time()
+        CACHE.mkdir(exist_ok=True)
+        cache_f = CACHE / f"{vid}.json"
+        if cache_f.exists():
+            heard = [(w[0], float(w[1])) for w in json.loads(cache_f.read_text())]
+            segments = None
+        else:
+            heard = None
         prompt = " ".join(known)[:850]  # bias the recogniser with the words we expect
-        segments, _ = model.transcribe(
+        segments, _ = (model.transcribe(
             str(path), word_timestamps=True, initial_prompt=prompt,
             # NB: vad_filter MUST stay off. Voice-activity detection is trained on speech and
             # throws away sung vocals over a loud instrumental — with it on, the back half of
             # every track was discarded and those lines got invented by interpolation instead.
             vad_filter=False, beam_size=5, condition_on_previous_text=False, language="en",
-        )
-        heard = []  # (normalised token, start seconds)
-        for seg in segments:
-            for w in (seg.words or []):
-                nw = norm(w.word)
-                if nw:
-                    heard.append((nw, float(w.start)))
+        ) if heard is None else (None, None))
+        if heard is None:
+            heard = []  # (normalised token, start seconds)
+            for seg in segments:
+                for w in (seg.words or []):
+                    nw = norm(w.word)
+                    if nw:
+                        heard.append((nw, float(w.start)))
+            cache_f.write_text(json.dumps(heard))
 
         # known tokens, tagged with the line they belong to
         ktoks, kline = [], []
@@ -93,14 +103,18 @@ def main():
                     ktoks.append(nt)
                     kline.append(i)
 
-        # monotonic alignment between what we know and what was heard
+        # monotonic alignment between what we know and what was heard.
+        # Keep the time of EVERY word, not just the first of each line — that's what lets the
+        # lyric light up word by word as it's actually sung.
+        tok_time = [None] * len(ktoks)
         line_time = [None] * len(known)
         if heard and ktoks:
             sm = difflib.SequenceMatcher(a=ktoks, b=[h[0] for h in heard], autojunk=False)
             for ai, bi, size in sm.get_matching_blocks():
                 for k in range(size):
-                    li = kline[ai + k]
                     ts = heard[bi + k][1]
+                    tok_time[ai + k] = ts
+                    li = kline[ai + k]
                     if line_time[li] is None or ts < line_time[li]:
                         line_time[li] = ts
 
@@ -129,7 +143,25 @@ def main():
             if line_time[i] < line_time[i - 1]:
                 line_time[i] = line_time[i - 1]
 
-        out[vid] = [round(x, 2) for x in line_time]
+        # fill unmatched word times inside each line, then emit word arrays per line
+        words_per_line = []
+        for li in range(len(known)):
+            idxs = [i for i, l in enumerate(kline) if l == li]
+            base = line_time[li]
+            nxt = line_time[li + 1] if li + 1 < len(known) else base + 2.5
+            span = max(0.35, min(6.0, nxt - base))
+            ts = []
+            for j, ti in enumerate(idxs):
+                t = tok_time[ti]
+                if t is None or t < base or t > base + span:
+                    # spread evenly across the line's span when the word wasn't heard
+                    t = base + span * (j / max(1, len(idxs)))
+                ts.append(t)
+            for j in range(1, len(ts)):           # keep words monotonic within the line
+                if ts[j] < ts[j - 1]:
+                    ts[j] = ts[j - 1]
+            words_per_line.append([round(x, 2) for x in ts])
+        out[vid] = words_per_line
         OUT.write_text(json.dumps(out, indent=0, sort_keys=True))
         print(f"  ({n}/{len(jobs)}) {vid} — {matched}/{len(known)} lines anchored "
               f"({time.time()-t0:.0f}s)", flush=True)
