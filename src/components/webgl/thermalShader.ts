@@ -206,11 +206,11 @@ export const thermalFrag = /* glsl */ `
     vec3 rd = normalize(vec3(p.x, p.y, 1.0));
     vec3 acc = vec3(0.0);
     float t = 0.35;
-    for(int s=0; s<20; s++){
+    for(int s=0; s<16; s++){
       vec3 pos = ro + rd*t;
       // haze is thicker toward the floor and drifts slowly, so beams break up as they descend
       float dens = (0.55 + 0.45*noise(pos.xz*1.6 + uTime*0.05)) * smoothstep(1.3, -0.5, pos.y);
-      for(int i=0; i<5; i++){
+      for(int i=0; i<4; i++){
         float fi = float(i);
         // the volumetric heads move with the look too, so the god rays come from wherever
         // the rig currently is rather than always hanging over the middle
@@ -224,7 +224,7 @@ export const thermalFrag = /* glsl */ `
         float cone = smoothstep(0.9885 - uBuild*0.012, 0.9997, dot(L/dist, cd));
         acc += rigColour(fi) * cone * dens / (1.0 + dist*dist*1.7);
       }
-      t += 0.17;
+      t += 0.21;   // fewer, longer steps cover the same depth
     }
     return acc * (0.22 + uBeat*0.6 + uDrop*1.1);
   }

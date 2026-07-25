@@ -18,6 +18,7 @@ export default function SectionCut() {
   const armed = useRef(false)
   const armedAt = useRef(0)
   const current = useRef('')
+  const startWatch = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     if (!loggedOn || reduced) return
@@ -35,33 +36,42 @@ export default function SectionCut() {
           if (first) continue // no cut on the very first section we land in
           armed.current = true
           armedAt.current = performance.now()
+          startWatch.current?.()
         }
       },
       { rootMargin: '-45% 0px -45% 0px', threshold: 0 }, // the section crossing screen centre
     )
     sections.forEach((s) => io.observe(s))
 
+    // The watcher only runs while a cut is ARMED. It used to run every frame for the life of
+    // the page purely to poll a flag that is false almost all of the time — a permanent rAF
+    // loop doing nothing.
     let raf = 0
     let lastBeat = -1
     const loop = () => {
-      if (armed.current) {
-        const beat = audioBus.music.beatIndex
-        const onDownbeat = beat !== lastBeat && beat % 4 === 0
-        const stale = performance.now() - armedAt.current > ARM_TIMEOUT_MS
-        if (onDownbeat || stale || !audioBus.playing) {
-          armed.current = false
-          setCut((c) => c + 1)
-        }
-        lastBeat = beat
-      } else {
-        lastBeat = audioBus.music.beatIndex
+      if (!armed.current) {
+        raf = 0
+        return // nothing pending: stop the loop entirely rather than spin
       }
+      const beat = audioBus.music.beatIndex
+      const onDownbeat = beat !== lastBeat && beat % 4 === 0
+      const stale = performance.now() - armedAt.current > ARM_TIMEOUT_MS
+      if (onDownbeat || stale || !audioBus.playing) {
+        armed.current = false
+        setCut((c) => c + 1)
+        raf = 0
+        return
+      }
+      lastBeat = beat
       raf = requestAnimationFrame(loop)
     }
-    raf = requestAnimationFrame(loop)
+    startWatch.current = () => {
+      lastBeat = audioBus.music.beatIndex
+      if (!raf) raf = requestAnimationFrame(loop)
+    }
     return () => {
       io.disconnect()
-      cancelAnimationFrame(raf)
+      if (raf) cancelAnimationFrame(raf)
     }
   }, [loggedOn, reduced])
 

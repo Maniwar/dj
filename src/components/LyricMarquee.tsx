@@ -15,10 +15,16 @@ export default function LyricMarquee({
   pxPerSec?: number
   offset?: number
 }) {
+  // A seamless marquee only needs enough content to fill the screen about twice — it loops.
+  // Rendering the entire lyric corpus (~650 hooks, doubled) put 1,300 spans in EACH marquee,
+  // 6,500 across the page, and since .lm-item glows off --m-beat every one of them was being
+  // style-invalidated on every frame. 40 hooks is still far more than a wide screen can show.
+  const PER_MARQUEE = 40
   const hooks = useMemo(() => {
     const h = allHooks()
-    // rotate so different marquees show different lines
-    return h.length ? h.slice(offset % h.length).concat(h.slice(0, offset % h.length)) : []
+    if (!h.length) return []
+    const rotated = h.slice(offset % h.length).concat(h.slice(0, offset % h.length))
+    return rotated.slice(0, PER_MARQUEE)
   }, [offset])
 
   const runRef = useRef<HTMLDivElement>(null)
