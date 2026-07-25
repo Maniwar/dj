@@ -27,10 +27,12 @@ if (typeof window !== 'undefined') {
 function Mainstage() {
   const matRef = useRef<THREE.ShaderMaterial>(null)
   const songSlugRef = useRef('')
+  const agcRef = useRef(0) // running peak for the spectrum strip's auto-gain
   const { size, gl } = useThree()
 
   // RGBA spectrum texture (universally supported) — the giant LED wall + lasers read it
   const freqData = useMemo(() => new Uint8Array(FREQ_BINS * 4), [])
+  const bandRaw = useMemo(() => new Float32Array(FREQ_BINS), [])
   const freqTex = useMemo(() => {
     const t = new THREE.DataTexture(freqData, FREQ_BINS, 1, THREE.RGBAFormat)
     t.minFilter = THREE.LinearFilter
@@ -82,13 +84,38 @@ function Mainstage() {
     u.uTime.value += dt
     const b = audioBus.bands
     const t = audioBus.thermal
-    // push downsampled FFT into the texture for the LED wall
+    // ---- SPECTRUM STRIP ----
+    // Bands are spaced LOGARITHMICALLY, not linearly. A linear split maps most of the strip's
+    // width onto 10–22kHz, where these tracks carry almost nothing — which is why the right-hand
+    // end sat flat and dead — while squeezing the bass and mids, where the music actually lives,
+    // into the first few pixels. Log spacing (40Hz–13kHz) gives every octave equal width, so the
+    // strip moves across its whole length.
     const src = audioBus.freq
-    const step = Math.max(1, Math.floor(src.length / FREQ_BINS))
+    const nyquist = 22050
+    const fMin = 40, fMax = 13000
+    const ratio = fMax / fMin
+    let frameMax = 0
     for (let i = 0; i < FREQ_BINS; i++) {
+      const f0 = fMin * Math.pow(ratio, i / FREQ_BINS)
+      const f1 = fMin * Math.pow(ratio, (i + 1) / FREQ_BINS)
+      const b0 = Math.max(0, Math.floor((f0 / nyquist) * src.length))
+      const b1 = Math.min(src.length, Math.max(b0 + 1, Math.ceil((f1 / nyquist) * src.length)))
       let m = 0
-      for (let j = 0; j < step; j++) m += src[i * step + j] || 0
-      const v = Math.min(255, (m / step) * 1.25)
+      for (let j = b0; j < b1; j++) m += src[j]
+      m /= b1 - b0
+      bandRaw[i] = m
+      if (m > frameMax) frameMax = m
+    }
+    // Auto-gain against a running peak, exactly like the player's EQ: recorded music rarely
+    // pushes the analyser near full scale, so without this the bars only ever use the bottom
+    // of their range and look flat regardless of what's playing.
+    agcRef.current = frameMax > agcRef.current
+      ? frameMax
+      : agcRef.current * 0.94 + frameMax * 0.06
+    const ref = Math.max(24, agcRef.current)
+    for (let i = 0; i < FREQ_BINS; i++) {
+      // slight gamma so the quiet detail lifts without the peaks clipping into a solid block
+      const v = Math.min(255, 255 * Math.pow(Math.min(1, bandRaw[i] / ref), 0.78))
       const o = i * 4
       freqData[o] = v
       freqData[o + 1] = v

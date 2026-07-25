@@ -284,7 +284,7 @@ export const thermalFrag = /* glsl */ `
     // grid of LED cells — the cell pattern read as a pink checkerboard sitting on top of the
     // photo instead of as part of the room.
     float spec = texture2D(uFreq, vec2(uv.x, 0.5)).r;
-    float lip = 0.022 + spec * 0.115;
+    float lip = 0.018 + spec * 0.165; // taller: the data spans its full range now
     vec3 wallCol = mix(uAccent, vec3(1.0), 0.24);
     // the LED CELLS are back — this is the bottom spectrum you liked. Soft-edged so they don't
     // alias into harsh flicker, and nothing is drawn on top of them any more.
