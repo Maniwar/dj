@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { audioBus } from '../audio/audioBus'
 import { usePlayerStore } from '../state/usePlayerStore'
 import { useSiteStore } from '../state/useSiteStore'
-import { cleanLyric, isSungLine, lyricVoice } from '../data/sungLines'
+import { cleanLyric, isSungLine, resolveVoices } from '../data/sungLines'
 import lyricsData from '../data/lyrics.json'
 import timingsData from '../data/lyricTimings.json'
 
@@ -34,6 +34,7 @@ export default function LyricStage() {
   const song = slug ? SONGS[slug] : undefined
   // must match scripts/align-lyrics.py exactly — the timing arrays are indexed against it
   const lines = useMemo(() => (song?.lines ?? []).filter(isSungLine), [song])
+  const voices = useMemo(() => resolveVoices(lines), [lines])
   const times = versionId ? TIMINGS[versionId] : undefined
 
   useEffect(() => {
@@ -87,9 +88,9 @@ export default function LyricStage() {
   if (!times?.length) return null // unaligned version: show nothing rather than something wrong
   const cur = idx >= 0 ? lines[idx] : undefined
   if (!cur) return null
-  // The [Male]/[Female] tag is explicit in the source, so the singer colour is reliable here
-  // even though the per-line `voice` field wasn't across versions.
-  const voice = lyricVoice(cur.text)
+  // Resolved per song (tag > field > carried forward) so every line has a singer instead of
+  // most of them falling through to one default colour.
+  const voice = voices[idx]
   const words = cleanLyric(cur.text).split(' ')
 
   return (

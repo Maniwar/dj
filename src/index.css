@@ -650,9 +650,10 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   text-align: center; pointer-events: none;
   --v: var(--magenta);
 }
-/* singer colour, taken from the explicit [Male]/[Female] tag in the lyrics */
+/* singer colour — resolved per line (tag > voice field > carried forward) */
 .lyric-stage.v-dieter { --v: var(--blue); }
 .lyric-stage.v-kiki { --v: var(--magenta); }
+.lyric-stage.v-both { --v: var(--acid); }
 .ls-line {
   font-family: 'Anton', sans-serif; text-transform: uppercase; line-height: 0.98;
   font-size: clamp(1.1rem, 3.1vw, 2.5rem); color: #fff;
