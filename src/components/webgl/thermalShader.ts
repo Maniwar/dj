@@ -56,17 +56,25 @@ export const thermalFrag = /* glsl */ `
     vec2 u=f*f*(3.-2.*f); return mix(a,b,u.x)+(c-a)*u.y*(1.-u.x)+(d-b)*u.x*u.y;
   }
   float fbm(vec2 p){ float v=0.,a=.5; for(int i=0;i<4;i++){ v+=a*noise(p); p*=2.03; a*=.5; } return v; }
+  // Condensation beading on the lens. Two faults made these read as big grey squares snowing
+  // across the club rather than water on glass:
+  //   • the grid was only 15 divisions wide — ~85px cells on a 1280px screen, so each "bead"
+  //     was enormous;
+  //   • the distance test runs inside a single cell, so any bead drifting near a cell edge got
+  //     sliced flat by it — which is where the square edges came from.
+  // Fixed by making the cells far finer and the bead small relative to its cell, so a bead
+  // never reaches the boundary that would clip it.
   float droplets(vec2 uv, float density){
     float acc=0.0;
     for(int layer=0; layer<2; layer++){
-      float s = 15.0*(1.0+float(layer)*0.85);
+      float s = 46.0*(1.0+float(layer)*0.85);
       vec2 gv=uv*s; vec2 id=floor(gv); vec2 f=fract(gv)-0.5;
       float rnd=hash(id+float(layer)*31.7);
       if(rnd>1.0-density){
         float drip=fract(uTime*0.04+rnd*7.0);
-        vec2 c=vec2((rnd-0.5)*0.5, 0.5-drip);
+        vec2 c=vec2((rnd-0.5)*0.34, 0.34-drip*0.68); // stays clear of the cell edge
         float d=length(f-c);
-        acc += smoothstep(0.15,0.0,d);
+        acc += smoothstep(0.085,0.0,d);
       }
     }
     return clamp(acc,0.0,1.0);
@@ -292,7 +300,10 @@ export const thermalFrag = /* glsl */ `
     // ~10px wide on a 1280px screen — chunky enough to read as huge pixels rather than an LED
     // strip — and worse, they resized with the window. 4px cells look like a real LED matrix
     // and stay that size at any resolution.
-    float cellPx = 4.0;
+    // You liked the fine cells AND the chunky ones, so the panel changes resolution with the
+    // rig cue — fine 3px dots, mid 6px, chunky 10px blocks — cycling on the bar line like the
+    // rest of the show rather than sitting at one size forever.
+    float cellPx = uPattern < 1.5 ? 3.0 : (uPattern < 3.5 ? 6.0 : 10.0);
     float cellY = smoothstep(0.12, 0.40, fract(uv.y * uRes.y / cellPx));
     float cellX = smoothstep(0.12, 0.40, fract(uv.x * uRes.x / cellPx));
     col += wallCol * step(uv.y, lip) * cellY * cellX * (0.34 + uBeat*0.42 + uDrop*0.6);
