@@ -69,6 +69,42 @@ export const thermalFrag = /* glsl */ `
     return clamp(acc,0.0,1.0);
   }
 
+  // The whole light rig evaluated at a point. Pulled into a function so the WET FLOOR can
+  // evaluate it a second time at the mirrored position — an actual reflection rather than a
+  // painted-on gradient.
+  //
+  // Each beam is drawn as a hard CORE plus a wide soft HALO. That halo is the trick that makes
+  // the light read as real bloom: a true bloom pass means rendering to a target, downsampling,
+  // blurring and compositing every frame. Because this rig is procedural, the "blurred" version
+  // is just the same distance field with a fatter falloff — same look, no extra passes, no
+  // render targets, no new dependency.
+  vec3 rig(vec2 q, float sweep, float fan){
+    vec3 c = vec3(0.0);
+    for(int i=0;i<6;i++){
+      float fi=float(i);
+      float a = (fi-2.5)*fan + sin(sweep + fi*1.04)*(0.55 + uBuild*0.35);
+      vec2 dir = vec2(cos(a), sin(a));
+      float d = abs(dot(q, vec2(dir.y,-dir.x)));
+      float w = 0.0030 + uBeat*0.012 + uBass*0.004 + uDrop*0.02; // fattens on the hit
+      float core = smoothstep(w, 0.0, d);
+      // Halo width/strength are deliberately restrained: the alpha of this whole layer is its
+      // own luminance, so an over-bright halo turns the overlay opaque and BURIES the footage
+      // underneath. The footage is the star; the rig lights it.
+      float halo = smoothstep(w*9.0, 0.0, d);
+      vec3 lc = fi<0.5 ? vec3(1.0,0.12,0.56)
+              : (fi<1.5 ? vec3(0.39,1.0,0.18)
+              : (fi<2.5 ? vec3(0.08,0.88,1.0)
+              : (fi<3.5 ? vec3(0.65,0.3,1.0)
+              : (fi<4.5 ? vec3(1.0,0.12,0.56) : vec3(0.39,1.0,0.18)))));
+      // Pull most beams toward the SECTION's colour so the rig belongs to whatever you're
+      // reading — Kiki's pages go magenta, Dieter's cold blue, Ibiza sunrise gold. Alternating
+      // beams keep their own hue so the fan still reads as multi-coloured rather than flat.
+      lc = mix(lc, uAccent, mod(fi, 2.0) < 0.5 ? 0.78 : 0.30);
+      c += lc * (core + halo*0.07) * (0.08 + uHat*0.5 + uBeat*1.25 + uBuild*0.5 + uDrop*1.6);
+    }
+    return c;
+  }
+
   void main(){
     vec2 uv = vUv;
     float aspect = uRes.x/max(1.0,uRes.y);
@@ -84,23 +120,31 @@ export const thermalFrag = /* glsl */ `
     // to a new spread on the downbeat. That's what makes it read as choreography.
     float sweep = uBar * 6.2831853;
     float fan = 0.34 + uBuild*0.22 + uDown*0.16;   // rig opens up as the energy climbs
-    for(int i=0;i<6;i++){
-      float fi=float(i);
-      float a = (fi-2.5)*fan + sin(sweep + fi*1.04)*(0.55 + uBuild*0.35);
-      vec2 dir = vec2(cos(a), sin(a));
-      float d = abs(dot(p, vec2(dir.y,-dir.x)));
-      float w = 0.0030 + uBeat*0.012 + uBass*0.004 + uDrop*0.02; // fattens on the hit
-      float streak = smoothstep(w, 0.0, d);
-      vec3 lc = fi<0.5 ? vec3(1.0,0.12,0.56)
-              : (fi<1.5 ? vec3(0.39,1.0,0.18)
-              : (fi<2.5 ? vec3(0.08,0.88,1.0)
-              : (fi<3.5 ? vec3(0.65,0.3,1.0)
-              : (fi<4.5 ? vec3(1.0,0.12,0.56) : vec3(0.39,1.0,0.18)))));
-      // Pull most beams toward the SECTION's colour so the rig belongs to whatever you're
-      // reading — Kiki's pages go magenta, Dieter's cold blue, Ibiza sunrise gold. Alternating
-      // beams keep their own hue so the fan still reads as multi-coloured rather than flat.
-      lc = mix(lc, uAccent, mod(fi, 2.0) < 0.5 ? 0.78 : 0.30);
-      col += lc * streak * (0.08 + uHat*0.5 + uBeat*1.25 + uBuild*0.5 + uDrop*1.6);
+    vec3 beams = rig(p, sweep, fan);
+    col += beams;
+
+    // DUST hanging in the air. Motes drift slowly upward and are only visible where a beam
+    // actually lands on them — which is what sells the beams as volumes of light rather than
+    // lines drawn on glass.
+    // Sampled on a fine grid, and each mote is a ROUND falloff inside its cell — a plain
+    // step() on a coarse grid lights the whole cell, which reads as blocky squares, not dust.
+    vec2 dgrid = vec2(uv.x, uv.y + uTime*0.015) * 320.0;
+    vec2 dcell = floor(dgrid);
+    float mote = step(0.9955, hash(dcell));
+    float dot2 = smoothstep(0.5, 0.0, length(fract(dgrid) - 0.5)); // round, soft-edged
+    col += vec3(1.0) * mote * dot2 * dot(beams, vec3(0.36)) * 0.9;
+
+    // WET FLOOR. This club is always soaked, so the stage floor mirrors the rig: the lights now
+    // have something to land on. The reflection re-evaluates the ACTUAL rig at the mirrored
+    // point (not a faded copy), smeared sideways by a ripple that swells with the bass, and
+    // falls off with depth. Phones skip it — it doubles the beam maths.
+    float horizon = 0.26;
+    if (uQuality > 0.5 && uv.y < horizon) {
+      float depth = (horizon - uv.y) / horizon;            // 0 at the floor line -> 1 at bottom
+      vec2 muv = vec2(uv.x, horizon + (horizon - uv.y));   // mirror across the floor line
+      vec2 mp = vec2((muv.x-0.5)*aspect, muv.y-0.5);
+      mp.x += sin(uv.y*70.0 - uTime*1.8) * 0.008 * (0.35 + uBass) * depth; // ripple
+      col += rig(mp, sweep, fan) * (1.0 - depth) * 0.5;
     }
 
     float r = length(p);
