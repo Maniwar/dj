@@ -17,6 +17,7 @@ smoke-shots
 # QA screenshot output
 ultrawide-shots/
 smoke-shots/
+qa-shots/
 
 # 1080p video masters (kept local, out of the Pages deploy)
 video-masters/

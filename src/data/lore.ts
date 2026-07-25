@@ -11,6 +11,8 @@ export type LoreStop = {
   image: string
   accent: 'kiki' | 'dieter' | 'both'
   videoKey?: string
+  /** Optional named line-up, rendered as a roster instead of one block of prose. */
+  roster?: { name: string; tag: string; line: string }[]
 }
 
 export const LORE_STOPS: LoreStop[] = [
@@ -31,6 +33,32 @@ export const LORE_STOPS: LoreStop[] = [
     accent: 'dieter',
     image: '/assets/lore/dieter-hero.jpg',
     body: `Former MIDI-workstation salesman of Munich; keeps all forty-one framed noise complaints above the decks. Believes — with his whole bare chest — that he IS a synthesizer. Communicates exclusively via a deep sleazy whisper and one thin, decisive moustache. The leather jacket has never been zipped. The sunglasses have never come off. Not even in the sauna. ESPECIALLY not in the sauna.`,
+  },
+  {
+    id: 'crew',
+    kind: 'hero',
+    eyebrow: 'THE ENTOURAGE · BACKING VOCALS · CROWD CONTROL · LEOPARD LOGISTICS',
+    title: 'THE CREW',
+    accent: 'both',
+    image: '/assets/ref/crew.jpg',
+    body: `Credited on every sleeve as "backing vocals", though not one of them has been within four metres of a microphone. Dieter believes they work for him. They work for Kiki. Kiki never hired them — they materialised in Munich in 1998 and simply never left.`,
+    roster: [
+      {
+        name: 'TANJA',
+        tag: 'LEOPARD · SIX FOOT · GOLD HOOPS',
+        line: 'Enters a room the way weather enters a room. Has never queued.',
+      },
+      {
+        name: 'MITZI',
+        tag: 'PLATINUM & PINK · GLOW BRACELETS',
+        line: 'Five foot nothing. Owns forty-one glow bracelets and one volume setting.',
+      },
+      {
+        name: 'BRIGITTE',
+        tag: 'COPPER CURLS · CHROME · WHISTLE',
+        line: 'The whistle is not decorative. Freckles rated 9.4 on the humidity index.',
+      },
+    ],
   },
   {
     id: 'munich',

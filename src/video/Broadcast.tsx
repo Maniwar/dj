@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { audioBus } from '../audio/audioBus'
 import { withBase } from '../lib/asset'
+import { videoSrc } from '../lib/videoRendition'
 import { PERF } from '../lib/perfFlags'
 import { usePlayerStore } from '../state/usePlayerStore'
 import { useSiteStore } from '../state/useSiteStore'
@@ -139,7 +140,7 @@ export default function Broadcast() {
         <video
           key={vids[vidIdx % vids.length]}
           className="bc-video"
-          src={withBase(vids[vidIdx % vids.length])}
+          src={videoSrc(vids[vidIdx % vids.length])}
           autoPlay
           muted
           playsInline

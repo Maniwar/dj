@@ -1,7 +1,7 @@
 {
   "name": "club-humidity",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "System Overload // Club Humidity — The Moist Mix 2002. A campy Y2K cyber-club promo site.",
   "scripts": {

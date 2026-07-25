@@ -239,7 +239,7 @@ section { position: relative; padding: 9vh 6vw; }
 
 /* ================= BOOT GATE / LOG ON ================= */
 .boot-gate { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: radial-gradient(120% 90% at 50% 15%, #3a0d17 0%, #120504 55%, #000 100%); }
-.boot-inner { text-align: center; padding: 6vw; max-width: 780px; }
+.boot-inner { text-align: center; padding: clamp(1.25rem, 6vw, 3.5rem); max-width: 780px; }
 .boot-logo { display: flex; flex-direction: column; gap: 0.5rem; }
 .boot-logo .drip { font-family: 'Anton', sans-serif; font-weight: 900; font-size: clamp(2.8rem, 10vw, 6.5rem); line-height: 0.9; }
 .boot-sub { font-family: 'Oswald', sans-serif; color: var(--gold); letter-spacing: 0.4em; font-size: 0.78rem; }
@@ -259,12 +259,35 @@ section { position: relative; padding: 9vh 6vw; }
 .boot-warn { color: #e79; font-size: 0.72rem; margin-top: 1.6rem; letter-spacing: 0.12em; font-family: 'Oswald', sans-serif; }
 .boot-console { font-family: 'Courier New', monospace; text-align: left; background: rgba(2,10,7,0.85); border: 1px solid var(--gold-deep); padding: 1.2rem; border-radius: 8px; color: #ffe9b0; box-shadow: 0 0 50px rgba(230,192,90,0.2), inset 0 0 40px rgba(0,0,0,0.4); }
 .boot-line { font-size: 0.84rem; line-height: 1.75; text-shadow: 0 0 6px rgba(230,192,90,0.4); }
+
+/* ---- Very large displays -------------------------------------------------------------------
+   The gate is a fixed 780px column with type capped in rem, which on a 5K/7K panel leaves the
+   whole thing a postage stamp adrift in the middle of the screen. Everything here scales off vh
+   rather than vw on purpose: these displays are enormously WIDE but no taller than usual, so
+   sizing by width would overshoot wildly while sizing by height tracks how far away the viewer
+   actually is from the panel. */
+@media (min-width: 2200px) {
+  .boot-inner { max-width: clamp(780px, 34vw, 1500px); }
+  .boot-logo .drip { font-size: clamp(6.5rem, 9vh, 11rem); }
+  .boot-sub { font-size: clamp(0.78rem, 1.5vh, 1.35rem); letter-spacing: 0.42em; }
+  .boot-ver { font-size: clamp(0.66rem, 1.15vh, 1.05rem); }
+  .boot-tag { font-size: clamp(0.8rem, 1.4vh, 1.25rem); margin: 3rem 0 2.4rem; }
+  .logon-btn { font-size: clamp(1.7rem, 2.5vh, 2.7rem); padding: 1.4rem 3.4rem; }
+  .boot-warn { font-size: clamp(0.72rem, 1.2vh, 1.1rem); margin-top: 2.2rem; }
+  .boot-console { padding: 1.8rem 2.2rem; }
+  .boot-line { font-size: clamp(0.84rem, 1.45vh, 1.3rem); }
+}
 .boot-line .prompt { color: var(--gold); }
 .boot-bar { height: 10px; background: #1a0f05; border: 1px solid var(--gold-deep); margin-top: 0.9rem; border-radius: 3px; overflow: hidden; }
 .boot-bar span { display: block; height: 100%; background: var(--grad-gold); transition: width 0.3s; }
 
 /* ================= HERO ================= */
-.hero { min-height: 100vh; display: grid; place-items: center; text-align: center; padding-top: 10vh; }
+/* section.hero, NOT .hero. The lore slides use "hero" as a MODIFIER — .lore-stop.hero and
+   .lore-name.hero — so an unscoped .hero was handing every character's NAME a min-height of
+   100vh and a 10vh top pad. That one leak was inflating a 144px headline into a 1479px block and
+   pushing the body copy clean out of the bottom of the slide. Only <section class="hero"> (the
+   page's own hero, #top) should ever match. */
+section.hero { min-height: 100vh; display: grid; place-items: center; text-align: center; padding-top: 10vh; }
 .hero-inner { max-width: 1000px; }
 .hero-crest { margin-bottom: 1.4rem; }
 .eyebrow { font-family: 'Oswald', sans-serif; color: var(--gold); letter-spacing: 0.35em; font-size: 0.74rem; margin-bottom: 1rem; text-transform: uppercase; }
@@ -304,15 +327,64 @@ section { position: relative; padding: 9vh 6vw; }
 /* full-bleed cover so the scene is BIG. HERO portraits anchor to the TOP so the head is never
    cropped at any aspect (ultrawide-short cuts top/bottom); a slow Ken-Burns pan adds motion
    AND drifts to reveal the cropped edges over time (works at every width, incl. mobile). */
-.lore-bg { position: absolute; inset: 0; background-size: cover; background-position: center; background-color: #0a0a12;
+.lore-bg { position: absolute; inset: 0; background-size: cover; background-position: center;
+  background-repeat: no-repeat; /* cover hides this, but the extreme-aspect rule below switches to
+    'auto 100%', where the default 'repeat' would tile ~3.5 copies across a 32:9 screen */
+  background-color: #0a0a12;
   filter: brightness(0.7) contrast(1.08) saturate(1.2); }
 .lore-stop.hero .lore-bg { background-position: center; filter: none; } /* centered + crop-safe; filter moved off the animated layer (see .lore-stop.hero .lore-scan) so the Ken-Burns is a clean, smooth GPU texture */
-/* Extreme-wide (>= 21:9) desktops: full-bleed COVER on the SQUARE hero portraits scales to
-   width and crops ~70% of the height; center-anchoring lands that on the torso and lops the
-   head off. Bias the crop upward so the face stays framed (head-and-shoulders). The wide 16:9
-   scene/tour images don't need this — only the two square hero portraits do. */
-@media (min-aspect-ratio: 2/1) {
-  .lore-stop.hero .lore-bg { background-position: center 30%; }
+/* ---- Wide-screen head safety ---------------------------------------------------------------
+   The two hero portraits are SQUARE (2048x2048) shown full-bleed with COVER, so the wider the
+   screen the thinner the band of the source that survives: 56% of its height at 16:9, 42% at
+   21:9, only 28% at 32:9. Kiki's head occupies roughly 5%-40% of that height, so a centred crop
+   lands on her collarbone and takes the head clean off. Each tier re-centres the crop on the
+   face. Measured per aspect rather than guessed — see the geometry in the commit. */
+@media (min-aspect-ratio: 17/10) { /* 1.7:1 — ordinary 16:9 desktops were ALREADY clipping */
+  .lore-stop.hero .lore-bg { background-position: center 34%; }
+}
+@media (min-aspect-ratio: 41/20) { /* 2.05:1 — 21:9 ultrawides */
+  /* 25%, not 27%: at 2.39:1 a 42% band sits at 4%-46%, which leaves the crown of the head a
+     sliver of air instead of shaving it off at the hairline. */
+  .lore-stop.hero .lore-bg { background-position: center 25%; }
+  /* the 16:9 scene footage keeps only ~50% of its height here; bias it up so faces and raised
+     arms stay in frame instead of the dance floor */
+  .lore-video, .journey-video, .bc-video { object-position: center 38%; }
+  .journey-bg, .bc-frame { background-position: center 38%; }
+}
+/* Past ~2.2:1 nothing can be gained by re-centring alone, so the media stops being full-bleed
+   and becomes a centred BAND of fixed maximum aspect, with a blurred over-scaled copy of the
+   same frame filling the sides.
+   Two things matter here and both were wrong before:
+   1. The band is capped at 2.2:1 rather than the source's own aspect. A square portrait shown
+      in a 2.2:1 window still reveals 45% of its height, which at a 25% anchor is rows 2.5%-47.5%
+      — the entire head AND shoulders. Contain-to-full-height was far too conservative: it left
+      1440px of picture on a 5120px screen and enormous bars.
+   2. The SAME band applies to .lore-bg and .lore-video, so a still and a clip in this section
+      have identical borders. Previously the stills letterboxed while the videos stayed
+      full-bleed, so the margins jumped as you scrolled between them. */
+@media (min-aspect-ratio: 11/5) {
+  .lore-stop .lore-band {
+    /* An explicit width, NOT left+right+width:auto. For an absolutely positioned REPLACED
+       element (the <video>) `width: auto` resolves to the intrinsic width and the right inset is
+       simply dropped — which measured 2560px wide and visibly off-centre while the still beside
+       it sat at 3168px. Width + left keeps the still and the clip pixel-identical.
+       Left inset rather than a translateX because .lore-bg's transform belongs to Ken-Burns. */
+    --band: min(100%, calc(100vh * 2.2));
+    width: var(--band);
+    left: calc((100% - var(--band)) / 2);
+    right: auto;
+  }
+  .lore-stop.hero .lore-bg { background-size: cover; background-position: center 25%; }
+
+  /* 16:9 footage keeps ~81% of its height inside the band; the upward anchor puts that on the
+     faces and raised arms rather than the dance floor */
+  .lore-video { object-position: center 35%; }
+  .lore-fill { display: block; }
+}
+.lore-fill {
+  display: none; position: absolute; inset: 0;
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+  filter: blur(60px) brightness(0.4) saturate(1.35); transform: scale(1.15);
 }
 /* heroes: barely-there Ken-Burns (start at full cover, no zoom) so the whole head + margin
    stays in frame — the 14% kbPan zoom was clipping the crown of the head. */
@@ -325,9 +397,13 @@ section { position: relative; padding: 9vh 6vw; }
   from { transform: scale(1) translate(0, 0); }
   to   { transform: scale(1.1) translate(2.5%, 2%); }
 }
+/* Wrapper around the scene media. Full-bleed by default; on very wide screens the media query
+   above turns it into the centred band, and its overflow:hidden is what keeps Ken-Burns inside
+   the frame instead of spilling over the side fill. */
+.lore-band { position: absolute; inset: 0; overflow: hidden; }
 .lore-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
   background: #0a0a12; }
-.lore-video ~ .lore-scan { background:
+.lore-stop[data-media="video"] .lore-scan { background:
   linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.30)),
   repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0 2px, transparent 2px 4px),
   radial-gradient(135% 100% at 50% 45%, transparent 55%, rgba(3,3,8,0.4) 100%); }
@@ -366,11 +442,29 @@ section { position: relative; padding: 9vh 6vw; }
 .lore-eyebrow { display: inline-block; font-family: 'Oswald', sans-serif; letter-spacing: 0.2em; font-size: 0.7rem;
   color: var(--accent); text-transform: uppercase; margin-bottom: 0.8rem; text-shadow: 0 0 10px var(--accent); }
 .lore-name { font-family: 'Anton', sans-serif; text-transform: uppercase; line-height: 0.88; margin: 0 0 1rem;
-  font-size: clamp(2.4rem, 6.5vw, 5rem); color: #fff;
+  font-size: clamp(2rem, min(6.5vw, 9vh), 5rem); color: #fff;
   filter: drop-shadow(0 2px 0 rgba(0,0,0,0.6)) drop-shadow(0 0 calc(14px + var(--m-beat,0)*26px) var(--accent)); }
-.lore-name.hero { font-size: clamp(3.4rem, 12vw, 9rem); -webkit-text-stroke: 1.5px rgba(255,255,255,0.28);
+.lore-name.hero { font-size: clamp(2.6rem, min(12vw, 15vh), 9rem); -webkit-text-stroke: 1.5px rgba(255,255,255,0.28);
   background: linear-gradient(180deg, #fff, var(--accent)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.lore-body { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(1.15rem, 2.2vw, 1.7rem); line-height: 1.55; color: #eef3f7; margin: 0; }
+/* min(vw, vh): sized on width ALONE this overflowed the 100vh stop on a wide-but-short window
+   (an ultrawide, or any window dragged short) and the last lines of the body were simply cut
+   off. Taking the smaller of the two makes the panel shrink to fit the height it actually has. */
+.lore-body { font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(1rem, min(2.2vw, 2.7vh), 1.7rem); line-height: 1.5; color: #eef3f7; margin: 0; }
+
+/* The crew are three separate people, so they get a roster rather than one block of prose —
+   it reads faster, it's funnier line by line, and it's far shorter vertically. */
+.lore-roster { list-style: none; margin: 1.1rem 0 0; padding: 0; display: grid;
+  gap: clamp(0.5rem, 1.2vh, 0.9rem); }
+.lore-roster li { display: grid; gap: 0.12rem; }
+.lore-roster-name { font-family: 'Anton', sans-serif; text-transform: uppercase;
+  font-size: clamp(1.1rem, min(2.4vw, 3vh), 1.9rem); color: #fff; letter-spacing: 0.02em;
+  filter: drop-shadow(0 0 calc(8px + var(--m-beat,0) * 16px) var(--accent)); }
+.lore-roster-tag { font-family: 'Oswald', sans-serif; font-size: clamp(0.56rem, 1.15vh, 0.72rem);
+  letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; }
+.lore-roster-line { font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(0.9rem, min(1.9vw, 2.3vh), 1.35rem); line-height: 1.4; color: #cfd8e2; }
+.lore-stop.side-right .lore-roster li { justify-items: end; }
 .lore-tag { display: inline-block; margin-top: 1.1rem; font-family: 'Courier New', monospace; font-size: 0.74rem; color: var(--accent); letter-spacing: 0.08em; }
 @media (max-width: 720px) {
   /* Show the WHOLE character image (contain) so nobody gets cropped off the edges; keep the
@@ -1086,4 +1180,15 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   .journey-blurb { font-size: clamp(0.9rem, 4vh, 1.2rem); }
   .lore-stop { align-items: center; padding: 8vh 0; }
   .lore-panel { margin-bottom: 0; }
+}
+
+/* Build stamp under the boot logo — deliberately quiet: it's a diagnostic, not part of the show. */
+.boot-ver {
+  display: block;
+  margin-top: 6px;
+  font-family: 'Courier New', ui-monospace, monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  color: rgba(230, 192, 90, 0.55); /* gold, matching .boot-sub — quiet but findable */
+  text-transform: uppercase;
 }

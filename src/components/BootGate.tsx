@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useSiteStore } from '../state/useSiteStore'
 import { useAudio } from '../audio/AudioProvider'
 import { usePlayerStore } from '../state/usePlayerStore'
+import { BUILD_STAMP } from '../version'
+import { bootAssets, warm, connectionAllowsPrefetch } from '../lib/preload'
 
 const BOOT_LINES = [
   'DIALING EUROBEAT RECORDS MAINFRAME... ▓▓▓▓▓▓▓',
@@ -13,6 +15,13 @@ const BOOT_LINES = [
   'SYSTEM OVERLOAD READY. STAY MOIST.',
 ]
 
+// The boot console was pure theatre on a fixed timer while the real assets loaded whenever they
+// felt like it. Now it's the actual load sequence: the bar reports real bytes landing, and the
+// door opens when the mainstage is genuinely warm — bounded at both ends so it still reads as a
+// sequence on a fast pipe and never traps anyone on a slow one.
+const MIN_BOOT_MS = 2600
+const MAX_BOOT_MS = 9000
+
 export default function BootGate() {
   const loggedOn = useSiteStore((s) => s.loggedOn)
   const booting = useSiteStore((s) => s.booting)
@@ -20,6 +29,7 @@ export default function BootGate() {
   const finishBoot = useSiteStore((s) => s.finishBoot)
   const audio = useAudio()
   const [line, setLine] = useState(0)
+  const [progress, setProgress] = useState(0)
 
   // Lock page scroll while the gate/boot overlay covers the screen — the fixed overlay hides
   // the page but the document behind it was still scrollable. Restore on log-on.
@@ -39,15 +49,28 @@ export default function BootGate() {
   useEffect(() => {
     if (!booting) return
     setLine(0)
-    const iv = setInterval(() => {
-      setLine((l) => {
-        if (l >= BOOT_LINES.length - 1) {
-          clearInterval(iv)
-          setTimeout(finishBoot, 650)
-          return l
-        }
-        return l + 1
+    setProgress(0)
+
+    const started = performance.now()
+    let ready = false
+    if (connectionAllowsPrefetch()) {
+      warm(bootAssets(), (p) => {
+        setProgress(p)
+        if (p >= 1) ready = true
       })
+    } else {
+      // metered or 2G: don't speculatively download anything, just play the sequence
+      ready = true
+      setProgress(1)
+    }
+
+    const iv = setInterval(() => {
+      setLine((l) => Math.min(l + 1, BOOT_LINES.length - 1))
+      const elapsed = performance.now() - started
+      if (elapsed >= MIN_BOOT_MS && (ready || elapsed >= MAX_BOOT_MS)) {
+        clearInterval(iv)
+        finishBoot()
+      }
     }, 360)
     return () => clearInterval(iv)
   }, [booting, finishBoot])
@@ -69,6 +92,7 @@ export default function BootGate() {
         <div className="boot-logo">
           <span className="drip">CLUB HUMIDITY</span>
           <span className="boot-sub">SYSTEM OVERLOAD // THE MOIST MIX 2002</span>
+          <span className="boot-ver">BUILD {BUILD_STAMP}</span>
         </div>
 
         {!booting ? (
@@ -92,7 +116,12 @@ export default function BootGate() {
               </div>
             ))}
             <div className="boot-bar">
-              <span style={{ width: `${((line + 1) / BOOT_LINES.length) * 100}%` }} />
+              {/* real download progress, floored by the line count so the bar always moves */}
+              <span
+                style={{
+                  width: `${Math.max(progress, (line + 1) / BOOT_LINES.length) * 100}%`,
+                }}
+              />
             </div>
           </div>
         )}

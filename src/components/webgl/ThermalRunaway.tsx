@@ -10,11 +10,28 @@ import { PERF } from '../../lib/perfFlags'
 const AMBIENT = 22
 const MAXT = 125
 const FREQ_BINS = 64
-// The full-screen fragment shader is the heaviest thing on the page. Cap the render
-// resolution hard on phones (1x) and modestly on desktop (1.4x) so the beat cuts, lasers
-// and the whole compositing stack stay at 60fps instead of flickering.
-const MAX_DPR =
-  typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches ? 1 : 1.4
+// The full-screen fragment shader is the heaviest thing on the page, and its cost scales with
+// PIXEL COUNT — so a big display was being punished: ~161M shader ops per frame on a laptop
+// versus ~1.3 BILLION at 4K. A fixed 1.4x device-pixel cap made that worse, because on a hidpi
+// screen it renders ABOVE native resolution.
+//
+// So the canvas is sized to a pixel BUDGET instead. Small screens are unaffected (they already
+// fit inside it and still get the 1.4x crispness); large ones render below native and are
+// upscaled by the compositor. That trade is nearly invisible here specifically because this
+// layer is beams, bloom and haze — soft, low-frequency content with no fine detail or text to
+// lose. It is the one way to keep a 4K display smooth WITHOUT cutting any of the visuals.
+const PIXEL_BUDGET = 2_300_000 // ≈ 1920x1200 worth of shader work
+const MIN_SCALE = 0.55 // never go so soft that the beams smear
+const MAX_SCALE = 1.4
+
+function shaderScale(cssW: number, cssH: number): number {
+  if (typeof window === 'undefined') return 1
+  const dpr = window.devicePixelRatio || 1
+  if (window.matchMedia('(max-width: 768px)').matches) return Math.min(1, dpr)
+  const area = Math.max(1, cssW * cssH)
+  const fit = Math.sqrt(PIXEL_BUDGET / area) // scale that lands exactly on the budget
+  return Math.max(MIN_SCALE, Math.min(MAX_SCALE, Math.min(dpr, fit)))
+}
 
 const pointer = { x: 0.5, y: 0.5 }
 if (typeof window !== 'undefined') {
@@ -76,9 +93,11 @@ function Mainstage() {
   )
 
   useEffect(() => {
-    const dpr = Math.min(MAX_DPR, window.devicePixelRatio || 1)
-    gl.setPixelRatio(dpr)
-    uniforms.uRes.value.set(size.width * dpr, size.height * dpr)
+    // recomputed on every resize, so dragging between a laptop and an external 4K panel
+    // re-tunes the render scale instead of staying stuck at whatever the first screen implied
+    const scale = shaderScale(size.width, size.height)
+    gl.setPixelRatio(scale)
+    uniforms.uRes.value.set(size.width * scale, size.height * scale)
   }, [size, gl, uniforms])
 
   useFrame((_, dt) => {
@@ -206,7 +225,7 @@ export default function ThermalRunaway() {
           premultipliedAlpha: false,
           powerPreference: 'high-performance',
         }}
-        dpr={[1, MAX_DPR]}
+        dpr={[1, MAX_SCALE]}
         frameloop="always"
       >
         <Mainstage />

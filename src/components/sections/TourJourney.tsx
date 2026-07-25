@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { TOUR_CLIPS } from '../../data/tour.manifest'
 import { SCENES, hydrateRealVideo } from '../../video/broadcastFrames'
 import { withBase } from '../../lib/asset'
+import { videoSrc } from '../../lib/videoRendition'
 import { ACCENTS, useSiteStore, type AccentKey } from '../../state/useSiteStore'
 
 // Vehicle for each leg of the world tour — the crew travels city to city as you scroll.
@@ -103,7 +104,7 @@ export default function TourJourney() {
                   ref={(el) => {
                     videoRefs.current[c.id] = el
                   }}
-                  src={withBase(mp4)}
+                  src={videoSrc(mp4)}
                   poster={withBase(c.posterUrl)}
                   muted
                   loop

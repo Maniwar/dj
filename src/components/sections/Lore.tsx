@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { LORE_STOPS } from '../../data/lore'
 import { withBase } from '../../lib/asset'
+import { videoSrc } from '../../lib/videoRendition'
 import { useSiteStore } from '../../state/useSiteStore'
 import results from '../../data/atlascloud.results.json'
 
@@ -92,14 +93,27 @@ export default function Lore() {
               className={`lore-stop accent-${s.accent} ${s.kind} side-${side}`}
               key={s.id}
               data-active={i === active}
+              data-media={vid ? 'video' : 'still'}
             >
+              {/* Blurred sides-filler, behind BOTH the clip and the still. On screens wider than
+                  the media band (see the 11/5 media query) the frame is centred and this fills
+                  what's left, so a video stop and a still stop have the same borders. */}
+              <div
+                className="lore-fill"
+                style={{ backgroundImage: `url(${withBase(s.image)})` }}
+                aria-hidden
+              />
+              {/* The band CLIPS its media. Ken-Burns scales the frame up to 1.1, and on a wide
+                  screen an unclipped scale would push the picture out past the band edge and
+                  into the side fill — making the borders visibly breathe with the animation. */}
+              <div className="lore-band">
               {vid ? (
                 <video
                   className="lore-video"
                   ref={(el) => {
                     videoRefs.current[s.id] = el
                   }}
-                  src={withBase(vid)}
+                  src={videoSrc(vid)}
                   poster={withBase(s.image)}
                   muted
                   loop
@@ -110,14 +124,31 @@ export default function Lore() {
               ) : (
                 <div className="lore-bg" style={{ backgroundImage: `url(${withBase(s.image)})` }} />
               )}
+              </div>
               <div className="lore-scan" aria-hidden />
               <div className="lore-panel">
                 <span className="lore-eyebrow">{s.eyebrow}</span>
                 <h3 className={`lore-name ${s.kind}`}>{s.title}</h3>
                 <p className="lore-body">{s.body}</p>
+                {s.roster && (
+                  <ul className="lore-roster">
+                    {s.roster.map((r) => (
+                      <li key={r.name}>
+                        <span className="lore-roster-name">{r.name}</span>
+                        <span className="lore-roster-tag">{r.tag}</span>
+                        <span className="lore-roster-line">{r.line}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {s.kind === 'hero' && (
                   <span className="lore-tag">
-                    ● {s.id === 'kiki' ? 'SHE IS THE SIGNAL' : 'HE IS THE NOISE'}
+                    ●{' '}
+                    {s.id === 'kiki'
+                      ? 'SHE IS THE SIGNAL'
+                      : s.id === 'dieter'
+                        ? 'HE IS THE NOISE'
+                        : 'THEY ARE THE HUMIDITY'}
                   </span>
                 )}
               </div>
