@@ -101,7 +101,12 @@ body {
    1.05 -> 1.2 zoom + drift over ~6.5s so each still visibly moves within its time on screen. */
 .bc-frame.on { opacity: 1; animation: kenburns 6.5s ease-out both; }
 @keyframes kenburns { from { transform: scale(1.05) translate(0,0); } to { transform: scale(1.2) translate(-3%, -2%); } }
-.bc-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.68) saturate(1.2); }
+.bc-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* video mode only (the stills branch renders no .bc-video): the darkening that used to be a
+   filter ON the video. brightness(0.68) == a flat 0.32 black, and this layer never animates. */
+.bc-video ~ .bc-scan { background:
+  linear-gradient(rgba(0,0,0,0.32), rgba(0,0,0,0.32)),
+  repeating-linear-gradient(0deg, rgba(0,0,0,0.10) 0 2px, transparent 2px 4px); }
 .bc-strobe { position: absolute; inset: 0; background: #fff; opacity: calc(var(--beat) * 0.18); mix-blend-mode: screen; }
 .bc-grain { position: absolute; inset: -150%; opacity: 0.07; mix-blend-mode: overlay; animation: grainshift 0.5s steps(2) infinite;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
@@ -321,7 +326,11 @@ section { position: relative; padding: 9vh 6vw; }
   to   { transform: scale(1.1) translate(2.5%, 2%); }
 }
 .lore-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-  filter: brightness(0.7) contrast(1.08) saturate(1.2); background: #0a0a12; }
+  background: #0a0a12; }
+.lore-video ~ .lore-scan { background:
+  linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.30)),
+  repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0 2px, transparent 2px 4px),
+  radial-gradient(135% 100% at 50% 45%, transparent 55%, rgba(3,3,8,0.4) 100%); }
 /* Promote ONLY the active slide (was on all 6 .lore-bg at once, which blew the compositor layer
    budget and forced main-thread animation = the choppiness). One promoted layer at a time. */
 .lore-stop[data-active="true"] .lore-bg { animation: kbPan 18s ease-in-out infinite alternate; will-change: transform; }
@@ -993,7 +1002,11 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      full-bleed image. Never scales below 1, so no background edge is ever revealed. */
   scale: calc(1 + var(--m-beat, 0) * 0.09); }
 .journey-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;
-  filter: brightness(0.5) contrast(1.12) saturate(1.25); background-color: #0a0a12; }
+  background-color: #0a0a12; }
+.journey-video ~ .journey-scan { background:
+  linear-gradient(rgba(0,0,0,0.50), rgba(0,0,0,0.50)),
+  repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0 2px, transparent 2px 4px),
+  radial-gradient(135% 100% at 50% 45%, transparent 55%, rgba(3,3,8,0.4) 100%); }
 /* the calm baseline drift — starts at the RESTING transform so activating a stop never pops */
 .journey-stop[data-active="true"] .journey-bg {
   animation: journeyZoom 24s ease-in-out infinite alternate; will-change: transform; }

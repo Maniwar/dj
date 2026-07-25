@@ -17,6 +17,7 @@ import { BrandBar, Crest } from './components/Ornaments'
 import AudioReactive from './components/AudioReactive'
 import LyricMarquee from './components/LyricMarquee'
 import LyricStage from './components/LyricStage'
+import Precache from './components/Precache'
 import SectionCut from './components/SectionCut'
 import VisualizerMode from './components/VisualizerMode'
 import TourRail from './components/TourRail'
@@ -37,6 +38,7 @@ export default function App() {
       <ThermalRunaway />
       <LyricStage />
       <SectionCut />
+      <Precache />
       <VisualizerMode />
       <FrictionOverlay />
 
