@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { usePlayerStore, getTrack } from '../../state/usePlayerStore'
 import { useSiteStore } from '../../state/useSiteStore'
 import { lyricsFor } from '../../data/lyricLines'
+import { isSungLine } from '../../data/sungLines'
 import timingsData from '../../data/lyricTimings.json'
 
 const TIMINGS = timingsData as unknown as Record<string, number[][] | undefined>
@@ -25,7 +26,7 @@ export default function Lyrics() {
   const lineOrdinals = useMemo(() => {
     if (!song) return []
     let n = 0
-    return song.lines.map((l) => (l.type === 'line' ? n++ : -1))
+    return song.lines.map((l) => (isSungLine(l) ? n++ : -1))
   }, [song])
   const totalLines = useMemo(() => lineOrdinals.filter((o) => o >= 0).length, [lineOrdinals])
   const times = versionId ? TIMINGS[versionId] : undefined

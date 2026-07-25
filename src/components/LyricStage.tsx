@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { audioBus } from '../audio/audioBus'
 import { usePlayerStore } from '../state/usePlayerStore'
 import { useSiteStore } from '../state/useSiteStore'
+import { cleanLyric, isSungLine, lyricVoice } from '../data/sungLines'
 import lyricsData from '../data/lyrics.json'
 import timingsData from '../data/lyricTimings.json'
 
@@ -31,7 +32,8 @@ export default function LyricStage() {
   const sungRef = useRef(0)
 
   const song = slug ? SONGS[slug] : undefined
-  const lines = useMemo(() => (song?.lines ?? []).filter((l) => l.type === 'line'), [song])
+  // must match scripts/align-lyrics.py exactly — the timing arrays are indexed against it
+  const lines = useMemo(() => (song?.lines ?? []).filter(isSungLine), [song])
   const times = versionId ? TIMINGS[versionId] : undefined
 
   useEffect(() => {
@@ -85,10 +87,13 @@ export default function LyricStage() {
   if (!times?.length) return null // unaligned version: show nothing rather than something wrong
   const cur = idx >= 0 ? lines[idx] : undefined
   if (!cur) return null
-  const words = cur.text.split(' ')
+  // The [Male]/[Female] tag is explicit in the source, so the singer colour is reliable here
+  // even though the per-line `voice` field wasn't across versions.
+  const voice = lyricVoice(cur.text)
+  const words = cleanLyric(cur.text).split(' ')
 
   return (
-    <div className="lyric-stage" aria-hidden>
+    <div className={`lyric-stage${voice ? ` v-${voice}` : ''}`} aria-hidden>
       <div className="ls-line" key={idx}>
         {words.map((w, i) => {
           // already sung / landing right now / still to come
@@ -99,8 +104,14 @@ export default function LyricStage() {
                 {state === 'now'
                   ? // the word being sung right now snaps in letter by letter
                     w.split('').map((ch, j) => (
-                      <span className="ls-ch" style={{ animationDelay: `${j * 26}ms` }} key={j}>
-                        {ch}
+                      // Two nested spans on purpose: the outer one plays the ENTRANCE and the
+                      // inner one the continuous shimmer. Both animate `transform`, so on a
+                      // single element the infinite one silently overrode the entrance and the
+                      // per-letter cascade never showed at all.
+                      <span className="ls-ch" style={{ animationDelay: `${j * 34}ms` }} key={j}>
+                        <span className="ls-ch-i" style={{ animationDelay: `${j * 90}ms` }}>
+                          {ch === ' ' ? '\u00a0' : ch}
+                        </span>
                       </span>
                     ))
                   : w}

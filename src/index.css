@@ -650,6 +650,9 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   text-align: center; pointer-events: none;
   --v: var(--magenta);
 }
+/* singer colour, taken from the explicit [Male]/[Female] tag in the lyrics */
+.lyric-stage.v-dieter { --v: var(--blue); }
+.lyric-stage.v-kiki { --v: var(--magenta); }
 .ls-line {
   font-family: 'Anton', sans-serif; text-transform: uppercase; line-height: 0.98;
   font-size: clamp(1.1rem, 3.1vw, 2.5rem); color: #fff;
@@ -660,8 +663,8 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    split that converges — the same trick a title sequence uses to make type feel struck rather
    than faded. Sung words stay lit so the line reads as it accumulates. */
 .ls-word { display: inline-block; transition: opacity 0.18s ease, transform 0.18s ease; }
-.ls-word.todo { opacity: 0.22; transform: translateY(0.07em) scale(0.96); filter: blur(0.4px); }
-.ls-word.done { opacity: 0.9; }
+.ls-word.todo { opacity: 0.30; color: #c8d2de; transform: translateY(0.06em) scale(0.96); }
+.ls-word.done { opacity: 1; color: var(--v); text-shadow: 0 2px 0 rgba(0,0,0,0.85), 0 0 12px var(--v); }
 .ls-word.now {
   opacity: 1; color: #fff;
   transform: translateY(calc(-0.12em - var(--m-beat,0) * 0.06em)) scale(calc(1.12 + var(--m-beat,0) * 0.07));
@@ -673,11 +676,8 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    a second, slower animation runs forever with the same per-letter delay, so the letters bob
    and flare out of phase with each other instead of freezing into a static word. Both
    animations are transform/opacity only, so it all stays on the compositor. */
-.ls-ch {
-  display: inline-block;
-  animation: lsCh 0.30s cubic-bezier(0.2,0.9,0.2,1) both,
-             lsAlive 1.1s ease-in-out infinite alternate;
-}
+.ls-ch { display: inline-block; animation: lsCh 0.34s cubic-bezier(0.2,0.9,0.2,1) both; }
+.ls-ch-i { display: inline-block; animation: lsAlive 1.1s ease-in-out infinite alternate; }
 @keyframes lsAlive {
   from { transform: translateY(0) scale(1); }
   to   { transform: translateY(calc(-0.05em - var(--m-beat,0) * 0.06em))

@@ -32,6 +32,24 @@ CACHE = ROOT / ".align-cache"  # raw ASR word timings, so re-runs never re-trans
 MODEL = os.environ.get("ALIGN_MODEL", "small")
 ONLY = os.environ.get("ALIGN_ONLY")
 
+NOTE_RE = re.compile(r"^[(\[].*[)\]]\.?$")
+TAG_RE = re.compile(r"^\s*\[[^\]]+\]\s*")
+
+
+def clean(text: str) -> str:
+    """Strip the [Male]/[Female] speaker tag — nobody sings it, and as tokens they would never
+    be heard, so they only served to pull the alignment off."""
+    return TAG_RE.sub("", text or "").strip()
+
+def is_sung(line: dict) -> bool:
+    """Mirrors src/data/sungLines.ts — production notes like "(heavy four-on-the-floor beat)"
+    are not sung, and including them shifted every later line's timestamp."""
+    if line.get("type") != "line":
+        return False
+    t = clean(line.get("text"))
+    return bool(t) and not NOTE_RE.match(t)
+
+
 def norm(tok: str) -> str:
     return re.sub(r"[^a-z0-9]", "", tok.lower())
 
@@ -55,7 +73,7 @@ def main():
         song = lyrics.get(t["slug"])
         if not song:
             continue
-        known = [l["text"] for l in song["lines"] if l.get("type") == "line"]
+        known = [clean(l["text"]) for l in song["lines"] if is_sung(l)]
         if not known:
             continue
         for v in t["versions"]:
@@ -157,9 +175,11 @@ def main():
                     # spread evenly across the line's span when the word wasn't heard
                     t = base + span * (j / max(1, len(idxs)))
                 ts.append(t)
-            for j in range(1, len(ts)):           # keep words monotonic within the line
-                if ts[j] < ts[j - 1]:
-                    ts[j] = ts[j - 1]
+            # strictly increasing, with a floor between words: identical timestamps make a
+            # word appear to stick while the rest of the line jumps past it
+            for j in range(1, len(ts)):
+                if ts[j] < ts[j - 1] + 0.06:
+                    ts[j] = ts[j - 1] + 0.06
             words_per_line.append([round(x, 2) for x in ts])
         out[vid] = words_per_line
         OUT.write_text(json.dumps(out, indent=0, sort_keys=True))
