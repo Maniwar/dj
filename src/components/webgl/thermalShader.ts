@@ -266,9 +266,17 @@ export const thermalFrag = /* glsl */ `
     col += vec3(1.0,0.35,0.75) * ring * 0.5;
     // SNARE = the strobe answering the kick on the backbeat (a flat flash, no colour cast)
     col += vec3(1.0) * uSnare * 0.11;
-    // HATS = fine sparkle in the air, resampled fast so it glitters rather than crawls
-    float sp = step(0.997 - uHat*0.02, hash(floor(uv*vec2(240.0,150.0)) + floor(uTime*34.0)));
-    col += vec3(0.85,1.0,1.0) * sp * uHat * 0.55;
+    // HATS = fine sparkle in the air. THIS was the pale grey squares drifting over the whole
+    // page: step() on a cell hash lights the ENTIRE cell, and the cells were ~9x7px, so every
+    // sparkle was a hard-edged rectangle. Now each one is a small round point at a random spot
+    // inside its cell, on a much finer grid — glitter rather than tiles.
+    vec2 sgrid = uv * uRes / 5.0;
+    vec2 scell = floor(sgrid);
+    float sHash = hash(scell + floor(uTime * 26.0));
+    float sp = step(0.9975 - uHat * 0.02, sHash);
+    vec2 sJit = vec2(hash(scell + 5.1), hash(scell + 19.7));
+    float sDot = smoothstep(0.42, 0.0, length(fract(sgrid) - sJit));
+    col += vec3(0.85,1.0,1.0) * sp * sDot * uHat * 0.6;
     // THE VOCAL LIGHTS THE ROOM: every sung word throws a bloom up off the lyric line and
     // shoves a ring outward, so the rig is answering the singing and not only the drum kit.
     float ly = uv.y - 0.075;

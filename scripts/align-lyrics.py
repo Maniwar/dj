@@ -22,7 +22,7 @@ Run (one-off, or whenever songs are added):
 
 Output: src/data/lyricTimings.json  ->  { "<versionId>": [t0, t1, ...] }  (seconds, per line)
 """
-import json, os, re, sys, difflib, time
+import json, os, re, sys, time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -48,6 +48,56 @@ def is_sung(line: dict) -> bool:
         return False
     t = clean(line.get("text"))
     return bool(t) and not NOTE_RE.match(t)
+
+
+def align_tokens(a, b):
+    """Global (Needleman-Wunsch) alignment of known tokens to heard tokens.
+
+    difflib was used here first, and it fails on this material: it greedily takes the LONGEST
+    matching block, so with a chorus that repeats two or three times it can lock a line onto the
+    wrong repetition. Everything after that either bunches up or leaves a hole — in one track the
+    chorus landed 49s late while three lines crammed into 0.6s. A global DP optimises the whole
+    sequence at once and keeps the mapping monotonic, so repeats land on the right occurrence.
+
+    Returns {index into a: index into b} for matched pairs only.
+    """
+    MATCH, MISMATCH, GAP = 1.0, -0.6, -0.35
+    n, m = len(a), len(b)
+    if not n or not m:
+        return {}
+    prev = [GAP * j for j in range(m + 1)]
+    ptr = [bytearray(m + 1) for _ in range(n + 1)]
+    for j in range(m + 1):
+        ptr[0][j] = 2
+    for i in range(1, n + 1):
+        cur = [prev[0] + GAP]
+        ptr[i][0] = 1
+        ai = a[i - 1]
+        for j in range(1, m + 1):
+            d = prev[j - 1] + (MATCH if ai == b[j - 1] else MISMATCH)
+            u = prev[j] + GAP
+            l = cur[j - 1] + GAP
+            best, p = d, 0
+            if u > best:
+                best, p = u, 1
+            if l > best:
+                best, p = l, 2
+            cur.append(best)
+            ptr[i][j] = p
+        prev = cur
+    out, i, j = {}, n, m
+    while i > 0 and j > 0:
+        p = ptr[i][j]
+        if p == 0:
+            if a[i - 1] == b[j - 1]:
+                out[i - 1] = j - 1
+            i -= 1
+            j -= 1
+        elif p == 1:
+            i -= 1
+        else:
+            j -= 1
+    return out
 
 
 def norm(tok: str) -> str:
@@ -127,14 +177,13 @@ def main():
         tok_time = [None] * len(ktoks)
         line_time = [None] * len(known)
         if heard and ktoks:
-            sm = difflib.SequenceMatcher(a=ktoks, b=[h[0] for h in heard], autojunk=False)
-            for ai, bi, size in sm.get_matching_blocks():
-                for k in range(size):
-                    ts = heard[bi + k][1]
-                    tok_time[ai + k] = ts
-                    li = kline[ai + k]
-                    if line_time[li] is None or ts < line_time[li]:
-                        line_time[li] = ts
+            pairs = align_tokens(ktoks, [h[0] for h in heard])
+            for ai, bi in pairs.items():
+                ts = heard[bi][1]
+                tok_time[ai] = ts
+                li = kline[ai]
+                if line_time[li] is None or ts < line_time[li]:
+                    line_time[li] = ts
 
         matched = sum(1 for x in line_time if x is not None)
         # fill gaps: interpolate between known anchors, then force non-decreasing
