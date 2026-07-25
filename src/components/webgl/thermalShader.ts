@@ -174,13 +174,16 @@ export const thermalFrag = /* glsl */ `
     // DUST hanging in the air. Motes drift slowly upward and are only visible where a beam
     // actually lands on them — which is what sells the beams as volumes of light rather than
     // lines drawn on glass.
-    // Sampled on a fine grid, and each mote is a ROUND falloff inside its cell — a plain
-    // step() on a coarse grid lights the whole cell, which reads as blocky squares, not dust.
-    vec2 dgrid = vec2(uv.x, uv.y + uTime*0.015) * 320.0;
+    // Motes are placed at a RANDOM point inside each cell, not at its centre. Lighting cell
+    // centres puts every mote on a regular lattice, which the eye reads as marching columns of
+    // static rather than dust in the air. Jittering the position (and thinning them out) breaks
+    // the grid up completely.
+    vec2 dgrid = vec2(uv.x, uv.y + uTime*0.012) * 300.0;
     vec2 dcell = floor(dgrid);
-    float mote = step(0.9955, hash(dcell));
-    float dot2 = smoothstep(0.5, 0.0, length(fract(dgrid) - 0.5)); // round, soft-edged
-    col += vec3(1.0) * mote * dot2 * dot(beams, vec3(0.36)) * 0.9;
+    float mote = step(0.9975, hash(dcell));
+    vec2 jitter = vec2(hash(dcell + 11.3), hash(dcell + 27.9));
+    float dot2 = smoothstep(0.34, 0.0, length(fract(dgrid) - jitter));
+    col += vec3(1.0) * mote * dot2 * dot(beams, vec3(0.36)) * 0.5;
 
     // WET FLOOR. This club is always soaked, so the stage floor mirrors the rig: the lights now
     // have something to land on. The reflection re-evaluates the ACTUAL rig at the mirrored
@@ -217,8 +220,9 @@ export const thermalFrag = /* glsl */ `
     // pure wasted work. It's now the stage's LED strip: real spectrum, one texture fetch.
     float spec = texture2D(uFreq, vec2(uv.x, 0.5)).r;
     float barH = 0.018 + spec * 0.11; // a strip along the stage lip, not a wall up the screen
-    float ledGapY = step(0.30, fract(uv.y * 90.0));  // the gaps between LED rows
-    float ledGapX = step(0.16, fract(uv.x * 130.0)); // ...and between columns
+    // Softened edges on the LED grid — hard step() gaps alias into harsh flickering squares.
+    float ledGapY = smoothstep(0.18, 0.42, fract(uv.y * 90.0));
+    float ledGapX = smoothstep(0.06, 0.26, fract(uv.x * 130.0));
     vec3 wallCol = mix(uAccent, vec3(1.0), 0.22);
     col += wallCol * step(uv.y, barH) * ledGapY * ledGapX * (0.32 + uBeat*0.45 + uDrop*0.7);
     // and the light the wall throws back up into the haze

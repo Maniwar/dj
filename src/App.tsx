@@ -16,6 +16,7 @@ import Merch from './components/sections/Merch'
 import { BrandBar, Crest } from './components/Ornaments'
 import AudioReactive from './components/AudioReactive'
 import LyricMarquee from './components/LyricMarquee'
+import LyricStage from './components/LyricStage'
 import TourRail from './components/TourRail'
 import Lyrics from './components/player/Lyrics'
 import { useSiteStore } from './state/useSiteStore'
@@ -32,6 +33,7 @@ export default function App() {
       <AudioReactive />
       <Broadcast />
       <ThermalRunaway />
+      <LyricStage />
       <FrictionOverlay />
 
       <div className="content">
