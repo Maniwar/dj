@@ -119,7 +119,7 @@ export const thermalFrag = /* glsl */ `
     float g;
     if (fi < 1.5)      g = 0.30 + uBeat*1.15;                          // overhead: on the kick
     else if (fi < 3.5) g = 0.10 + uSnare*1.9 + uDrop*1.2;              // corners: SNAP on the backbeat
-    else if (fi < 5.5) g = 0.05 + uBuild*1.8 + uLevel*0.35;            // floor: swells through a build
+    else if (fi < 5.5) g = 0.02 + uBuild*1.9 + uBeat*0.55;              // floor: idle dark, swell on a build
     else if (fi < 6.5) g = (0.20 + uBeat*0.8) * step(1.0, mod(pat,2.0)); // side tower: alternate cues
     else               g = 0.06 + uDown*1.1 + uDrop*2.2 + uVocal*0.9;  // centre: accents + vocal
 
@@ -129,10 +129,19 @@ export const thermalFrag = /* glsl */ `
     // hard, while the rest sit back — so the eye has something to follow.
     float pick = mod(fi + floor(pat) * 2.0 + floor(uSong * 8.0), 8.0);
     float hero = step(pick, 1.5);                       // 2 of the 8 are heroes this cue
-    g *= mix(0.55, 2.6, hero);                          // the gap between hero and fill is wide
+    g *= mix(0.38, 5.0, hero);                          // a hero is >13x the fill, not 5x
     // and the heroes flare harder still on the hit
-    g += hero * (uBeat*0.9 + uDown*0.7 + uDrop*1.6);
+    g += hero * (uBeat*2.2 + uDown*1.6 + uDrop*3.0);   // and it SLAMS on the hit
     return g;
+  }
+
+  // Beam width per fixture. The floor uplights read as a wash because they were as wide as
+  // everything else while travelling the full height of the frame — a broad, near-vertical
+  // column of haze rather than a shaft of light. Narrow them right down.
+  float beamWidth(float fi){
+    if (fi > 3.5 && fi < 5.5) return 0.45;  // floor uplights: tight shafts
+    if (fi > 6.5) return 0.75;              // centre burst: crisper
+    return 1.0;
   }
 
   vec3 rig(vec2 q, float sweep, float fan, float pat){
@@ -154,7 +163,7 @@ export const thermalFrag = /* glsl */ `
       // Small near-field radius only: enough to stop a blown-out blob AT the lens, but not so
       // wide that it erases the centre-burst look (whose origin is the middle of the screen).
       float att = fwd * smoothstep(0.0, 0.10, len) / (1.0 + len*0.9);
-      float w = 0.0030 + uBeat*0.012 + uBass*0.004 + uDrop*0.02; // fattens on the hit
+      float w = (0.0030 + uBeat*0.012 + uBass*0.004 + uDrop*0.02) * beamWidth(fi); // fattens on the hit
       float core = smoothstep(w, 0.0, d) * att;
       // Halo width/strength are deliberately restrained: the alpha of this whole layer is its
       // own luminance, so an over-bright halo turns the overlay opaque and BURIES the footage
@@ -385,8 +394,12 @@ export const thermalFrag = /* glsl */ `
     // alpha = luminance so dark areas are transparent (footage shows through)
     // Hard ceiling on both brightness and alpha. Whatever the rig does, the footage underneath
     // must stay readable — "sometimes you can't see anything" is never an acceptable state.
-    vec3 outc = min(max(col, 0.0), vec3(1.25));
-    float a = clamp(dot(outc, vec3(0.34,0.5,0.16))*1.15, 0.0, 0.62);
+    vec3 outc = min(max(col, 0.0), vec3(1.6));
+    // Ceiling raised from 0.62: that cap was added to stop a white-out caused by light sources
+    // sitting INSIDE the frame, which was fixed by moving every origin off-screen. Keeping it
+    // that low was capping how intense a hero beam could ever get. The colour clamp below still
+    // prevents a blow-out.
+    float a = clamp(dot(outc, vec3(0.34,0.5,0.16))*1.25, 0.0, 0.80);
     gl_FragColor = vec4(outc, a);
   }
 `
