@@ -210,25 +210,51 @@ def main():
             if line_time[i] < line_time[i - 1]:
                 line_time[i] = line_time[i - 1]
 
-        # fill unmatched word times inside each line, then emit word arrays per line
+        # Fill unmatched word times inside each line by INTERPOLATING BETWEEN NEIGHBOURING
+        # ANCHORS, not by spreading from the line's start. Spreading from the start ignored the
+        # words that were anchored, so any evenly-spread value that landed before a real anchor
+        # got shoved forward by the minimum-spacing floor and the tail of the line crammed into
+        # a few hundredths of a second — half a line lighting up at once.
         words_per_line = []
         for li in range(len(known)):
             idxs = [i for i, l in enumerate(kline) if l == li]
-            base = line_time[li]
-            nxt = line_time[li + 1] if li + 1 < len(known) else base + 2.5
-            span = max(0.35, min(6.0, nxt - base))
-            ts = []
-            for j, ti in enumerate(idxs):
-                t = tok_time[ti]
-                if t is None or t < base or t > base + span:
-                    # spread evenly across the line's span when the word wasn't heard
-                    t = base + span * (j / max(1, len(idxs)))
-                ts.append(t)
-            # strictly increasing, with a floor between words: identical timestamps make a
-            # word appear to stick while the rest of the line jumps past it
+            lo = line_time[li]
+            hi = line_time[li + 1] if li + 1 < len(known) else lo + 2.5
+            hi = max(lo + 0.3, min(hi, lo + 8.0))
+            ts = [tok_time[i] for i in idxs]
+            # only trust anchors that actually sit inside this line's window
+            ts = [t if (t is not None and lo - 0.05 <= t <= hi) else None for t in ts]
+            n = len(ts)
+            if n:
+                if ts[0] is None:
+                    ts[0] = lo
+                anchored = [j for j, t in enumerate(ts) if t is not None]
+                # before the first anchor, and between anchors, and after the last
+                if anchored:
+                    first, last = anchored[0], anchored[-1]
+                    for j in range(first):
+                        ts[j] = lo + (ts[first] - lo) * (j / max(1, first))
+                    for k in range(len(anchored) - 1):
+                        a_i, b_i = anchored[k], anchored[k + 1]
+                        if b_i - a_i > 1:
+                            a_t, b_t = ts[a_i], ts[b_i]
+                            for j in range(a_i + 1, b_i):
+                                ts[j] = a_t + (b_t - a_t) * ((j - a_i) / (b_i - a_i))
+                    if last < n - 1:
+                        end = min(hi, ts[last] + 0.42 * (n - last))
+                        for j in range(last + 1, n):
+                            ts[j] = ts[last] + (end - ts[last]) * ((j - last) / (n - last))
+                else:
+                    for j in range(n):
+                        ts[j] = lo + (hi - lo) * (j / n)
+            # Enforce a realistic minimum sung-word duration. Nobody sings four words in a
+            # tenth of a second, but that's what happens when the FOLLOWING line's anchor lands
+            # early and squashes this line's remaining span — the tail then highlights in a
+            # blur. Better to let a word run past the nominal line end (it simply stops being
+            # shown when the line changes) than to cram it.
             for j in range(1, len(ts)):
-                if ts[j] < ts[j - 1] + 0.06:
-                    ts[j] = ts[j - 1] + 0.06
+                if ts[j] < ts[j - 1] + 0.13:
+                    ts[j] = ts[j - 1] + 0.13
             words_per_line.append([round(x, 2) for x in ts])
         out[vid] = words_per_line
         OUT.write_text(json.dumps(out, indent=0, sort_keys=True))
