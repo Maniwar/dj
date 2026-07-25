@@ -33,6 +33,7 @@ export const thermalFrag = /* glsl */ `
   uniform float uDrop;    // release   -> everything blows open
   uniform vec3  uAccent;  // the colour of the section you're currently in
   uniform float uQuality; // 1 = full rig, 0 = phone tier (skips the expensive passes)
+  uniform float uSong;    // per-track lighting design: 0..1, derived from the track slug
   uniform float uTemp;
   uniform float uHumidity;
   uniform float uDew;
@@ -159,8 +160,12 @@ export const thermalFrag = /* glsl */ `
     // music no matter how hard they flashed. They now sweep in MUSICAL time: uBar carries the
     // position through the bar, so one full scissor of the rig == one bar, and the fan kicks
     // to a new spread on the downbeat. That's what makes it read as choreography.
-    float sweep = uBar * 6.2831853;
-    float fan = 0.34 + uBuild*0.22 + uDown*0.16;   // rig opens up as the energy climbs
+    // PER-SONG LIGHTING DESIGN. uSong is a stable 0..1 hash of the track, so every song gets
+    // its own rig: a different fan spread, a different sweep rate, and a different phase — the
+    // way a lighting designer would program each track rather than running one look all night.
+    // It's deterministic, so a song always looks like itself.
+    float sweep = uBar * 6.2831853 * (1.0 + floor(uSong*3.0)*0.5) + uSong*6.283;
+    float fan = (0.26 + uSong*0.22) + uBuild*0.22 + uDown*0.16;
     // Flat rig for the sharp beam cores (and the whole rig on phones); the volumetric heads add
     // the depth on top. Together: crisp beams that also occupy real space.
     vec3 beams = rig(p, sweep, fan);
@@ -208,6 +213,10 @@ export const thermalFrag = /* glsl */ `
     // HATS = fine sparkle in the air, resampled fast so it glitters rather than crawls
     float sp = step(0.997 - uHat*0.02, hash(floor(uv*vec2(240.0,150.0)) + floor(uTime*34.0)));
     col += vec3(0.85,1.0,1.0) * sp * uHat * 0.55;
+    // FOLLOW SPOT — a head that tracks your cursor. uMouse was already being smoothed every
+    // frame and never read by anything; now the rig acknowledges you're in the room.
+    vec2 mpos = vec2((uMouse.x-0.5)*aspect, uMouse.y-0.5);
+    col += uAccent * smoothstep(0.40, 0.0, length(p - mpos)) * (0.045 + uBeat*0.11);
     // DROP = the whole room blows open
     col += vec3(1.0,0.55,0.9) * uDrop * 0.3 * (1.0 - r);
 
@@ -250,6 +259,34 @@ export const thermalFrag = /* glsl */ `
 
     // overclock shimmer
     col += vec3(0.4,1.0,0.6) * uOverclock * 0.1 * (0.5+0.5*sin(uTime*8.0));
+
+    // ---- CROWD ----
+    // A silhouetted front row along the bottom that JUMPS on the kick. The whole site is shot
+    // from inside the crowd, so having actual heads between you and the stage is what puts you
+    // in the room rather than looking at a poster of it.
+    float headX = uv.x * 26.0;
+    float hid = floor(headX);
+    float bob = (0.012 + 0.03*hash(vec2(hid, 3.0))) * uBeat;      // each head on its own scale
+    float headTop = 0.055 + 0.05*hash(vec2(hid, 7.0)) + bob;
+    float dHead = length(vec2((fract(headX)-0.5)*0.55, (uv.y - headTop)));
+    // RIM light only. This layer's alpha is its own luminance, so it can add light but can
+    // never darken what's underneath — a filled silhouette would just punch a transparent hole
+    // in the rig. Backlit heads catching the stage light is what you'd actually see anyway.
+    float rim = smoothstep(0.150, 0.132, dHead) - smoothstep(0.132, 0.112, dHead);
+    col += uAccent * max(rim, 0.0) * (0.35 + uBeat*0.9);
+
+    // ---- VHS ----
+    // The whole site is framed as leaked bootleg footage, so it should carry the artefacts of
+    // one: the head-switching noise band that lives at the very bottom of a VHS frame, tape
+    // tracking that wobbles the picture, and chroma that doesn't quite line up.
+    float headSwitch = smoothstep(0.018, 0.0, uv.y) * (0.35 + 0.65*hash(vec2(floor(uv.x*90.0), floor(uTime*24.0))));
+    col += vec3(0.55) * headSwitch * 0.5;
+    // tracking wobble — worst on the downbeat, like the tape is struggling to hold the picture
+    float track = sin(uv.y*140.0 + uTime*5.0) * 0.5 + 0.5;
+    col += vec3(0.35,0.32,0.4) * track * uDown * 0.10;
+    // occasional dropout streak
+    float drop = step(0.9975, hash(vec2(floor(uv.y*160.0), floor(uTime*6.0))));
+    col += vec3(0.8) * drop * 0.16;
 
     // grain (friction) + scanlines
     float grain = (hash(uv*uRes + uTime)-0.5)*(0.05+uFriction*0.2);

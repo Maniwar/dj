@@ -3,6 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { audioBus } from '../../audio/audioBus'
 import { ACCENTS, useSiteStore } from '../../state/useSiteStore'
+import { usePlayerStore } from '../../state/usePlayerStore'
 import { thermalVert, thermalFrag } from './thermalShader'
 import { PERF } from '../../lib/perfFlags'
 
@@ -25,6 +26,7 @@ if (typeof window !== 'undefined') {
 
 function Mainstage() {
   const matRef = useRef<THREE.ShaderMaterial>(null)
+  const songSlugRef = useRef('')
   const { size, gl } = useThree()
 
   // RGBA spectrum texture (universally supported) — the giant LED wall + lasers read it
@@ -54,6 +56,7 @@ function Mainstage() {
       uDrop: { value: 0 },
       uAccent: { value: new THREE.Vector3(1.0, 0.12, 0.56) },
       uQuality: { value: PERF.isMobile ? 0 : 1 }, // phones skip the costliest shader passes
+      uSong: { value: 0 }, // per-track lighting design (stable hash of the slug)
       uTemp: { value: 0 },
       uHumidity: { value: 0.35 },
       uDew: { value: 0 },
@@ -113,6 +116,14 @@ function Mainstage() {
     // Ease toward the current section's colour rather than snapping — a hard cut in the rig
     // colour on a scroll boundary looks like a bug; a ~1s fade reads as the lighting following
     // the story. (Same rate regardless of framerate.)
+    // Stable per-track value so each song's rig is its own design and never drifts between plays
+    const slug = usePlayerStore.getState().currentTrackSlug ?? ''
+    if (slug !== songSlugRef.current) {
+      songSlugRef.current = slug
+      let h = 0
+      for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) >>> 0
+      u.uSong.value = (h % 1000) / 1000
+    }
     const target = ACCENTS[useSiteStore.getState().accent] ?? ACCENTS.default
     const k = 1 - Math.exp(-dt / 0.35)
     u.uAccent.value.x += (target[0] - u.uAccent.value.x) * k
