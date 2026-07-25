@@ -29,11 +29,18 @@ export default function AudioReactive() {
     let beat = 0, level = 0, bass = 0, treble = 0
     const loop = () => {
       const b = audioBus.bands
+      // When nothing is PLAYING, ease every band to 0 so the whole page goes calm (Ken-Burns
+      // keeps drifting, but the beat-pulses stop). Don't rely on the analyser decaying to
+      // silence on its own — a paused/suspended audio graph can freeze its last FFT, which
+      // would leave the site pulsing to a beat that isn't there.
+      const on = audioBus.playing
+      const tBeat = on ? b.beat : 0, tLevel = on ? b.level : 0
+      const tBass = on ? b.bass : 0, tTreble = on ? b.treble : 0
       // smooth a touch so it pulses instead of jitters (snappier attack on the beat)
-      beat += (b.beat - beat) * 0.6
-      level += (b.level - level) * 0.22
-      bass += (b.bass - bass) * 0.4
-      treble += (b.treble - treble) * 0.35
+      beat += (tBeat - beat) * 0.6
+      level += (tLevel - level) * 0.22
+      bass += (tBass - bass) * 0.4
+      treble += (tTreble - treble) * 0.35
       root.style.setProperty('--m-beat', gain(beat, 1.55, 0.7).toFixed(3))
       root.style.setProperty('--m-level', gain(level, 1.6, 0.8).toFixed(3))
       root.style.setProperty('--m-bass', gain(bass, 1.7, 0.78).toFixed(3))
