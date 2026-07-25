@@ -85,25 +85,36 @@ export const thermalFrag = /* glsl */ `
   // room has heads on the overhead truss, on the corners, uplights along the floor lip and
   // towers at the sides — and the desk CHANGES the look every few bars. uPattern cycles those.
   vec2 beamOrigin(float fi, float pat){
-    // NB: every origin sits OUTSIDE the frame. A light source inside the picture puts its own
-    // blown-out hotspot on screen — six of those whited the page out completely.
-    if (pat < 0.5) return vec2(((fi-2.5)/2.5)*0.65, 1.05);                  // overhead truss
-    if (pat < 1.5) return vec2(mod(fi,2.0) < 0.5 ? -1.35 : 1.35, 1.00);     // corner trusses
-    if (pat < 2.5) return vec2(((fi-2.5)/2.5)*0.85, -1.00);                 // floor uplights
-    if (pat < 3.5) return vec2(mod(fi,2.0) < 0.5 ? -1.5 : 1.5, ((fi-2.5)/2.5)*0.35); // side towers
-    return vec2(0.0, 0.0);                                                  // classic centre burst
+    // Fixed rig positions — 2 overhead, 2 corners, 2 floor uplights, 1 side tower, 1 centre.
+    // Origins sit OUTSIDE the frame (except the centre burst, which is meant to be seen from
+    // the middle); a light source inside the picture puts a blown-out hotspot on screen.
+    if (fi < 1.5) return vec2(fi < 0.5 ? -0.45 : 0.45, 1.05);       // overhead truss L/R
+    if (fi < 3.5) return vec2(fi < 2.5 ? -1.35 : 1.35, 1.00);       // corner trusses
+    if (fi < 5.5) return vec2(fi < 4.5 ? -0.55 : 0.55, -1.00);      // floor uplights
+    if (fi < 6.5) return vec2(mod(pat,2.0) < 1.0 ? -1.5 : 1.5, 0.10); // side tower (swaps side)
+    return vec2(0.0, 0.0);                                          // centre burst
   }
   float beamAim(float fi, float pat){
-    if (pat < 0.5) return -1.5708;                                           // straight down
-    if (pat < 1.5) return mod(fi,2.0) < 0.5 ? -0.95 : -2.19;                 // inward + down
-    if (pat < 2.5) return 1.5708;                                            // straight up
-    if (pat < 3.5) return mod(fi,2.0) < 0.5 ? 0.0 : 3.1416;                  // across the room
-    return fi * 1.2566;                                                      // radiating outward
+    if (fi < 1.5) return -1.5708;                                    // down
+    if (fi < 3.5) return fi < 2.5 ? -0.95 : -2.19;                   // inward + down
+    if (fi < 5.5) return 1.5708;                                     // up
+    if (fi < 6.5) return mod(pat,2.0) < 1.0 ? 0.0 : 3.1416;          // across
+    return fi * 1.2566;                                              // radiating
+  }
+  // WHICH FIXTURES ARE LIVE, and how hard — this is the cue list. Everything used to be on all
+  // the time, which is why it read as a constant wash instead of a show. Now each group answers
+  // to a different part of the kit, so lights come in and drop out with the music.
+  float beamGain(float fi, float pat){
+    if (fi < 1.5) return 0.30 + uBeat*1.15;                          // overhead: the backbone, on the kick
+    if (fi < 3.5) return 0.10 + uSnare*1.9 + uDrop*1.2;              // corners: SNAP on the backbeat
+    if (fi < 5.5) return 0.05 + uBuild*1.8 + uLevel*0.35;            // floor: swells through a build
+    if (fi < 6.5) return (0.20 + uBeat*0.8) * step(1.0, mod(pat,2.0)); // side tower: every other cue
+    return 0.06 + uDown*1.1 + uDrop*2.2;                             // centre: ACCENT only, not a constant
   }
 
   vec3 rig(vec2 q, float sweep, float fan, float pat){
     vec3 c = vec3(0.0);
-    for(int i=0;i<6;i++){
+    for(int i=0;i<8;i++){
       float fi=float(i);
       vec2 org = beamOrigin(fi, pat);
       float a = beamAim(fi, pat) + (fi-2.5)*fan*0.34
@@ -126,16 +137,15 @@ export const thermalFrag = /* glsl */ `
       // own luminance, so an over-bright halo turns the overlay opaque and BURIES the footage
       // underneath. The footage is the star; the rig lights it.
       float halo = smoothstep(w*9.0, 0.0, d) * att;
-      vec3 lc = fi<0.5 ? vec3(1.0,0.12,0.56)
-              : (fi<1.5 ? vec3(0.39,1.0,0.18)
-              : (fi<2.5 ? vec3(0.08,0.88,1.0)
-              : (fi<3.5 ? vec3(0.65,0.3,1.0)
-              : (fi<4.5 ? vec3(1.0,0.12,0.56) : vec3(0.39,1.0,0.18)))));
+      vec3 lc = fi<1.5 ? vec3(1.0,0.12,0.56)
+              : (fi<3.5 ? vec3(0.08,0.88,1.0)
+              : (fi<5.5 ? vec3(0.39,1.0,0.18)
+              : (fi<6.5 ? vec3(0.65,0.3,1.0) : vec3(1.0,0.12,0.56))));
       // Pull most beams toward the SECTION's colour so the rig belongs to whatever you're
       // reading — Kiki's pages go magenta, Dieter's cold blue, Ibiza sunrise gold. Alternating
       // beams keep their own hue so the fan still reads as multi-coloured rather than flat.
       lc = mix(lc, uAccent, mod(fi, 2.0) < 0.5 ? 0.78 : 0.30);
-      c += lc * (core + halo*0.06) * (0.09 + uHat*0.45 + uBeat*1.2 + uBuild*0.45 + uDrop*1.4);
+      c += lc * (core + halo*0.06) * beamGain(fi, pat) * (0.9 + uHat*0.5);
     }
     return c;
   }

@@ -20,3 +20,6 @@ smoke-shots/
 
 # 1080p video masters (kept local, out of the Pages deploy)
 video-masters/
+
+# local forced-alignment venv (tooling is scripts/align-lyrics.py)
+.venv-align/
