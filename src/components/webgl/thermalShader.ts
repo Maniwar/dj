@@ -36,6 +36,7 @@ export const thermalFrag = /* glsl */ `
   uniform float uSong;    // per-track lighting design: 0..1, derived from the track slug
   uniform float uPattern; // which rig look is up: 0 overhead, 1 corners, 2 floor, 3 sides
   uniform float uVocal;   // a sung WORD just landed
+  uniform float uConfetti; // 0..1, fires on a drop and falls for a few seconds after
   uniform float uTemp;
   uniform float uHumidity;
   uniform float uDew;
@@ -318,6 +319,23 @@ export const thermalFrag = /* glsl */ `
     // soft spill of light up off the strip
     col += wallCol * step(uv.y, lip + 0.075) * smoothstep(lip + 0.075, lip, uv.y) * (0.05 + uLevel*0.05);
 
+    // CONFETTI — gold foil off the ceiling on a drop. Flakes fall on their own grid, each with
+    // its own drift, fall speed and spin, so they scatter rather than march. Rectangles are the
+    // point here (foil, not dust), but they're small and rotated so they never read as the grid
+    // they came from. Rides its own slow envelope so the fall outlasts the drop itself.
+    if (uConfetti > 0.01) {
+      vec2 cg = vec2(uv.x * 34.0, uv.y * 20.0);
+      vec2 cid = floor(cg);
+      float r1 = hash(cid), r2 = hash(cid + 3.7), r3 = hash(cid + 9.1);
+      float fall = fract(r1 + uTime * (0.16 + r2 * 0.24));
+      vec2 f = fract(cg) - vec2(0.5 + (r2 - 0.5) * 0.6, 1.0 - fall);
+      float spin = uTime * (1.4 + r3 * 2.6) + r1 * 6.28;
+      vec2 rf = vec2(f.x * cos(spin) - f.y * sin(spin), f.x * sin(spin) + f.y * cos(spin));
+      // a thin flake: wide in one axis, nearly flat in the other, and it flickers edge-on
+      float flake = step(abs(rf.x), 0.085) * step(abs(rf.y), 0.028 + 0.03 * abs(sin(spin)));
+      vec3 gold = mix(vec3(1.0, 0.82, 0.35), uAccent, step(0.65, r3));
+      col += gold * flake * uConfetti * (0.55 + uBeat * 0.4);
+    }
     // DROP = pyro. Rays fire out of the middle for the length of the release.
     if (uDrop > 0.01) {
       float ang = atan(p.y, p.x);

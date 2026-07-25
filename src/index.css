@@ -639,6 +639,29 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 }
 
 /* =========================================================
+   SECTION CUT — a directed transition, fired on the downbeat
+   A hard light-sweep across the frame plus a one-frame flash. Deliberately short (~420ms):
+   long enough to register as a cut, short enough that it never interrupts reading.
+   ========================================================= */
+.section-cut {
+  position: fixed; inset: 0; z-index: 70; pointer-events: none;
+  animation: cutSweep 0.42s cubic-bezier(0.4, 0, 0.1, 1) forwards;
+  background: linear-gradient(100deg,
+    transparent 0%, transparent 38%,
+    rgba(255,255,255,0.03) 44%,
+    rgba(255,31,143,0.55) 48%,
+    rgba(255,255,255,0.92) 50%,
+    rgba(20,224,255,0.55) 52%,
+    rgba(255,255,255,0.03) 56%,
+    transparent 62%, transparent 100%);
+  background-size: 260% 100%;
+}
+@keyframes cutSweep {
+  from { background-position: 130% 0; opacity: 1; }
+  to   { background-position: -130% 0; opacity: 0; }
+}
+
+/* =========================================================
    LYRIC STAGE — the current line, performed, site-wide
    Sits above the bottom chrome and clear of the player. Words fly in one after another on the
    beat; the voice sets the colour (Dieter cold blue, Kiki hot magenta).

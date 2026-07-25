@@ -28,6 +28,7 @@ function Mainstage() {
   const matRef = useRef<THREE.ShaderMaterial>(null)
   const songSlugRef = useRef('')
   const agcRef = useRef(0) // running peak for the spectrum strip's auto-gain
+  const confettiRef = useRef(0)
   const { size, gl } = useThree()
 
   // RGBA spectrum texture (universally supported) — the giant LED wall + lasers read it
@@ -61,6 +62,7 @@ function Mainstage() {
       uSong: { value: 0 }, // per-track lighting design (stable hash of the slug)
       uPattern: { value: 0 }, // which rig look is up; changes every 4 bars
       uVocal: { value: 0 },   // impulse each time a sung word lands
+      uConfetti: { value: 0 }, // slow-decaying drop envelope, so confetti outlives the drop
       uTemp: { value: 0 },
       uHumidity: { value: 0.35 },
       uDew: { value: 0 },
@@ -143,6 +145,10 @@ function Mainstage() {
     u.uBuild.value = mu.build
     u.uDrop.value = mu.drop
     u.uVocal.value = audioBus.vocal
+    // The drop envelope itself is gone in ~1s, but confetti has to keep falling after that —
+    // hold the peak and bleed it away over ~4s.
+    confettiRef.current = Math.max(mu.drop, confettiRef.current - dt / 4.0)
+    u.uConfetti.value = confettiRef.current
     // Ease toward the current section's colour rather than snapping — a hard cut in the rig
     // colour on a scroll boundary looks like a bug; a ~1s fade reads as the lighting following
     // the story. (Same rate regardless of framerate.)
