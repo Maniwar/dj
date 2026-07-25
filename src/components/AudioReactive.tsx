@@ -27,6 +27,13 @@ export default function AudioReactive() {
     }
     let raf = 0
     let beat = 0, level = 0, bass = 0, treble = 0
+    const written: Record<string, string> = {}
+    const setVar = (name: string, v: number) => {
+      const s = v.toFixed(2)
+      if (written[name] === s) return
+      written[name] = s
+      root.style.setProperty(name, s)
+    }
     const loop = () => {
       const b = audioBus.bands
       // When nothing is PLAYING, ease every band to 0 so the whole page goes calm (Ken-Burns
@@ -36,15 +43,22 @@ export default function AudioReactive() {
       const on = audioBus.playing
       const tBeat = on ? b.beat : 0, tLevel = on ? b.level : 0
       const tBass = on ? b.bass : 0, tTreble = on ? b.treble : 0
-      // smooth a touch so it pulses instead of jitters (snappier attack on the beat)
-      beat += (tBeat - beat) * 0.6
+      // The beat envelope now arrives pre-shaped from the onset detector (instant attack, timed
+      // decay), so DON'T re-smooth the attack — that's what blunted the hit and made it feel
+      // late. Follow a rise instantly; ease only the fall. No gain curve either: the envelope
+      // is already a clean 0..1, and the old pow()*1.55 lifted the noise floor to ~0.3, which
+      // left everything permanently half-pulsing (the "jitter") with no headroom for real kicks.
+      beat = tBeat > beat ? tBeat : beat + (tBeat - beat) * 0.28
       level += (tLevel - level) * 0.22
       bass += (tBass - bass) * 0.4
       treble += (tTreble - treble) * 0.35
-      root.style.setProperty('--m-beat', gain(beat, 1.55, 0.7).toFixed(3))
-      root.style.setProperty('--m-level', gain(level, 1.6, 0.8).toFixed(3))
-      root.style.setProperty('--m-bass', gain(bass, 1.7, 0.78).toFixed(3))
-      root.style.setProperty('--m-treble', gain(treble, 1.7, 0.8).toFixed(3))
+      // Only write when the value actually changed: every setProperty on :root invalidates
+      // style for each element using these vars, so skipping no-op writes cuts a lot of
+      // per-frame recalculation (2 decimals is finer than any of the visuals resolve).
+      setVar('--m-beat', beat)
+      setVar('--m-level', gain(level, 1.6, 0.8))
+      setVar('--m-bass', gain(bass, 1.7, 0.78))
+      setVar('--m-treble', gain(treble, 1.7, 0.8))
       raf = requestAnimationFrame(loop)
     }
     raf = requestAnimationFrame(loop)
