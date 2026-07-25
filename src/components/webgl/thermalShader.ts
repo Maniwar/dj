@@ -149,8 +149,11 @@ export const thermalFrag = /* glsl */ `
     for(int i=0;i<8;i++){
       float fi=float(i);
       vec2 org = beamOrigin(fi, pat);
+      // FRICTION shakes the rig itself: the heads lose their footing and the beams judder,
+      // which is what a worn bootleg of a light show would actually look like.
+      float jitter = (hash(vec2(fi, floor(uTime*22.0))) - 0.5) * uFriction * 0.34;
       float a = beamAim(fi, pat) + (fi-2.5)*fan*0.34
-              + sin(sweep + fi*1.04)*(0.5 + uBuild*0.32);
+              + sin(sweep + fi*1.04)*(0.5 + uBuild*0.32) + jitter;
       vec2 dir = vec2(cos(a), sin(a));
       vec2 rel = q - org;
       float d = abs(dot(rel, vec2(dir.y,-dir.x)));
@@ -388,8 +391,20 @@ export const thermalFrag = /* glsl */ `
     //  grain + scanlines below already carry the bootleg feel without the noise.)
 
     // grain (friction) + scanlines
-    float grain = (hash(uv*uRes + uTime)-0.5)*(0.05+uFriction*0.2);
+    float grain = (hash(uv*uRes + uTime)-0.5)*(0.04+uFriction*0.42);
     col += grain;
+    // Tape scanlines — absent at friction 0, heavy at 1. They were removed as a permanent
+    // fixture because they read as dirt; as something the viewer dials in, they're the point.
+    col -= sin(uv.y*uRes.y*0.85) * 0.05 * uFriction;
+    // Chromatic fringe: the rig's red and blue pull apart, like a mistracked head.
+    // GATED, because this evaluates the whole rig twice more — three times the beam maths per
+    // pixel. Only past a quarter turn of the knob, and never on the phone tier, so the default
+    // setting costs nothing and only someone deliberately cranking it pays for it.
+    if (uQuality > 0.5 && uFriction > 0.25) {
+      float fr = uFriction * 0.012;
+      col.r += dot(rig(p + vec2(fr, 0.0), sweep, fan, uPattern), vec3(0.33)) * uFriction * 0.55;
+      col.b += dot(rig(p - vec2(fr, 0.0), sweep, fan, uPattern), vec3(0.33)) * uFriction * 0.55;
+    }
 
     // alpha = luminance so dark areas are transparent (footage shows through)
     // Hard ceiling on both brightness and alpha. Whatever the rig does, the footage underneath

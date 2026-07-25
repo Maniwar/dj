@@ -218,7 +218,17 @@ section { position: relative; padding: 9vh 6vw; }
 .crest .banner { font-family: 'Oswald', sans-serif; font-size: 0.55rem; letter-spacing: 0.25em; color: var(--gold); }
 
 /* ---------- friction / CRT overlay ---------- */
-.friction-overlay { position: fixed; inset: 0; z-index: 30; pointer-events: none; }
+/* This overlay was completely empty — transparent, no background — so the CRT shake bolted to
+   it moved nothing and the knob's promised effect never existed. Giving it real scanlines makes
+   the shake visible, and ties the previously-dead --friction variable to something. At 0 the
+   overlay is fully transparent, so the knob genuinely bottoms out at "off".
+   (It can't live on .broadcast: that element's animation slot is already used by the beat
+   glitch-cut, and the two would cancel each other.) */
+.friction-overlay {
+  position: fixed; inset: -4px; z-index: 30; pointer-events: none;
+  background: repeating-linear-gradient(0deg,
+    rgba(0,0,0, calc(var(--friction, 0) * 0.42)) 0 2px, transparent 2px 4px);
+}
 .crt-scan { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.2) 0 1px, transparent 1px 3px); mix-blend-mode: multiply; }
 .crt-vignette { position: absolute; inset: 0; background: radial-gradient(130% 100% at 50% 50%, transparent 52%, rgba(0,0,0,0.72) 100%); }
 
@@ -782,6 +792,7 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .ls-word { display: inline-block; transition: opacity 0.18s ease, transform 0.18s ease; }
 .ls-word.todo { opacity: 0.30; color: #c8d2de; transform: translateY(0.06em) scale(0.96); }
 .ls-word.done { opacity: 1; color: var(--v); text-shadow: 0 2px 0 rgba(0,0,0,0.85), 0 0 12px var(--v); }
+.ls-line { text-shadow: calc(var(--chroma,0) * -1px) 0 rgba(255,31,143,.5), calc(var(--chroma,0) * 1px) 0 rgba(20,224,255,.5); }
 .ls-word.now {
   opacity: 1; color: #fff;
   transform: translateY(calc(-0.12em - var(--m-beat,0) * 0.06em)) scale(calc(1.12 + var(--m-beat,0) * 0.07));
