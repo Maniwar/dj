@@ -183,6 +183,15 @@ export default function Player() {
             <button className="tbtn" onClick={() => audio.next()} aria-label="Next">
               ⏭
             </button>
+            <div className="knobs">
+              <Knob label="VOL" value={volume} onChange={(v) => audio.setVolume(v)} color="#12e0c0" />
+              <Knob label="FRICTION" value={friction} onChange={setFriction} color="#ff2e9a" />
+            </div>
+          </div>
+
+          {/* Toggles get their own row. Five of them alongside transport + two knobs overflowed
+              the 348px window and pushed the FRICTION knob outside it. */}
+          <div className="tools">
             <button
               className={`tbtn lyr ${lyricsOpen ? 'on' : ''}`}
               onClick={toggleLyrics}
@@ -224,15 +233,6 @@ export default function Player() {
             >
               ⛶
             </button>
-            <div className="knobs">
-              <Knob label="VOL" value={volume} onChange={(v) => audio.setVolume(v)} color="#12e0c0" />
-              <Knob
-                label="FRICTION"
-                value={friction}
-                onChange={setFriction}
-                color="#ff2e9a"
-              />
-            </div>
           </div>
 
           {playlistOpen && (

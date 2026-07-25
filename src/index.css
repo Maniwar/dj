@@ -503,6 +503,10 @@ section { position: relative; padding: 9vh 6vw; }
 .seek::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, var(--gold)); border: 1px solid var(--gold-shadow); box-shadow: 0 0 8px var(--gold); }
 .seek::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--gold); border: 1px solid var(--gold-shadow); }
 .transport { display: flex; align-items: center; gap: 8px; }
+/* Secondary toggles live on their own row — five of them beside transport and two knobs
+   overflowed the 348px window and pushed the FRICTION knob outside it. Smaller, evenly spread. */
+.tools { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+.tools .tbtn { width: 100%; height: 30px; font-size: 0.82rem; }
 .tbtn { width: 40px; height: 36px; border-radius: 8px; border: 1px solid var(--gold-shadow); background: linear-gradient(180deg, #e8eef5, #9fb0c0 50%, #5a6672); color: #0d1017; font-size: 0.9rem; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.6); }
 .tbtn:active { transform: translateY(1px); }
 .tbtn.play { width: 48px; font-size: 1.05rem; }
