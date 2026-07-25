@@ -554,9 +554,31 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    headings; it looked great but re-rasterised the biggest type on the page every frame, so it
    was removed in favour of keeping the motion smooth.) */
 :root {
-  --beat-lift: calc(var(--m-beat) * -7px);
-  --beat-glow: calc(var(--m-beat) * 46px);
+  /* the KICK throws headings up; the DOWNBEAT (every 4th) throws them noticeably higher, so
+     the motion has bar structure instead of one identical thump forever */
+  --beat-lift: calc((var(--m-beat) + var(--m-down, 0) * 0.8) * -7px);
+  /* neon rides the kick, and the whole rig gets HOTTER through a build-up */
+  --beat-glow: calc((var(--m-beat) + var(--m-build, 0) * 0.7) * 46px);
 }
+
+/* =========================================================
+   THE KIT — each part of the drum kit drives what it should
+   kick   -> the physical hit   (scale/lift punches)
+   snare  -> the strobe accent  (the backbeat flash, beats 2 & 4)
+   hats   -> shimmer            (fine sparkle on the top end)
+   downbeat -> the big accent every 4th beat
+   build/drop -> tension and release
+   ========================================================= */
+/* SNARE = the white strobe hit. Previously the strobe fired on the kick, doubling up with every
+   other pulse on screen; on the backbeat it answers the kick instead of echoing it. A DROP
+   flares it wide open. */
+.bc-strobe { opacity: calc(var(--m-snare, 0) * 0.15 + var(--m-drop, 0) * 0.22); }
+/* HATS = the fine grain shimmering on the top end (cheap: opacity only, already composited) */
+.bc-grain { opacity: calc(0.05 + var(--m-hat, 0) * 0.07); }
+/* HATS = sparkle on the small accent type (top-end detail, so top-end text) */
+.journey-seed, .lore-tag { opacity: calc(0.75 + var(--m-hat, 0) * 0.25); }
+/* (the light bars and the tour-rail vehicle are accented at their own rules further down —
+    both are re-declared later in this file, so setting them here would be overridden) */
 /* NB: .section-title is gradient-CLIPPED text (color: transparent), so a text-shadow would
    render as a blob behind the glyphs — the glow has to ride the filter/drop-shadow chain, and
    the "light" sweeping through the letters is background-SIZE (background-position is already
@@ -567,7 +589,8 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    each heading keeps ONE animated shadow (the others are static). The beat is carried by
    transform — composited, free, and now crisp because the envelope has a real onset attack. */
 .section-title {
-  transform: skewX(-5deg) translateY(var(--beat-lift)) scale(calc(1 + var(--m-beat) * 0.1));
+  transform: skewX(-5deg) translateY(var(--beat-lift))
+             scale(calc(1 + var(--m-beat) * 0.1 + var(--m-down, 0) * 0.05));
   filter: drop-shadow(0 3px 0 rgba(0,0,0,0.6))
           drop-shadow(0 0 calc(10px + var(--beat-glow)) rgba(255,31,143,0.65))
           drop-shadow(0 0 50px rgba(20,224,255,0.25)); }
@@ -591,7 +614,9 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .lore-eyebrow { text-shadow: 0 0 calc(10px + var(--m-beat) * 26px) var(--accent); }
 .merch-name, .quote { text-shadow: 0 0 calc(2px + var(--m-beat) * 18px) rgba(255,31,143,0.5); }
 /* the gold divider bars read as LIGHT BARS strobing between sections */
-.divider span { box-shadow: 0 0 calc(var(--m-beat) * 18px) rgba(255,31,143, calc(var(--m-beat) * 0.9)); }
+/* DOWNBEAT = the light bars between sections snap brighter on the 1 of each bar */
+.divider span { box-shadow: 0 0 calc((var(--m-beat) + var(--m-down, 0)) * 16px)
+  rgba(255,31,143, calc(var(--m-beat) * 0.6 + var(--m-down, 0) * 0.5)); }
 /* scrolling lyric text rides the beat as well */
 .lm-item { transform: scale(calc(1 + var(--m-beat) * 0.035)); display: inline-block; }
 /* the player's LCD track title glows with the track it's playing */
@@ -780,7 +805,8 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .rail-pin.done b { color: var(--acid); }
 .rail-pin.now b { opacity: 1; } /* label only the current city, to keep the edge clean */
 .rail-vehicle { position: absolute; left: 50%; top: calc(var(--rail,0) * 100%);
-  transform: translate(-50%,-50%) scale(calc(1 + var(--m-beat,0) * 0.16)); font-size: 1.4rem;
+  /* rides the kick, and gets thrown by a DROP */
+  transform: translate(-50%,-50%) scale(calc(1 + var(--m-beat,0) * 0.16 + var(--m-drop,0) * 0.3)); font-size: 1.4rem;
   filter: drop-shadow(0 3px 5px rgba(0,0,0,0.7)); will-change: top, transform; }
 .rail-pct { font-family: 'Courier New', monospace; font-size: 0.6rem; color: var(--champagne); }
 @media (max-width: 640px) { .tour-rail { right: 6px; height: 68vh; } .rail-track { width: 18px; } .rail-vehicle { font-size: 1.2rem; } }

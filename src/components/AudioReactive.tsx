@@ -23,6 +23,7 @@ export default function AudioReactive() {
     if (PERF.noReact) {
       // low-power: set neutral values once, no per-frame writes
       for (const v of ['--m-beat', '--m-level', '--m-bass', '--m-treble']) root.style.setProperty(v, '0.2')
+      for (const v of ['--m-snare', '--m-hat', '--m-down', '--m-build', '--m-drop', '--m-bar']) root.style.setProperty(v, '0')
       return
     }
     let raf = 0
@@ -59,6 +60,16 @@ export default function AudioReactive() {
       setVar('--m-level', gain(level, 1.6, 0.8))
       setVar('--m-bass', gain(bass, 1.7, 0.78))
       setVar('--m-treble', gain(treble, 1.7, 0.8))
+      // Per-instrument + structural channels, so each visual can react to the part of the kit
+      // that actually suits it instead of everything firing off the kick.
+      const mu = audioBus.music
+      setVar('--m-snare', on ? b.snare : 0)
+      setVar('--m-hat', on ? b.hat : 0)
+      setVar('--m-down', on ? mu.downbeat : 0)
+      setVar('--m-build', on ? mu.build : 0)
+      setVar('--m-drop', on ? mu.drop : 0)
+      // phases keep running so bar-synced sweeps stay continuous rather than snapping
+      setVar('--m-bar', mu.barPhase)
       raf = requestAnimationFrame(loop)
     }
     raf = requestAnimationFrame(loop)
