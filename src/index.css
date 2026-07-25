@@ -674,7 +674,11 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    sits at 0 whenever nothing is playing, so with the music off the still simply settles into
    the calm slow drift; with music on it breathes on every kick. */
 .journey-bg { position: absolute; inset: 0; background-size: cover; background-position: center; background-color: #0a0a12;
-  scale: calc(1 + var(--m-beat, 0) * 0.045); }
+  /* Coefficient tuned against the MEASURED envelope: --m-beat averages ~0.34 and peaks ~0.57
+     (it rarely nears 1.0), so 0.045 only moved the image ~1.5% — gentle breathing rather than
+     a kick. 0.09 gives ~3% typical / ~5% peak: clearly felt on the beat, still smooth on a
+     full-bleed image. Never scales below 1, so no background edge is ever revealed. */
+  scale: calc(1 + var(--m-beat, 0) * 0.09); }
 .journey-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;
   filter: brightness(0.5) contrast(1.12) saturate(1.25); background-color: #0a0a12; }
 /* the calm baseline drift — starts at the RESTING transform so activating a stop never pops */
@@ -690,7 +694,11 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .journey-bg ~ .journey-scan {
   background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
               repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0 2px, transparent 2px 4px),
-              radial-gradient(135% 100% at 50% 45%, transparent 55%, rgba(3,3,8,0.4) 100%); }
+              radial-gradient(135% 100% at 50% 45%, transparent 55%, rgba(3,3,8,0.4) 100%);
+  /* the kick also LIFTS this darkening for an instant, so the scene flashes brighter on the
+     beat like a club light — scale alone reads as breathing, light is what sells the rhythm.
+     Free: this layer never animates, and opacity is composited (no repaint of the image). */
+  opacity: calc(1 - var(--m-beat, 0) * 0.25); }
 .journey-card { position: relative; z-index: 2; text-align: center; max-width: 680px; padding: 2rem; }
 .journey-leg { display: inline-block; font-family: 'Oswald', sans-serif; letter-spacing: 0.2em; font-size: 0.7rem;
   color: var(--gold-hi); border: 1px solid var(--edge); border-radius: 2px; padding: 5px 12px; margin-bottom: 1rem;
