@@ -188,7 +188,8 @@ The headline feature: a track (or a stretch of one) is uploaded and the video is
 
 - Model: `bytedance/seedance-2.0/reference-to-video` (`reference_audios` + `reference_images`)
 - `POST /api/v1/model/generateVideo` → poll `GET /api/v1/model/prediction/{id}` → `outputs[0]`
-- Rendered silent (`generate_audio: false`), seed-locked to the character bible
+- Rendered silent (`generate_audio: false`), seed-locked to the character bible — the fixed
+  seed is **`480917`**, reused for every clip so the same faces recur city to city
 - Clips cap at ~10–15s, so longer pieces are stretches stitched with ffmpeg
 
 ```bash
