@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { useAudio } from '../../audio/AudioProvider'
 import { usePlayerStore, getTrack, getVersion } from '../../state/usePlayerStore'
-import { useSiteStore } from '../../state/useSiteStore'
+import { LYRIC_STYLE_LABEL, useSiteStore } from '../../state/useSiteStore'
 import { useThermalReadout } from '../../hooks/useThermalReadout'
 import SpectrumDisplay from './SpectrumDisplay'
 import BootlegSwitch from './BootlegSwitch'
@@ -28,6 +28,8 @@ export default function Player() {
   const lyricsOpen = useSiteStore((s) => s.lyricsOpen)
   const videoEnabled = useSiteStore((s) => s.videoEnabled)
   const toggleVideo = useSiteStore((s) => s.toggleVideo)
+  const lyricStyle = useSiteStore((s) => s.lyricStyle)
+  const cycleLyricStyle = useSiteStore((s) => s.cycleLyricStyle)
   const thermal = useThermalReadout()
 
   const track = getTrack(slug)
@@ -193,6 +195,14 @@ export default function Player() {
               title={videoEnabled ? 'Video ON — tap for stills' : 'Stills — tap for video'}
             >
               🎬
+            </button>
+            <button
+              className="tbtn lstyle"
+              onClick={cycleLyricStyle}
+              aria-label="Change lyric style"
+              title={`Lyric style: ${LYRIC_STYLE_LABEL[lyricStyle]} — tap to change`}
+            >
+              🅰
             </button>
             <div className="knobs">
               <Knob label="VOL" value={volume} onChange={(v) => audio.setVolume(v)} color="#12e0c0" />

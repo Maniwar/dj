@@ -15,6 +15,25 @@ export const ACCENTS = {
 
 export type AccentKey = keyof typeof ACCENTS
 
+// How the sung lyric words are drawn. Legibility over moving footage is genuinely a matter of
+// taste and of what you're watching, so this is the VIEWER's choice, cycled from the player and
+// remembered on their device.
+export const LYRIC_STYLES = ['none', 'hair', 'dark', 'both', 'core'] as const
+export type LyricStyle = (typeof LYRIC_STYLES)[number]
+export const LYRIC_STYLE_LABEL: Record<LyricStyle, string> = {
+  none: 'Neon fill',
+  hair: 'Hairline outline',
+  dark: 'Dark outline',
+  both: 'Outline + halo',
+  core: 'White + colour glow',
+}
+const STORE_KEY = 'so.lyricStyle'
+function initialLyricStyle(): LyricStyle {
+  if (typeof localStorage === 'undefined') return 'hair'
+  const v = localStorage.getItem(STORE_KEY) as LyricStyle | null
+  return v && (LYRIC_STYLES as readonly string[]).includes(v) ? v : 'hair'
+}
+
 type SiteState = {
   loggedOn: boolean // has the user clicked LOG ON & PLUG IN?
   booting: boolean // dial-up handshake in progress
@@ -26,6 +45,8 @@ type SiteState = {
   videoEnabled: boolean // play the real muted mp4 backgrounds vs the Ken-Burns stills
   accent: AccentKey // which section owns the light rig right now
   setAccent: (a: AccentKey) => void
+  lyricStyle: LyricStyle // viewer's choice of how sung words are drawn
+  cycleLyricStyle: () => void
   logOn: () => void
   finishBoot: () => void
   setFriction: (v: number) => void
@@ -50,6 +71,17 @@ export const useSiteStore = create<SiteState>((set) => ({
   videoEnabled: true,
   accent: 'default',
   setAccent: (a) => set((s) => (s.accent === a ? s : { accent: a })), // no-op re-renders avoided
+  lyricStyle: initialLyricStyle(),
+  cycleLyricStyle: () =>
+    set((s) => {
+      const next = LYRIC_STYLES[(LYRIC_STYLES.indexOf(s.lyricStyle) + 1) % LYRIC_STYLES.length]
+      try {
+        localStorage.setItem(STORE_KEY, next)
+      } catch {
+        /* private mode — the choice just won't persist */
+      }
+      return { lyricStyle: next }
+    }),
   logOn: () => set({ loggedOn: true, booting: true }),
   finishBoot: () => set({ booting: false }),
   setFriction: (v) => set({ friction: Math.max(0, Math.min(1, v)) }),

@@ -654,6 +654,40 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .lyric-stage.v-dieter { --v: var(--blue); }
 .lyric-stage.v-kiki { --v: var(--magenta); }
 .lyric-stage.v-both { --v: var(--acid); }
+
+/* ---- LYRIC WORD TREATMENTS (the viewer picks one from the player) ----
+   Deliberately pushed well apart: if someone is choosing between these, "slightly different
+   stroke width" is not a choice. Each varies stroke, glow AND weight of the neon so they read
+   as five distinct looks at a glance. */
+
+/* A · Neon fill — no stroke at all, the glow does everything. Softest, most 2002. */
+.ls-none .ls-word.done { text-shadow: 0 2px 0 rgba(0,0,0,.85), 0 0 16px var(--v), 0 0 34px var(--v); }
+.ls-none .ls-word.now  { text-shadow: 0 2px 0 rgba(0,0,0,.9), 0 0 22px var(--v), 0 0 52px var(--v), 0 0 90px var(--v); }
+
+/* B · Hairline — a crisp white edge and the glow pulled right back, so the letterform is sharp. */
+.ls-hair .ls-word { -webkit-text-stroke: 1px rgba(255,255,255,.92); paint-order: stroke fill; }
+.ls-hair .ls-word.done { text-shadow: 0 2px 0 rgba(0,0,0,.85), 0 0 8px var(--v); }
+.ls-hair .ls-word.now  { text-shadow: 0 2px 0 rgba(0,0,0,.9), 0 0 12px var(--v), 0 0 24px var(--v); }
+
+/* C · Dark outline — thick near-black keyline. Poster-like; the neon reads hottest against it. */
+.ls-dark .ls-word { -webkit-text-stroke: 4px #05030a; paint-order: stroke fill; }
+.ls-dark .ls-word.done { text-shadow: 0 0 18px var(--v); }
+.ls-dark .ls-word.now  { text-shadow: 0 0 24px var(--v), 0 0 54px var(--v); }
+.ls-dark .ls-word.todo { -webkit-text-stroke-width: 3px; }
+
+/* D · Outline + halo — white keyline riding a hard black shadow. Sticker/comic; most legible. */
+.ls-both .ls-word {
+  -webkit-text-stroke: 1.4px #fff; paint-order: stroke fill;
+  filter: drop-shadow(0 0 3px rgba(0,0,0,1)) drop-shadow(0 2px 4px rgba(0,0,0,.95));
+}
+.ls-both .ls-word.done { text-shadow: 0 0 14px var(--v); }
+.ls-both .ls-word.now  { text-shadow: 0 0 20px var(--v), 0 0 44px var(--v); }
+
+/* E · White + colour glow — letters stay white, the singer's colour becomes the halo. */
+.ls-core .ls-word { color: #fff; -webkit-text-stroke: 0; }
+.ls-core .ls-word.done { color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.9), 0 0 14px var(--v), 0 0 30px var(--v); }
+.ls-core .ls-word.now  { text-shadow: 0 2px 0 rgba(0,0,0,.9), 0 0 22px var(--v), 0 0 56px var(--v), 0 0 96px var(--v); }
+.ls-core .ls-word.todo { color: #c8d2de; }
 .ls-line {
   font-family: 'Anton', sans-serif; text-transform: uppercase; line-height: 0.98;
   font-size: clamp(1.1rem, 3.1vw, 2.5rem); color: #fff;

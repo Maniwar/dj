@@ -26,6 +26,7 @@ export default function LyricStage() {
   const loggedOn = useSiteStore((s) => s.loggedOn)
   const lyricsOpen = useSiteStore((s) => s.lyricsOpen) // full karaoke panel — don't double up
   const reduced = useSiteStore((s) => s.reducedMotion)
+  const lyricStyle = useSiteStore((s) => s.lyricStyle)
   const [idx, setIdx] = useState(-1) // -1 = nothing being sung right now (instrumental)
   const [sung, setSung] = useState(0) // how many words of the current line have landed
   const idxRef = useRef(-1)
@@ -94,7 +95,7 @@ export default function LyricStage() {
   const words = cleanLyric(cur.text).split(' ')
 
   return (
-    <div className={`lyric-stage${voice ? ` v-${voice}` : ''}`} aria-hidden>
+    <div className={`lyric-stage ls-${lyricStyle}${voice ? ` v-${voice}` : ''}`} aria-hidden>
       <div className="ls-line" key={idx}>
         {words.map((w, i) => {
           // already sung / landing right now / still to come
