@@ -2508,7 +2508,8 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   border: 1px solid rgba(255,255,255,0.5);
   box-shadow: 0 0 calc(6px + var(--m-beat, 0) * 22px) var(--accent, #ff1f8f),
               inset 0 0 calc(4px + var(--m-beat, 0) * 14px) var(--accent, #ff1f8f);
-  transform: perspective(220px) rotateX(58deg);
+  /* same reasoning as the burst: a flat squash cannot project anything off screen */
+  transform: scaleY(0.45);
   scale: calc(0.85 + var(--m-beat, 0) * 0.6 + var(--m-drop, 0) * 0.4);
   transition: scale 70ms ease-out;
 }
@@ -2658,7 +2659,7 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   width: 26px; height: 26px; border-radius: 50%;
   border: 2px solid var(--accent, #ff1f8f);
   box-shadow: 0 0 18px var(--accent, #ff1f8f), inset 0 0 12px var(--accent, #ff1f8f);
-  transform: translate(-50%, -50%) perspective(220px) rotateX(58deg);
+  transform: translate(-50%, -50%) scaleY(0.42);
   animation: burstRing 780ms cubic-bezier(0.15, 0.7, 0.2, 1) forwards;
 }
 /* a hot core that flashes and dies fast — this is what sells it as light rather than as a shape */
@@ -2676,14 +2677,20 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    is what makes it read as depth rather than as a graphic.
    They are also longer, brighter and slower than the first version, which was over in half a
    second and easy to miss entirely. */
+/* A SQUASH, not a projection. This was perspective(300px) rotateX(62deg), and with spokes up to
+   310px long against a 300px perspective distance the projection is violent: the near half is
+   magnified enormously and thrown off screen while the far half collapses toward the vanishing
+   point, which sits ABOVE the origin. The result was every spoke appearing to fire off to the
+   upper left instead of radiating.
+   scaleY gives the same read — a circle of light lying on the floor rather than facing you —
+   with no projection that can blow up, whatever length a spoke happens to get. */
 .click-burst .spokes {
   position: absolute; left: 0; top: 0; width: 0; height: 0;
-  transform: perspective(300px) rotateX(62deg);
-  transform-style: preserve-3d;
+  transform: scaleY(0.42);
 }
 .click-burst i {
   position: absolute; left: 0; top: 0;
-  width: var(--len, 180px); height: 3px; transform-origin: 0 50%;
+  width: var(--len, 170px); height: 3px; transform-origin: 0 50%;
   border-radius: 2px;
   background: linear-gradient(90deg,
     #fff 0%, var(--accent, #ff1f8f) 22%, color-mix(in srgb, var(--accent, #ff1f8f) 55%, transparent) 60%, transparent 100%);

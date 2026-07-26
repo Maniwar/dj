@@ -124,7 +124,7 @@ export default function BeatCursor() {
         // spread them unevenly — a perfectly even star reads as a graphic, not as light
         const angle = (360 / spokes) * i + (Math.random() * 24 - 12)
         spoke.style.setProperty('--a', `${angle}deg`)
-        spoke.style.setProperty('--len', `${140 + Math.random() * 170}px`)
+        spoke.style.setProperty('--len', `${120 + Math.random() * 120}px`)
         spoke.style.setProperty('--delay', `${Math.random() * 60}ms`)
         group.appendChild(spoke)
       }
