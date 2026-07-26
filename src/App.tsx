@@ -1,7 +1,6 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { AudioProvider } from './audio/AudioProvider'
 import Broadcast from './video/Broadcast'
-import ThermalRunaway from './components/webgl/ThermalRunaway'
 import FrictionOverlay from './components/FrictionOverlay'
 import BootGate from './components/BootGate'
 import EasterEggs from './components/EasterEggs'
@@ -24,8 +23,20 @@ import TourRail from './components/TourRail'
 import Lyrics from './components/player/Lyrics'
 import { useSiteStore } from './state/useSiteStore'
 
+// three.js + @react-three/fiber are ~330KB gzipped and by far the heaviest thing we ship, and
+// initialising the renderer (WebGLRenderer.setSize allocating buffers) is the single longest
+// synchronous block on the page. Statically imported it sat on the critical path, delaying the
+// first paint of a screen that does not even show it.
+//
+// The light rig lives BEHIND the boot gate — nobody sees the club until they press LOG ON — so
+// it can load during the boot sequence instead of before it. Mounting is gated on loggedOn,
+// which means the chunk is fetched and the renderer built while the console is still scrolling,
+// and the gate's own paint no longer waits on any of it.
+const ThermalRunaway = lazy(() => import('./components/webgl/ThermalRunaway'))
+
 export default function App() {
   const bumpHits = useSiteStore((s) => s.bumpHits)
+  const loggedOn = useSiteStore((s) => s.loggedOn)
   useEffect(() => {
     const id = setInterval(bumpHits, 4200) // hit-counter creeps up while you watch
     return () => clearInterval(id)
@@ -35,7 +46,11 @@ export default function App() {
     <AudioProvider>
       <AudioReactive />
       <Broadcast />
-      <ThermalRunaway />
+      {loggedOn && (
+        <Suspense fallback={null}>
+          <ThermalRunaway />
+        </Suspense>
+      )}
       <LyricStage />
       <SectionCut />
       <Precache />

@@ -108,7 +108,12 @@ body {
   linear-gradient(rgba(0,0,0,0.32), rgba(0,0,0,0.32)),
   repeating-linear-gradient(0deg, rgba(0,0,0,0.10) 0 2px, transparent 2px 4px); }
 .bc-strobe { position: absolute; inset: 0; background: #fff; opacity: calc(var(--beat) * 0.18); mix-blend-mode: screen; }
-.bc-grain { position: absolute; inset: -150%; opacity: 0.07; mix-blend-mode: overlay; animation: grainshift 0.5s steps(2) infinite;
+.bc-grain { position: absolute; inset: -8%; opacity: 0.07; mix-blend-mode: overlay; animation: grainshift 0.5s steps(2) infinite;
+  /* inset -8%, not -150%. grainshift only translates by (-6%, 4%), so -8% is all the overscan
+     it can possibly need — but at -150% the element was 400% x 400%, i.e. SIXTEEN times the
+     viewport, and it is animated AND blended. On a 7680x2160 screen that was a ~265 Mpx
+     blended surface repainting twice a second for a grain texture at 7% opacity. Identical
+     on screen, a twelfth of the pixels. */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 @keyframes grainshift { 0%{ transform: translate(0,0); } 100%{ transform: translate(-6%, 4%); } }
 .bc-scan { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.10) 0 2px, transparent 2px 4px); mix-blend-mode: multiply; opacity: 0.16; }
@@ -317,7 +322,13 @@ section.hero { min-height: 100vh; display: grid; place-items: center; text-align
 .lore-title { position: sticky; top: 0; z-index: 4; text-align: center; padding: 7vh 6vw 2vh; pointer-events: none;
   background: linear-gradient(180deg, rgba(3,4,8,0.85), transparent); }
 .lore-stops { position: relative; }
-.lore-stop { position: relative; height: 100vh; overflow: hidden; display: flex; align-items: center; }
+.lore-stop { position: relative; height: 100vh; overflow: hidden; display: flex; align-items: center;
+  /* Every slide is a stack of full-screen layers (fill, band, media, scan). Seven slides meant
+     the compositor was still handling all of them while only one was on screen — measured at
+     7680x2160 that was 55 full-screen layers and ~1.7 BILLION pixels of fill per frame. This
+     skips rendering entirely for anything off-screen; contain-intrinsic-size keeps the page
+     height and scroll position stable while it does. */
+  content-visibility: auto; contain-intrinsic-size: 100vw 100vh; }
 /* blurred fill so there are no empty bars; the sharp image is CONTAINED on top so the
    characters are always fully in frame at any window width */
 /* No dark fill — let the live party Broadcast footage show THROUGH the letterbox gaps around
@@ -392,7 +403,19 @@ section.hero { min-height: 100vh; display: grid; place-items: center; text-align
 .lore-fill {
   display: none; position: absolute; inset: 0;
   background-size: cover; background-position: center; background-repeat: no-repeat;
-  filter: blur(60px) brightness(0.4) saturate(1.35); transform: scale(1.15);
+  /* Translucent on purpose. A solid fill walls the frame off from the rest of the page; at
+     roughly half opacity the live Broadcast footage still reads through the gaps, so the band
+     sits IN the club rather than on top of a grey slab — while the blur keeps the sides quiet
+     enough that they never compete with the subject. */
+  opacity: 0.5;
+  /* Blur at ONE EIGHTH scale, then upscale. A blur is per-pixel, so running it over a full
+     7680x2160 surface (21.9 Mpx, and there is one per slide) was costing more than everything
+     else on the page combined. Rendering it on a 1/8 surface cuts that 64x, and since the
+     result is a 60px blur nobody can tell the difference. Overscanned to -6% so the blur's
+     soft edge never shows as a fringe. */
+  left: -6%; top: -6%; width: 14%; height: 14%; right: auto; bottom: auto;
+  transform-origin: 0 0; transform: scale(8);
+  filter: blur(7px) brightness(0.62) saturate(1.3);
 }
 /* heroes: barely-there Ken-Burns (start at full cover, no zoom) so the whole head + margin
    stays in frame — the 14% kbPan zoom was clipping the crown of the head. */
@@ -1088,7 +1111,8 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .journey-title { position: sticky; top: 0; z-index: 4; text-align: center; padding: 7vh 6vw 2vh; pointer-events: none;
   background: linear-gradient(180deg, rgba(3,4,8,0.85), transparent); }
 .journey-stops { position: relative; }
-.journey-stop { position: relative; height: 100vh; display: grid; place-items: center; overflow: hidden; }
+.journey-stop { position: relative; height: 100vh; display: grid; place-items: center; overflow: hidden;
+  content-visibility: auto; contain-intrinsic-size: 100vw 100vh; }
 /* blurred fill + CONTAINED sharp image so the crew is never cropped at any width */
 .journey-bg-blur { display: none; }
 /* City stills (STILL mode). No filter here — the darkening moved to the static scan layer below

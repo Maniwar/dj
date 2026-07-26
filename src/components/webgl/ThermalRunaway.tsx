@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { audioBus } from '../../audio/audioBus'
@@ -92,17 +92,74 @@ function Mainstage() {
     [freqTex],
   )
 
+  // ---- ADAPTIVE QUALITY ----------------------------------------------------------------
+  // The pixel budget bounds how many pixels we shade, but says nothing about how fast THIS
+  // GPU shades them. A fixed budget hands a 2019 integrated laptop chip exactly the same load
+  // as an M3 Max, which is why the rig could still feel heavy on a modest machine even with
+  // the music paused — nothing audio-reactive is running then, but the raymarch still is.
+  //
+  // So the renderer measures itself and backs off in discrete tiers until frames are cheap
+  // enough. It only ever steps DOWN: stepping back up invites oscillation, where the page
+  // alternates between smooth and stuttering, which reads far worse than settling one tier
+  // lower and staying there. Each step is followed by a settle window so the cost of the
+  // resize itself is never mistaken for a slow frame.
+  const tier = useRef(0)
+  // TIME-based windows, not frame counts. Counting frames is self-defeating here: the slower
+  // the machine, the longer it takes to collect the samples that would trigger the rescue. At
+  // 10fps a 90-frame window is nine seconds of jank before anything happens.
+  // Grace period before ANY measurement. Start-up is the slowest the page ever is — shaders
+  // compiling, the first video decoding, chunks landing — and judging a GPU on those frames
+  // would pin a 3080 to the bottom tier for the rest of the session. Degradation is one-way,
+  // so a false positive here is permanent and must be designed out.
+  const acc = useRef({ frames: 0, time: 0, settleUntil: 0, strikes: 0 })
+  const TIERS = [1, 0.8, 0.65, 0.5] // multipliers on the budgeted scale
+  const SLOW_MS = 22 // ~45fps; below this we are visibly dropping frames
+
+  const applyScale = useCallback(() => {
+    const scale = shaderScale(size.width, size.height) * TIERS[tier.current]
+    gl.setPixelRatio(scale)
+    uniforms.uRes.value.set(size.width * scale, size.height * scale)
+    // past the first step-down, drop the costliest shader passes as well
+    uniforms.uQuality.value = PERF.isMobile || tier.current >= 2 ? 0 : 1
+  }, [size, gl, uniforms])
+
   useEffect(() => {
     // recomputed on every resize, so dragging between a laptop and an external 4K panel
     // re-tunes the render scale instead of staying stuck at whatever the first screen implied
-    const scale = shaderScale(size.width, size.height)
-    gl.setPixelRatio(scale)
-    uniforms.uRes.value.set(size.width * scale, size.height * scale)
-  }, [size, gl, uniforms])
+    applyScale()
+  }, [applyScale])
 
   useFrame((_, dt) => {
     const u = uniforms
     u.uTime.value += dt
+
+    // measure, then degrade if this machine cannot hold the frame rate
+    const a = acc.current
+    const now = performance.now()
+    if (a.settleUntil === 0) a.settleUntil = now + 3000 // ignore the first 3s entirely
+    if (now >= a.settleUntil && tier.current < TIERS.length - 1) {
+      a.frames++
+      a.time += dt * 1000
+      // a full second of evidence, or 20 frames, whichever lands first — so a machine running
+      // at 8fps still gets judged after ~1s rather than after ninety slow frames
+      if (a.time >= 1000 || a.frames >= 20) {
+        // two consecutive slow windows, not one: a single hitch (a video starting, a GC pause,
+        // the user dragging the window to another display) must not cost quality permanently
+        if (a.time / a.frames > SLOW_MS) {
+          a.strikes++
+          if (a.strikes >= 2) {
+            tier.current++
+            applyScale()
+            a.strikes = 0
+            a.settleUntil = now + 600 // don't count the resize itself as a slow frame
+          }
+        } else {
+          a.strikes = 0
+        }
+        a.frames = 0
+        a.time = 0
+      }
+    }
     const b = audioBus.bands
     const t = audioBus.thermal
     // ---- SPECTRUM STRIP ----
