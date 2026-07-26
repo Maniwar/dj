@@ -363,13 +363,13 @@ section.hero { min-height: 100vh; display: grid; place-items: center; text-align
       have identical borders. Previously the stills letterboxed while the videos stayed
       full-bleed, so the margins jumped as you scrolled between them. */
 @media (min-aspect-ratio: 11/5) {
+  .lore-stop { --band: min(100%, calc(100vh * 2.2)); }
   .lore-stop .lore-band {
     /* An explicit width, NOT left+right+width:auto. For an absolutely positioned REPLACED
        element (the <video>) `width: auto` resolves to the intrinsic width and the right inset is
        simply dropped — which measured 2560px wide and visibly off-centre while the still beside
        it sat at 3168px. Width + left keeps the still and the clip pixel-identical.
        Left inset rather than a translateX because .lore-bg's transform belongs to Ken-Burns. */
-    --band: min(100%, calc(100vh * 2.2));
     width: var(--band);
     left: calc((100% - var(--band)) / 2);
     right: auto;
@@ -379,7 +379,15 @@ section.hero { min-height: 100vh; display: grid; place-items: center; text-align
   /* 16:9 footage keeps ~81% of its height inside the band; the upward anchor puts that on the
      faces and raised arms rather than the dance floor */
   .lore-video { object-position: center 35%; }
-  .lore-fill { display: block; }
+  .lore-stop .lore-fill { display: block; }
+  /* Keep the copy INSIDE the band. Left at 6vw it floats out in the side gap, on top of
+     whatever is bleeding through there — unreadable and visually detached from the frame. */
+  /* #lore prefix is deliberate. The base side-left/side-right panel rules further down the
+     file have the SAME specificity (0,3,0) and would win on source order alone — the same
+     cascade collision that already bit .lore-band and .lore-fill. The id raises this above
+     them so placement cannot depend on where the block happens to sit in the file. */
+  #lore .lore-stop.side-left .lore-panel { margin-left: calc((100% - var(--band)) / 2 + 2.5vw); }
+  #lore .lore-stop.side-right .lore-panel { margin-right: calc((100% - var(--band)) / 2 + 2.5vw); }
 }
 .lore-fill {
   display: none; position: absolute; inset: 0;
