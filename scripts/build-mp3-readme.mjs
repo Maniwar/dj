@@ -17,6 +17,8 @@ const tracks = JSON.parse(readFileSync('src/data/tracks.json', 'utf8')).tracks
 const lyrics = JSON.parse(readFileSync('src/data/lyrics.json', 'utf8'))
 
 const ARTIST = 'SYSTEM OVERLOAD'
+// DistroKid requires a real legal name for the songwriter field, not the stage name.
+const SONGWRITER = 'Mani Berenji-Jourshari'
 const ALBUM = 'Club Humidity — The Moist Mix 2002'
 
 // Production notes sit in the lyric sheets as whole lines in brackets — "(heavy four-on-the-floor
@@ -48,7 +50,8 @@ out += `> \`src/data/lyrics.json\` rather than editing this file, or the two wil
 out += `## Before you upload\n\n`
 out += `- **Artist name:** \`${ARTIST}\` — must match exactly across every track or DistroKid\n`
 out += `  will create separate artist pages.\n`
-out += `- **Songwriter credit:** DistroKid requires a real legal name per track, not the stage name.\n`
+out += `- **Songwriter credit:** \`${SONGWRITER}\` — DistroKid requires a real legal name, not the\n`
+out += `  stage name. Same on every track.\n`
 out += `- **Explicit:** flag per track — several of these carry innuendo rather than profanity, but\n`
 out += `  that is a judgement call you should make deliberately rather than leave at the default.\n`
 out += `- **Parody/fiction:** SYSTEM OVERLOAD, DJ Dieter and Kiki G are fictional. If any cover art\n`
@@ -122,29 +125,52 @@ brief += `| Release type | Album (${n} tracks) |\n`
 brief += `| Primary genre | Dance |\n`
 brief += `| Secondary genre | Electronic |\n`
 brief += `| Language of lyrics | English |\n`
+brief += `| Songwriter (all tracks) | \`${SONGWRITER}\` |\n`
 brief += `| Record label | leave blank unless you have one |\n`
 brief += `| Release date | **ASK THE USER** — do not guess |\n`
 brief += `| Cover art | **ASK THE USER** — not in this repo, must be 3000x3000px |\n\n`
 
 brief += `## Fields you must NOT fill without being told\n\n`
 brief += `These are legal or financial and a wrong guess is worse than an empty box:\n\n`
-brief += `- **Songwriter real name** — DistroKid requires a legal name, not "${ARTIST}". Ask.\n`
+brief += `- ~~Songwriter~~ — supplied: \`${SONGWRITER}\`. Use it verbatim on every track,\n`
+brief += `  including the hyphen. Do not substitute the stage name.\n`
 brief += `- **Explicit lyrics flag** — this material trades in innuendo. Ask per track; do not\n`
 brief += `  infer it from the lyrics yourself.\n`
 brief += `- **Release date**, **cover art**, **ISRC/UPC** (let DistroKid generate unless told).\n`
 brief += `- **Spotify/Apple artist IDs** — attaching to the wrong existing artist page is painful\n`
 brief += `  to undo. If asked to link, confirm the act is new first.\n\n`
 
-brief += `## Track worklist\n\n`
-brief += `${n} audio files. Upload in this order; the number is the intended track order.\n\n`
+// ---- ORDERING AGAINST THE 35-SLOT LIMIT ----------------------------------------------------
+// There are more files than slots, so the order decides what survives — and left interleaved by
+// track, the cut would land arbitrarily and could drop an A-SIDE while keeping some track's
+// third bootleg. Priority instead:
+//   1. every A-side, in album order    — the release itself; none of these may be cut
+//   2. every FIRST alternate           — one bootleg per track before any track gets a second
+//   3. deeper alternates               — the most expendable, so they take the cut
+const SLOTS = 35
+const rows = []
+const titleFor = (t, v) =>
+  t.versions.length > 1 ? `${t.title} (${v.badge === 'A-SIDE' ? 'Original Mix' : v.label})` : t.title
+for (const t of tracks) for (const v of t.versions) rows.push({ t, v, tier: v.variantIndex })
+rows.sort((a, b) => a.tier - b.tier || tracks.indexOf(a.t) - tracks.indexOf(b.t))
+
+const aSides = rows.filter((r) => r.tier === 0).length
+brief += `## Track worklist — ORDER MATTERS\n\n`
+brief += `${n} audio files, **${SLOTS} slots**. The order below is the priority order, and the\n`
+brief += `cut line is marked: enter rows 1-${SLOTS} and stop.\n\n`
+brief += `- rows 1-${aSides} are every A-side. **None of these may be dropped** — they are the release.\n`
+brief += `- then one alternate per track, before any track gets a second.\n`
+brief += `- the ${n - SLOTS} rows past the cut are the deepest bootlegs, which is why they are the ones\n`
+brief += `  that go. If you would rather cut something else, change it here, not while filling the form.\n\n`
 brief += `| # | Track title (paste exactly) | Version label | Absolute file path |\n|---|---|---|---|\n`
 let i = 0
-for (const t of tracks) {
-  for (const v of t.versions) {
-    i++
-    const title = t.versions.length > 1 ? `${t.title} (${v.badge === 'A-SIDE' ? 'Original Mix' : v.label})` : t.title
-    brief += `| ${i} | ${title} | ${v.label} | \`${ABS}/mp3/${v.file}\` |\n`
+for (const r of rows) {
+  i++
+  if (i === SLOTS + 1) {
+    brief += `\n**— CUT LINE. Everything above fits in the ${SLOTS} slots. Do not enter anything below. —**\n\n`
+    brief += `| # | Track title | Version label | Absolute file path |\n|---|---|---|---|\n`
   }
+  brief += `| ${i} | ${titleFor(r.t, r.v)} | ${r.v.label} | \`${ABS}/mp3/${r.v.file}\` |\n`
 }
 
 brief += `\n### On the version suffixes\n\n`
@@ -164,7 +190,8 @@ brief += `1. ${n} files attached, each to the track whose title matches the tabl
 brief += `2. No two tracks share a title.\n`
 brief += `3. Artist name identical on every track — no trailing spaces, no case differences.\n`
 brief += `4. Every track has lyrics, or you have said which do not.\n`
-brief += `5. Songwriter and explicit flag filled from the user's answers, not from your own guess.\n`
+brief += `5. Songwriter reads \`${SONGWRITER}\` on every track; the explicit flag came from the\n`
+brief += `   user, not from your own reading of the lyrics.\n`
 brief += `6. The submit button has NOT been pressed.\n`
 writeFileSync('mp3/DISTROKID-BRIEF.md', brief)
 console.log(`[brief]  mp3/DISTROKID-BRIEF.md — ${n} files with absolute paths`)

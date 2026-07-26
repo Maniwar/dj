@@ -12,7 +12,8 @@
 
 - **Artist name:** `SYSTEM OVERLOAD` — must match exactly across every track or DistroKid
   will create separate artist pages.
-- **Songwriter credit:** DistroKid requires a real legal name per track, not the stage name.
+- **Songwriter credit:** `Mani Berenji-Jourshari` — DistroKid requires a real legal name, not the
+  stage name. Same on every track.
 - **Explicit:** flag per track — several of these carry innuendo rather than profanity, but
   that is a judgement call you should make deliberately rather than leave at the default.
 - **Parody/fiction:** SYSTEM OVERLOAD, DJ Dieter and Kiki G are fictional. If any cover art

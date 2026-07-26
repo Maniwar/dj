@@ -20,6 +20,7 @@ re-running anything.
 | Primary genre | Dance |
 | Secondary genre | Electronic |
 | Language of lyrics | English |
+| Songwriter (all tracks) | `Mani Berenji-Jourshari` |
 | Record label | leave blank unless you have one |
 | Release date | **ASK THE USER** — do not guess |
 | Cover art | **ASK THE USER** — not in this repo, must be 3000x3000px |
@@ -28,58 +29,70 @@ re-running anything.
 
 These are legal or financial and a wrong guess is worse than an empty box:
 
-- **Songwriter real name** — DistroKid requires a legal name, not "SYSTEM OVERLOAD". Ask.
+- ~~Songwriter~~ — supplied: `Mani Berenji-Jourshari`. Use it verbatim on every track,
+  including the hyphen. Do not substitute the stage name.
 - **Explicit lyrics flag** — this material trades in innuendo. Ask per track; do not
   infer it from the lyrics yourself.
 - **Release date**, **cover art**, **ISRC/UPC** (let DistroKid generate unless told).
 - **Spotify/Apple artist IDs** — attaching to the wrong existing artist page is painful
   to undo. If asked to link, confirm the act is new first.
 
-## Track worklist
+## Track worklist — ORDER MATTERS
 
-39 audio files. Upload in this order; the number is the intended track order.
+39 audio files, **35 slots**. The order below is the priority order, and the
+cut line is marked: enter rows 1-35 and stop.
+
+- rows 1-19 are every A-side. **None of these may be dropped** — they are the release.
+- then one alternate per track, before any track gets a second.
+- the 4 rows past the cut are the deepest bootlegs, which is why they are the ones
+  that go. If you would rather cut something else, change it here, not while filling the form.
 
 | # | Track title (paste exactly) | Version label | Absolute file path |
 |---|---|---|---|
 | 1 | Abduct Me Baby (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Abduct Me Baby.mp3` |
-| 2 | Abduct Me Baby (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Abduct Me Baby_1.mp3` |
-| 3 | Bite Me in the Dark (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Bite Me in the Dark.mp3` |
-| 4 | Bite Me in the Dark (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Bite Me in the Dark_1.mp3` |
-| 5 | Ciao Ciao Afterparty (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Ciao Ciao Afterparty.mp3` |
-| 6 | Ciao Ciao Afterparty (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Ciao Ciao Afterparty_1.mp3` |
-| 7 | Euro Airways (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Euro Airways.mp3` |
-| 8 | Euro Airways (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Euro Airways_1.mp3` |
-| 9 | Euro-Trash (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Euro-Trash.mp3` |
-| 10 | Euro-Trash (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Euro-Trash_1.mp3` |
-| 11 | Firemans Disco (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Firemans Disco.mp3` |
-| 12 | Firemans Disco (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Firemans Disco_1.mp3` |
-| 13 | Patient Zero (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Patient Zero.mp3` |
-| 14 | Patient Zero (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Patient Zero_1.mp3` |
-| 15 | Pump My Iron (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Pump My Iron.mp3` |
-| 16 | Pump My Iron (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Pump My Iron_1.mp3` |
-| 17 | Reboot My Heart (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Reboot My Heart.mp3` |
-| 18 | Reboot My Heart (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Reboot My Heart_1.mp3` |
-| 19 | Sha-Sha-Shameless (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Sha-Sha-Shameless.mp3` |
-| 20 | Sha-Sha-Shameless (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Sha-Sha-Shameless_1.mp3` |
-| 21 | Shameless in the Luxury Car (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Shameless in the Luxury Car.mp3` |
-| 22 | Shameless in the Luxury Car (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Shameless in the Luxury Car_1.mp3` |
-| 23 | Shameless in the Navy | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Shameless in the Navy.mp3` |
-| 24 | Shameless Little Mechanic (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Shameless Little Mechanic.mp3` |
-| 25 | Shameless Little Mechanic (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Shameless Little Mechanic_1.mp3` |
-| 26 | Shameless on the Floor (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Shameless on the Floor.mp3` |
-| 27 | Shameless on the Floor (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Shameless on the Floor_1.mp3` |
-| 28 | Synthesizer Is So Big (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Synthesizer Is So Big.mp3` |
-| 29 | Synthesizer Is So Big (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Synthesizer Is So Big_1.mp3` |
-| 30 | Synthesizer Is So Big (Basement VIP Edit) | Basement VIP Edit | `/Users/maniwar/nodeProjects/dj/mp3/Synthesizer Is So Big_2.mp3` |
-| 31 | Synthesizer Is So Big (Sauna Dub) | Sauna Dub | `/Users/maniwar/nodeProjects/dj/mp3/Synthesizer Is So Big_3.mp3` |
-| 32 | The Basement VIP (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/The Basement VIP.mp3` |
-| 33 | The Basement VIP (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/The Basement VIP_1.mp3` |
-| 34 | Touch My Subwoofer (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Touch My Subwoofer.mp3` |
+| 2 | Bite Me in the Dark (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Bite Me in the Dark.mp3` |
+| 3 | Ciao Ciao Afterparty (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Ciao Ciao Afterparty.mp3` |
+| 4 | Euro Airways (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Euro Airways.mp3` |
+| 5 | Euro-Trash (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Euro-Trash.mp3` |
+| 6 | Firemans Disco (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Firemans Disco.mp3` |
+| 7 | Patient Zero (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Patient Zero.mp3` |
+| 8 | Pump My Iron (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Pump My Iron.mp3` |
+| 9 | Reboot My Heart (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Reboot My Heart.mp3` |
+| 10 | Sha-Sha-Shameless (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Sha-Sha-Shameless.mp3` |
+| 11 | Shameless in the Luxury Car (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Shameless in the Luxury Car.mp3` |
+| 12 | Shameless in the Navy | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Shameless in the Navy.mp3` |
+| 13 | Shameless Little Mechanic (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Shameless Little Mechanic.mp3` |
+| 14 | Shameless on the Floor (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Shameless on the Floor.mp3` |
+| 15 | Synthesizer Is So Big (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Synthesizer Is So Big.mp3` |
+| 16 | The Basement VIP (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/The Basement VIP.mp3` |
+| 17 | Touch My Subwoofer (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Touch My Subwoofer.mp3` |
+| 18 | Tutti-Frutti (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Tutti-Frutti.mp3` |
+| 19 | Winter Time Romance (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Winter Time Romance.mp3` |
+| 20 | Abduct Me Baby (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Abduct Me Baby_1.mp3` |
+| 21 | Bite Me in the Dark (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Bite Me in the Dark_1.mp3` |
+| 22 | Ciao Ciao Afterparty (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Ciao Ciao Afterparty_1.mp3` |
+| 23 | Euro Airways (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Euro Airways_1.mp3` |
+| 24 | Euro-Trash (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Euro-Trash_1.mp3` |
+| 25 | Firemans Disco (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Firemans Disco_1.mp3` |
+| 26 | Patient Zero (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Patient Zero_1.mp3` |
+| 27 | Pump My Iron (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Pump My Iron_1.mp3` |
+| 28 | Reboot My Heart (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Reboot My Heart_1.mp3` |
+| 29 | Sha-Sha-Shameless (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Sha-Sha-Shameless_1.mp3` |
+| 30 | Shameless in the Luxury Car (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Shameless in the Luxury Car_1.mp3` |
+| 31 | Shameless Little Mechanic (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Shameless Little Mechanic_1.mp3` |
+| 32 | Shameless on the Floor (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Shameless on the Floor_1.mp3` |
+| 33 | Synthesizer Is So Big (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Synthesizer Is So Big_1.mp3` |
+| 34 | The Basement VIP (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/The Basement VIP_1.mp3` |
 | 35 | Touch My Subwoofer (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Touch My Subwoofer_1.mp3` |
-| 36 | Tutti-Frutti (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Tutti-Frutti.mp3` |
-| 37 | Tutti-Frutti (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Tutti-Frutti_1.mp3` |
-| 38 | Winter Time Romance (Original Mix) | A-Side · Studio Mix | `/Users/maniwar/nodeProjects/dj/mp3/Winter Time Romance.mp3` |
-| 39 | Winter Time Romance (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Winter Time Romance_1.mp3` |
+
+**— CUT LINE. Everything above fits in the 35 slots. Do not enter anything below. —**
+
+| # | Track title | Version label | Absolute file path |
+|---|---|---|---|
+| 36 | Tutti-Frutti (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Tutti-Frutti_1.mp3` |
+| 37 | Winter Time Romance (White-Label Bootleg) | White-Label Bootleg | `/Users/maniwar/nodeProjects/dj/mp3/Winter Time Romance_1.mp3` |
+| 38 | Synthesizer Is So Big (Basement VIP Edit) | Basement VIP Edit | `/Users/maniwar/nodeProjects/dj/mp3/Synthesizer Is So Big_2.mp3` |
+| 39 | Synthesizer Is So Big (Sauna Dub) | Sauna Dub | `/Users/maniwar/nodeProjects/dj/mp3/Synthesizer Is So Big_3.mp3` |
 
 ### On the version suffixes
 
@@ -102,5 +115,6 @@ Check each of these and say which ones you could not verify:
 2. No two tracks share a title.
 3. Artist name identical on every track — no trailing spaces, no case differences.
 4. Every track has lyrics, or you have said which do not.
-5. Songwriter and explicit flag filled from the user's answers, not from your own guess.
+5. Songwriter reads `Mani Berenji-Jourshari` on every track; the explicit flag came from the
+   user, not from your own reading of the lyrics.
 6. The submit button has NOT been pressed.
