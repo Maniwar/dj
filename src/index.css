@@ -292,12 +292,16 @@ section { position: relative; padding: 9vh 6vw; }
    100vh and a 10vh top pad. That one leak was inflating a 144px headline into a 1479px block and
    pushing the body copy clean out of the bottom of the slide. Only <section class="hero"> (the
    page's own hero, #top) should ever match. */
-/* 100vh is the LARGE viewport height on mobile — measured as if the URL bar were hidden — so
-   with browser chrome showing, every full-height section is taller than the screen and the
-   layout jumps as the bar hides and reappears. It is worst in landscape, where the chrome is a
-   big fraction of a ~390px viewport. 100dvh tracks the real visible height; the plain vh line
-   stays first as the fallback for browsers without dvh. */
-section.hero { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; text-align: center; padding-top: 10vh; }
+/* svh, NOT vh and NOT dvh.
+   - 100vh is the LARGE height (as if the URL bar were hidden), so with chrome visible every
+     full-height section is taller than the screen.
+   - 100svh tracks the CURRENT height, which sounds right but changes continuously while the
+     URL bar animates — that is a resize of every full-height section on every scroll frame,
+     and on Android it shows up as the whole page flickering as you scroll.
+   - 100svh is the SMALL height: the stable worst case, with chrome showing. It never changes
+     during scroll, so there is nothing to thrash, and content always fits.
+   The plain vh line stays first as the fallback for browsers without svh. */
+section.hero { min-height: 100vh; min-height: 100svh; display: grid; place-items: center; text-align: center; padding-top: 10vh; }
 .hero-inner { max-width: 1000px; }
 .hero-crest { margin-bottom: 1.4rem; }
 .eyebrow { font-family: 'Oswald', sans-serif; color: var(--gold); letter-spacing: 0.35em; font-size: 0.74rem; margin-bottom: 1rem; text-transform: uppercase; }
@@ -327,13 +331,11 @@ section.hero { min-height: 100vh; min-height: 100dvh; display: grid; place-items
 .lore-title { position: sticky; top: 0; z-index: 4; text-align: center; padding: 7vh 6vw 2vh; pointer-events: none;
   background: linear-gradient(180deg, rgba(3,4,8,0.85), transparent); }
 .lore-stops { position: relative; }
-.lore-stop { position: relative; height: 100vh; height: 100dvh; overflow: hidden; display: flex; align-items: center;
-  /* Every slide is a stack of full-screen layers (fill, band, media, scan). Seven slides meant
-     the compositor was still handling all of them while only one was on screen — measured at
-     7680x2160 that was 55 full-screen layers and ~1.7 BILLION pixels of fill per frame. This
-     skips rendering entirely for anything off-screen; contain-intrinsic-size keeps the page
-     height and scroll position stable while it does. */
-  content-visibility: auto; contain-intrinsic-size: 100vw 100dvh; }
+.lore-stop { position: relative; height: 100vh; height: 100svh; overflow: hidden; display: flex; align-items: center;
+  /* content-visibility: auto was tried here and REMOVED. The saving was never demonstrated —
+     the browser already skips painting off-screen layers — and skipping/unskipping a slide as
+     it scrolls into view makes it pop. Reported as the page flickering while scrolling on
+     Android, together with the dvh thrash above. */ }
 /* blurred fill so there are no empty bars; the sharp image is CONTAINED on top so the
    characters are always fully in frame at any window width */
 /* No dark fill — let the live party Broadcast footage show THROUGH the letterbox gaps around
@@ -379,7 +381,7 @@ section.hero { min-height: 100vh; min-height: 100dvh; display: grid; place-items
       have identical borders. Previously the stills letterboxed while the videos stayed
       full-bleed, so the margins jumped as you scrolled between them. */
 @media (min-aspect-ratio: 11/5) {
-  .lore-stop { --band: min(100%, calc(100dvh * 2.2)); }
+  .lore-stop { --band: min(100%, calc(100svh * 2.2)); }
   .lore-stop .lore-band {
     /* An explicit width, NOT left+right+width:auto. For an absolutely positioned REPLACED
        element (the <video>) `width: auto` resolves to the intrinsic width and the right inset is
@@ -1116,8 +1118,8 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .journey-title { position: sticky; top: 0; z-index: 4; text-align: center; padding: 7vh 6vw 2vh; pointer-events: none;
   background: linear-gradient(180deg, rgba(3,4,8,0.85), transparent); }
 .journey-stops { position: relative; }
-.journey-stop { position: relative; height: 100vh; height: 100dvh; display: grid; place-items: center; overflow: hidden;
-  content-visibility: auto; contain-intrinsic-size: 100vw 100dvh; }
+.journey-stop { position: relative; height: 100vh; height: 100svh; display: grid; place-items: center; overflow: hidden;
+ }
 /* blurred fill + CONTAINED sharp image so the crew is never cropped at any width */
 .journey-bg-blur { display: none; }
 /* City stills (STILL mode). No filter here — the darkening moved to the static scan layer below
@@ -1266,4 +1268,51 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   .player.mobile .lcd-meta { font-size: 0.55rem; margin-top: 2px; }
   /* the title bar is pure chrome — it can be thin when height is the scarce resource */
   .player.mobile .player-title { padding: 4px 9px; }
+}
+
+
+/* ---- COLLAPSED BAR: as thin as it can honestly be -------------------------------------
+   Rolled up, this is meant to be a slim status strip you can ignore. Two things made it a
+   thick slab instead:
+   1. .player.mobile .tbtn sets `flex: 1 1 44px` to make the transport buttons big touch
+      targets. The collapsed bar's play button is a .tbtn too, so it inherited the grow and
+      stretched across the whole row — that enormous button is the single biggest thing in
+      the bar and it was an accident, not a design.
+   2. The title strip kept its full padding even with nothing under it to title.
+   Result is a bar around 70px instead of ~95px, and the play button stays a comfortable
+   40x34 target. */
+.player.mobile .player-shade .tbtn,
+.player.mobile .player-shade .tbtn.sm {
+  flex: 0 0 40px; width: 40px; height: 34px; min-height: 0;
+}
+.player.mobile .player-shade { padding: 4px 8px 6px; gap: 7px; }
+.player.mobile.minimized .player-title { padding: 3px 9px; }
+.player.mobile.minimized .player-title .mp3-dot { transform: scale(0.85); }
+
+
+/* ---- EXPANDED PLAYER ON A PHONE: stop spending height it doesn't have -------------------
+   At 375x667 the open player was 403px — SIXTY PERCENT of the screen. The two biggest wastes
+   were structural rather than decorative:
+   1. .transport was flex-wrap: wrap with the knobs pushed right by margin-left:auto, so VOL and
+      FRICTION always fell onto a row of their own. Measured, they fit inline at 375px once
+      sized sensibly (5 buttons ~40px + 2 knobs ~32px + gaps ~= 304px of 355px available), so
+      the whole extra row was avoidable.
+   2. Everything was sized for touch generously and then stacked, which compounds.
+   Buttons stay at 38px (and 32px for the secondary row), which is still a usable target.
+   Scoped to max-width 640px so the landscape grid above is untouched. */
+@media (max-width: 640px) {
+  .player.mobile .spectrum-canvas { height: 24px; }
+  .player.mobile .lcd { padding: 6px; }
+  .player.mobile .lcd-meta { font-size: 0.55rem; margin-top: 2px; }
+  .player.mobile .transport { flex-wrap: nowrap; gap: 5px; }
+  .player.mobile .tbtn { flex: 1 1 34px; height: 38px; }
+  .player.mobile .tbtn.play { flex: 1.4 1 44px; }
+  .player.mobile .knobs { margin-left: 6px; gap: 8px; flex: none; }
+  .player.mobile .knob-wrap { width: 32px; }
+  .player.mobile .knob-body { width: 32px !important; height: 32px !important; }
+  .player.mobile .knob-label { font-size: 0.4rem; letter-spacing: 0.02em; }
+  .player.mobile .tools { margin-top: 4px; gap: 5px; }
+  .player.mobile .tools .tbtn { height: 32px; }
+  .player.mobile .bootleg { padding: 4px 8px; }
+  .player.mobile .player-body { gap: 6px; }
 }
