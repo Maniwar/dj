@@ -1034,9 +1034,13 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    75px of blurred fill each side, which is what .lore-fill was built for. Nothing is cropped,
    and on a screen this size the subject is still comfortably large. */
 @media (orientation: landscape) and (max-height: 560px) {
-  .lore-video { object-fit: contain; object-position: center; }
-  .lore-stop .lore-bg { background-size: contain; background-position: center; }
-  .lore-stop .lore-fill { display: block; }
+  /* CONTAIN was tried here to save the roller skates and is now reverted. It cost ~75px of
+     static bar each side, and because .lore-bg carries a background-COLOUR, that colour painted
+     into the letterbox gaps on top of the blurred fill — the black bar that appeared on the
+     left. The skates are handled properly now by the per-scene `focus` anchor plus a much
+     shorter player (40px), so the media goes back to filling the full width with no bars. */
+  .lore-video { object-fit: cover; }
+  .lore-stop .lore-fill { display: none; }
   .lyric-stage { left: 3vw; right: 3vw; bottom: 58px; }
   .ls-line { font-size: clamp(0.95rem, 5.2vh, 1.5rem); line-height: 1.04; }
   .ls-next { display: none; }
@@ -1400,9 +1404,11 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   .tint-magenta .lm-item { text-shadow: 0 0 10px rgba(255,31,143,0.65); }
   .tint-acid .lm-item { text-shadow: 0 0 10px rgba(99,255,46,0.6); }
   .tint-blue .lm-item { text-shadow: 0 0 10px rgba(20,224,255,0.6); }
-  /* the lore panel gets its own compositing layer, so whatever it does repaint cannot drag
-     the video layer underneath it into the repaint too */
-  .lore-panel, .journey-card { will-change: transform; }
+  /* will-change: transform was set on every panel here and has been REMOVED. Promoting a
+     large semi-transparent element that sits over playing video creates and destroys a
+     compositing layer as each slide activates, and on Android that re-composites the whole
+     stack — reported as the entire site flickering as the text slides in. The panel's own
+     transition is already transform+opacity, which the compositor handles without help. */
 }
 
 
