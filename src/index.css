@@ -2243,7 +2243,7 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    than from a blur. Costs nothing, and the plastic-and-brushed-metal fiction survives. */
 .player {
   background:
-    linear-gradient(180deg, rgba(18,21,28,0.94) 0%, rgba(11,13,19,0.93) 10%, rgba(6,8,12,0.92) 100%)
+    linear-gradient(180deg, rgba(18,21,28,0.84) 0%, rgba(11,13,19,0.82) 10%, rgba(6,8,12,0.80) 100%)
       padding-box,
     var(--grad-gilt-border) border-box;
   box-shadow:
@@ -2253,7 +2253,35 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
     inset 0 -1px 0 rgba(0,0,0,0.55);
 }
 .player-title {
-  background: linear-gradient(180deg, rgba(26,30,38,0.95) 0%, rgba(16,19,26,0.92) 100%);
+  background: linear-gradient(180deg, rgba(26,30,38,0.86) 0%, rgba(16,19,26,0.82) 100%);
 }
 /* the readout stays solid — an LCD that lets the room through stops reading as a screen */
 .lcd { background: linear-gradient(180deg, #0a1a06, #071204); }
+
+
+/* ============================================================================================
+   LANDSCAPE PHONE — CARD TYPE (appended last on purpose)
+   Two earlier attempts at this silently did nothing: they were anchored to rule text that had
+   already been rewritten, so the replace matched nothing and reported success. Written as a
+   plain appended block there is nothing to miss.
+
+   The headline is ONE size for every card. Previously heroes rendered at --step-5 and chapters
+   at --step-4, which on a 390px screen was the difference between 88px and 68px — visibly
+   different card to card as you scroll, which reads as a mistake rather than a hierarchy. On a
+   screen this short the headline is competing with its own paragraph for the same forty lines,
+   so it does not get to be the size it is on a monitor, and it does not get to vary either.
+   ========================================================================================== */
+@media (orientation: landscape) and (max-height: 560px) {
+  #lore .lore-name,
+  #lore .lore-name.hero { font-size: clamp(1rem, 6vh, 1.6rem); margin-bottom: var(--sp-2); }
+  #lore .lore-eyebrow { font-size: clamp(0.42rem, 1.6vh, 0.55rem); margin-bottom: var(--sp-1); }
+  #lore .lore-body { font-size: clamp(0.64rem, 2.7vh, 0.86rem); line-height: 1.32; }
+  #lore .lore-roster { gap: var(--sp-1) var(--sp-3); margin-top: var(--sp-2); }
+  #lore .lore-roster-name { font-size: clamp(0.68rem, 2.6vh, 0.88rem); }
+  #lore .lore-roster-line { font-size: clamp(0.52rem, 2vh, 0.7rem); line-height: 1.26; }
+  #lore .lore-roster-tag { font-size: clamp(0.4rem, 1.4vh, 0.52rem); }
+  #lore .lore-tag { font-size: clamp(0.44rem, 1.6vh, 0.56rem); margin-top: var(--sp-2); }
+  #lore .lore-panel { padding: var(--sp-2) var(--sp-4); }
+  /* the card must also clear the mini bar, which the panels were overlapping by 20-62px */
+  #lore .lore-stop { padding-bottom: 84px; }
+}
