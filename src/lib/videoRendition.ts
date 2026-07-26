@@ -20,6 +20,24 @@ const HD_MIN_PHYSICAL_WIDTH = 1920
 // soft frame after someone drags the window to another monitor.
 let cached: boolean | null = null
 
+/**
+ * Forget the cached decision so the next clip re-picks its rendition.
+ *
+ * Going full screen can take a 1400px window past the 1920-physical-pixel threshold, but the
+ * decision was made once at load and never revisited. It deliberately does NOT swap the src of
+ * whatever is playing: changing a playing video's source restarts the clip mid-scene, which is
+ * a far worse artefact than one more scene at 720p. Clearing the cache means the UPGRADE lands
+ * at the next natural scene or track change, which nobody perceives as a change at all.
+ */
+export function refreshRenditionChoice(): void {
+  cached = null
+}
+
+if (typeof window !== 'undefined') {
+  document.addEventListener('fullscreenchange', refreshRenditionChoice)
+  document.addEventListener('webkitfullscreenchange', refreshRenditionChoice)
+}
+
 export function prefersHdVideo(): boolean {
   if (cached !== null) return cached
   if (typeof window === 'undefined') return (cached = false)

@@ -18,6 +18,7 @@ import LyricMarquee from './components/LyricMarquee'
 import LyricStage from './components/LyricStage'
 import Precache from './components/Precache'
 import PauseOffscreen from './components/PauseOffscreen'
+import BeatCursor from './components/BeatCursor'
 import SectionCut from './components/SectionCut'
 import VisualizerMode from './components/VisualizerMode'
 import TourRail from './components/TourRail'
@@ -56,6 +57,7 @@ export default function App() {
       <SectionCut />
       <Precache />
       <PauseOffscreen />
+      <BeatCursor />
       <VisualizerMode />
       <FrictionOverlay />
 

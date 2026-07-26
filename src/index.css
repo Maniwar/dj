@@ -1598,6 +1598,12 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .player.minimized .shade-expand {
   display: block; flex: 0 0 24px; width: 24px; height: 24px; font-size: 0.55rem;
 }
+/* ...but NOT when the title bar is on screen. The strip's restore control exists because mobile
+   drops the title bar entirely, which would otherwise leave the mini bar a dead end. On desktop
+   the title bar stays (it is the drag handle) and still carries its own restore, so showing both
+   gave two buttons for one job. Generalising the collapsed-bar styles to every player is what
+   introduced the duplicate. */
+.player.minimized:not(.mobile) .shade-expand { display: none; }
 .player.minimized .shade-bar {
   left: 0; right: 0; bottom: 0; height: 2px; border-radius: 0; background: rgba(255,255,255,0.10);
 }
@@ -2333,19 +2339,55 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 
 
 /* ---- OPT-IN GLASS -----------------------------------------------------------------------
-   Real frosted glass, behind a toggle. backdrop-filter must re-blur whatever is behind it on
-   EVERY frame, and what is behind this is playing video — the same per-pixel cost that was
-   heating phones, which is why it is opt-in rather than the default. The plain translucent
-   panel stays the baseline, so turning this off is not a downgrade to something worse.
-   -webkit- first for Safari, which still needs the prefix. */
+   backdrop-filter on its own gives you FROSTING, not glass — a blurred rectangle reads as a
+   flat panel because nothing about it responds to light. Glass reads as glass because light
+   interacts with it in three specific ways, and all three are here:
+
+     1. IT BLOOMS what is behind it. saturate + brightness on the backdrop means the lasers
+        behind the panel flare through it instead of being muted by the blur.
+     2. ITS EDGES REFRACT. Real glass is brightest where it curves — an inset rim light plus a
+        bright top edge, and a second inset shadow at the bottom to give it thickness.
+     3. IT CATCHES A MOVING HIGHLIGHT. A specular band travels across the surface, and its
+        brightness rides --m-beat, so the club's own light is what plays over it.
+
+   Opt-in because the blur has to re-run every frame over playing video — the same per-pixel
+   cost that was heating phones. -webkit- first for Safari. */
 :root.glass-on .player {
-  -webkit-backdrop-filter: blur(14px) saturate(1.25);
-  backdrop-filter: blur(14px) saturate(1.25);
-  background: linear-gradient(180deg, rgba(22,27,36,0.30) 0%, rgba(13,17,24,0.26) 10%, rgba(6,8,12,0.24) 100%);
+  -webkit-backdrop-filter: blur(16px) saturate(1.9) brightness(1.18);
+  backdrop-filter: blur(16px) saturate(1.9) brightness(1.18);
+  background:
+    /* frost: a fine texture so the surface is not perfectly smooth */
+    repeating-linear-gradient(122deg, rgba(255,255,255,0.028) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, rgba(30,38,52,0.22) 0%, rgba(10,14,22,0.17) 45%, rgba(6,8,12,0.20) 100%);
+  border-color: rgba(255,255,255,0.30);
+  box-shadow:
+    0 24px 60px rgba(0,0,0,0.5),
+    /* the rim: bright at the top edge, dark at the bottom, which is what gives it thickness */
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    inset 0 0 0 1px rgba(255,255,255,0.10),
+    inset 0 -14px 26px rgba(0,0,0,0.34),
+    inset 0 14px 26px rgba(255,255,255,0.06);
+}
+/* the specular sweep — brightness rides the beat, so the room's light plays across the glass */
+:root.glass-on .player::after {
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255,255,255,calc(0.10 + var(--m-beat, 0) * 0.30)) 44%,
+    rgba(255,255,255,calc(0.03 + var(--m-beat, 0) * 0.10)) 52%,
+    transparent 66%
+  );
 }
 :root.glass-on .player-title {
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(12px) saturate(1.6);
+  backdrop-filter: blur(12px) saturate(1.6);
+  background: linear-gradient(180deg, rgba(40,50,66,0.24) 0%, rgba(18,24,34,0.18) 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+}
+/* the controls stay solid — a button you can see through stops looking pressable — but they
+   pick up an edge highlight so they read as sitting ON the glass rather than behind it */
+:root.glass-on .tbtn, :root.glass-on .shade-btn {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), 0 1px 3px rgba(0,0,0,0.5);
 }
 
 /* The ORIGIN header fades with its section. Declared at top level, NOT inside a breakpoint —
@@ -2353,3 +2395,27 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    header away on desktop with nothing to bring it back. */
 .lore-title { opacity: 0; transition: opacity 0.5s ease; }
 .lore-title.on { opacity: 1; }
+
+
+/* ---- BEAT CURSOR -------------------------------------------------------------------------
+   A halo around the real cursor, not a replacement for it. Position is translate3d, the pulse
+   is the `scale` property — both composited, so this costs nothing per frame beyond one style
+   write that AudioReactive is already making. --m-beat sits at 0 when nothing is playing, so
+   the ring settles to its resting size on its own with no playback logic here at all.
+   mix-blend-mode: screen so it reads as light over the footage rather than as a sticker. */
+.beat-cursor {
+  position: fixed; left: 0; top: 0; width: 30px; height: 30px; margin: -15px 0 0 -15px;
+  border-radius: 50%; pointer-events: none; z-index: 200;
+  background:
+    radial-gradient(circle, rgba(255,255,255,0.85) 0%, rgba(255,31,143,0.55) 34%,
+                    rgba(255,31,143,0.16) 58%, transparent 72%);
+  mix-blend-mode: screen;
+  scale: calc(0.55 + var(--m-beat, 0) * 0.85 + var(--m-drop, 0) * 0.5);
+  opacity: calc(0.42 + var(--m-level, 0) * 0.45);
+  will-change: transform; /* permanent, never toggled — see the flicker notes elsewhere */
+}
+/* it borrows the singer's colour, so the halo changes with whoever is on the mic */
+.beat-cursor { background-image:
+  radial-gradient(circle, rgba(255,255,255,0.85) 0%, var(--accent, #ff1f8f) 34%,
+                  rgba(0,0,0,0) 72%); }
+@media (pointer: coarse) { .beat-cursor { display: none; } }
