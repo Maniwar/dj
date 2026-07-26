@@ -443,17 +443,18 @@ export default function Player() {
               ☰
             </button>
             <button
-              className={`tbtn sm ${glass ? 'on' : ''}`}
+              className={`tbtn sm ${glass !== 'off' ? 'on' : ''}`}
               onClick={toggleGlass}
-              aria-pressed={glass}
-              aria-label="Glass panel"
+              aria-label="Panel finish"
               title={
-                glass
-                  ? 'Glass ON — frosted panel (costs a blur pass every frame)'
-                  : 'Glass off — tap for a frosted panel'
+                glass === 'off'
+                  ? 'Solid panel — tap for clear glass'
+                  : glass === 'clear'
+                    ? 'CLEAR glass — tap for frosted'
+                    : 'FROSTED glass — tap for solid'
               }
             >
-              ◧
+              {glass === 'off' ? '◧' : glass === 'clear' ? '◨' : '◩'}
             </button>
             <button
               className="tbtn viz"

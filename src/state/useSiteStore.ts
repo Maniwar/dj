@@ -67,8 +67,8 @@ type SiteState = {
   cycleLyricStyle: () => void
   visualizer: boolean // full-screen takeover: the page falls away and the rig performs
   toggleVisualizer: () => void
-  /** Real frosted glass on the player. Off by default — see toggleGlass. */
-  glass: boolean
+  /** Panel finish: solid, clear glass, or frosted. Cycles; see toggleGlass. */
+  glass: 'off' | 'clear' | 'frost'
   toggleGlass: () => void
   vizMode: VizMode // which analyser visualisation the player is showing
   cycleVizMode: () => void
@@ -107,13 +107,24 @@ export const useSiteStore = create<SiteState>((set) => ({
   // while video plays behind it — the same class of per-pixel work that was heating phones
   // earlier — so it is opt-in rather than something everyone pays for by default. The choice
   // persists, because having to re-enable it every visit would make it not worth having.
+  // Three finishes rather than a switch, because they are genuinely different materials and
+  // which one looks best depends on what is playing behind the panel. CLEAR is the interesting
+  // one — you see the scene through it — and it is also the cheapest of the two glass modes,
+  // since a 1px blur costs a fraction of a 16px one over playing video. Solid stays the default
+  // so nobody pays for a backdrop pass they did not ask for. The choice persists.
   glass: (() => {
-    try { return localStorage.getItem('so.glass') === '1' } catch { return false }
+    try {
+      const v = localStorage.getItem('so.glass')
+      return v === 'clear' || v === 'frost' ? v : 'off'
+    } catch {
+      return 'off'
+    }
   })(),
   toggleGlass: () =>
     set((s) => {
-      const glass = !s.glass
-      try { localStorage.setItem('so.glass', glass ? '1' : '0') } catch { /* private mode */ }
+      const order = ['off', 'clear', 'frost'] as const
+      const glass = order[(order.indexOf(s.glass) + 1) % order.length]
+      try { localStorage.setItem('so.glass', glass) } catch { /* private mode */ }
       return { glass }
     }),
   vizMode: initialViz(),

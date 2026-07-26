@@ -37,7 +37,9 @@ export default function VisualizerMode() {
   // the glass opt-in rides the same root-class mechanism
   const glass = useSiteStore((s) => s.glass)
   useEffect(() => {
-    document.documentElement.classList.toggle('glass-on', glass)
+    const root = document.documentElement
+    root.classList.toggle('glass-on', glass !== 'off')
+    root.classList.toggle('glass-frost', glass === 'frost')
   }, [glass])
 
   if (!on || !loggedOn) return null

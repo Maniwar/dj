@@ -2353,8 +2353,14 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    Opt-in because the blur has to re-run every frame over playing video — the same per-pixel
    cost that was heating phones. -webkit- first for Safari. */
 :root.glass-on .player {
-  -webkit-backdrop-filter: blur(16px) saturate(1.9) brightness(1.18);
-  backdrop-filter: blur(16px) saturate(1.9) brightness(1.18);
+  /* CLEAR glass, not frosted. blur(16px) was making a bathroom window — you could tell
+     something was behind it but not what. Real glass in front of a screen shows the screen:
+     1px is just enough to read as a surface rather than a hole, and everything that says
+     "glass" is now carried by the specular sweeps, the bevel and the edge refraction instead
+     of by obliteration. It is also markedly cheaper — a 1px blur is a fraction of the
+     per-frame cost of a 16px one, which matters because this re-runs over playing video. */
+  -webkit-backdrop-filter: blur(1px) saturate(1.7) brightness(1.12) contrast(1.04);
+  backdrop-filter: blur(1px) saturate(1.7) brightness(1.12) contrast(1.04);
   background:
     /* frost: a fine texture so the surface is not perfectly smooth */
     repeating-linear-gradient(122deg, rgba(255,255,255,0.028) 0 1px, transparent 1px 3px),
@@ -2379,9 +2385,9 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   );
 }
 :root.glass-on .player-title {
-  -webkit-backdrop-filter: blur(12px) saturate(1.6);
-  backdrop-filter: blur(12px) saturate(1.6);
-  background: linear-gradient(180deg, rgba(40,50,66,0.24) 0%, rgba(18,24,34,0.18) 100%);
+  -webkit-backdrop-filter: blur(1px) saturate(1.5);
+  backdrop-filter: blur(1px) saturate(1.5);
+  background: linear-gradient(180deg, rgba(40,50,66,0.20) 0%, rgba(18,24,34,0.15) 100%);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
 }
 /* the controls stay solid — a button you can see through stops looking pressable — but they
@@ -2419,3 +2425,184 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   radial-gradient(circle, rgba(255,255,255,0.85) 0%, var(--accent, #ff1f8f) 34%,
                   rgba(0,0,0,0) 72%); }
 @media (pointer: coarse) { .beat-cursor { display: none; } }
+
+
+/* ============================================================================================
+   HYPER-REAL GLASS
+   What was there — blur, a rim, a frost texture, a beat-driven sheen — gets you a convincing
+   frosted panel. What it does not get you is GLASS, because the single strongest cue is missing:
+   real glass changes as you move relative to it. Four additions, in order of how much each one
+   sells the illusion:
+
+   1. THE HIGHLIGHT FOLLOWS YOUR VIEWING ANGLE. The panel already computes --rx/--ry from pointer
+      tilt for its 3D transform, so the specular can be driven from the same numbers. Move the
+      mouse and the light travels across the surface. Nothing else here comes close to this for
+      believability — a static highlight reads as a painted-on gradient no matter how good it is.
+   2. FRESNEL. Glass is nearly clear face-on and increasingly reflective toward grazing angles,
+      which is why a real pane is brightest at its edges. A radial gradient that is transparent
+      in the middle and bright at the rim is that effect, and it is what makes the surface read
+      as curved rather than flat.
+   3. CHROMATIC FRINGING. Thick glass splits light at its edges. A hair of warm on one side and
+      cool on the other, blended in, is the difference between "transparent rectangle" and a
+      piece of physical material.
+   4. IMPERFECTION. Nothing real is optically perfect. Faint micro-scratches at two angles, well
+      under the threshold of being noticed individually, stop the surface reading as CGI.
+   ========================================================================================== */
+:root.glass-on .player {
+  background:
+    /* 2 — fresnel: clear in the middle, bright toward the edges */
+    radial-gradient(120% 100% at 50% 45%, transparent 42%, rgba(255,255,255,0.06) 78%, rgba(255,255,255,0.13) 100%),
+    /* 4 — micro-scratches, two angles, deliberately near-invisible */
+    repeating-linear-gradient(122deg, rgba(255,255,255,0.030) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(37deg, rgba(255,255,255,0.016) 0 1px, transparent 1px 7px),
+    linear-gradient(180deg, rgba(30,38,52,0.14) 0%, rgba(10,14,22,0.10) 45%, rgba(6,8,12,0.13) 100%);
+}
+
+/* 1 — the specular tracks the tilt. --ry is the horizontal tilt in degrees (about -12..12), so
+   50% + (--ry * 3%) sweeps the band right across the panel as the pointer moves. */
+:root.glass-on .player::after {
+  background:
+    radial-gradient(
+      140% 90% at calc(50% + var(--ry, 0deg) * 3) calc(30% - var(--rx, 0deg) * 2),
+      rgba(255,255,255,calc(0.20 + var(--m-beat, 0) * 0.26)) 0%,
+      rgba(255,255,255,0.05) 26%,
+      transparent 55%
+    ),
+    linear-gradient(115deg, transparent 34%, rgba(255,255,255,0.07) 47%, transparent 60%);
+  transition: background 90ms linear;
+}
+
+/* 3 — chromatic fringing at the two edges where a pane would split light */
+:root.glass-on .player::before {
+  content: ''; position: absolute; inset: 0; border-radius: 14px; pointer-events: none;
+  z-index: 1; mix-blend-mode: screen;
+  background:
+    linear-gradient(90deg, rgba(90,150,255,0.16) 0%, transparent 5%),
+    linear-gradient(270deg, rgba(255,150,90,0.14) 0%, transparent 5%),
+    linear-gradient(180deg, rgba(160,200,255,0.10) 0%, transparent 3%);
+}
+
+/* ---- CURSOR: a lens, not a dot ------------------------------------------------------------
+   One flat halo reads as a sticker stuck to the screen. Depth comes from two elements moving at
+   DIFFERENT rates — the core pinned to the pointer, the outer ring easing behind it — which is
+   the same trick that makes a comet read as travelling rather than as a shape. The ring is what
+   carries the beat; the core stays small and steady so it never obscures what you are aiming at.
+   Both are transform-only. */
+.beat-cursor::before, .beat-cursor::after {
+  content: ''; position: absolute; left: 50%; top: 50%; border-radius: 50%;
+  transform: translate(-50%, -50%); pointer-events: none;
+}
+/* the core — small, bright, always legible against the footage */
+.beat-cursor::before {
+  width: 7px; height: 7px;
+  background: radial-gradient(circle, #fff 0%, rgba(255,255,255,0.9) 40%, transparent 72%);
+}
+/* the ring — this is the part that dances */
+.beat-cursor::after {
+  width: 34px; height: 34px;
+  border: 1px solid rgba(255,255,255,0.55);
+  box-shadow: 0 0 calc(6px + var(--m-beat, 0) * 20px) var(--accent, #ff1f8f),
+              inset 0 0 calc(4px + var(--m-beat, 0) * 12px) var(--accent, #ff1f8f);
+  scale: calc(0.8 + var(--m-beat, 0) * 0.55 + var(--m-drop, 0) * 0.35);
+  transition: scale 70ms ease-out;
+}
+
+
+/* ============================================================================================
+   GLASS THAT IS LIT BY THE ROOM, NOT BY THE POINTER
+   Tying the highlight to mouse tilt was a mistake in emphasis: nobody waves a cursor at a music
+   player, so for 99% of the time the surface sat perfectly still and read as a painted gradient
+   again. A real pane in a real club is never still — the rig sweeps over it whether or not
+   anyone is touching anything. So the light now moves ON ITS OWN, and the pointer merely nudges
+   it. Two independent sweeps at different speeds and angles, so they beat against each other
+   and the surface never repeats in a way the eye can latch onto.
+
+   And it now has FORM. A single rim highlight reads as an outline; real glass has thickness, so
+   the edge is built as a chamfer — a bright bevel catching light from above, a dark one falling
+   away below, and a soft contact shadow where the pane meets its frame. That is what makes it
+   read as a solid object rather than a hole cut in the page.
+   ========================================================================================== */
+@keyframes glassSweepA {
+  0%   { background-position: -40% 0%, 50% 30%; }
+  100% { background-position: 140% 0%, 50% 30%; }
+}
+@keyframes glassSweepB {
+  0%   { background-position: 130% 100%; }
+  100% { background-position: -30% 100%; }
+}
+
+:root.glass-on .player::after {
+  background:
+    /* the travelling band — this is the rig passing over the pane */
+    linear-gradient(
+      108deg,
+      transparent 38%,
+      rgba(255,255,255,calc(0.16 + var(--m-beat, 0) * 0.34)) 47%,
+      rgba(255,255,255,calc(0.05 + var(--m-beat, 0) * 0.12)) 53%,
+      transparent 62%
+    ),
+    /* a soft pool that drifts with tilt when the pointer IS moving, and simply sits otherwise */
+    radial-gradient(
+      140% 90% at calc(50% + var(--ry, 0deg) * 3) calc(30% - var(--rx, 0deg) * 2),
+      rgba(255,255,255,calc(0.14 + var(--m-beat, 0) * 0.20)) 0%,
+      rgba(255,255,255,0.04) 28%,
+      transparent 56%
+    );
+  background-size: 220% 100%, 100% 100%;
+  background-repeat: no-repeat;
+  animation: glassSweepA 13s linear infinite;
+}
+
+/* the second sweep, slower and against the grain of the first */
+:root.glass-on .player::before {
+  background:
+    linear-gradient(
+      68deg,
+      transparent 42%,
+      rgba(190,225,255,calc(0.07 + var(--m-level, 0) * 0.14)) 50%,
+      transparent 58%
+    ),
+    /* chromatic fringing at the edges where a thick pane splits light */
+    linear-gradient(90deg, rgba(90,150,255,0.15) 0%, transparent 4%),
+    linear-gradient(270deg, rgba(255,150,90,0.13) 0%, transparent 4%);
+  background-size: 260% 100%, 100% 100%, 100% 100%;
+  background-repeat: no-repeat;
+  animation: glassSweepB 21s linear infinite;
+}
+
+/* FORM: a chamfered edge rather than an outline, and a contact shadow under the pane */
+:root.glass-on .player {
+  box-shadow:
+    /* the pane sits above the page and casts onto it */
+    0 30px 70px rgba(0,0,0,0.55),
+    0 2px 0 rgba(0,0,0,0.45),
+    /* the bevel: lit from above-left, falling away below-right */
+    inset 0 2px 0 rgba(255,255,255,0.62),
+    inset 2px 0 0 rgba(255,255,255,0.20),
+    inset -2px 0 0 rgba(0,0,0,0.30),
+    inset 0 -2px 0 rgba(0,0,0,0.45),
+    /* thickness: light bleeding in from the top face, shadow pooling at the bottom */
+    inset 0 16px 30px rgba(255,255,255,0.07),
+    inset 0 -20px 34px rgba(0,0,0,0.38),
+    inset 0 0 0 1px rgba(255,255,255,0.09);
+}
+
+/* reduced-motion users get the material without the moving light */
+@media (prefers-reduced-motion: reduce) {
+  :root.glass-on .player::after, :root.glass-on .player::before { animation: none; }
+}
+
+
+/* FROSTED is the same material with the blur turned up — clear glass shows the scene, frosted
+   obscures it. Everything else (bevel, sweeps, fringing) is shared, because both are glass. */
+:root.glass-frost .player {
+  -webkit-backdrop-filter: blur(15px) saturate(1.9) brightness(1.16);
+  backdrop-filter: blur(15px) saturate(1.9) brightness(1.16);
+  background:
+    repeating-linear-gradient(122deg, rgba(255,255,255,0.030) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, rgba(30,38,52,0.26) 0%, rgba(10,14,22,0.21) 45%, rgba(6,8,12,0.24) 100%);
+}
+:root.glass-frost .player-title {
+  -webkit-backdrop-filter: blur(12px) saturate(1.6);
+  backdrop-filter: blur(12px) saturate(1.6);
+}
