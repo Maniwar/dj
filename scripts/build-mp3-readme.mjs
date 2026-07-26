@@ -16,6 +16,17 @@ import path from 'node:path'
 const tracks = JSON.parse(readFileSync('src/data/tracks.json', 'utf8')).tracks
 const lyrics = JSON.parse(readFileSync('src/data/lyrics.json', 'utf8'))
 
+// The bio is INLINED from mp3/BIO.md rather than duplicated here. Both documents need it, and a
+// second copy is a second thing to forget to update — the version that then gets pasted into a
+// store is whichever one you happened to open.
+const bio = existsSync('mp3/BIO.md')
+  ? readFileSync('mp3/BIO.md', 'utf8')
+      .split('\n')
+      .filter((l) => !l.startsWith('# ')) // its own H1 would fight the README's
+      .join('\n')
+      .trim()
+  : null
+
 const ARTIST = 'SYSTEM OVERLOAD'
 // DistroKid requires a real legal name for the songwriter field, not the stage name.
 const SONGWRITER = 'Mani Berenji-Jourshari'
@@ -59,6 +70,12 @@ out += `  or title reads as referencing a real act, expect a review hold.\n`
 out += `- **Alternate versions:** where a track has more than one pressing they are listed together\n`
 out += `  below. Uploading them as separate tracks on one release is usually what you want; do not\n`
 out += `  upload the same recording twice under different titles.\n\n`
+
+if (bio) {
+  out += `## Artist bio\n\n`
+  out += `Maintained in \`mp3/BIO.md\` and inlined here, so there is only one copy to keep current.\n\n`
+  out += bio.replace(/^## /gm, '### ') + `\n\n---\n\n`
+}
 
 out += `## Track list\n\n`
 out += `| # | Title | Version | File | Size |\n|---|---|---|---|---|\n`
@@ -178,6 +195,12 @@ brief += `Files ending \`_1\`, \`_2\`, \`_3\` are ALTERNATE PRESSINGS of the pre
 brief += `different songs. Give each a distinct track title using its version label in brackets, as\n`
 brief += `in the table above — DistroKid rejects releases with duplicate track titles, and stores\n`
 brief += `display them as separate tracks regardless.\n\n`
+
+brief += `## Artist bio\n\n`
+brief += `Three lengths in \`${ABS}/mp3/BIO.md\` and in the README. Paste whichever fits the field;\n`
+brief += `do not write your own. If a platform asks whether the artist is real, say it is a parody\n`
+brief += `project — the bio is in character, and staying in character with a human reviewer turns a\n`
+brief += `joke into a misrepresentation.\n\n`
 
 brief += `## Lyrics\n\n`
 brief += `Full lyrics for every track are in \`${ABS}/mp3/README.md\`, under a \`## <Track title>\`\n`

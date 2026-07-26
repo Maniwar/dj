@@ -101,6 +101,13 @@ different songs. Give each a distinct track title using its version label in bra
 in the table above — DistroKid rejects releases with duplicate track titles, and stores
 display them as separate tracks regardless.
 
+## Artist bio
+
+Three lengths in `/Users/maniwar/nodeProjects/dj/mp3/BIO.md` and in the README. Paste whichever fits the field;
+do not write your own. If a platform asks whether the artist is real, say it is a parody
+project — the bio is in character, and staying in character with a human reviewer turns a
+joke into a misrepresentation.
+
 ## Lyrics
 
 Full lyrics for every track are in `/Users/maniwar/nodeProjects/dj/mp3/README.md`, under a `## <Track title>`
