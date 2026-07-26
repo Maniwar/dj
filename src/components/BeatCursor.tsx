@@ -68,8 +68,19 @@ export default function BeatCursor() {
     // Twelve nodes are created once and reused round-robin. Moving the mouse now costs two style
     // writes on an element that already exists, and the ceiling on simultaneous trail layers is
     // twelve no matter how violently the cursor is waved.
-    const POOL = 18
-    const DROP_DISTANCE = 26 // a denser spray now that each particle travels away
+    // YOU SHOULD BE ABLE TO DRAW WITH IT.
+    //
+    // The particles now hold long enough that sweeping the cursor paints a visible line — a
+    // heart, a name, whatever — and only then does the whole stroke fire off into the scene.
+    // That is a far better effect than a quick spark, and it decides every number here.
+    //
+    // The pool must outlast the emission rate or particles get recycled mid-stroke and the
+    // shape dissolves as you draw it. At ~1200px/s and a drop every 24px that is ~50 emitted a
+    // second; with a 2s life, ~100 are in flight at once. 104 slots covers it. They are cheap —
+    // no blending, transform and opacity only — so the cost is a bounded set of tiny composited
+    // layers rather than the unbounded node churn the very first version had.
+    const POOL = 104
+    const DROP_DISTANCE = 24
     const pool: HTMLDivElement[] = []
     for (let i = 0; i < POOL; i++) {
       const dot = document.createElement('div')
@@ -105,12 +116,15 @@ export default function BeatCursor() {
           // LINGER: sit where it was dropped, at full size. This is the trail half — the
           // previous version shrank to a quarter within 300ms having travelled only 28px, so it
           // collapsed before it went anywhere and never read as being fired at all.
-          { transform: from, opacity: 0.9, offset: 0, easing: 'linear' },
-          { transform: from, opacity: 0.9, offset: 0.34, easing: 'cubic-bezier(0.3,0,0.5,1)' },
+          // HOLD — this is the drawable part. Long enough to complete a shape before any of it
+          // starts moving, which is the whole point of being able to paint with it.
+          { transform: from, opacity: 0.95, offset: 0, easing: 'linear' },
+          { transform: from, opacity: 0.95, offset: 0.62, easing: 'cubic-bezier(0.3,0,0.5,1)' },
           // THEN FIRE: outward and away, shrinking as it recedes into the scene.
           { transform: to, opacity: 0, offset: 1 },
         ],
-        { duration: 1000, fill: 'forwards' },
+        // 2s total: ~1.25s of drawable hold, then ~0.75s of flight
+        { duration: 2000, fill: 'forwards' },
       )
     }
 
