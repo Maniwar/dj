@@ -292,7 +292,12 @@ section { position: relative; padding: 9vh 6vw; }
    100vh and a 10vh top pad. That one leak was inflating a 144px headline into a 1479px block and
    pushing the body copy clean out of the bottom of the slide. Only <section class="hero"> (the
    page's own hero, #top) should ever match. */
-section.hero { min-height: 100vh; display: grid; place-items: center; text-align: center; padding-top: 10vh; }
+/* 100vh is the LARGE viewport height on mobile — measured as if the URL bar were hidden — so
+   with browser chrome showing, every full-height section is taller than the screen and the
+   layout jumps as the bar hides and reappears. It is worst in landscape, where the chrome is a
+   big fraction of a ~390px viewport. 100dvh tracks the real visible height; the plain vh line
+   stays first as the fallback for browsers without dvh. */
+section.hero { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; text-align: center; padding-top: 10vh; }
 .hero-inner { max-width: 1000px; }
 .hero-crest { margin-bottom: 1.4rem; }
 .eyebrow { font-family: 'Oswald', sans-serif; color: var(--gold); letter-spacing: 0.35em; font-size: 0.74rem; margin-bottom: 1rem; text-transform: uppercase; }
@@ -322,13 +327,13 @@ section.hero { min-height: 100vh; display: grid; place-items: center; text-align
 .lore-title { position: sticky; top: 0; z-index: 4; text-align: center; padding: 7vh 6vw 2vh; pointer-events: none;
   background: linear-gradient(180deg, rgba(3,4,8,0.85), transparent); }
 .lore-stops { position: relative; }
-.lore-stop { position: relative; height: 100vh; overflow: hidden; display: flex; align-items: center;
+.lore-stop { position: relative; height: 100vh; height: 100dvh; overflow: hidden; display: flex; align-items: center;
   /* Every slide is a stack of full-screen layers (fill, band, media, scan). Seven slides meant
      the compositor was still handling all of them while only one was on screen — measured at
      7680x2160 that was 55 full-screen layers and ~1.7 BILLION pixels of fill per frame. This
      skips rendering entirely for anything off-screen; contain-intrinsic-size keeps the page
      height and scroll position stable while it does. */
-  content-visibility: auto; contain-intrinsic-size: 100vw 100vh; }
+  content-visibility: auto; contain-intrinsic-size: 100vw 100dvh; }
 /* blurred fill so there are no empty bars; the sharp image is CONTAINED on top so the
    characters are always fully in frame at any window width */
 /* No dark fill — let the live party Broadcast footage show THROUGH the letterbox gaps around
@@ -374,7 +379,7 @@ section.hero { min-height: 100vh; display: grid; place-items: center; text-align
       have identical borders. Previously the stills letterboxed while the videos stayed
       full-bleed, so the margins jumped as you scrolled between them. */
 @media (min-aspect-ratio: 11/5) {
-  .lore-stop { --band: min(100%, calc(100vh * 2.2)); }
+  .lore-stop { --band: min(100%, calc(100dvh * 2.2)); }
   .lore-stop .lore-band {
     /* An explicit width, NOT left+right+width:auto. For an absolutely positioned REPLACED
        element (the <video>) `width: auto` resolves to the intrinsic width and the right inset is
@@ -1040,7 +1045,7 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .tbtn.lyr.on { background: linear-gradient(180deg, #ff6ec7, #b0186a); color: #fff; }
 
 /* ---- MOBILE: dock the player as a compact, touch-friendly bottom bar (no drag/tilt) ---- */
-@media (max-width: 640px) {
+@media (max-width: 640px), (max-height: 600px) {
   .player.mobile {
     left: 0; right: 0; top: auto; bottom: 0; width: 100%;
     border-radius: 14px 14px 0 0; touch-action: auto; transform: none;
@@ -1111,8 +1116,8 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .journey-title { position: sticky; top: 0; z-index: 4; text-align: center; padding: 7vh 6vw 2vh; pointer-events: none;
   background: linear-gradient(180deg, rgba(3,4,8,0.85), transparent); }
 .journey-stops { position: relative; }
-.journey-stop { position: relative; height: 100vh; display: grid; place-items: center; overflow: hidden;
-  content-visibility: auto; contain-intrinsic-size: 100vw 100vh; }
+.journey-stop { position: relative; height: 100vh; height: 100dvh; display: grid; place-items: center; overflow: hidden;
+  content-visibility: auto; contain-intrinsic-size: 100vw 100dvh; }
 /* blurred fill + CONTAINED sharp image so the crew is never cropped at any width */
 .journey-bg-blur { display: none; }
 /* City stills (STILL mode). No filter here — the darkening moved to the static scan layer below

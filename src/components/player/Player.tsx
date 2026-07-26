@@ -1,4 +1,9 @@
 import { useRef, useState, useEffect } from 'react'
+
+// Any viewport too small in EITHER axis to hold the full window gets the docked bar. The
+// height clause is what catches phones in landscape; it also correctly catches a short
+// desktop window, which equally cannot fit a 381px player.
+const COMPACT_Q = '(max-width: 768px), (max-height: 600px)'
 import { useAudio } from '../../audio/AudioProvider'
 import { usePlayerStore, getTrack, getVersion } from '../../state/usePlayerStore'
 import { LYRIC_STYLE_LABEL, useSiteStore } from '../../state/useSiteStore'
@@ -76,17 +81,20 @@ export default function Player() {
     } catch {
       /* fall through to the default */
     }
-    return window.matchMedia('(max-width: 640px)').matches // phones start rolled up
+    return window.matchMedia(COMPACT_Q).matches // phones (either orientation) start rolled up
   })
   const dragRef = useRef<{ dx: number; dy: number } | null>(null)
   const winRef = useRef<HTMLDivElement>(null)
   // On phones the draggable/tilting 348px window is too big and blocks scroll — dock it as a
   // full-width compact bar at the bottom instead (CSS controls position; drag/tilt disabled).
+  // Width OR height. A phone in landscape is 844px WIDE and 390px TALL, so a width-only test
+  // called it a desktop and handed it the 381px-tall draggable window — 98% of the screen, and
+  // on a 375px-tall device it overflowed off the bottom entirely.
   const [isMobile, setIsMobile] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches,
+    () => typeof window !== 'undefined' && window.matchMedia(COMPACT_Q).matches,
   )
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 640px)')
+    const mq = window.matchMedia(COMPACT_Q)
     const on = () => setIsMobile(mq.matches)
     mq.addEventListener('change', on)
     return () => mq.removeEventListener('change', on)
