@@ -16,6 +16,7 @@ smoke-shots
 
 # album-cover working copy of the source frame (the original lives in public/assets)
 artwork/bg.jpg
+artwork/bg-rig.jpg
 
 # QA screenshot output
 ultrawide-shots/

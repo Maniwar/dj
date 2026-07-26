@@ -12,18 +12,23 @@
 
   /* The footage, pushed dark and cool so the type has somewhere to sit. Album art is read at
      64px in a phone list before it is ever seen large, so contrast beats detail. */
-  .bg { position:absolute; inset:0; background:url('bg.jpg') center 42%/cover no-repeat;
-        filter:brightness(.52) contrast(1.18) saturate(1.25); }
+  /* brightness(.82), not .52. The first pass crushed the picture to clear space for the type and
+     threw away the light rig with it — the beams ARE the artwork, so the type has to work around
+     them rather than the other way round. The source is now a live capture of the running rig
+     (artwork/grab.mjs), so the lasers, bloom and haze on the cover are the real thing. */
+  .bg { position:absolute; inset:0; background:url('bg-rig.jpg') center center/cover no-repeat;
+        filter:brightness(.82) contrast(1.12) saturate(1.4); }
   /* laser haze */
   .haze { position:absolute; inset:0;
     background:
       radial-gradient(120% 80% at 22% 12%, rgba(255,31,143,.55), transparent 58%),
       radial-gradient(110% 75% at 82% 20%, rgba(20,224,255,.38), transparent 60%),
       radial-gradient(130% 90% at 50% 108%, rgba(99,255,46,.30), transparent 62%);
-    mix-blend-mode:screen; }
+    mix-blend-mode:screen; opacity:.45; }
   /* a scrim so the title never fights the picture */
+  /* a scrim only where the type sits — the middle of the frame stays bright */
   .scrim { position:absolute; inset:0;
-    background:linear-gradient(180deg, rgba(4,3,8,.62) 0%, rgba(4,3,8,.12) 34%, rgba(4,3,8,.80) 78%, rgba(4,3,8,.95) 100%); }
+    background:linear-gradient(180deg, rgba(4,3,8,.55) 0%, rgba(4,3,8,0) 26%, rgba(4,3,8,0) 46%, rgba(4,3,8,.72) 76%, rgba(4,3,8,.93) 100%); }
   /* VHS scanlines, the same texture the site uses */
   .scan { position:absolute; inset:0; opacity:.16; mix-blend-mode:multiply;
     background:repeating-linear-gradient(0deg, rgba(0,0,0,.9) 0 3px, transparent 3px 7px); }
