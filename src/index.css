@@ -2874,3 +2874,57 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 :root.glass-on .player.minimized .shade-time {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.6);
 }
+
+/* ============================================================================================
+   TOUR STOPS — GET OUT OF THE MIDDLE OF THE PICTURE
+   ============================================================================================
+   `.journey-stop` is `place-items: center` and `.journey-card` is `text-align: center`, so every
+   stop put a 137px city name and a paragraph squarely over the one thing worth looking at. The
+   hero had exactly this problem and it was solved by treating the frame like a record sleeve:
+   type in a corner, picture owns the rest. The stops should follow the same rule rather than
+   inventing a second answer to the same question.
+
+   The other half is SIZING TYPE OFF HEIGHT. `clamp(3.4rem, 15vw, 11rem)` is a width formula, and
+   a landscape phone is wide and SHORT — at 915x412 that resolves to 137px of city name inside
+   412px of screen, a third of the viewport for one word. In landscape the scarce axis is
+   vertical, so the clamp reads svh and the type gets big only when there is height to spend. */
+@media (orientation: landscape) and (max-height: 620px) {
+  .journey-stop {
+    place-items: end start; /* bottom-left, like the hero */
+  }
+  .journey-card {
+    text-align: left;
+    /* Leave the right side of the frame alone: that is where the footage subject usually sits,
+       and where the tour rail lives. Reserve the mini bar at the bottom as the hero does. */
+    max-width: min(54%, 30rem);
+    padding: 0 0 calc(2vh + 52px) 5vw;
+    margin: 0;
+  }
+  .journey-city {
+    font-size: clamp(1.9rem, 12svh, 4.4rem);
+    line-height: 0.9;
+  }
+  .journey-venue { margin: 0.15rem 0 0.4rem; font-size: 0.82rem; }
+  .journey-blurb {
+    font-size: 0.92rem;
+    line-height: 1.35;
+    max-width: 38ch;
+    margin: 0 0 0.5rem;
+  }
+  .journey-leg { margin-bottom: 0.5rem; padding: 3px 9px; font-size: 0.62rem; }
+  .journey-seed { font-size: 0.6rem; }
+}
+
+/* Portrait phones have the height but not the width, so the type can stay large — the fix there
+   is anchoring, not scale. Bottom-left for the same reason: a centred block sits on the face. */
+@media (orientation: portrait) and (max-width: 768px) {
+  .journey-stop { place-items: end start; }
+  .journey-card {
+    text-align: left;
+    max-width: none;
+    padding: 0 6vw calc(3vh + 52px);
+  }
+  .journey-city { font-size: clamp(2.8rem, 13vw, 5.5rem); line-height: 0.88; }
+  .journey-blurb { font-size: 1.02rem; line-height: 1.4; max-width: 34ch; margin: 0 0 0.6rem; }
+  .journey-venue { margin: 0.2rem 0 0.6rem; }
+}
