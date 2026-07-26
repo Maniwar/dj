@@ -3,7 +3,7 @@ import { useSiteStore } from '../state/useSiteStore'
 import { useAudio } from '../audio/AudioProvider'
 import { usePlayerStore, randomVersionId } from '../state/usePlayerStore'
 import { BUILD_STAMP } from '../version'
-import { bootAssets, warm, connectionAllowsPrefetch } from '../lib/preload'
+import { bootAssets, warm, connectionAllowsPrefetch, idleSoon } from '../lib/preload'
 
 const BOOT_LINES = [
   'DIALING EUROBEAT RECORDS MAINFRAME... ▓▓▓▓▓▓▓',
@@ -45,6 +45,28 @@ export default function BootGate() {
       body.style.overflow = prev.body
     }
   }, [loggedOn, booting])
+
+  // THE GATE ITSELF IS DEAD TIME, and it can last as long as someone leaves the tab open.
+  // Nothing was being fetched while it sat there: the boot warm-up only starts on the click, so
+  // a visitor who reads the warning, takes a phone call and comes back still waits the full
+  // sequence afterwards. Warming the mainstage BEFORE the click means the boot sequence has
+  // nothing left to do and opens on its floor, and the first clip is already in cache.
+  //
+  // Same restraint as everywhere else: idle priority, off entirely on a metered connection, and
+  // it stops as soon as the gate is dismissed so it can never compete with playback.
+  useEffect(() => {
+    if (loggedOn) return // already through the door; the boot effect owns it from here
+    if (!connectionAllowsPrefetch()) return
+    let cancelled = false
+    const start = idleSoon(() => {
+      if (cancelled) return
+      warm(bootAssets(), () => {})
+    }, 1500)
+    return () => {
+      cancelled = true
+      if ((window as any).cancelIdleCallback) (window as any).cancelIdleCallback(start)
+    }
+  }, [loggedOn])
 
   useEffect(() => {
     if (!booting) return
