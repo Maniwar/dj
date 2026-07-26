@@ -1076,43 +1076,29 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    75px of blurred fill each side, which is what .lore-fill was built for. Nothing is cropped,
    and on a screen this size the subject is still comfortably large. */
 @media (orientation: landscape) and (max-height: 560px) {
-  /* The roller-skate shot, art-directed for THIS breakpoint, and the numbers leave no room to
-     be clever with. A phone in landscape shows 82.1% of a 16:9 frame. Her hair starts at 14%
-     and the skate wheels end at 96% — the subject IS 82.0% of the frame. The slack is one
-     tenth of one percent, so no anchor keeps both ends with any real margin.
-     70% is therefore a CHOICE, not a solve: the band sits at 12.5%-94.6%, which clears her head
-     by 1.5% and trims about 1.4% off the bottom of the wheels. A head is the subject of a shot;
-     the last sliver of a wheel is not.
-     It also cannot be the scene's global focus (60%), because the desktop 2.5 band shows only
-     71% of the frame and a 70% anchor there starts at 20% — straight through her face. */
-  .lore-stop[data-id='stockholm'] .lore-video,
-  .lore-stop[data-id='stockholm'] .lore-bg { --focus: center 70%; }
+  /* ---- ONE BAND FOR EVERY SLIDE ---------------------------------------------------------
+     The previous arrangement gave 16:9 clips `contain` (693px) and square heroes `cover`
+     (844px), so the media WIDTH jumped from slide to slide — and the text panel is positioned
+     against the stop rather than the media, so nothing lined up with anything. That is the
+     misalignment reported, and it is the same fault that was fixed once before on desktop:
+     stills and video must share one frame.
 
-  /* WHOLE FRAME, no crop. The viewport here is 2.16:1 and the footage is 1.78:1, so cover has
-     to eat ~18% of the height — and on the roller-skate shot the subject IS 82% of the frame,
-     so that crop can only be spent on her head or on the skates. Contain shows all of it.
-     Contain was tried before and reverted because a BLACK bar appeared. That was a bug, not the
-     letterbox: .lore-bg carries a background-COLOUR, which painted into the gaps on top of the
-     blurred fill behind it. Clearing it is the whole fix — the gaps are now the same soft
-     blurred edge the wide-screen slides already use, about 9% each side. */
-  /* Contain ONLY where the frame is what matters — the 16:9 scene clips. Never on the hero
-     portraits, for two separate reasons:
-       1. They are square. Contained in a 2.16:1 viewport a 2048x2048 portrait becomes a 390px
-          square with 227px gaps (27%) each side, and kbHero scales it 1 -> 1.1, so those gaps
-          swing 20px continuously. Cover fills the frame and still shows 46% of the source,
-          which is plenty for a head-and-shoulders crop.
-       2. Contain requires .lore-fill, and that is a BLURRED, 8x-scaled layer. Putting one under
-          an element that starts animating the moment the slide activates gives the compositor a
-          reason to re-rasterise mid-animation — which is the page-wide flicker that appeared on
-          Kiki's slide, the first hero you meet. Heroes never display it now. */
-  .lore-stop:not(.hero) .lore-video { object-fit: contain; object-position: center; }
-  .lore-stop:not(.hero) .lore-bg {
-    background-size: contain; background-position: center;
-    background-color: transparent; /* the actual cause of the earlier black bar */
+     So: one band, cover for both. At 2.0 the band is 780px with 32px bars, a 16:9 clip keeps
+     89% of its height (enough for the skates at a 70% anchor: 7.8%-96.7%, hair at 14% and
+     wheels at 96% both inside) and a square portrait shows 50% — a proper head-and-shoulders
+     crop. Every slide is now the same width, and the copy is aligned TO that width. */
+  .lore-stop { --band: min(100%, calc(100svh * 2.0)); }
+  .lore-stop .lore-band {
+    width: var(--band); left: calc((100% - var(--band)) / 2); right: auto;
   }
-  .lore-stop:not(.hero) .lore-fill { display: block; }
-  .lore-stop.hero .lore-fill { display: none; }
-  .lore-video { background-color: transparent; }
+  .lore-video { object-fit: cover; object-position: var(--focus, center); background-color: transparent; }
+  .lore-stop .lore-bg { background-size: cover; background-color: transparent; }
+  .lore-stop .lore-fill { display: block; }
+  .lore-stop[data-id='stockholm'] { --focus: center 70%; }
+
+  /* the copy lines up with the frame it sits on, not with the window */
+  #lore .lore-stop.side-left .lore-panel { margin-left: calc((100% - var(--band)) / 2 + 3vw); }
+  #lore .lore-stop.side-right .lore-panel { margin-right: calc((100% - var(--band)) / 2 + 3vw); }
   .lyric-stage { left: 3vw; right: 3vw; bottom: 58px; }
   .ls-line { font-size: clamp(0.95rem, 5.2vh, 1.5rem); line-height: 1.04; }
   .ls-next { display: none; }
@@ -1456,13 +1442,11 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    flat. Beat reaction is not lost either: the transform-based lift and scale further up are
    composited, cost nothing, and still pulse. Only the repaint-forcing half is switched off. */
 @media (max-width: 768px), (max-height: 600px) {
-  /* No per-frame TRANSFORM on the full-screen stills either. The beat scale rewrote `scale` on
-     .lore-bg / .bc-frame / .journey-bg sixty times a second, and on a phone in landscape that
-     element is 844px wide — twice the area of portrait, which is why the same cost only became
-     unmissable there. Even promoted it is work for no visible gain at this size; the beat is
-     still carried by the text lift, the light rig and the VU. The Ken-Burns pan is unaffected —
-     that is one animation the compositor runs on its own. */
-  .lore-bg, .bc-frame, .journey-bg { scale: 1; }
+  /* The beat pulse is BACK on phones. Killing it was treating the symptom: the flicker was
+     never the pulse itself, it was a per-frame transform on a layer that had no promotion, so
+     every beat repainted the page beneath it. All three still layers are promoted permanently
+     now (see .lore-bg, .bc-frame, .journey-bg below), which makes the pulse a composited
+     transform and therefore free — and matches what desktop does, which is what was noticed. */
 
   .lore-name {
     filter: drop-shadow(0 2px 0 rgba(0,0,0,0.6)) drop-shadow(0 0 18px var(--accent));
@@ -1963,4 +1947,95 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
     padding-left: calc((100% - min(100%, 100svh * 2.5)) / 2 + 2.5vw);
     padding-right: calc((100% - min(100%, 100svh * 2.5)) / 2 + 2.5vw);
   }
+}
+
+
+/* Anything carrying a PER-FRAME transform gets a permanent layer. Not toggled — toggling the
+   hint is what caused the churn — and not omitted, because without it the transform repaints
+   everything underneath. This is the rule the whole flicker saga kept teaching. */
+.bc-frame, .journey-bg { will-change: transform; }
+
+/* The travel rail overlapped the city copy in landscape, and on touch it is already inert, so
+   on a phone in landscape it is simply not drawn: a decorative readout is not worth sitting on
+   top of the text it is meant to accompany. */
+@media (orientation: landscape) and (max-height: 560px) {
+  .tour-rail { display: none; }
+
+  /* ---- ONE WIDTH FOR EVERY PIECE OF MEDIA ON THE PAGE ----------------------------------
+     The Origin slides were put on a 2.0 band (780px) but the tour scenes and the mainstage
+     backdrop were left full-bleed at 844px, so the frame still jumped by 64px as you scrolled
+     between sections — the same misalignment, just moved somewhere else. Every media element
+     now shares the one band, so the edge never moves from the top of the page to the bottom. */
+  .journey-stop { --band: min(100%, calc(100svh * 2.0)); }
+  .journey-bg, .journey-video {
+    left: calc((100% - var(--band)) / 2); right: auto; width: var(--band);
+  }
+  .journey-stop .journey-bg-blur {
+    display: block; position: absolute; inset: 0; z-index: -1;
+    background-size: cover; background-position: center; background-repeat: no-repeat;
+    filter: blur(40px) brightness(0.4) saturate(1.25);
+  }
+  .broadcast { --stage: min(100%, calc(100svh * 2.0)); }
+  .bc-video { left: calc((100% - var(--stage)) / 2); right: auto; width: var(--stage); }
+  .bc-frame { left: calc((100% - var(--stage)) / 2); right: auto; width: var(--stage); top: -5%; bottom: -5%; }
+  /* the ticker lines up with the frame too, rather than running the full window */
+  .lyric-marquee { width: min(100%, calc(100svh * 2.0)); margin-inline: auto; }
+}
+
+
+/* ============================================================================================
+   PORTRAIT HERO, take two — the bottom of a phone screen is CONTESTED
+   The first pass anchored the type to the floor without accounting for what already lives
+   there: the lyric line (bottom 104px) and the docked player. So the badges, the gauge, the
+   counter and the lyric all landed in the same 150px and read as one jumble, and the title sat
+   directly on people's faces with nothing to lift it off the picture.
+
+   Three changes, in order of how much they matter:
+   1. RESERVE the contested space. The block now stops ~176px above the floor, which is the
+      lyric line plus the player plus air — so the hero never competes with them.
+   2. A SCRIM. Type over footage needs its own ground or it is at the mercy of whatever frame is
+      playing; a bottom gradient guarantees the name reads regardless of what is behind it. This
+      is what every poster does and the reason it never looked settled without one.
+   3. Cut what the space cannot carry. The hit counter goes on portrait — it is the least
+      informative row and it was costing a whole line next to the player.
+   ========================================================================================== */
+@media (max-width: 768px) and (orientation: portrait) {
+  section.hero { position: relative; }
+  /* the ground the type stands on */
+  section.hero::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 62%;
+    background: linear-gradient(180deg, rgba(4,3,8,0) 0%, rgba(4,3,8,0.55) 45%, rgba(4,3,8,0.88) 100%);
+    pointer-events: none; z-index: 0;
+  }
+  .hero-inner { position: relative; z-index: 1; padding-bottom: calc(2vh + 176px); }
+  .hitcounter { display: none; }
+
+  /* The lede/meta grouping is what desktop needs to ARRANGE, and exactly what portrait needs to
+     get out of the way — it forced the CTA (inside the lede) to sit above the badges and gauge
+     (inside the meta), burying the one action in the middle of the block. display: contents
+     dissolves both wrappers so every element becomes a direct flex child again and `order` can
+     put them in the sequence a phone actually wants: who this is, then the detail, then the
+     way in — last, nearest the thumb. */
+  .hero-lede, .hero-meta { display: contents; }
+  .hero-title   { order: 1; }
+  .hero-sub     { order: 2; }
+  .hero-artists { order: 3; }
+  .hero-flex    { order: 4; margin: 0 0 0.5rem; }
+  .hero-gauge   { order: 5; margin: 0 0 0.8rem; }
+  .scroll-cue   { order: 6; margin: 0; }
+
+  /* WRAP, do not scroll. A masked scroller clipped a badge mid-word ("YACHT-CERT…"), which
+     reads as broken text rather than as something you can swipe. Two tidy left-aligned rows say
+     the same thing and finish every word. */
+  .hero-flex {
+    flex-wrap: wrap; overflow: visible; mask-image: none; row-gap: 0.35rem;
+  }
+  .hero-flex > * { font-size: 0.54rem; padding: 0.28rem 0.5rem; }
+}
+
+/* The brand bar is a decorative motto strip. In landscape it was taking a full band of height
+   off a 390px screen for text nobody reads twice, so it thins to a hairline there — still
+   present, still scrolling, no longer a tenant. */
+@media (orientation: landscape) and (max-height: 560px) {
+  .brandbar { padding: 2px 10px; font-size: 0.4rem; letter-spacing: 0.12em; opacity: 0.75; }
 }
