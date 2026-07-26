@@ -2765,7 +2765,12 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    transparency, a rim light and a bevel are all paint-once. Kept denser than the expanded
    panel's glass because the transport has to stay legible over whatever footage is playing. */
 :root.glass-on {
-  --shade-bg: linear-gradient(180deg, rgba(18, 22, 29, 0.42) 0%, rgba(10, 13, 19, 0.54) 55%, rgba(5, 7, 11, 0.64) 100%);
+  /* ACTUALLY clear. At 0.42 over the bottom of the frame - crowd and floor, the darkest band in
+     almost every scene - this landed on virtually the same colour as the solid skin, so `off`
+     and `clear` were two names for one picture and the toggle looked broken on two of its three
+     states. Down at 0.18 the footage genuinely comes through. Legibility is carried by the text
+     and control styling rather than by drowning the panel, which is what a clear finish means. */
+  --shade-bg: linear-gradient(180deg, rgba(16, 20, 28, 0.16) 0%, rgba(9, 12, 18, 0.22) 55%, rgba(4, 6, 10, 0.3) 100%);
   --shade-edge: rgba(230, 192, 90, 0.34);
   /* thickness: bright top edge, shadow under it, and a soft inner glow so the strip reads as a
      pane with depth rather than a tinted rectangle. Inset shadows never touch the backdrop. */
@@ -2840,3 +2845,21 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   background: linear-gradient(100deg, transparent 12%, rgba(255, 248, 228, 0.09) 38%, transparent 62%);
 }
 :root.glass-on .player.minimized .player-shade { position: relative; }
+
+/* SELF-LIT, because the backdrop cannot be relied on. The strip is 40px pinned to the floor of
+   the viewport, where the footage is darkest; the expanded panel reads as glass for free only
+   because it is tall enough to overlap lasers and skin higher up the frame. So the mini bar
+   carries a little light of its own - a warm gold wash along its length - and reads as LIT GLASS
+   rather than as a window onto a dark floor. Static: one paint, no per-frame cost over video. */
+:root.glass-on .player.minimized .player-shade::before {
+  background:
+    linear-gradient(100deg, transparent 8%, rgba(255, 248, 228, 0.10) 34%, transparent 58%),
+    linear-gradient(180deg, rgba(230, 192, 90, 0.09), rgba(230, 192, 90, 0.02) 60%, transparent);
+}
+/* Transport text has to survive whatever is playing behind it now that the panel is genuinely
+   see-through. A static shadow is one paint - the rule against text-shadow here was about
+   shadows driven off --m-beat, which repaint every frame. */
+:root.glass-on .player.minimized .shade-title,
+:root.glass-on .player.minimized .shade-time {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.6);
+}
