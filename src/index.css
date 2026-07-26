@@ -2934,3 +2934,38 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   .journey-blurb { font-size: 1.02rem; line-height: 1.4; max-width: 34ch; margin: 0 0 0.6rem; }
   .journey-venue { margin: 0.2rem 0 0.6rem; }
 }
+
+/* THE REC READOUT IS CAMERA FURNITURE, NOT BODY COPY.
+   `.journey-seed` renders "REC · seed·480917 · same leopard crew, every city" — a fake camera
+   status line. Sitting last in the card's flow it landed mid-frame, reading as a third paragraph
+   of the blurb rather than as an overlay burned into the footage. The site already gets this
+   right in the hero, where "● REC · THE MAINSTAGE · SO-CAM 01" is pinned to a corner.
+   So: out of the flow and into the corner, where a camera OSD actually lives. Bottom-left keeps
+   it clear of the lyric line (bottom-centre) and of the mini player (the floor). */
+@media (max-width: 900px), (orientation: landscape) and (max-height: 620px) {
+  /* The card is position:relative, so an absolutely-positioned child anchors to the CARD, not to
+     the frame — which put the readout 297px off the floor. Stretching the card to the stop's full
+     height makes its floor the frame's floor, so `bottom` means what it looks like it means.
+     Done this way rather than by setting the card static: that would drop its z-index and drop
+     the copy behind the scan overlay, which carries the darkening. */
+  /* Flex column with the readout pushed down by `margin-top: auto`, rather than absolute
+     positioning. Absolute anchors to the card (it is position:relative), and `height: 100%`
+     only resolves against the grid AREA, which is not the stop's full height in landscape — it
+     left the readout 175px off the floor. `margin-top: auto` inside a stretched column needs no
+     containing block and no resolved height: it simply eats the leftover space. */
+  .journey-card {
+    padding-bottom: 0;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+  }
+  .journey-seed {
+    margin: auto 0 calc(52px + 1.6vh);
+    align-self: flex-start;
+    z-index: 3;
+    letter-spacing: 0.08em;
+    /* it has to survive whatever footage is behind it, and a camera OSD is legible by design */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 10px rgba(0, 0, 0, 0.7);
+    opacity: 0.85;
+  }
+}
