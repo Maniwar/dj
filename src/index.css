@@ -359,6 +359,11 @@ section.hero { min-height: 100vh; min-height: 100svh; display: grid; place-items
 /* ================= LORE ================= */
 /* THE ORIGIN — full-bleed scroll-journey (hero pages + story beats) */
 .lore { position: relative; padding: 0; }
+/* A fade-in gated on the first active slide was tried and REVERTED: measured, no stop reported
+   data-active at the moment the header should appear, so the header simply never showed. The
+   gate needs to hang off scroll position rather than the observer's active index. Left visible
+   until that is done — a header that appears early is a blemish; one that never appears is a
+   missing section. */
 .lore-title { position: sticky; top: 0; z-index: 4; text-align: center; padding: 7vh 6vw 2vh; pointer-events: none;
   background: linear-gradient(180deg, rgba(3,4,8,0.85), transparent); }
 .lore-stops { position: relative; }
@@ -1882,14 +1887,60 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    vertical space, so those are the three that go. */
 @media (orientation: landscape) and (max-height: 560px) {
   .hero-inner {
-    padding: 2vh 5vw calc(2vh + 42px); height: 100svh;
-    align-items: flex-start; text-align: left;
+    /* 58px of floor, not 42: the mini bar is 40px and the CTA was landing at 346-389 straight
+       through it at 350-390. Reserve the bar plus air, and centre what is left so the block sits
+       in the space it actually has rather than overflowing from the top. */
+    padding: 2vh 5vw calc(2vh + 58px); height: 100svh;
+    align-items: flex-start; text-align: left; justify-content: center;
   }
-  .hero-crest, .hero-flex, .hero-gauge, .hitcounter { display: none; }
-  .hero-title .drip { font-size: clamp(2rem, 14vh, 3.4rem); line-height: 0.86; }
-  .hero-sub { font-size: clamp(0.62rem, 3vh, 0.85rem); margin: 0.25rem 0 0.05rem; }
-  .hero-artists { font-size: clamp(0.8rem, 3.8vh, 1.05rem); margin: 0 0 0.5rem; }
-  .scroll-cue { align-self: flex-start; padding: 0.5rem 1.2rem; font-size: 0.6rem; }
+  /* Landscape declares its OWN layout. At 844x390 neither the mobile rule (max-width: 768) nor
+     the desktop grid (min-height: 600) matches, so the hero was falling through to base styles
+     with no flex container at all — which is why `order` did nothing and the elements simply ran
+     in DOM sequence. A breakpoint that describes a real device has to actually own its layout,
+     not assume it inherits one. */
+  .hero-inner {
+    display: flex; flex-direction: column; align-items: flex-start; text-align: left;
+    max-width: none; width: 100%;
+  }
+
+  /* Same wrapper dissolve as portrait. Without it the gauge lives in .hero-meta, which comes
+     after .hero-lede in the DOM, so it landed BELOW the call to action at y 330-369 — straight
+     through the mini player at 350-390. Ordered, it sits above the CTA and the action stays
+     last, nearest the thumb. */
+  .hero-lede, .hero-meta { display: contents; }
+  .hero-title { order: 1; }
+  .hero-sub { order: 2; }
+  .hero-artists { order: 3; }
+  .hero-gauge { order: 4; }
+  .scroll-cue { order: 5; }
+
+  /* Hiding the rig meter was the lazy call — it is one of the better jokes on the page and it
+     only needed to be smaller, not gone. The crest, badges and counter stay out: those genuinely
+     have nothing to add at this size. Everything that remains steps DOWN the type scale rather
+     than getting bespoke values, so landscape stays part of the same system. */
+  .hero-crest, .hero-flex, .hitcounter { display: none; }
+  /* 10vh, not 13. The block measured taller than the space it had (content ~377px into ~324px),
+     and the title is the largest single item — so it is the one that gives. A name at 39px on a
+     390px screen still dominates everything around it. */
+  /* section.hero prefix is required: the design-system block is appended at the END of this
+     file and sets .hero-title .drip at the same specificity, so without it the token wins on
+     source order and this rule is inert. A system that is applied last outranks every
+     breakpoint written before it — which is a trap worth naming, because it fails silently. */
+  section.hero .hero-title .drip { font-size: clamp(1.5rem, 10vh, 2.4rem); line-height: 0.88; }
+  section.hero .hero-sub { font-size: var(--step--1); margin: var(--sp-1) 0 0; letter-spacing: 0.08em; }
+  section.hero .hero-artists { font-size: var(--step-0); margin: 0 0 var(--sp-3); }
+  .scroll-cue {
+    align-self: flex-start; padding: var(--sp-2) var(--sp-4); font-size: var(--step--2);
+  }
+  /* the rig meter, at a size that suits a 390px screen */
+  .hero-gauge {
+    display: grid; gap: 2px; background: none; border: 0; box-shadow: none; padding: 0;
+    margin: 0 0 var(--sp-3); max-width: 46vw;
+  }
+  .hero-gauge .gauge-label { font-size: var(--step--2); opacity: 0.7; letter-spacing: 0.16em; }
+  .hero-gauge .gauge-bar { height: 4px; margin: 0; }
+  .hero-gauge .gauge-read { font-size: var(--step--2); }
+  .hero-gauge .gauge-dew { display: none; } /* the marker needs room the bar no longer has */
 }
 
 /* The brand bar wrapped its three mottos into three ragged columns on a phone. One line that
@@ -1928,7 +1979,12 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      - meta bottom-right, small, as instrumentation should be
      - the centre and the upper two-thirds are left ALONE, which is where the action is
    ========================================================================================== */
-@media (min-width: 769px) {
+/* min-HEIGHT as well as min-width. A phone in landscape is 844px wide — comfortably past the
+   769px desktop breakpoint — so it was being handed the four-corner desktop grid on a 390px-tall
+   screen, on top of the landscape rules, which is why the rig status ended up in the top-right
+   corner and the call to action fell off the bottom entirely. Width alone has not described a
+   desktop since phones started being wider than they are tall. */
+@media (min-width: 769px) and (min-height: 600px) {
   section.hero { display: block; padding-top: 0; }
   .hero-inner {
     max-width: none; width: 100%; height: 100svh;
@@ -2176,3 +2232,28 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   .hero-gauge { margin: 0 0 var(--sp-5); }
   .scroll-cue { margin: 0; }
 }
+
+
+/* ---- PLAYER: translucent, no blur pass --------------------------------------------------
+   The window read as pasted onto the page because it was fully opaque over moving footage.
+   Glass would tie it in, but backdrop-filter re-blurs its backdrop EVERY FRAME when there is
+   video behind it — the same per-pixel work that was heating phones and flickering on Android —
+   and frosted glass is a 2013 idiom on a 1999 skin besides.
+   So: the footage ghosts through at ~8%, and the depth comes from a brighter inner bevel rather
+   than from a blur. Costs nothing, and the plastic-and-brushed-metal fiction survives. */
+.player {
+  background:
+    linear-gradient(180deg, rgba(18,21,28,0.94) 0%, rgba(11,13,19,0.93) 10%, rgba(6,8,12,0.92) 100%)
+      padding-box,
+    var(--grad-gilt-border) border-box;
+  box-shadow:
+    0 24px 60px rgba(0,0,0,0.62),
+    0 0 0 1px rgba(0,0,0,0.55),
+    inset 0 1px 0 rgba(255,255,255,0.30),
+    inset 0 -1px 0 rgba(0,0,0,0.55);
+}
+.player-title {
+  background: linear-gradient(180deg, rgba(26,30,38,0.95) 0%, rgba(16,19,26,0.92) 100%);
+}
+/* the readout stays solid — an LCD that lets the room through stops reading as a screen */
+.lcd { background: linear-gradient(180deg, #0a1a06, #071204); }
