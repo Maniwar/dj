@@ -49,18 +49,49 @@ export default function BeatCursor() {
     // which is what a glow stick waved in a dark room actually leaves behind — a line of light
     // that decays rather than a solid stroke. Rate-limited by DISTANCE, not by time: moving fast
     // should draw a longer trail, and holding still should not pile hundreds of dots in one spot.
+    // A FIXED POOL, recycled — not one node per drop.
+    //
+    // The first version created an element on every ~22px of travel and deleted it 900ms later.
+    // A brisk sweep across a wide screen is easily a hundred of those a second, each one an
+    // allocation, a style resolve, a new compositor layer and then a teardown — and every one of
+    // them blended, which forces the compositor to read the backdrop. That is precisely the
+    // churn that was making this page flicker and phones run warm.
+    //
+    // Twelve nodes are created once and reused round-robin. Moving the mouse now costs two style
+    // writes on an element that already exists, and the ceiling on simultaneous trail layers is
+    // twelve no matter how violently the cursor is waved.
+    const POOL = 12
+    const DROP_DISTANCE = 34 // further apart than before: fewer layers, and it reads the same
+    const pool: HTMLDivElement[] = []
+    for (let i = 0; i < POOL; i++) {
+      const dot = document.createElement('div')
+      dot.className = 'glow-trail'
+      document.body.appendChild(dot)
+      pool.push(dot)
+    }
+    let next = 0
     let lastDropX = 0
     let lastDropY = 0
     const dropTrail = (px: number, py: number) => {
-      if (Math.hypot(px - lastDropX, py - lastDropY) < 22) return
+      if (Math.hypot(px - lastDropX, py - lastDropY) < DROP_DISTANCE) return
       lastDropX = px
       lastDropY = py
-      const dot = document.createElement('div')
-      dot.className = 'glow-trail'
-      dot.style.left = `${px}px`
-      dot.style.top = `${py}px`
-      document.body.appendChild(dot)
-      window.setTimeout(() => dot.remove(), 900)
+      const dot = pool[next]
+      next = (next + 1) % POOL
+      dot.style.transform = `translate3d(${px}px, ${py}px, 0)`
+      // Restart the fade with the Web Animations API, NOT the class-toggle + `void offsetWidth`
+      // trick. That trick forces a synchronous reflow every single time, and measured under a
+      // fast sweep it cost 126 layouts / 185ms — on an effect that should cause exactly zero,
+      // since everything it touches is transform and opacity. .animate() restarts cleanly with
+      // no layout at all, and opacity/scale here run on the compositor.
+      dot.getAnimations().forEach((a) => a.cancel())
+      dot.animate(
+        [
+          { opacity: 0.8, scale: 1 },
+          { opacity: 0, scale: 0.3 },
+        ],
+        { duration: 820, easing: 'ease-out', fill: 'forwards' },
+      )
     }
 
     const onMove = (e: PointerEvent) => {
@@ -110,6 +141,7 @@ export default function BeatCursor() {
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerdown', onDown)
       document.removeEventListener('pointerleave', onLeave)
+      pool.forEach((d) => d.remove())
     }
   }, [loggedOn, reduced])
 

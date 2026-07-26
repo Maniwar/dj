@@ -2698,15 +2698,18 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    draws nothing, exactly like the real thing. Each dot animates opacity and scale only and
    deletes itself, so the page never accumulates them. */
 .glow-trail {
-  position: fixed; width: 14px; height: 14px; margin: -7px 0 0 -7px;
+  position: fixed; left: 0; top: 0; width: 14px; height: 14px; margin: -7px 0 0 -7px;
   border-radius: 50%; pointer-events: none; z-index: 197;
-  mix-blend-mode: screen;
-  background: radial-gradient(circle, #fff 0%, var(--accent, #ff1f8f) 40%, transparent 70%);
-  animation: glowTrail 820ms ease-out forwards;
+  /* NO mix-blend-mode. Blending forces the compositor to read the backdrop for every layer, and
+     there can be twelve of these at once over playing video. A bright additive-looking gradient
+     gets within a hair of the same look for none of that cost — the flashlight keeps its blend
+     because it is one layer, not twelve. */
+  background: radial-gradient(circle, rgba(255,255,255,0.95) 0%, var(--accent, #ff1f8f) 40%, transparent 70%);
+  opacity: 0; /* pooled nodes sit invisible until they are used */
+  will-change: transform, opacity;
 }
-@keyframes glowTrail {
-  0%   { opacity: 0.85; scale: 1; }
-  100% { opacity: 0; scale: 0.3; }
-}
+/* The fade is driven from JS with .animate() rather than a CSS class, because restarting a CSS
+   animation on a recycled node requires forcing a reflow and that is the one thing this effect
+   must never do. No keyframes needed here at all. */
 @media (prefers-reduced-motion: reduce) { .glow-trail { display: none; } }
 @media (pointer: coarse) { .glow-trail { display: none; } }
