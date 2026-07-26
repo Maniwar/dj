@@ -1134,7 +1134,12 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   }
   .lore-video { object-fit: cover; object-position: var(--focus, center); background-color: transparent; }
   .lore-stop .lore-bg { background-size: cover; background-color: transparent; }
-  .lore-stop .lore-fill { display: block; }
+  /* NO blurred fill here. Re-enabling it for every stop put an 8x-scaled blurred layer back
+     under the HERO slides — exactly what caused the flicker on Kiki, and now on Crew, which is
+     also a hero. And it buys almost nothing: every slide uses cover and fills the band, so the
+     layer is only ever visible in 32px of bar. A flat ground costs nothing and cannot flicker. */
+  .lore-stop .lore-fill { display: none; }
+  .lore-stop { background: #06070c; }
   .lore-stop[data-id='stockholm'] { --focus: center 70%; }
 
   /* the copy lines up with the frame it sits on, not with the window */
@@ -2253,7 +2258,7 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    than from a blur. Costs nothing, and the plastic-and-brushed-metal fiction survives. */
 .player {
   background:
-    linear-gradient(180deg, rgba(20,24,32,0.56) 0%, rgba(12,15,22,0.52) 10%, rgba(6,8,12,0.50) 100%)
+    linear-gradient(180deg, rgba(22,27,36,0.40) 0%, rgba(13,17,24,0.36) 10%, rgba(6,8,12,0.34) 100%)
       padding-box,
     var(--grad-gilt-border) border-box;
   box-shadow:
@@ -2263,7 +2268,7 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
     inset 0 -1px 0 rgba(0,0,0,0.55);
 }
 .player-title {
-  background: linear-gradient(180deg, rgba(28,33,42,0.62) 0%, rgba(17,21,29,0.56) 100%);
+  background: linear-gradient(180deg, rgba(30,36,46,0.46) 0%, rgba(18,23,31,0.40) 100%);
 }
 /* the readout stays solid — an LCD that lets the room through stops reading as a screen */
 .lcd { background: linear-gradient(180deg, #0a1a06, #071204); }
@@ -2315,3 +2320,10 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
     0 0 0 1px rgba(0,0,0,0.5),
     inset 0 1px 0 rgba(255,255,255,0.38),
     inset 0 -1px 0 rgba(0,0,0,0.5); }
+
+
+/* The chassis at ~0.36. Two earlier passes (0.84, then 0.5) still read as solid because the
+   panel is dark and so is most of the footage behind it — only the lasers carry enough luminance
+   to show through, so the alpha has to go far enough for THOSE to read. The controls and the LCD
+   stay opaque: a button you can see the room through stops looking pressable. */
+.player-body, .player-shade { background: transparent; }
