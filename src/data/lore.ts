@@ -13,6 +13,13 @@ export type LoreStop = {
   videoKey?: string
   /** Optional named line-up, rendered as a roster instead of one block of prose. */
   roster?: { name: string; tag: string; line: string }[]
+  /**
+   * Per-scene crop anchor (a CSS position, e.g. 'center 60%').
+   * Wide screens bias the crop UPWARD by default to keep faces in frame, which is right for
+   * most shots and wrong for any whose payoff is at the bottom. Set this where the subject
+   * decides, rather than letting one heuristic govern every clip.
+   */
+  focus?: string
 }
 
 export const LORE_STOPS: LoreStop[] = [
@@ -71,6 +78,9 @@ export const LORE_STOPS: LoreStop[] = [
   },
   {
     id: 'stockholm',
+    // The roller skates ARE the joke and they sit at 75-95% of the frame, so the default
+    // upward bias cut them off in landscape. Anchored low enough to hold face and skates.
+    focus: 'center 60%',
     kind: 'chapter',
     eyebrow: 'CHAPTER II · STOCKHOLM',
     title: 'THE ROLLER-SKATING WAITRESS',

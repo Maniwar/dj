@@ -232,13 +232,35 @@ export default function Player() {
         // Winamp's shade mode stayed useful when rolled up. Ours went completely blank, so a
         // collapsed player was just a title bar you had to expand to do anything with.
         <div className="player-shade">
-          <button className="tbtn sm" onClick={() => audio.toggle()} aria-label="Play/Pause">
+          {/* Winamp shade mode, rebuilt for a phone. Everything you actually reach for while a
+              track is playing, in one 40px strip: a live VU, real transport, the title, the
+              time, and a hairline progress bar along the bottom edge.
+              The VU is four bars driven straight off the audio CSS variables via scaleY — a
+              TRANSFORM, so it is composited and costs nothing, unlike a second canvas with its
+              own draw loop or anything animating height. */}
+          <div className="shade-vu" aria-hidden>
+            <i style={{ ['--b' as any]: 'var(--m-bass, 0)' }} />
+            <i style={{ ['--b' as any]: 'var(--m-level, 0)' }} />
+            <i style={{ ['--b' as any]: 'var(--m-beat, 0)' }} />
+            <i style={{ ['--b' as any]: 'var(--m-treble, 0)' }} />
+          </div>
+          <button className="shade-btn" onClick={() => audio.prev()} aria-label="Previous">
+            ⏮
+          </button>
+          <button className="shade-btn play" onClick={() => audio.toggle()} aria-label="Play/Pause">
             {isPlaying ? '⏸' : '▶'}
           </button>
-          <span className="shade-title">{track ? track.title : 'INSERT DISC'}</span>
+          <button className="shade-btn" onClick={() => audio.next()} aria-label="Next">
+            ⏭
+          </button>
+          {/* the title scrolls only when it cannot fit, the way the original did */}
+          <div className="shade-marquee">
+            <span className="shade-title">
+              {track ? track.title : 'INSERT DISC'}
+              {version ? ` \u00b7 ${version.label}` : ''}
+            </span>
+          </div>
           <span className="shade-time">{fmt(currentTime)}</span>
-          {/* On a phone the whole title strip is hidden when rolled up, so the restore control
-              has to live here — otherwise the mini bar would be a dead end. */}
           <button
             className="shade-expand"
             onClick={() => {

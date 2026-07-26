@@ -114,6 +114,7 @@ export default function Lore() {
                     videoRefs.current[s.id] = el
                   }}
                   src={videoSrc(vid)}
+                  style={s.focus ? { objectPosition: s.focus } : undefined}
                   poster={withBase(s.image)}
                   muted
                   loop
@@ -122,7 +123,13 @@ export default function Lore() {
                   aria-hidden
                 />
               ) : (
-                <div className="lore-bg" style={{ backgroundImage: `url(${withBase(s.image)})` }} />
+                <div
+                  className="lore-bg"
+                  style={{
+                    backgroundImage: `url(${withBase(s.image)})`,
+                    ...(s.focus ? { backgroundPosition: s.focus } : {}),
+                  }}
+                />
               )}
               </div>
               <div className="lore-scan" aria-hidden />
