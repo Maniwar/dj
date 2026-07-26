@@ -2801,8 +2801,16 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    and width will keep lying about it. */
 @media (max-width: 900px), (max-height: 600px) {
   :root.glass-frost {
+    /* Frost without its blur cannot be faked with DENSITY. At 0.82 it landed on the same
+       picture as the solid skin, so two of the three finishes looked identical and the toggle
+       read as broken - the opposite of the intent, since frost is meant to be the most obviously
+       glassy. Dropping the blur has to mean dropping opacity too: a MILKY, light-scattering wash
+       at moderate alpha reads as frosted glass, where a dense dark one just reads as a panel.
+       Sits deliberately between clear and solid so all three states are distinguishable. */
     --shade-blur: none;
-    --shade-bg: linear-gradient(180deg, rgba(20, 25, 33, 0.82) 0%, rgba(8, 11, 17, 0.9) 100%);
+    --shade-bg:
+      linear-gradient(180deg, rgba(214, 226, 245, 0.13) 0%, rgba(188, 202, 226, 0.07) 60%, rgba(160, 175, 200, 0.05) 100%),
+      linear-gradient(180deg, rgba(20, 25, 33, 0.44) 0%, rgba(10, 14, 21, 0.54) 100%);
   }
 }
 
