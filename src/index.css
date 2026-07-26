@@ -1408,8 +1408,8 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    2. The title strip kept its full padding even with nothing under it to title.
    Result is a bar around 70px instead of ~95px, and the play button stays a comfortable
    40x34 target. */
-.player.mobile .player-shade .tbtn,
-.player.mobile .player-shade .tbtn.sm {
+.player .player-shade .tbtn,
+.player .player-shade .tbtn.sm {
   flex: 0 0 40px; width: 40px; height: 34px; min-height: 0;
 }
 .player.mobile .player-shade { padding: 4px 8px 6px; gap: 7px; }
@@ -1510,7 +1510,7 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   }
   .player.mobile.minimized .shade-expand { display: block; }
   .player.mobile .player-shade .tbtn { flex: 0 0 34px; width: 34px; height: 26px; font-size: 0.72rem; }
-  .player.mobile.minimized .shade-title { font-size: 0.7rem; }
+  .player.minimized .shade-title { font-size: 0.7rem; }
   .player.mobile.minimized .shade-bar { left: 0; right: 0; bottom: 0; border-radius: 0; }
 }
 
@@ -1524,7 +1524,7 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    nothing may animate a property that repaints (no filter, no text-shadow off --m-beat, no
    animating height), and the strip must stay under ~11% of a 667px screen.
    ========================================================================================== */
-.player.mobile.minimized .player-shade {
+.player.minimized .player-shade {
   display: flex; align-items: center; gap: 7px;
   min-height: 40px; padding: 0 8px;
   background: linear-gradient(180deg, #12161d 0%, #0a0d13 55%, #05070b 100%);
@@ -1540,7 +1540,7 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   transform-origin: bottom;
   transition: transform 90ms linear; /* smooths the 60fps var writes without a repaint */
 }
-.player.mobile.minimized .shade-vu { display: flex; }
+.player.minimized .shade-vu { display: flex; }
 
 /* --- transport: real controls, not just play --- */
 .shade-btn {
@@ -1553,30 +1553,30 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .shade-btn:active { transform: translateY(1px); }
 
 /* --- title: LCD green, and it only scrolls when it genuinely overflows --- */
-.player.mobile.minimized .shade-marquee {
+.player.minimized .shade-marquee {
   flex: 1 1 auto; min-width: 0; overflow: hidden; mask-image: linear-gradient(90deg, #000 88%, transparent);
 }
-.player.mobile.minimized .shade-title {
+.player.minimized .shade-title {
   display: inline-block; white-space: nowrap;
   font-family: 'Courier New', ui-monospace, monospace; font-size: 0.68rem; letter-spacing: 0.02em;
   color: #7dffb0; text-shadow: 0 0 6px rgba(23,201,100,0.5); /* static: never animated */
 }
-.player.mobile.minimized .shade-time {
+.player.minimized .shade-time {
   flex: 0 0 auto; font-family: 'Courier New', monospace; font-size: 0.6rem; color: var(--gold-hi);
   font-variant-numeric: tabular-nums;
 }
-.player.mobile.minimized .shade-expand {
+.player.minimized .shade-expand {
   display: block; flex: 0 0 24px; width: 24px; height: 24px; font-size: 0.55rem;
 }
-.player.mobile.minimized .shade-bar {
+.player.minimized .shade-bar {
   left: 0; right: 0; bottom: 0; height: 2px; border-radius: 0; background: rgba(255,255,255,0.10);
 }
-.player.mobile.minimized .shade-bar span { background: linear-gradient(90deg, var(--gold), var(--gold-hi)); }
+.player.minimized .shade-bar span { background: linear-gradient(90deg, var(--gold), var(--gold-hi)); }
 
 /* Landscape has width to spare and height to save: flatter strip, roomier title. */
 @media (orientation: landscape) and (max-height: 560px) {
   .player.mobile.minimized .player-shade { min-height: 36px; gap: 9px; padding: 0 10px; }
-  .player.mobile.minimized .shade-title { font-size: 0.66rem; }
+  .player.minimized .shade-title { font-size: 0.66rem; }
   .shade-vu { height: 15px; }
 }
 
@@ -1788,5 +1788,112 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 @media (orientation: landscape) and (max-height: 560px) {
   .player.mobile.minimized .shade-versions { display: flex; }
   /* the title yields first when space gets tight — it is the one thing that can ellipsis */
-  .player.mobile.minimized .shade-marquee { flex: 1 1 60px; }
+  .player.minimized .shade-marquee { flex: 1 1 60px; }
 }
+
+
+/* ============================================================================================
+   MOBILE HERO — a record sleeve, not a web page
+   The desktop hero stacks eight blocks: crest, catalogue line, title, subtitle, duo, five
+   wrapping badges, a boxed rig gauge, a CTA and a hit counter. On a 430px phone that stops
+   being a hierarchy and becomes a list — everything the same weight, nothing leading, and the
+   footage (the one real asset) reduced to wallpaper behind the pile.
+
+   A phone in portrait has poster proportions, so it is treated as one:
+     - the image is given room to BREATHE. Nothing occupies the upper half except the crest.
+     - the type is one block anchored in the lower third, the way a sleeve is set.
+     - one hierarchy: name, then release, then who. Everything else is trim.
+     - the badges become a single ticker line instead of a wrapping pill cloud — same content,
+       one line instead of three, and it matches the marquee language the rest of the site uses.
+     - the rig gauge loses its box and becomes one thin readout. The joke survives; the widget
+       does not.
+     - the CTA becomes a real, thumb-reachable target at the bottom where a thumb actually is.
+   Nothing is deleted — every element still ships, just at the weight a phone can carry.
+   ========================================================================================== */
+@media (max-width: 768px) {
+  section.hero { padding-top: 0; min-height: 100svh; display: block; }
+
+  /* A COLUMN, not a grid of one cell — the previous attempt put every element in the same grid
+     row and they simply stacked on top of each other. The crest takes the top and `margin-
+     bottom: auto` pushes everything after it to the floor, which is the whole composition in
+     one line: art above, type below. */
+  .hero-inner {
+    display: flex; flex-direction: column; align-items: flex-start; text-align: left;
+    height: 100svh; width: 100%; max-width: none;
+    padding: 3vh 6vw calc(3vh + 46px); /* clear of the docked mini player */
+  }
+  .hero-crest { margin: 0 0 auto; transform: scale(0.66); transform-origin: top left; }
+
+  /* LEFT-aligned and bottom-anchored, deliberately. Centred type sat squarely over the figure
+     in the footage and covered the one thing worth looking at; a sleeve puts its type in a
+     corner and lets the picture own the rest of the frame. */
+  .hero-title { margin: 0; }
+  .hero-title .drip { font-size: clamp(2.8rem, 15vw, 4.4rem); line-height: 0.84; }
+  .hero-sub { font-size: clamp(0.74rem, 3.2vw, 0.95rem); letter-spacing: 0.1em; margin: 0.45rem 0 0.1rem; }
+  .hero-artists { font-size: clamp(0.92rem, 4.2vw, 1.2rem); margin: 0 0 0.65rem; }
+  .hero-artists .aka { display: block; font-size: 0.72em; opacity: 0.85; }
+  .eyebrow { display: none; } /* illegible at this size and already said by the brand bar */
+
+  /* one ticker line rather than a wrapping pill cloud */
+  .hero-flex {
+    align-self: stretch; flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start;
+    gap: 0.4rem; margin: 0 0 0.55rem; padding-bottom: 2px;
+    scrollbar-width: none; mask-image: linear-gradient(90deg, #000 86%, transparent);
+  }
+  .hero-flex::-webkit-scrollbar { display: none; }
+  .hero-flex > * { flex: 0 0 auto; font-size: 0.56rem; padding: 0.3rem 0.55rem; }
+
+  /* the rig readout keeps the joke and loses the widget */
+  .hero-gauge {
+    align-self: stretch; background: none; border: 0; box-shadow: none;
+    padding: 0; margin: 0 0 0.7rem; display: grid; gap: 0.22rem;
+  }
+  .gauge-label { font-size: 0.48rem; letter-spacing: 0.2em; opacity: 0.72; }
+  .gauge-bar { height: 5px; margin: 0; }
+  .gauge-read { font-size: 0.55rem; }
+
+  /* a real target, full width, where the thumb already is */
+  .scroll-cue {
+    align-self: stretch; text-align: center; margin: 0;
+    padding: 0.72rem 1rem; border-radius: 999px;
+    border: 1px solid var(--gold-deep); background: rgba(6,4,10,0.55);
+    font-size: 0.66rem; letter-spacing: 0.18em;
+  }
+  .hitcounter { align-self: center; margin-top: 0.6rem; transform: scale(0.78); }
+}
+
+/* Landscape leaves ~430px of height for everything, so the sleeve becomes a title card: the
+   name, who it is, and the way in. Badges, gauge and counter carry the least and cost the most
+   vertical space, so those are the three that go. */
+@media (orientation: landscape) and (max-height: 560px) {
+  .hero-inner {
+    padding: 2vh 5vw calc(2vh + 42px); height: 100svh;
+    align-items: flex-start; text-align: left;
+  }
+  .hero-crest, .hero-flex, .hero-gauge, .hitcounter { display: none; }
+  .hero-title .drip { font-size: clamp(2rem, 14vh, 3.4rem); line-height: 0.86; }
+  .hero-sub { font-size: clamp(0.62rem, 3vh, 0.85rem); margin: 0.25rem 0 0.05rem; }
+  .hero-artists { font-size: clamp(0.8rem, 3.8vh, 1.05rem); margin: 0 0 0.5rem; }
+  .scroll-cue { align-self: flex-start; padding: 0.5rem 1.2rem; font-size: 0.6rem; }
+}
+
+/* The brand bar wrapped its three mottos into three ragged columns on a phone. One line that
+   scrolls is both tidier and more in keeping with a ticker-obsessed site. */
+@media (max-width: 768px) {
+  .brandbar {
+    display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 0.9rem;
+    justify-content: flex-start; padding: 5px 10px; font-size: 0.46rem;
+    scrollbar-width: none; mask-image: linear-gradient(90deg, #000 88%, transparent);
+  }
+  .brandbar::-webkit-scrollbar { display: none; }
+  .brandbar > * { flex: 0 0 auto; white-space: nowrap; }
+}
+
+
+/* The collapsed bar is now ONE design at every size — the refined strip was scoped to
+   .player.mobile.minimized, so a desktop window kept the old cramped row: an oversized play
+   button, a title with nowhere to go, and a full title bar above it all. Desktop keeps its title
+   bar because that is the drag handle, but slimmed, and the strip itself is identical. */
+.player.minimized:not(.mobile) .player-title { padding: 4px 9px; }
+.player.minimized:not(.mobile) { width: 348px; }
+.player.minimized:not(.mobile) .shade-title { font-size: 0.66rem; }
