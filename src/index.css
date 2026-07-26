@@ -2409,21 +2409,18 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    write that AudioReactive is already making. --m-beat sits at 0 when nothing is playing, so
    the ring settles to its resting size on its own with no playback logic here at all.
    mix-blend-mode: screen so it reads as light over the footage rather than as a sticker. */
+/* A ZERO-SIZED anchor. It was a 30px box centred with margin: -15px — which is correct until
+   you also put `scale` on it, and I did. Scale changes the RENDERED size while the margin stays
+   at the layout size, so the visual centre slid away from the pointer and the halo sat off to
+   one side. The anchor now has no size at all and cannot drift: the pointer position is the
+   element's origin, and both rings centre themselves on it with their own transforms.
+   Nothing scales on this element any more; the beat lives on the ring, where it belongs. */
 .beat-cursor {
-  position: fixed; left: 0; top: 0; width: 30px; height: 30px; margin: -15px 0 0 -15px;
-  border-radius: 50%; pointer-events: none; z-index: 200;
-  background:
-    radial-gradient(circle, rgba(255,255,255,0.85) 0%, rgba(255,31,143,0.55) 34%,
-                    rgba(255,31,143,0.16) 58%, transparent 72%);
+  position: fixed; left: 0; top: 0; width: 0; height: 0;
+  pointer-events: none; z-index: 200;
   mix-blend-mode: screen;
-  scale: calc(0.55 + var(--m-beat, 0) * 0.85 + var(--m-drop, 0) * 0.5);
-  opacity: calc(0.42 + var(--m-level, 0) * 0.45);
   will-change: transform; /* permanent, never toggled — see the flicker notes elsewhere */
 }
-/* it borrows the singer's colour, so the halo changes with whoever is on the mic */
-.beat-cursor { background-image:
-  radial-gradient(circle, rgba(255,255,255,0.85) 0%, var(--accent, #ff1f8f) 34%,
-                  rgba(0,0,0,0) 72%); }
 @media (pointer: coarse) { .beat-cursor { display: none; } }
 
 
@@ -2497,15 +2494,22 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   width: 7px; height: 7px;
   background: radial-gradient(circle, #fff 0%, rgba(255,255,255,0.9) 40%, transparent 72%);
 }
-/* the ring — this is the part that dances */
+/* The ring — the part that dances, and the part that points INTO the room. rotateX lays it back
+   in perspective so it reads as a disc lying on the floor of the club catching the rig, rather
+   than a flat sticker on the glass. The beat rides `scale`, which composes with the rotation
+   instead of fighting it for the transform declaration. */
 .beat-cursor::after {
-  width: 34px; height: 34px;
-  border: 1px solid rgba(255,255,255,0.55);
-  box-shadow: 0 0 calc(6px + var(--m-beat, 0) * 20px) var(--accent, #ff1f8f),
-              inset 0 0 calc(4px + var(--m-beat, 0) * 12px) var(--accent, #ff1f8f);
-  scale: calc(0.8 + var(--m-beat, 0) * 0.55 + var(--m-drop, 0) * 0.35);
+  width: 38px; height: 38px;
+  border: 1px solid rgba(255,255,255,0.5);
+  box-shadow: 0 0 calc(6px + var(--m-beat, 0) * 22px) var(--accent, #ff1f8f),
+              inset 0 0 calc(4px + var(--m-beat, 0) * 14px) var(--accent, #ff1f8f);
+  transform: translate(-50%, -50%) perspective(220px) rotateX(58deg);
+  scale: calc(0.85 + var(--m-beat, 0) * 0.6 + var(--m-drop, 0) * 0.4);
   transition: scale 70ms ease-out;
 }
+/* a second, wider ring easing behind it — two rates is what reads as depth rather than as a
+   single shape being moved around */
+.beat-cursor { --halo: calc(0.5 + var(--m-level, 0) * 0.5); }
 
 
 /* ============================================================================================
