@@ -29,3 +29,6 @@ video-masters/
 # local forced-alignment venv (tooling is scripts/align-lyrics.py)
 .venv-align/
 .align-cache/
+
+# Spotify Canvas: raw Playwright capture is a build input, regenerate with artwork/canvas/record.mjs
+artwork/canvas/raw/
