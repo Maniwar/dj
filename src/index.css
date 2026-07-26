@@ -1316,3 +1316,63 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   .player.mobile .bootleg { padding: 4px 8px; }
   .player.mobile .player-body { gap: 6px; }
 }
+
+
+/* ---- PHONES: no per-frame FILTER or TEXT-SHADOW -----------------------------------------
+   Seventeen rules animated filter/text-shadow off --m-beat. Both force a REPAINT of the
+   affected layer on every frame — the same lesson this file already learned with Ken-Burns,
+   where moving the filter off the animated layer is what made it smooth. On a phone, and
+   especially in landscape where the lore cards sit directly on top of the video, repainting
+   text sixty times a second makes the whole page flicker on Android.
+
+   The glow is kept, frozen at roughly where it sits on a moderate beat, so nothing looks
+   flat. Beat reaction is not lost either: the transform-based lift and scale further up are
+   composited, cost nothing, and still pulse. Only the repaint-forcing half is switched off. */
+@media (max-width: 768px), (max-height: 600px) {
+  .lore-name {
+    filter: drop-shadow(0 2px 0 rgba(0,0,0,0.6)) drop-shadow(0 0 18px var(--accent));
+  }
+  .lore-roster-name { filter: drop-shadow(0 0 10px var(--accent)); }
+  .hero-title { filter: drop-shadow(0 0 14px rgba(255,31,143,0.6)); }
+  .section-title {
+    filter: drop-shadow(0 2px 0 rgba(0,0,0,0.6)) drop-shadow(0 0 10px rgba(255,31,143,0.6));
+    text-shadow: 0 0 6px rgba(255,31,143,0.7);
+  }
+  .eyebrow, .section-kicker { text-shadow: 0 0 8px currentColor; }
+  .journey-venue, .lore-tag, .journey-seed { text-shadow: 0 0 8px currentColor; }
+  .lore-eyebrow { text-shadow: 0 0 12px var(--accent); }
+  .merch-name, .quote { text-shadow: 0 0 6px rgba(255,31,143,0.5); }
+  .lcd-title { text-shadow: 0 0 4px currentColor; }
+  .journey-city {
+    filter: drop-shadow(0 3px 0 rgba(0,0,0,0.6)) drop-shadow(0 0 26px rgba(255,31,143,0.5));
+  }
+  .tint-magenta .lm-item { text-shadow: 0 0 10px rgba(255,31,143,0.65); }
+  .tint-acid .lm-item { text-shadow: 0 0 10px rgba(99,255,46,0.6); }
+  .tint-blue .lm-item { text-shadow: 0 0 10px rgba(20,224,255,0.6); }
+  /* the lore panel gets its own compositing layer, so whatever it does repaint cannot drag
+     the video layer underneath it into the repaint too */
+  .lore-panel, .journey-card { will-change: transform; }
+}
+
+
+/* ---- MINI BAR: Winamp shade mode, phone edition -----------------------------------------
+   Rolled up, this should be a strip you forget is there. It was 77px because it kept BOTH the
+   title bar and the shade row, and the title bar has nothing left to title once the body is
+   gone. On a phone the title strip is dropped entirely and the shade row carries the restore
+   control instead, which takes it to ~38px — about the height of one line of text. */
+.shade-expand {
+  flex: 0 0 26px; height: 26px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--gold-shadow); background: linear-gradient(180deg, #e8eef5, #9fb0c0 60%, #6b7684);
+  color: #0d1017; font-size: 0.6rem; line-height: 1; display: none;
+}
+@media (max-width: 768px), (max-height: 600px) {
+  .player.mobile.minimized .player-title { display: none; }
+  .player.mobile.minimized { border-radius: 10px 10px 0 0; }
+  .player.mobile.minimized .player-shade {
+    padding: 5px 8px 7px; gap: 8px; min-height: 38px;
+  }
+  .player.mobile.minimized .shade-expand { display: block; }
+  .player.mobile .player-shade .tbtn { flex: 0 0 34px; width: 34px; height: 26px; font-size: 0.72rem; }
+  .player.mobile.minimized .shade-title { font-size: 0.7rem; }
+  .player.mobile.minimized .shade-bar { left: 0; right: 0; bottom: 0; border-radius: 0; }
+}

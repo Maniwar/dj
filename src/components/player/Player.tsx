@@ -237,6 +237,19 @@ export default function Player() {
           </button>
           <span className="shade-title">{track ? track.title : 'INSERT DISC'}</span>
           <span className="shade-time">{fmt(currentTime)}</span>
+          {/* On a phone the whole title strip is hidden when rolled up, so the restore control
+              has to live here — otherwise the mini bar would be a dead end. */}
+          <button
+            className="shade-expand"
+            onClick={() => {
+              setMinimized(false)
+              savePlacement(pos, false)
+            }}
+            aria-label="Expand player"
+            title="Expand"
+          >
+            ▲
+          </button>
           <div className="shade-bar" aria-hidden>
             <span style={{ width: `${pct}%` }} />
           </div>
