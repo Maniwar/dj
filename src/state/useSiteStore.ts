@@ -136,7 +136,11 @@ export const useSiteStore = create<SiteState>((set) => ({
       // the player first. The toggle now swaps between the two MATERIALS; 'off' remains a valid
       // stored value and simply steps into the cycle at clear.
       const order = ['clear', 'frost'] as const
-      const glass = order[(order.indexOf(s.glass) + 1) % order.length]
+      // indexOf returns -1 for 'off' (a valid stored value that is no longer in the cycle),
+      // and -1 + 1 === 0, so a visitor holding it steps in at clear. The cast is needed because
+      // the store's type is wider than the cycle by exactly that one value.
+      const i = order.indexOf(s.glass as (typeof order)[number])
+      const glass = order[(i + 1) % order.length]
       try { localStorage.setItem('so.glass', glass) } catch { /* private mode */ }
       return { glass }
     }),
