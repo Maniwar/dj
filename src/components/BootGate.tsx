@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSiteStore } from '../state/useSiteStore'
 import { useAudio } from '../audio/AudioProvider'
-import { usePlayerStore } from '../state/usePlayerStore'
+import { usePlayerStore, randomVersionId } from '../state/usePlayerStore'
 import { BUILD_STAMP } from '../version'
 import { bootAssets, warm, connectionAllowsPrefetch } from '../lib/preload'
 
@@ -83,7 +83,8 @@ export default function BootGate() {
     // track so the album doesn't open on the same song every visit.
     const tracks = usePlayerStore.getState().tracks
     const first = tracks[Math.floor(Math.random() * tracks.length)]
-    audio.playTrack(first.slug)
+    // and a random pressing of it, so first boot can open on a bootleg rather than always an A-side
+    audio.playTrack(first.slug, randomVersionId(first.slug))
   }
 
   return (

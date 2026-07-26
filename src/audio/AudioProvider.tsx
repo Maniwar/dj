@@ -10,6 +10,7 @@ import {
   getVersion,
   nextTrackSlug,
   prevTrackSlug,
+  randomVersionId,
 } from '../state/usePlayerStore'
 
 type AudioController = {
@@ -145,7 +146,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         const cur = usePlayerStore.getState().currentTrackSlug
         const pool = all.filter((t) => t.slug !== cur)
         const pick = pool[Math.floor(Math.random() * pool.length)] ?? all[0]
-        controller.playTrack(pick.slug)
+        // a random PRESSING too — otherwise shuffle only ever reaches the A-sides
+        controller.playTrack(pick.slug, randomVersionId(pick.slug))
         return
       }
       controller.next()

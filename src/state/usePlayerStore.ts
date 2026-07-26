@@ -50,3 +50,18 @@ export function prevTrackSlug(slug: string | null): string {
   const i = TRACKS.findIndex((t) => t.slug === slug)
   return TRACKS[(i - 1 + TRACKS.length) % TRACKS.length].slug
 }
+
+
+/**
+ * A random PRESSING of a track, not just the track.
+ *
+ * Random selection picked a title and then fell through to its default version, which is always
+ * the A-side — so 39 pressings behaved like 19 tracks and the bootlegs, VIPs and dubs were
+ * effectively unreachable unless you went looking for them. They are half the joke of the
+ * record, so a shuffle that never reaches them is a shuffle that is missing the point.
+ */
+export function randomVersionId(slug: string): string | undefined {
+  const t = getTrack(slug)
+  if (!t || !t.versions?.length) return undefined
+  return t.versions[Math.floor(Math.random() * t.versions.length)]?.id
+}

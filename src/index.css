@@ -346,7 +346,12 @@ section.hero { min-height: 100vh; min-height: 100svh; display: grid; place-items
 .hero-flex span { border: 1px solid var(--edge); border-radius: 999px; padding: 0.4rem 1rem; background: rgba(0,0,0,0.4); }
 .hero-gauge { margin: 2rem auto 1rem; max-width: 480px; text-align: left; padding: 1.1rem 1.3rem; }
 .gauge-label { font-family: 'Oswald', sans-serif; font-size: 0.7rem; letter-spacing: 0.25em; color: var(--gold); }
-.gauge-bar { position: relative; height: 16px; background: #1a0705; border-radius: 999px; overflow: hidden; margin: 0.55rem 0; border: 1px solid var(--edge); }
+/* overflow VISIBLE. The dew marker lives inside the bar, so `overflow: hidden` was clipping the
+   label to the bar's height — which is why it read as squashed rather than as a marker, and why
+   making the bar thicker only gave it more room to be squashed in. The fill is what actually
+   needs clipping, and it clips itself with a matching radius. */
+.gauge-bar { position: relative; height: 16px; background: #1a0705; border-radius: 999px; overflow: visible; margin: 0.55rem 0; border: 1px solid var(--edge); }
+.gauge-fill { border-radius: 999px; }
 .gauge-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 999px; transition: width 0.2s; }
 .gauge-dew { position: absolute; top: -3px; transform: translateX(-50%); font-size: 0.55rem; color: #fff; border-left: 2px dashed #fff; padding-left: 3px; height: 22px; font-family: 'Oswald', sans-serif; }
 .gauge-read { font-family: 'Courier New', monospace; font-size: 0.82rem; color: var(--champagne); }
@@ -1869,7 +1874,8 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
     padding: 0; margin: 0 0 0.7rem; display: grid; gap: 0.22rem;
   }
   .gauge-label { font-size: 0.48rem; letter-spacing: 0.2em; opacity: 0.72; }
-  .gauge-bar { height: 5px; margin: 0; }
+  .gauge-bar { height: 10px; margin: 0; }
+  .gauge-dew { font-size: 0.52rem; top: -12px; height: auto; }
   .gauge-read { font-size: 0.55rem; }
 
   /* a real target, full width, where the thumb already is */
@@ -1938,9 +1944,13 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
     margin: 0 0 var(--sp-3); max-width: 46vw;
   }
   .hero-gauge .gauge-label { font-size: var(--step--2); opacity: 0.7; letter-spacing: 0.16em; }
-  .hero-gauge .gauge-bar { height: 4px; margin: 0; }
+  /* 9px, and DEW comes back. Hiding it was my call and it was the wrong one — the dew point is
+     the entire joke of the gauge, and a 4px hairline reads as a divider rather than as an
+     instrument. Give the bar enough body to be a bar and the marker has somewhere to sit. */
+  .hero-gauge .gauge-bar { height: 9px; margin: 0; }
   .hero-gauge .gauge-read { font-size: var(--step--2); }
-  .hero-gauge .gauge-dew { display: none; } /* the marker needs room the bar no longer has */
+  /* now free of the bar, the marker can sit ABOVE it and be read at a normal size */
+  .hero-gauge .gauge-dew { display: block; font-size: 0.5rem; top: -11px; height: auto; padding-left: 3px; }
 }
 
 /* The brand bar wrapped its three mottos into three ragged columns on a phone. One line that
