@@ -130,8 +130,16 @@ export default function Player() {
     // 300px, but the window grew (tools row, bootleg switch) and the stale assumption left the
     // A-SIDE / BOOTLEG version switch hanging below the fold on first boot. Clamped so the whole
     // window still fits on a short viewport.
+    // Bottom-RIGHT, not bottom-left. The hero sets its name in the lower-left the way a poster
+    // does, and a 381px-tall window docked in that same corner sat straight through it —
+    // measured, the player covered both the lede and its call to action. The two want the same
+    // corner, so they get one each: type bottom-left, player bottom-right.
     const h = winRef.current?.offsetHeight ?? 360
-    let next = { x: 24, y: Math.max(8, window.innerHeight - h - 20) }
+    const w = winRef.current?.offsetWidth ?? 348
+    let next = {
+      x: Math.max(8, window.innerWidth - w - 24),
+      y: Math.max(8, window.innerHeight - h - 20),
+    }
     try {
       const raw = localStorage.getItem('so.player')
       if (raw) {

@@ -1903,26 +1903,52 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
     max-width: none; width: 100%; height: 100svh;
     display: grid;
     grid-template-columns: minmax(340px, 44%) 1fr minmax(260px, 26%);
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto 1fr auto auto;
+    /* The lede sits in the MIDDLE row, not on the floor. The player docks bottom-left by
+       default and is 381px tall expanded, so a floor-anchored lede collided with it — measured,
+       the player (24-372 x 557-938) sat straight through the lede and the CTA. Dodging its
+       current position is not a fix either: it is draggable and its placement persists, so the
+       only reliable answer is to leave the bottom-left corner to it.
+       Crest top-left, lede centre-left, instrumentation bottom-right — the player then has a
+       corner of its own and the middle of the frame is still clear for the footage. */
+    /* Four corners, one occupant each — the only arrangement where nothing has to dodge
+       anything. The lede is 442px tall and the docked player is 381px; both wanted the
+       lower-left, and measured they overlapped by 83px through the title AND its call to
+       action. So: crest and meta take the top edge, the name takes the lower-left the way a
+       poster sets it, and the player gets the lower-right to itself. The middle of the frame —
+       where the footage actually is — stays empty in every direction. */
+    /* The crest sits directly ABOVE the name, not alone in the far corner. On its own up there
+       it read as an orphan — a lone mark with a screen of empty space around it looks accidental
+       rather than deliberate. Stacked with the title it becomes one lockup: mark, name, release,
+       who, and the way in. The top-left corner goes back to the footage, which is the whole
+       point of the layout. */
     grid-template-areas:
-      'crest .    .'
+      '.     .    meta'
       '.     .    .'
-      'lede  .    meta';
-    align-items: end;
+      'crest .    .'
+      'lede  .    .';
+    align-items: start;
     padding: 4vh 3.5vw calc(4vh + 84px); /* clear of the docked player */
     text-align: left;
     gap: 2vh 3vw;
   }
-  .hero-crest { grid-area: crest; align-self: start; justify-self: start; margin: 0; }
-  .hero-lede { grid-area: lede; text-align: left; }
-  .hero-meta { grid-area: meta; text-align: right; justify-self: end; max-width: 34ch; }
+  .hero-crest { grid-area: crest; align-self: end; justify-self: start; margin: 0 0 0.9rem; }
+  .hero-lede { grid-area: lede; text-align: left; align-self: end; }
+  /* 46ch, not 32: at 32 the five badges could only stack one per row, which reads as a list
+     rather than a caption block. With room to flow they wrap into two right-aligned rows and
+     the whole meta column stops being a tall ladder down the edge of the frame. */
+  .hero-meta { grid-area: meta; text-align: right; justify-self: end; align-self: start; max-width: 46ch; }
 
   /* the name gets the weight it should always have had — it is the loudest thing on the page */
   .hero-title { margin: 0; }
   .hero-title .drip { font-size: clamp(3.4rem, 7.4vw, 8rem); line-height: 0.86; }
   .eyebrow { margin-bottom: 0.6rem; opacity: 0.8; }
-  .hero-sub { margin: 0.7rem 0 0.2rem; }
-  .hero-artists { margin: 0 0 1.1rem; }
+  /* balance stops the subtitle orphaning its last word ("...UNFILTERED / EXCESS"), which is the
+     kind of ragged break that makes a hero look unconsidered no matter how good the type is */
+  /* No max-width: constraining it forced a break that left the separator stranded at the head
+     of the second line ("THE MOIST MIX 2002 / · UNFILTERED EXCESS"). It fits on one line here. */
+  .hero-sub { margin: 0.7rem 0 0.2rem; white-space: nowrap; }
+  .hero-artists { margin: 0 0 1.1rem; text-wrap: balance; }
   .scroll-cue {
     display: inline-block; margin: 0; padding: 0.75rem 1.6rem; border-radius: 999px;
     border: 1px solid var(--gold-deep); background: rgba(6,4,10,0.5);
@@ -1930,14 +1956,22 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 
   /* instrumentation: quiet, right-aligned, out of the picture's way */
   .hero-meta .hero-flex {
-    justify-content: flex-end; gap: 0.4rem; margin: 0 0 0.9rem; font-size: 0.62rem;
+    justify-content: flex-end; flex-wrap: wrap; gap: 0.35rem; margin: 0 0 0.9rem;
+    font-size: 0.6rem;
   }
+  .hero-meta .hero-flex > * { flex: 0 0 auto; }
   .hero-meta .hero-gauge {
     background: none; border: 0; box-shadow: none; padding: 0; margin: 0 0 0.8rem;
     display: grid; gap: 0.3rem; justify-items: end;
   }
   .hero-meta .gauge-bar { width: 100%; }
-  .hero-meta .hitcounter { justify-content: flex-end; margin: 0; }
+  /* The counter is a fixed row of digit tiles and was wider than the meta column, so it
+     overflowed to the LEFT and the label lost its first letter ("ISITORS:"). Scaled from its
+     right edge it stays inside the column and still reads. */
+  .hero-meta .hitcounter {
+    justify-content: flex-end; margin: 0; transform: scale(0.82); transform-origin: right center;
+  }
+  .hero-meta .gauge-read { text-align: right; }
 }
 
 /* Ultrawide: the lede must not drift to the far edge, away from the picture it belongs to. It
