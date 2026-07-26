@@ -129,6 +129,14 @@ function Mainstage() {
     applyScale()
   }, [applyScale])
 
+  // the metronome for the capped mobile frame rate (see frameloop on the Canvas)
+  const invalidate = useThree((st) => st.invalidate)
+  useEffect(() => {
+    if (!PERF.isMobile) return
+    const id = window.setInterval(() => invalidate(), 33)
+    return () => window.clearInterval(id)
+  }, [invalidate])
+
   useFrame((_, dt) => {
     const u = uniforms
     u.uTime.value += dt
@@ -283,7 +291,11 @@ export default function ThermalRunaway() {
           powerPreference: 'high-performance',
         }}
         dpr={[1, MAX_SCALE]}
-        frameloop="always"
+        // Phones render the rig at 30fps instead of 60. It is haze, beams and slow bloom —
+        // nothing in it moves fast enough for 60fps to buy anything — and halving the frame
+        // count halves the GPU work, which on a phone is felt as heat rather than smoothness.
+        // 'demand' plus the metronome in Mainstage is how r3f expresses a capped rate.
+        frameloop={PERF.isMobile ? 'demand' : 'always'}
       >
         <Mainstage />
       </Canvas>

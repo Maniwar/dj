@@ -1582,3 +1582,20 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   .boot-line { font-size: clamp(0.52rem, 2.3vh, 0.72rem); line-height: 1.45; }
   .boot-bar { margin-top: 0.4rem; }
 }
+
+
+/* ---- ISOLATE THE PLAYER FROM THE VIDEO BEHIND IT ----------------------------------------
+   Reported as an occasional flicker in landscape with the player open, worst with the playlist
+   showing. The player is a fixed panel sitting over playing video, and the playlist is a
+   SCROLLING container inside it — so every scroll and every repaint inside the player was
+   free to invalidate the video layer underneath.
+   Promoting the player to its own layer and containing its paint means what happens inside it
+   stays inside it. contain: paint is the part that actually matters; the transform is what
+   guarantees the layer exists. */
+@media (max-width: 768px), (max-height: 600px) {
+  .player.mobile {
+    transform: translateZ(0); will-change: transform; contain: paint;
+    backface-visibility: hidden;
+  }
+  .player.mobile .playlist { will-change: scroll-position; contain: content; overscroll-behavior: contain; }
+}
