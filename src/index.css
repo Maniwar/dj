@@ -1229,3 +1229,41 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   color: rgba(230, 192, 90, 0.55); /* gold, matching .boot-sub — quiet but findable */
   text-transform: uppercase;
 }
+
+
+/* ---- LANDSCAPE PHONES: use the width, not the height -----------------------------------
+   The docked player stacks six rows vertically. That is right in portrait, where height is
+   plentiful, and wrong in landscape, where a phone gives you 844px of width and under 400px
+   of height — the stack ate 67% of the screen. Here the body becomes two columns: the readout
+   on the left, the controls on the right, so the height is the TALLER COLUMN rather than the
+   sum of every row. Controls also shrink, but stay at/above 32px so they remain touch targets. */
+@media (orientation: landscape) and (max-height: 600px) {
+  .player.mobile .player-body {
+    display: grid;
+    grid-template-columns: minmax(190px, 0.85fr) 1.4fr;
+    grid-template-areas:
+      'lcd transport'
+      'lcd tools'
+      'seek bootleg';
+    align-items: center;
+    gap: 6px 10px;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+  .player.mobile .lcd { grid-area: lcd; align-self: stretch; padding: 6px; }
+  .player.mobile .seek { grid-area: seek; }
+  .player.mobile .transport { grid-area: transport; gap: 6px; }
+  .player.mobile .tools { grid-area: tools; gap: 6px; }
+  .player.mobile .bootleg-row, .player.mobile .bootleg { grid-area: bootleg; }
+  .player.mobile .spectrum-canvas { height: 26px; }
+  .player.mobile .tbtn { height: 34px; flex: 1 1 34px; }
+  /* Knob sizes come from a `size` prop as INLINE width/height, so a plain rule cannot reach
+     them — this is one of the few places !important is the correct tool rather than a smell. */
+  .player.mobile .knob-wrap { width: 36px; }
+  .player.mobile .knob-body { width: 36px !important; height: 36px !important; }
+  .player.mobile .knob-label { font-size: 0.42rem; }
+  .player.mobile .bootleg, .player.mobile .bootleg-row { min-height: 0; padding: 3px 8px; }
+  .player.mobile .bootleg-switch { transform: scale(0.8); transform-origin: center; }
+  .player.mobile .lcd-meta { font-size: 0.55rem; margin-top: 2px; }
+  /* the title bar is pure chrome — it can be thin when height is the scarce resource */
+  .player.mobile .player-title { padding: 4px 9px; }
+}
