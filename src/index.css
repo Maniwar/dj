@@ -1065,14 +1065,17 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    75px of blurred fill each side, which is what .lore-fill was built for. Nothing is cropped,
    and on a screen this size the subject is still comfortably large. */
 @media (orientation: landscape) and (max-height: 560px) {
-  /* The roller-skate shot, art-directed for THIS breakpoint. A phone in landscape shows 82% of
-     a 16:9 frame; the skates live at 78-98% and the face at 15-40%, which is 83% of span — so
-     both fit, but only at a low anchor. 78% shows 14%-96%: skates in, face in.
-     It cannot be the scene's global `focus` (60%) because at the desktop 2.5 band only 71% of
-     the frame survives, and a 78% anchor there starts at 23% and takes the top of her head off.
-     Same shot, different amount of room, different answer. */
+  /* The roller-skate shot, art-directed for THIS breakpoint, and the numbers leave no room to
+     be clever with. A phone in landscape shows 82.1% of a 16:9 frame. Her hair starts at 14%
+     and the skate wheels end at 96% — the subject IS 82.0% of the frame. The slack is one
+     tenth of one percent, so no anchor keeps both ends with any real margin.
+     70% is therefore a CHOICE, not a solve: the band sits at 12.5%-94.6%, which clears her head
+     by 1.5% and trims about 1.4% off the bottom of the wheels. A head is the subject of a shot;
+     the last sliver of a wheel is not.
+     It also cannot be the scene's global focus (60%), because the desktop 2.5 band shows only
+     71% of the frame and a 70% anchor there starts at 20% — straight through her face. */
   .lore-stop[data-id='stockholm'] .lore-video,
-  .lore-stop[data-id='stockholm'] .lore-bg { --focus: center 78%; }
+  .lore-stop[data-id='stockholm'] .lore-bg { --focus: center 70%; }
 
   /* CONTAIN was tried here to save the roller skates and is now reverted. It cost ~75px of
      static bar each side, and because .lore-bg carries a background-COLOUR, that colour painted
@@ -1719,4 +1722,27 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 /* a wider invisible grab column on touch, where precision is worst */
 @media (pointer: coarse) {
   .tour-rail .rail-track { width: 34px; }
+}
+
+
+/* ---- PRESSING CHIPS IN THE MINI BAR ------------------------------------------------------
+   Hidden by default: portrait has no width to spare and the title needs what there is. In
+   landscape the strip is ~840px and was spending most of it on nothing, so the pressings come
+   out of the expanded player and sit here, where swapping an A-side for a bootleg no longer
+   costs you the whole panel. Badges only — full labels stay in the expanded view. */
+.shade-versions { display: none; align-items: center; gap: 4px; flex: 0 0 auto; }
+.shade-ver {
+  cursor: pointer; min-width: 24px; height: 22px; padding: 0 6px; border-radius: 5px;
+  font-family: 'Oswald', sans-serif; font-size: 0.52rem; letter-spacing: 0.08em;
+  color: #9fb0c0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.14);
+}
+.shade-ver.on {
+  color: #0d1017; border-color: var(--gold-deep);
+  background: linear-gradient(180deg, #fff6d8, #e6c05a 60%, #a8842e);
+}
+.shade-ver:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+@media (orientation: landscape) and (max-height: 560px) {
+  .player.mobile.minimized .shade-versions { display: flex; }
+  /* the title yields first when space gets tight — it is the one thing that can ellipsis */
+  .player.mobile.minimized .shade-marquee { flex: 1 1 60px; }
 }

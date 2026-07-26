@@ -284,6 +284,24 @@ export default function Player() {
               {version ? ` \u00b7 ${version.label}` : ''}
             </span>
           </div>
+          {/* Pressings, in the mini bar. Landscape gives this strip ~840px and it was spending
+              most of it on empty space, while switching an A-side for a bootleg meant expanding
+              the whole player. Badges only — the full labels live in the expanded view. */}
+          {track && track.versionCount > 1 && (
+            <div className="shade-versions" role="group" aria-label="Pressing">
+              {track.versions.map((v) => (
+                <button
+                  key={v.id}
+                  className={`shade-ver ${v.id === versionId ? 'on' : ''}`}
+                  onClick={() => audio.setVersion(v.id)}
+                  aria-pressed={v.id === versionId}
+                  title={`${v.label} — ${v.vibe}`}
+                >
+                  {v.badge}
+                </button>
+              ))}
+            </div>
+          )}
           <span className="shade-time">{fmt(currentTime)}</span>
           <button
             className="shade-expand"
