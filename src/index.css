@@ -345,7 +345,7 @@ section.hero { min-height: 100vh; min-height: 100svh; display: grid; place-items
 /* full-bleed cover so the scene is BIG. HERO portraits anchor to the TOP so the head is never
    cropped at any aspect (ultrawide-short cuts top/bottom); a slow Ken-Burns pan adds motion
    AND drifts to reveal the cropped edges over time (works at every width, incl. mobile). */
-.lore-bg { position: absolute; inset: 0; background-size: cover; background-position: center;
+.lore-bg { position: absolute; inset: 0; background-size: cover; background-position: var(--focus, center);
   background-repeat: no-repeat; /* cover hides this, but the extreme-aspect rule below switches to
     'auto 100%', where the default 'repeat' would tile ~3.5 copies across a 32:9 screen */
   background-color: #0a0a12;
@@ -429,7 +429,7 @@ section.hero { min-height: 100vh; min-height: 100svh; display: grid; place-items
 }
 /* heroes: barely-there Ken-Burns (start at full cover, no zoom) so the whole head + margin
    stays in frame — the 14% kbPan zoom was clipping the crown of the head. */
-.lore-stop.hero[data-active="true"] .lore-bg { animation: kbHero 15s ease-in-out infinite alternate; }
+.lore-stop.hero .lore-bg { animation-name: kbHero; animation-duration: 15s; }
 /* Hero intros (always stills, both video modes). Starts at the RESTING transform (identity) so
    there's no pop when the slide activates, then eases to a clear 1.1 zoom + down-right drift.
    The downward (positive Y) bias gives the crown of the head room; the translate stays under the
@@ -442,15 +442,24 @@ section.hero { min-height: 100vh; min-height: 100svh; display: grid; place-items
    above turns it into the centred band, and its overflow:hidden is what keeps Ken-Burns inside
    the frame instead of spilling over the side fill. */
 .lore-band { position: absolute; inset: 0; overflow: hidden; }
+/* --focus is the per-scene crop anchor (see LoreStop.focus). It is a custom property rather
+   than an inline object-position precisely so a breakpoint can override it — an inline style
+   would beat every stylesheet rule and no art direction per screen size would be possible. */
 .lore-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-  background: #0a0a12; }
+  object-position: var(--focus, center); background: #0a0a12; }
 .lore-stop[data-media="video"] .lore-scan { background:
   linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.30)),
   repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0 2px, transparent 2px 4px),
   radial-gradient(135% 100% at 50% 45%, transparent 55%, rgba(3,3,8,0.4) 100%); }
 /* Promote ONLY the active slide (was on all 6 .lore-bg at once, which blew the compositor layer
    budget and forced main-thread animation = the choppiness). One promoted layer at a time. */
-.lore-stop[data-active="true"] .lore-bg { animation: kbPan 18s ease-in-out infinite alternate; will-change: transform; }
+/* The animation and will-change used to be ADDED when a slide became active and removed when
+   it stopped, which creates and destroys a compositing layer on every activation — the same
+   churn that was making the whole page flicker from .lore-panel, just on the image instead.
+   Declared once and merely PAUSED means one stable layer for the life of the page; becoming
+   active only flips play-state, which costs nothing. */
+.lore-bg { animation: kbPan 18s ease-in-out infinite alternate; animation-play-state: paused; }
+.lore-stop[data-active="true"] .lore-bg { animation-play-state: running; }
 /* Story chapters: also start at the resting transform (no activation pop), then ease to a 1.14
    zoom + diagonal drift. */
 @keyframes kbPan { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.14) translate(-3%, 2%); } }
@@ -893,6 +902,23 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .viz-exit:hover { color: #fff; border-color: var(--magenta); }
 .viz-exit:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
+/* Transport inside the visualizer HUD — deliberately the SAME pill language as .viz-exit, so
+   the HUD reads as one control strip rather than a player pasted over a visualizer. Square-ish
+   rather than elongated, because a glyph does not need the width a phrase does. */
+.viz-controls { display: flex; align-items: center; gap: .5rem; pointer-events: none; }
+.viz-btn {
+  pointer-events: auto; cursor: pointer; font-size: .7rem; line-height: 1;
+  color: #cfd8e3; background: rgba(6,4,10,.6); border: 1px solid var(--edge);
+  border-radius: 999px; width: 2.1rem; height: 2.1rem; display: grid; place-items: center;
+}
+.viz-btn:hover { color: #fff; border-color: var(--magenta); }
+.viz-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+@media (max-width: 768px), (max-height: 600px) {
+  .viz-controls { gap: .4rem; }
+  .viz-btn { width: 2.4rem; height: 2.4rem; } /* touch target */
+  .viz-exit { font-size: .55rem; padding: .4rem .7rem; letter-spacing: .14em; }
+}
+
 /* =========================================================
    SECTION CUT — a directed transition, fired on the downbeat
    A hard light-sweep across the frame plus a one-frame flash. Deliberately short (~420ms):
@@ -1039,6 +1065,15 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    75px of blurred fill each side, which is what .lore-fill was built for. Nothing is cropped,
    and on a screen this size the subject is still comfortably large. */
 @media (orientation: landscape) and (max-height: 560px) {
+  /* The roller-skate shot, art-directed for THIS breakpoint. A phone in landscape shows 82% of
+     a 16:9 frame; the skates live at 78-98% and the face at 15-40%, which is 83% of span — so
+     both fit, but only at a low anchor. 78% shows 14%-96%: skates in, face in.
+     It cannot be the scene's global `focus` (60%) because at the desktop 2.5 band only 71% of
+     the frame survives, and a 78% anchor there starts at 23% and takes the top of her head off.
+     Same shot, different amount of room, different answer. */
+  .lore-stop[data-id='stockholm'] .lore-video,
+  .lore-stop[data-id='stockholm'] .lore-bg { --focus: center 78%; }
+
   /* CONTAIN was tried here to save the roller skates and is now reverted. It cost ~75px of
      static bar each side, and because .lore-bg carries a background-COLOUR, that colour painted
      into the letterbox gaps on top of the blurred fill — the black bar that appeared on the
@@ -1659,4 +1694,29 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   /* 3. TOUR RAIL — pinned to the physical right edge, it ended up marooned hundreds of pixels
         away from anything it relates to. It now tracks the edge of the stage. */
   .tour-rail { right: max(12px, calc((100% - min(100%, 100svh * 2.5)) / 2 + 14px)); }
+}
+
+
+/* ---- TOUR RAIL AS A SCRUBBER -------------------------------------------------------------
+   The rail stays pointer-events:none so it can never block the page; only the track and the
+   vehicle opt back in. The track is widened well beyond its 2px line for the hit area — a
+   2px-wide drag target is unusable on a mouse and impossible on a thumb — while the line
+   itself stays hairline-thin. */
+.tour-rail .rail-track { pointer-events: auto; cursor: pointer; touch-action: none; }
+.rail-vehicle {
+  pointer-events: auto; cursor: grab; touch-action: none;
+  /* the emoji is small; this gives the thumb something real to catch without drawing anything */
+  padding: 10px; margin: -10px;
+}
+.tour-rail.dragging .rail-vehicle,
+.rail-vehicle:active { cursor: grabbing; }
+.rail-vehicle:focus-visible {
+  outline: 2px solid var(--gold-hi); outline-offset: 3px; border-radius: 50%;
+}
+/* while dragging, the vehicle should sit exactly under the finger — any easing on its travel
+   makes it lag the gesture and feel broken */
+.tour-rail.dragging .rail-vehicle, .tour-rail.dragging .rail-fill { transition: none; }
+/* a wider invisible grab column on touch, where precision is worst */
+@media (pointer: coarse) {
+  .tour-rail .rail-track { width: 34px; }
 }

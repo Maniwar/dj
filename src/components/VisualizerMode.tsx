@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { usePlayerStore, getTrack } from '../state/usePlayerStore'
 import { useSiteStore } from '../state/useSiteStore'
+import { useAudio } from '../audio/AudioProvider'
 
 // FULL-SCREEN TAKEOVER. The page falls away and the light rig plays on its own — the closest
 // thing this site has to putting the visuals on the big screen at the back of the club.
@@ -12,6 +13,8 @@ export default function VisualizerMode() {
   const loggedOn = useSiteStore((s) => s.loggedOn)
   const slug = usePlayerStore((s) => s.currentTrackSlug)
   const track = getTrack(slug)
+  const audio = useAudio()
+  const playing = usePlayerStore((s) => s.isPlaying)
 
   // V toggles, Escape always exits — a full-screen mode you can't leave by reflex is a trap.
   useEffect(() => {
@@ -35,7 +38,27 @@ export default function VisualizerMode() {
   return (
     <div className="viz-hud" role="dialog" aria-label="Visualizer">
       <div className="viz-now">{track ? track.title : 'SYSTEM OVERLOAD'}</div>
-      <button className="viz-exit" onClick={toggle}>ESC · EXIT VISUALIZER</button>
+      {/* Full screen hid the player completely, which meant skipping a track cost you the whole
+          mode. Transport lives here instead, in the same quiet pill style as the exit control
+          so the HUD stays one thing rather than a player bolted onto a visualizer. */}
+      <div className="viz-controls">
+        <button className="viz-btn" onClick={() => audio.prev()} aria-label="Previous track">
+          ⏮
+        </button>
+        <button
+          className="viz-btn"
+          onClick={() => audio.toggle()}
+          aria-label={playing ? 'Pause' : 'Play'}
+        >
+          {playing ? '⏸' : '▶'}
+        </button>
+        <button className="viz-btn" onClick={() => audio.next()} aria-label="Next track">
+          ⏭
+        </button>
+        <button className="viz-exit" onClick={toggle}>
+          ESC · EXIT VISUALIZER
+        </button>
+      </div>
     </div>
   )
 }

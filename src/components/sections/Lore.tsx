@@ -123,6 +123,8 @@ export default function Lore() {
               key={s.id}
               data-active={i === active}
               data-media={vid ? 'video' : 'still'}
+              data-id={s.id}
+              style={s.focus ? ({ ['--focus']: s.focus } as React.CSSProperties) : undefined}
             >
               {/* Blurred sides-filler, behind BOTH the clip and the still. On screens wider than
                   the media band (see the 11/5 media query) the frame is centred and this fills
@@ -143,7 +145,6 @@ export default function Lore() {
                     videoRefs.current[s.id] = el
                   }}
                   src={videoSrc(vid)}
-                  style={s.focus ? { objectPosition: s.focus } : undefined}
                   poster={withBase(s.image)}
                   muted
                   loop
@@ -154,10 +155,7 @@ export default function Lore() {
               ) : (
                 <div
                   className="lore-bg"
-                  style={{
-                    backgroundImage: `url(${withBase(s.image)})`,
-                    ...(s.focus ? { backgroundPosition: s.focus } : {}),
-                  }}
+                  style={{ backgroundImage: `url(${withBase(s.image)})` }}
                 />
               )}
               </div>
