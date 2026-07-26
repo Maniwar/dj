@@ -13,6 +13,10 @@ export default function Hero() {
         <div className="hero-crest">
           <Crest />
         </div>
+        {/* Two groups, so the layout has something to ARRANGE. Previously every element was a
+            direct sibling in one centred column, which is why the desktop hero could only ever
+            stack down the middle — there was nothing to place. */}
+        <div className="hero-lede">
         <div className="eyebrow">Eurobeat Records · Cat # EBR-2002-💦 · 50,000 Capacity · Sold Out</div>
         <h1 className="hero-title">
           <span className="drip gold-text">CLUB HUMIDITY</span>
@@ -22,6 +26,12 @@ export default function Hero() {
           <b>DJ DIETER</b> &amp; <b>KIKI G</b> <span className="aka">— System Overload —</span>
         </p>
 
+        <a className="scroll-cue" href="#lore">
+          ▾ ENTER THE VIP LOUNGE ▾
+        </a>
+        </div>
+
+        <aside className="hero-meta">
         <div className="hero-flex">
           <span>🐆 LEOPARD-CLAD</span>
           <span>🏎 FERRARI-ESCORTED</span>
@@ -55,10 +65,6 @@ export default function Hero() {
           </div>
         </div>
 
-        <a className="scroll-cue" href="#lore">
-          ▾ ENTER THE VIP LOUNGE ▾
-        </a>
-
         <div className="hitcounter" title="visitors since the sauna incident">
           <span className="hc-label">VISITORS:</span>
           {String(hits)
@@ -70,6 +76,7 @@ export default function Hero() {
               </span>
             ))}
         </div>
+        </aside>
       </div>
     </section>
   )
