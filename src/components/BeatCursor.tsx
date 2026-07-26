@@ -78,17 +78,25 @@ export default function BeatCursor() {
       lastDropY = py
       const dot = pool[next]
       next = (next + 1) % POOL
-      dot.style.transform = `translate3d(${px}px, ${py}px, 0)`
-      // Restart the fade with the Web Animations API, NOT the class-toggle + `void offsetWidth`
-      // trick. That trick forces a synchronous reflow every single time, and measured under a
-      // fast sweep it cost 126 layouts / 185ms — on an effect that should cause exactly zero,
-      // since everything it touches is transform and opacity. .animate() restarts cleanly with
-      // no layout at all, and opacity/scale here run on the compositor.
+      // The shrink is written INTO the same transform as the position, translate first.
+      //
+      // Animating the separate `scale` property instead was the bug that made the dots fly to
+      // the upper-left: CSS applies `scale` BEFORE the `transform` property, so a dot shrinking
+      // to 0.3 had its translate3d(x, y) scaled to 30% as well — collapsing its position toward
+      // the origin, which is the top-left corner of the screen. Inside one transform, translate
+      // is applied first and scale then operates around the already-placed point, which is what
+      // "shrink in place" actually requires.
+      //
+      // Still WAAPI rather than a CSS class restart, because restarting a CSS animation on a
+      // recycled node needs a forced reflow and this effect must never cause layout.
+      const from = `translate3d(${px}px, ${py}px, 0) scale(1)`
+      const to = `translate3d(${px}px, ${py}px, 0) scale(0.3)`
+      dot.style.transform = from
       dot.getAnimations().forEach((a) => a.cancel())
       dot.animate(
         [
-          { opacity: 0.8, scale: 1 },
-          { opacity: 0, scale: 0.3 },
+          { transform: from, opacity: 0.8 },
+          { transform: to, opacity: 0 },
         ],
         { duration: 820, easing: 'ease-out', fill: 'forwards' },
       )
