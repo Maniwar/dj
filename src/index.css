@@ -1474,3 +1474,55 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   .player.mobile.minimized .shade-title { font-size: 0.66rem; }
   .shade-vu { height: 15px; }
 }
+
+
+/* ============================================================================================
+   MAINSTAGE AT EXTREME WIDTH — the backdrop stops stretching and the club takes over
+   The Broadcast is 16:9 shown with cover, so on a 3.56:1 monitor it scales 4x and you see only
+   the middle FIFTY PERCENT of the frame. That is not a backdrop any more, it is a crop: too
+   zoomed, too narrow, and it is behind every other section on the page.
+
+   Past 2.4:1 the footage stops widening and centres, and the leftover width becomes part of
+   the venue rather than dead letterbox. Three things already in place make that read as
+   deliberate instead of as bars:
+     - the light rig canvas is full-bleed and blends screen, so beams keep sweeping ACROSS the
+       columns and visually tie them to the stage;
+     - grain, scanlines and vignette are full-bleed too, so the columns carry the same film
+       treatment as the footage;
+     - the columns themselves are speaker-stack/LED architecture, feathered into the frame edge
+       so there is no hard letterbox line.
+   At 2.4:1 the visible slice of the source goes from 50% back to 74%.
+   ========================================================================================== */
+@media (min-aspect-ratio: 12/5) {
+  .broadcast { --stage: min(100%, calc(100svh * 2.4)); }
+  .bc-video {
+    left: calc((100% - var(--stage)) / 2); right: auto; width: var(--stage);
+  }
+  /* .bc-frame keeps its -5% vertical overscan for Ken-Burns; only the width is capped */
+  .bc-frame {
+    left: calc((100% - var(--stage)) / 2); right: auto; width: var(--stage);
+    top: -5%; bottom: -5%;
+  }
+
+  /* the room either side of the stage */
+  .broadcast::before, .broadcast::after {
+    content: ''; position: absolute; top: 0; bottom: 0; width: calc((100% - var(--stage)) / 2 + 2px);
+    pointer-events: none; z-index: 1;
+    background:
+      /* feather into the frame edge so the join is a falloff, not a line */
+      linear-gradient(var(--dir, 90deg), rgba(5,3,2,0) 0%, rgba(5,3,2,0.35) 55%, rgba(5,3,2,0.62) 100%),
+      /* speaker-stack / LED columns */
+      repeating-linear-gradient(90deg,
+        rgba(255,255,255,0.045) 0 2px,
+        rgba(0,0,0,0) 2px 9px,
+        rgba(0,0,0,0.28) 9px 11px,
+        rgba(0,0,0,0) 11px 26px),
+      /* rack shelves */
+      repeating-linear-gradient(0deg,
+        rgba(255,255,255,0.03) 0 1px,
+        rgba(0,0,0,0) 1px 34px),
+      radial-gradient(120% 80% at 50% 30%, rgba(60,12,26,0.55), rgba(4,2,2,0.9) 70%);
+  }
+  .broadcast::before { left: 0; --dir: 270deg; }
+  .broadcast::after { right: 0; --dir: 90deg; }
+}
