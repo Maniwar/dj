@@ -42,17 +42,40 @@ export default function Lore() {
     // when the whole section is off-screen — so leaving (e.g. scrolling back to the top) resets
     // the cards and re-entering re-plays their fade-in, in BOTH directions.
     const visible = new Set<number>()
+    // A 1px detection line at the exact viewport centre (rootMargin -50%/-50%) meant that
+    // parking BETWEEN two slides left the boundary sitting on that line, where a single pixel
+    // of scroll, a beat transform or the URL bar animating would flip isIntersecting back and
+    // forth. Every flip restarted Ken-Burns AND called play() on one video and pause() on the
+    // other — video play/pause thrash, which is what was flickering while standing still.
+    //
+    // So: choose the slide that occupies the most of the screen, and require a challenger to
+    // win by a clear margin before handing over. Oscillation needs a tie; hysteresis removes
+    // the tie.
+    const ratios = new Map<number, number>()
+    const SWITCH_MARGIN = 0.18 // how far ahead a challenger must be to take over
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
           const idx = items.indexOf(e.target as HTMLElement)
           if (idx < 0) continue
-          if (e.isIntersecting) visible.add(idx)
-          else visible.delete(idx)
+          ratios.set(idx, e.isIntersecting ? e.intersectionRatio : 0)
         }
-        setActive(visible.size ? Math.min(...visible) : -1)
+        let best = -1
+        let bestRatio = 0
+        for (const [idx, r] of ratios) {
+          if (r > bestRatio) {
+            bestRatio = r
+            best = idx
+          }
+        }
+        setActive((cur) => {
+          if (best < 0 || bestRatio <= 0) return -1
+          if (cur < 0 || cur === best) return best
+          const curRatio = ratios.get(cur) ?? 0
+          return bestRatio > curRatio + SWITCH_MARGIN ? best : cur
+        })
       },
-      { rootMargin: '-50% 0px -50% 0px', threshold: 0 },
+      { threshold: [0, 0.15, 0.3, 0.5, 0.7, 0.85, 1] },
     )
     items.forEach((it) => io.observe(it))
     return () => io.disconnect()
@@ -66,12 +89,18 @@ export default function Lore() {
     setAccent(stop ? stop.accent : 'default')
   }, [active, stops])
 
-  // single-decode: only the active stop's video plays
+  // Single-decode: only the active stop's video plays. The guards matter — calling play() on
+  // an already-playing element, or pause() on an already-paused one, still churns the media
+  // pipeline and shows up as a flash on Android. Cheap to check, so check.
   useEffect(() => {
+    const activeId = stops[active]?.id
     for (const [id, v] of Object.entries(videoRefs.current)) {
       if (!v) continue
-      if (id === stops[active]?.id) v.play().catch(() => {})
-      else v.pause()
+      if (id === activeId) {
+        if (v.paused) v.play().catch(() => {})
+      } else if (!v.paused) {
+        v.pause()
+      }
     }
   }, [active, videoEnabled, stops])
 

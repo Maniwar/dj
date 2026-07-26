@@ -380,8 +380,8 @@ section.hero { min-height: 100vh; min-height: 100svh; display: grid; place-items
    2. The SAME band applies to .lore-bg and .lore-video, so a still and a clip in this section
       have identical borders. Previously the stills letterboxed while the videos stayed
       full-bleed, so the margins jumped as you scrolled between them. */
-@media (min-aspect-ratio: 11/5) {
-  .lore-stop { --band: min(100%, calc(100svh * 2.2)); }
+@media (min-aspect-ratio: 5/2) {
+  .lore-stop { --band: min(100%, calc(100svh * 2.5)); }
   .lore-stop .lore-band {
     /* An explicit width, NOT left+right+width:auto. For an absolutely positioned REPLACED
        element (the <video>) `width: auto` resolves to the intrinsic width and the right inset is
@@ -392,7 +392,10 @@ section.hero { min-height: 100vh; min-height: 100svh; display: grid; place-items
     left: calc((100% - var(--band)) / 2);
     right: auto;
   }
-  .lore-stop.hero .lore-bg { background-size: cover; background-position: center 25%; }
+  /* 22%, not 25%: the band is shallower at 2.5 than at 2.2 (40% of a square source rather than
+     45%), so the anchor moves up to keep the crown of the head inside it with air to spare.
+     2.5 is the LIMIT here, not a preference — at 2.6 the head no longer clears the top edge. */
+  .lore-stop.hero .lore-bg { background-size: cover; background-position: center 22%; }
 
   /* 16:9 footage keeps ~81% of its height inside the band; the upward anchor puts that on the
      faces and raised arms rather than the dance floor */
@@ -1046,8 +1049,19 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      lyric line and the mini player — which is where the crew slide's sign-off ("THEY ARE THE
      HUMIDITY") was disappearing. Padding the stop shifts the centring up into the space that
      is actually visible. */
-  .lore-stop, .journey-stop { padding-bottom: 104px; }
-  .lore-panel { width: min(62vw, 640px); max-height: 74svh; overflow-y: auto; }
+  /* Padding alone did not fix this: the panel was TALLER than the space left over, so centring
+     it just overflowed in both directions and the sign-off still landed under the player.
+     In landscape the panel is anchored to the TOP instead of centred, and its own padding
+     comes right down — 67px of vertical panel padding was the single largest non-text item in
+     a slide with only ~250px to work with. */
+  .lore-stop, .journey-stop { align-items: flex-start; padding: 4vh 0 116px; }
+  .lore-panel {
+    width: min(62vw, 640px); padding: 0.6rem 1rem;
+    max-height: none; overflow: visible;
+  }
+  .lore-name { margin-bottom: 0.35rem; }
+  .lore-eyebrow { margin-bottom: 0.3rem; }
+  .lore-tag { margin-top: 0.5rem; }
   .lore-roster { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 12px; margin-top: 0.7rem; }
   .lore-roster-name { font-size: clamp(0.85rem, 3.2vh, 1.05rem); }
   .lore-roster-tag { font-size: clamp(0.5rem, 1.5vh, 0.6rem); letter-spacing: 0.14em; }

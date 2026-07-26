@@ -79,8 +79,13 @@ export default function TourJourney() {
   useEffect(() => {
     for (const [id, v] of Object.entries(videoRefs.current)) {
       if (!v) continue
-      if (id === cities[active]?.id) v.play().catch(() => {})
-      else v.pause()
+      // guarded for the same reason as Lore: re-issuing play/pause on an element already in
+      // that state still churns the media pipeline and flashes on Android
+      if (id === cities[active]?.id) {
+        if (v.paused) v.play().catch(() => {})
+      } else if (!v.paused) {
+        v.pause()
+      }
     }
   }, [active, videoMap, cities])
 
