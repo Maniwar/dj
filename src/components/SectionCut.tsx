@@ -11,9 +11,25 @@ import { useSiteStore } from '../state/useSiteStore'
 // so the site never feels unresponsive.
 const ARM_TIMEOUT_MS = 1400 // if no downbeat arrives by then, just cut
 
+// A full-viewport fixed overlay that ANIMATES on every section change. On desktop it is the
+// director's-cut flourish it was built to be. On a phone it is a full-screen animated layer
+// compositing over playing video every time you cross a section boundary — reported as the
+// page flickering "between cards" in landscape on Android. It is a flourish, not a feature, so
+// phones simply don't get it.
+const NO_CUT_Q = '(max-width: 768px), (max-height: 600px)'
+
 export default function SectionCut() {
   const loggedOn = useSiteStore((s) => s.loggedOn)
   const reduced = useSiteStore((s) => s.reducedMotion)
+  const [tooSmall, setTooSmall] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(NO_CUT_Q).matches,
+  )
+  useEffect(() => {
+    const mq = window.matchMedia(NO_CUT_Q)
+    const on = () => setTooSmall(mq.matches)
+    mq.addEventListener('change', on)
+    return () => mq.removeEventListener('change', on)
+  }, [])
   const [cut, setCut] = useState(0) // bump to replay the animation
   const armed = useRef(false)
   const armedAt = useRef(0)
@@ -21,7 +37,7 @@ export default function SectionCut() {
   const startWatch = useRef<(() => void) | null>(null)
 
   useEffect(() => {
-    if (!loggedOn || reduced) return
+    if (!loggedOn || reduced || tooSmall) return
     const sections = Array.from(document.querySelectorAll<HTMLElement>('section[id]'))
     if (!sections.length) return
 
@@ -73,9 +89,9 @@ export default function SectionCut() {
       io.disconnect()
       if (raf) cancelAnimationFrame(raf)
     }
-  }, [loggedOn, reduced])
+  }, [loggedOn, reduced, tooSmall])
 
-  if (!loggedOn || reduced || cut === 0) return null
+  if (!loggedOn || reduced || tooSmall || cut === 0) return null
   // keyed so each cut restarts the animation from the top
   return <div className="section-cut" key={cut} aria-hidden />
 }

@@ -36,6 +36,30 @@ export default function Player() {
   const lyricStyle = useSiteStore((s) => s.lyricStyle)
   const cycleLyricStyle = useSiteStore((s) => s.cycleLyricStyle)
   const toggleVisualizer = useSiteStore((s) => s.toggleVisualizer)
+
+  // The button is labelled "full-screen" and shows the full-screen glyph, but only ever toggled
+  // the visualizer state — so on a phone the browser's address bar stayed put and it was never
+  // actually full screen. It now asks the browser for real fullscreen as well. This MUST run
+  // from the click itself: requestFullscreen is only granted inside a user gesture.
+  const goFullscreen = () => {
+    toggleVisualizer()
+    const el = document.documentElement as HTMLElement & {
+      webkitRequestFullscreen?: () => Promise<void>
+    }
+    const doc = document as Document & { webkitExitFullscreen?: () => Promise<void> }
+    const isFull = document.fullscreenElement ?? (doc as any).webkitFullscreenElement
+    try {
+      if (isFull) {
+        void (document.exitFullscreen?.() ?? doc.webkitExitFullscreen?.())
+      } else {
+        // iOS Safari still has no Fullscreen API on <html>; there the visualizer alone is the
+        // effect, which is why the toggle above happens regardless of what this returns.
+        void (el.requestFullscreen?.({ navigationUI: 'hide' }) ?? el.webkitRequestFullscreen?.())
+      }
+    } catch {
+      /* denied or unsupported — the visualizer still toggled */
+    }
+  }
   const shuffle = useSiteStore((s) => s.shuffle)
   const repeat = useSiteStore((s) => s.repeat)
   const toggleShuffle = useSiteStore((s) => s.toggleShuffle)
@@ -392,7 +416,7 @@ export default function Player() {
             </button>
             <button
               className="tbtn viz"
-              onClick={toggleVisualizer}
+              onClick={goFullscreen}
               aria-label="Full-screen visualizer"
               title="Visualizer — the page steps aside (V)"
             >

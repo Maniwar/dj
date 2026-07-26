@@ -1042,7 +1042,12 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      three-person roster stacks vertically while 844px of width sits unused. Across, it costs a
      third of the height. The panel also widens a little, and keeps a scroll as a safety net so
      no future slide can silently lose its last lines again. */
-  .lore-panel { width: min(62vw, 640px); max-height: 84svh; overflow-y: auto; }
+  /* The stop centres its panel over the FULL height, but the bottom ~100px is covered by the
+     lyric line and the mini player — which is where the crew slide's sign-off ("THEY ARE THE
+     HUMIDITY") was disappearing. Padding the stop shifts the centring up into the space that
+     is actually visible. */
+  .lore-stop, .journey-stop { padding-bottom: 104px; }
+  .lore-panel { width: min(62vw, 640px); max-height: 74svh; overflow-y: auto; }
   .lore-roster { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 12px; margin-top: 0.7rem; }
   .lore-roster-name { font-size: clamp(0.85rem, 3.2vh, 1.05rem); }
   .lore-roster-tag { font-size: clamp(0.5rem, 1.5vh, 0.6rem); letter-spacing: 0.14em; }
@@ -1525,4 +1530,55 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   }
   .broadcast::before { left: 0; --dir: 270deg; }
   .broadcast::after { right: 0; --dir: 90deg; }
+}
+
+
+/* ---- LANDSCAPE + PLAYLIST: a third column, not a second scroller ------------------------
+   Opening the playlist in landscape stacked a 168px list UNDER the controls, inside a body
+   that already had max-height + overflow-y — a scroll container nested in a scroll container,
+   composited over playing video. That is both the flicker and the reason it felt awful.
+   In landscape the width is the resource that exists, so the playlist becomes a third column
+   with the single scroll living on the list itself. The body stops scrolling entirely. */
+@media (orientation: landscape) and (max-height: 560px) {
+  .player.mobile .player-body { max-height: none; overflow: visible; }
+  .player.mobile .playlist {
+    /* Bounded, NOT height:100%. Spanning three auto rows, an unbounded list sets the row
+       heights itself — measured, that pushed the player to 404px inside a 390px screen. Capped,
+       it scrolls instead of growing, and the open player stays the same height as the closed
+       one. */
+    margin: 0; height: auto; max-height: 40svh; min-height: 0; overflow-y: auto;
+    grid-area: playlist; -webkit-overflow-scrolling: touch;
+  }
+  /* :has() keeps this to CSS — no extra state, no re-render, and the grid only changes shape
+     when the list is actually open. */
+  .player.mobile .player-body:has(.playlist) {
+    grid-template-columns: minmax(140px, 0.7fr) minmax(210px, 1fr) minmax(170px, 0.9fr);
+    grid-template-areas:
+      'lcd transport playlist'
+      'lcd tools     playlist'
+      'seek bootleg  playlist';
+  }
+  .player.mobile .pl-row { font-size: 0.6rem; padding: 3px 5px; }
+}
+
+
+/* ---- BOOT GATE ON A PHONE IN LANDSCAPE --------------------------------------------------
+   The gate is sized for height it does not have here: the logo alone clamps to 6.5rem and the
+   stack of logo + tagline + button + warning simply ran off a ~390px screen, taking the log-on
+   button with it. Everything scales off vh, which is the scarce axis, and the gate can scroll
+   as a last resort so nothing is ever unreachable. Applies to the boot console too, which had
+   the same problem while it loaded. */
+@media (orientation: landscape) and (max-height: 560px) {
+  .boot-gate { overflow-y: auto; }
+  .boot-inner { padding: 1.1rem 2rem; max-width: 94vw; }
+  .boot-logo { gap: 0.15rem; }
+  .boot-logo .drip { font-size: clamp(1.5rem, 12vh, 3.2rem); }
+  .boot-sub { font-size: clamp(0.5rem, 2.2vh, 0.7rem); letter-spacing: 0.3em; }
+  .boot-ver { font-size: clamp(0.46rem, 1.8vh, 0.6rem); margin-top: 3px; }
+  .boot-tag { margin: 0.7rem 0 0.7rem; font-size: clamp(0.52rem, 2.2vh, 0.72rem); letter-spacing: 0.18em; }
+  .logon-btn { font-size: clamp(0.85rem, 4.6vh, 1.35rem); padding: 0.55rem 1.7rem; }
+  .boot-warn { margin-top: 0.7rem; font-size: clamp(0.48rem, 2vh, 0.64rem); }
+  .boot-console { padding: 0.6rem 0.9rem; }
+  .boot-line { font-size: clamp(0.52rem, 2.3vh, 0.72rem); line-height: 1.45; }
+  .boot-bar { margin-top: 0.4rem; }
 }
