@@ -2257,10 +2257,13 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    So: the footage ghosts through at ~8%, and the depth comes from a brighter inner bevel rather
    than from a blur. Costs nothing, and the plastic-and-brushed-metal fiction survives. */
 .player {
-  background:
-    linear-gradient(180deg, rgba(22,27,36,0.40) 0%, rgba(13,17,24,0.36) 10%, rgba(6,8,12,0.34) 100%)
-      padding-box,
-    var(--grad-gilt-border) border-box;
+  /* ONE layer. This was `<translucent> padding-box, var(--grad-gilt-border) border-box`, and the
+     second layer paints the WHOLE element — not just the border — so an opaque gilt gradient sat
+     directly behind the translucent one and no light ever reached the page. Every alpha I tried
+     (0.84, 0.5, 0.36) was tinting that instead of revealing the club. The gilt edge moves to the
+     border colour, which is the only place it was ever meant to be visible. */
+  background: linear-gradient(180deg, rgba(22,27,36,0.42) 0%, rgba(13,17,24,0.36) 10%, rgba(6,8,12,0.34) 100%);
+  border-color: rgba(230,192,90,0.55);
   box-shadow:
     0 24px 60px rgba(0,0,0,0.62),
     0 0 0 1px rgba(0,0,0,0.55),
