@@ -49,6 +49,14 @@ export default function BeatCursor() {
     // which is what a glow stick waved in a dark room actually leaves behind — a line of light
     // that decays rather than a solid stroke. Rate-limited by DISTANCE, not by time: moving fast
     // should draw a longer trail, and holding still should not pile hundreds of dots in one spot.
+    // A PARTICLE EMITTER, not a trail. A trail marks where the cursor has BEEN — dots sitting
+    // still on the path, fading — which is why it read as beads following the pointer. Sparks
+    // thrown into a room do the opposite: they leave the source, travel outward, and SHRINK as
+    // they recede, because things get smaller with distance. That shrink-while-travelling is the
+    // entire depth cue; without it any particle is just a dot sliding around on the glass.
+    //
+    // Each one gets its own direction and throw distance, so a spray never repeats.
+    //
     // A FIXED POOL, recycled — not one node per drop.
     //
     // The first version created an element on every ~22px of travel and deleted it 900ms later.
@@ -60,8 +68,8 @@ export default function BeatCursor() {
     // Twelve nodes are created once and reused round-robin. Moving the mouse now costs two style
     // writes on an element that already exists, and the ceiling on simultaneous trail layers is
     // twelve no matter how violently the cursor is waved.
-    const POOL = 12
-    const DROP_DISTANCE = 34 // further apart than before: fewer layers, and it reads the same
+    const POOL = 18
+    const DROP_DISTANCE = 26 // a denser spray now that each particle travels away
     const pool: HTMLDivElement[] = []
     for (let i = 0; i < POOL; i++) {
       const dot = document.createElement('div')
@@ -78,27 +86,31 @@ export default function BeatCursor() {
       lastDropY = py
       const dot = pool[next]
       next = (next + 1) % POOL
-      // The shrink is written INTO the same transform as the position, translate first.
-      //
-      // Animating the separate `scale` property instead was the bug that made the dots fly to
-      // the upper-left: CSS applies `scale` BEFORE the `transform` property, so a dot shrinking
-      // to 0.3 had its translate3d(x, y) scaled to 30% as well — collapsing its position toward
-      // the origin, which is the top-left corner of the screen. Inside one transform, translate
-      // is applied first and scale then operates around the already-placed point, which is what
-      // "shrink in place" actually requires.
-      //
-      // Still WAAPI rather than a CSS class restart, because restarting a CSS animation on a
-      // recycled node needs a forced reflow and this effect must never cause layout.
+      // Position and scale live in ONE transform, translate first. Animating the standalone
+      // `scale` property instead multiplies the translate along with it — CSS applies `scale`
+      // before `transform` — which collapsed every particle toward the screen origin. Inside a
+      // single transform, translate is applied first and scale operates around the placed point.
+      const angle = Math.random() * Math.PI * 2
+      const throwDist = 160 + Math.random() * 220
+      const ex = px + Math.cos(angle) * throwDist
+      // biased upward: sparks thrown into a room rise as they go, and the footage's horizon is
+      // above centre, so travelling up also reads as travelling AWAY
+      const ey = py + Math.sin(angle) * throwDist * 0.62 - 30 - Math.random() * 50
       const from = `translate3d(${px}px, ${py}px, 0) scale(1)`
-      const to = `translate3d(${px}px, ${py}px, 0) scale(0.3)`
+      const to = `translate3d(${ex}px, ${ey}px, 0) scale(0.12)`
       dot.style.transform = from
       dot.getAnimations().forEach((a) => a.cancel())
       dot.animate(
         [
-          { transform: from, opacity: 0.8 },
-          { transform: to, opacity: 0 },
+          // LINGER: sit where it was dropped, at full size. This is the trail half — the
+          // previous version shrank to a quarter within 300ms having travelled only 28px, so it
+          // collapsed before it went anywhere and never read as being fired at all.
+          { transform: from, opacity: 0.9, offset: 0, easing: 'linear' },
+          { transform: from, opacity: 0.9, offset: 0.34, easing: 'cubic-bezier(0.3,0,0.5,1)' },
+          // THEN FIRE: outward and away, shrinking as it recedes into the scene.
+          { transform: to, opacity: 0, offset: 1 },
         ],
-        { duration: 820, easing: 'ease-out', fill: 'forwards' },
+        { duration: 1000, fill: 'forwards' },
       )
     }
 
