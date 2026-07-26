@@ -1518,8 +1518,11 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
        so there is no hard letterbox line.
    At 2.4:1 the visible slice of the source goes from 50% back to 74%.
    ========================================================================================== */
-@media (min-aspect-ratio: 12/5) {
-  .broadcast { --stage: min(100%, calc(100svh * 2.4)); }
+@media (min-aspect-ratio: 5/2) {
+  /* 2.5, matching the lore and tour bands. When these differed (2.4 vs 2.5) the backdrop's edge
+     sat 134px inside the slides in front of it, so the page had two competing stage widths
+     visible at once. One number, one edge, everywhere. */
+  .broadcast { --stage: min(100%, calc(100svh * 2.5)); }
   .bc-video {
     left: calc((100% - var(--stage)) / 2); right: auto; width: var(--stage);
   }
@@ -1618,4 +1621,37 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
     backface-visibility: hidden;
   }
   .player.mobile .playlist { will-change: scroll-position; contain: content; overscroll-behavior: contain; }
+}
+
+
+/* ============================================================================================
+   SUPER-ULTRAWIDE: everything that was still running edge-to-edge
+   The mainstage and the lore slides already stop widening. Three things did not, and at 4000px+
+   each looked wrong in its own way.
+   ========================================================================================== */
+@media (min-aspect-ratio: 5/2) {
+  /* 1. TOUR SCENES — the city clips stretched without limit while the mainstage behind them
+        stopped at 2.4 and the lore slides at 2.5. Same treatment, same number as the lore band,
+        so the whole page shares one rhythm instead of each section choosing its own width. */
+  .journey-stop { --band: min(100%, calc(100svh * 2.5)); }
+  .journey-bg, .journey-video {
+    left: calc((100% - var(--band)) / 2); right: auto; width: var(--band);
+  }
+  .journey-stop .journey-bg-blur {
+    display: block; position: absolute; inset: 0; z-index: -1;
+    background-size: cover; background-position: center; background-repeat: no-repeat;
+    filter: blur(48px) brightness(0.4) saturate(1.25);
+  }
+
+  /* 2. LYRIC TICKER — a single line of type stretched across 4000px reads as a stock ticker,
+        not a lyric. Holding it to the same width as the stage keeps it part of the composition,
+        and the type grows with the viewport instead of just repeating more often. */
+  .lyric-marquee {
+    width: min(100%, calc(100svh * 2.5)); margin-inline: auto;
+  }
+  .lm-item { font-size: clamp(1.2rem, 2.1vh, 2.2rem); }
+
+  /* 3. TOUR RAIL — pinned to the physical right edge, it ended up marooned hundreds of pixels
+        away from anything it relates to. It now tracks the edge of the stage. */
+  .tour-rail { right: max(12px, calc((100% - min(100%, 100svh * 2.5)) / 2 + 14px)); }
 }
