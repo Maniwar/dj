@@ -458,7 +458,18 @@ section.hero { min-height: 100vh; min-height: 100svh; display: grid; place-items
    churn that was making the whole page flicker from .lore-panel, just on the image instead.
    Declared once and merely PAUSED means one stable layer for the life of the page; becoming
    active only flips play-state, which costs nothing. */
-.lore-bg { animation: kbPan 18s ease-in-out infinite alternate; animation-play-state: paused; }
+/* Promoted PERMANENTLY, not on activation. .lore-bg carries a beat-driven `scale` that changes
+   every single frame, so without a layer of its own a full-screen element re-transforms 60x a
+   second and repaints everything underneath it — the whole page, which is precisely what was
+   flickering on Kiki's slide while the player (the one element with contain: paint) sat
+   perfectly still.
+   The earlier churn came from TOGGLING this hint per slide, not from having it. Declared once
+   and never removed, there is one stable layer for the life of the page: no churn, and no
+   per-frame repaint either. */
+.lore-bg {
+  animation: kbPan 18s ease-in-out infinite alternate; animation-play-state: paused;
+  will-change: transform;
+}
 .lore-stop[data-active="true"] .lore-bg { animation-play-state: running; }
 /* Story chapters: also start at the resting transform (no activation pop), then ease to a 1.14
    zoom + diagonal drift. */
@@ -1445,6 +1456,14 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    flat. Beat reaction is not lost either: the transform-based lift and scale further up are
    composited, cost nothing, and still pulse. Only the repaint-forcing half is switched off. */
 @media (max-width: 768px), (max-height: 600px) {
+  /* No per-frame TRANSFORM on the full-screen stills either. The beat scale rewrote `scale` on
+     .lore-bg / .bc-frame / .journey-bg sixty times a second, and on a phone in landscape that
+     element is 844px wide — twice the area of portrait, which is why the same cost only became
+     unmissable there. Even promoted it is work for no visible gain at this size; the beat is
+     still carried by the text lift, the light rig and the VU. The Ken-Burns pan is unaffected —
+     that is one animation the compositor runs on its own. */
+  .lore-bg, .bc-frame, .journey-bg { scale: 1; }
+
   .lore-name {
     filter: drop-shadow(0 2px 0 rgba(0,0,0,0.6)) drop-shadow(0 0 18px var(--accent));
   }
