@@ -14,6 +14,9 @@ smoke-shots
 # intermediate uncompressed video renders (we commit the compressed .mp4)
 *.raw.mp4
 
+# album-cover working copy of the source frame (the original lives in public/assets)
+artwork/bg.jpg
+
 # QA screenshot output
 ultrawide-shots/
 smoke-shots/

@@ -1,0 +1,63 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* 3000x3000 at 1x. DistroKid's minimum is 3000 square; everything is sized off the canvas so
+     the layout is resolution-independent if the export size ever changes. */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:3000px; height:3000px; background:#05060a; overflow:hidden; }
+  .cover { position:relative; width:3000px; height:3000px; overflow:hidden; }
+
+  /* The footage, pushed dark and cool so the type has somewhere to sit. Album art is read at
+     64px in a phone list before it is ever seen large, so contrast beats detail. */
+  .bg { position:absolute; inset:0; background:url('bg.jpg') center 42%/cover no-repeat;
+        filter:brightness(.52) contrast(1.18) saturate(1.25); }
+  /* laser haze */
+  .haze { position:absolute; inset:0;
+    background:
+      radial-gradient(120% 80% at 22% 12%, rgba(255,31,143,.55), transparent 58%),
+      radial-gradient(110% 75% at 82% 20%, rgba(20,224,255,.38), transparent 60%),
+      radial-gradient(130% 90% at 50% 108%, rgba(99,255,46,.30), transparent 62%);
+    mix-blend-mode:screen; }
+  /* a scrim so the title never fights the picture */
+  .scrim { position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(4,3,8,.62) 0%, rgba(4,3,8,.12) 34%, rgba(4,3,8,.80) 78%, rgba(4,3,8,.95) 100%); }
+  /* VHS scanlines, the same texture the site uses */
+  .scan { position:absolute; inset:0; opacity:.16; mix-blend-mode:multiply;
+    background:repeating-linear-gradient(0deg, rgba(0,0,0,.9) 0 3px, transparent 3px 7px); }
+
+  .frame { position:absolute; inset:96px; border:5px solid rgba(230,192,90,.55); }
+
+  .inner { position:absolute; inset:0; display:flex; flex-direction:column;
+           align-items:center; justify-content:flex-end; padding:0 260px 300px; text-align:center; }
+
+  .eyebrow { font-family:Oswald,sans-serif; font-weight:600; font-size:64px; letter-spacing:.42em;
+             color:#e6c05a; text-transform:uppercase; margin-bottom:54px; text-shadow:0 0 30px rgba(230,192,90,.6); }
+
+  /* the title, in the site's own chrome treatment */
+  .title { font-family:Anton,sans-serif; font-size:520px; line-height:.82; letter-spacing:.005em;
+           text-transform:uppercase;
+           background:linear-gradient(180deg,#fff 0%,#dfe6ee 34%,#8fa0b2 52%,#f3f7fb 68%,#b9c6d4 100%);
+           -webkit-background-clip:text; background-clip:text; color:transparent;
+           filter:drop-shadow(0 10px 0 rgba(0,0,0,.55)) drop-shadow(0 0 70px rgba(255,31,143,.65)); }
+
+  .sub { font-family:Oswald,sans-serif; font-weight:700; font-size:96px; letter-spacing:.14em;
+         color:#fff; margin-top:64px; text-transform:uppercase;
+         text-shadow:0 0 34px rgba(20,224,255,.75), 0 6px 0 rgba(0,0,0,.5); }
+
+  .artist { position:absolute; top:210px; left:0; right:0; text-align:center;
+            font-family:Oswald,sans-serif; font-weight:700; font-size:110px; letter-spacing:.30em;
+            color:#fff; text-transform:uppercase; text-shadow:0 0 40px rgba(255,31,143,.8), 0 6px 0 rgba(0,0,0,.55); }
+</style></head>
+<body><div class="cover">
+  <div class="bg"></div><div class="haze"></div><div class="scrim"></div><div class="scan"></div>
+  <div class="frame"></div>
+  <div class="artist">System Overload</div>
+  <div class="inner">
+    <div class="eyebrow">Eurobeat Records · MMII</div>
+    <div class="title">Club<br>Humidity</div>
+    <div class="sub">The Moist Mix 2002</div>
+  </div>
+</div></body></html>
