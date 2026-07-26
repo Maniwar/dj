@@ -757,7 +757,12 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    than overwriting it. Never goes below 1, so no background edge is ever revealed. */
 .lore-bg { scale: calc(1 + var(--m-beat, 0) * 0.05 + var(--m-drop, 0) * 0.06); }
 .bc-frame { scale: calc(1 + var(--m-beat, 0) * 0.035 + var(--m-drop, 0) * 0.05); }
-.bc-video, .lore-video, .journey-video { scale: calc(1 + var(--m-beat, 0) * 0.03 + var(--m-drop, 0) * 0.05); }
+/* Stills pulse; VIDEO does not. The beat scale was on both, which was invisible while the
+   media ran edge to edge — there was no fixed reference to judge the size against. Now that the
+   footage sits in a band with stationary bars beside it, the same scale reads as the picture
+   breathing in and out against a still edge, which looks like a bug rather than a beat.
+   Footage already carries its own motion; a still needs the help, a clip does not. */
+.bc-frame { /* stills keep the pulse — see the .bc-frame rule above */ }
 /* (the light bars and the tour-rail vehicle are accented at their own rules further down —
     both are re-declared later in this file, so setting them here would be overridden) */
 /* NB: .section-title is gradient-CLIPPED text (color: transparent), so a text-shadow would
