@@ -115,7 +115,14 @@ export const useSiteStore = create<SiteState>((set) => ({
   glass: (() => {
     try {
       const v = localStorage.getItem('so.glass')
-      return v === 'clear' || v === 'frost' ? v : 'off'
+      // Defaults to CLEAR, not off. The original default of 'off' was justified by
+      // backdrop-filter having to re-blur its backdrop every frame over playing video — but
+      // clear glass has no backdrop-filter at all. It is transparency, a rim light and a bevel:
+      // all paint-once, all free. So the old default made everyone pay a perf-motivated cost
+      // that the clear finish does not incur, and on mobile the finish button is unreachable
+      // from the minimized player, so most people could never have found it. FROSTED, which is
+      // the expensive one, stays strictly opt-in.
+      return v === 'clear' || v === 'frost' || v === 'off' ? v : 'clear'
     } catch {
       return 'off'
     }

@@ -2819,3 +2819,24 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 :root.glass-frost .player.minimized {
   background: transparent padding-box, var(--grad-gilt-border) border-box;
 }
+
+/* READING AS GLASS OVER A DARK BACKDROP.
+   The mini bar sits at the very bottom of the screen, where the footage is crowd and floor —
+   almost always the darkest part of the frame. Transparency alone cannot read there: 42% of
+   nothing is still nothing, which is why the strip could be genuinely translucent and still look
+   like a black bar. Glass over a dark room reads through its EDGES, not its body — the rim is
+   where light collects and where thickness becomes visible. So the highlight does the work. */
+:root.glass-on .player.minimized .player-shade {
+  --shade-bevel:
+    inset 0 1px 0 rgba(255, 252, 240, 0.34),
+    inset 0 2px 5px -3px rgba(255, 244, 214, 0.26),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.45);
+}
+/* A faint sheen across the strip so it is not a flat tint — real glass catches a little of the
+   room along its length. Static: a gradient that does not move costs one paint, and this thing
+   is pinned over playing video where anything animated is a repaint per frame. */
+:root.glass-on .player.minimized .player-shade::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  background: linear-gradient(100deg, transparent 12%, rgba(255, 248, 228, 0.09) 38%, transparent 62%);
+}
+:root.glass-on .player.minimized .player-shade { position: relative; }
