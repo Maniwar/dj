@@ -36,6 +36,8 @@ export default function Player() {
   const lyricStyle = useSiteStore((s) => s.lyricStyle)
   const cycleLyricStyle = useSiteStore((s) => s.cycleLyricStyle)
   const toggleVisualizer = useSiteStore((s) => s.toggleVisualizer)
+  const glass = useSiteStore((s) => s.glass)
+  const toggleGlass = useSiteStore((s) => s.toggleGlass)
 
   // The button is labelled "full-screen" and shows the full-screen glyph, but only ever toggled
   // the visualizer state — so on a phone the browser's address bar stayed put and it was never
@@ -439,6 +441,19 @@ export default function Player() {
               title={`Playlist — ${tracks.length} tracks`}
             >
               ☰
+            </button>
+            <button
+              className={`tbtn sm ${glass ? 'on' : ''}`}
+              onClick={toggleGlass}
+              aria-pressed={glass}
+              aria-label="Glass panel"
+              title={
+                glass
+                  ? 'Glass ON — frosted panel (costs a blur pass every frame)'
+                  : 'Glass off — tap for a frosted panel'
+              }
+            >
+              ◧
             </button>
             <button
               className="tbtn viz"

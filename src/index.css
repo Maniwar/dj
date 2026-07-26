@@ -2330,3 +2330,26 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    to show through, so the alpha has to go far enough for THOSE to read. The controls and the LCD
    stay opaque: a button you can see the room through stops looking pressable. */
 .player-body, .player-shade { background: transparent; }
+
+
+/* ---- OPT-IN GLASS -----------------------------------------------------------------------
+   Real frosted glass, behind a toggle. backdrop-filter must re-blur whatever is behind it on
+   EVERY frame, and what is behind this is playing video — the same per-pixel cost that was
+   heating phones, which is why it is opt-in rather than the default. The plain translucent
+   panel stays the baseline, so turning this off is not a downgrade to something worse.
+   -webkit- first for Safari, which still needs the prefix. */
+:root.glass-on .player {
+  -webkit-backdrop-filter: blur(14px) saturate(1.25);
+  backdrop-filter: blur(14px) saturate(1.25);
+  background: linear-gradient(180deg, rgba(22,27,36,0.30) 0%, rgba(13,17,24,0.26) 10%, rgba(6,8,12,0.24) 100%);
+}
+:root.glass-on .player-title {
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+/* The ORIGIN header fades with its section. Declared at top level, NOT inside a breakpoint —
+   an earlier attempt put the `.on` rule inside a max-width block, which would have faded the
+   header away on desktop with nothing to bring it back. */
+.lore-title { opacity: 0; transition: opacity 0.5s ease; }
+.lore-title.on { opacity: 1; }

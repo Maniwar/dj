@@ -34,6 +34,12 @@ export default function VisualizerMode() {
     return () => document.documentElement.classList.remove('viz-on')
   }, [on, loggedOn])
 
+  // the glass opt-in rides the same root-class mechanism
+  const glass = useSiteStore((s) => s.glass)
+  useEffect(() => {
+    document.documentElement.classList.toggle('glass-on', glass)
+  }, [glass])
+
   if (!on || !loggedOn) return null
   return (
     <div className="viz-hud" role="dialog" aria-label="Visualizer">

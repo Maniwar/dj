@@ -12,6 +12,36 @@ import results from '../../data/atlascloud.results.json'
 // character (Kiki=magenta, Dieter=blue, both=acid).
 export default function Lore() {
   const secRef = useRef<HTMLElement>(null)
+  // The header waits for its section to actually own the screen. Gating it on the observer's
+  // active index was tried and failed — no stop reported active at the moment the header should
+  // appear, so it never showed at all. Scroll position is the honest signal: the title belongs
+  // once the section is genuinely under you, not when its top edge first clips the viewport.
+  const [titleOn, setTitleOn] = useState(false)
+  useEffect(() => {
+    // The ref is read INSIDE update rather than captured once. Bailing on a null ref at mount
+    // — which is what happens while the boot gate still covers the page — left the listener
+    // never attached and the header permanently hidden, which is exactly how the previous
+    // attempt failed.
+    let raf = 0
+    const update = () => {
+      const el = secRef.current
+      if (!el) return
+      const r = el.getBoundingClientRect()
+      setTitleOn(r.top <= window.innerHeight * 0.4 && r.bottom > window.innerHeight * 0.55)
+    }
+    const onScroll = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(update)
+    }
+    update()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
+  }, [])
   // -1 = nothing active yet, so a stop's entrance animation only plays once it actually
   // crosses into view (starting at 0 consumed stop 0's fade-in while off-screen).
   const [active, setActive] = useState(-1)
@@ -106,7 +136,7 @@ export default function Lore() {
 
   return (
     <section className="lore" id="lore" ref={secRef}>
-      <div className="lore-title">
+      <div className={`lore-title ${titleOn ? 'on' : ''}`}>
         <h2 className="section-title">THE ORIGIN</h2>
         <p className="section-kicker">two humans · one sauna · scroll to meet them</p>
       </div>

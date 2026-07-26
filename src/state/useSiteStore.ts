@@ -67,6 +67,9 @@ type SiteState = {
   cycleLyricStyle: () => void
   visualizer: boolean // full-screen takeover: the page falls away and the rig performs
   toggleVisualizer: () => void
+  /** Real frosted glass on the player. Off by default — see toggleGlass. */
+  glass: boolean
+  toggleGlass: () => void
   vizMode: VizMode // which analyser visualisation the player is showing
   cycleVizMode: () => void
   shuffle: boolean // play the album in a random order
@@ -100,6 +103,19 @@ export const useSiteStore = create<SiteState>((set) => ({
   lyricStyle: initialLyricStyle(),
   visualizer: false,
   toggleVisualizer: () => set((s) => ({ visualizer: !s.visualizer })),
+  // Default OFF, and deliberately so. backdrop-filter has to re-blur its backdrop EVERY FRAME
+  // while video plays behind it — the same class of per-pixel work that was heating phones
+  // earlier — so it is opt-in rather than something everyone pays for by default. The choice
+  // persists, because having to re-enable it every visit would make it not worth having.
+  glass: (() => {
+    try { return localStorage.getItem('so.glass') === '1' } catch { return false }
+  })(),
+  toggleGlass: () =>
+    set((s) => {
+      const glass = !s.glass
+      try { localStorage.setItem('so.glass', glass ? '1' : '0') } catch { /* private mode */ }
+      return { glass }
+    }),
   vizMode: initialViz(),
   shuffle: false,
   repeat: false,
