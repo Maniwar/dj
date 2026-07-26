@@ -2889,15 +2889,19 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    412px of screen, a third of the viewport for one word. In landscape the scarce axis is
    vertical, so the clamp reads svh and the type gets big only when there is height to spend. */
 @media (orientation: landscape) and (max-height: 620px) {
+  /* TOP-left, not bottom-left like the hero — the two sections have different furniture. The
+     bottom-centre of a stop belongs to the lyric overlay, which is the loudest thing on screen
+     when a track is playing, so anchoring the card down there would put the city name and the
+     karaoke line in the same place. The hero has no lyric line and can use its floor. */
   .journey-stop {
-    place-items: end start; /* bottom-left, like the hero */
+    place-items: start start;
   }
   .journey-card {
     text-align: left;
     /* Leave the right side of the frame alone: that is where the footage subject usually sits,
        and where the tour rail lives. Reserve the mini bar at the bottom as the hero does. */
     max-width: min(54%, 30rem);
-    padding: 0 0 calc(2vh + 52px) 5vw;
+    padding: 1.5vh 0 0 5vw;
     margin: 0;
   }
   .journey-city {
@@ -2918,11 +2922,13 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 /* Portrait phones have the height but not the width, so the type can stay large — the fix there
    is anchoring, not scale. Bottom-left for the same reason: a centred block sits on the face. */
 @media (orientation: portrait) and (max-width: 768px) {
-  .journey-stop { place-items: end start; }
+  /* Portrait has the height to keep the card off the floor entirely, so the lyric line and the
+     mini player both keep their space. */
+  .journey-stop { place-items: start start; }
   .journey-card {
     text-align: left;
     max-width: none;
-    padding: 0 6vw calc(3vh + 52px);
+    padding: 6vh 6vw 0;
   }
   .journey-city { font-size: clamp(2.8rem, 13vw, 5.5rem); line-height: 0.88; }
   .journey-blurb { font-size: 1.02rem; line-height: 1.4; max-width: 34ch; margin: 0 0 0.6rem; }
