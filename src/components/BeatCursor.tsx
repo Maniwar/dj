@@ -119,12 +119,16 @@ export default function BeatCursor() {
           // HOLD — this is the drawable part. Long enough to complete a shape before any of it
           // starts moving, which is the whole point of being able to paint with it.
           { transform: from, opacity: 0.95, offset: 0, easing: 'linear' },
-          { transform: from, opacity: 0.95, offset: 0.62, easing: 'cubic-bezier(0.3,0,0.5,1)' },
+          { transform: from, opacity: 0.95, offset: 0.35, easing: 'cubic-bezier(0.3,0,0.5,1)' },
           // THEN FIRE: outward and away, shrinking as it recedes into the scene.
           { transform: to, opacity: 0, offset: 1 },
         ],
-        // 2s total: ~1.25s of drawable hold, then ~0.75s of flight
-        { duration: 2000, fill: 'forwards' },
+        // A middle ground. 780ms total with a 26% hold was too brief to draw with; 2000ms with a
+        // 62% hold inverted the balance — the stroke sat there so long it stopped feeling like
+        // light, and the flight was over before it registered. 1200ms with a 35% hold gives
+        // ~420ms to lay a stroke down and ~780ms of flight, so the movement is the longer half
+        // again while a shape still survives long enough to be seen.
+        { duration: 1200, fill: 'forwards' },
       )
     }
 
