@@ -115,22 +115,26 @@ export default function BeatCursor() {
       burst.className = 'click-burst'
       burst.style.left = `${e.clientX}px`
       burst.style.top = `${e.clientY}px`
-      const spokes = 7
+      // the spokes live in their own rotated group so they radiate along the floor plane
+      const group = document.createElement('div')
+      group.className = 'spokes'
+      const spokes = 9
       for (let i = 0; i < spokes; i++) {
         const spoke = document.createElement('i')
         // spread them unevenly — a perfectly even star reads as a graphic, not as light
-        const angle = (360 / spokes) * i + (Math.random() * 26 - 13)
+        const angle = (360 / spokes) * i + (Math.random() * 24 - 12)
         spoke.style.setProperty('--a', `${angle}deg`)
-        spoke.style.setProperty('--len', `${90 + Math.random() * 130}px`)
-        spoke.style.setProperty('--delay', `${Math.random() * 40}ms`)
-        burst.appendChild(spoke)
+        spoke.style.setProperty('--len', `${140 + Math.random() * 170}px`)
+        spoke.style.setProperty('--delay', `${Math.random() * 60}ms`)
+        group.appendChild(spoke)
       }
+      burst.appendChild(group)
       document.body.appendChild(burst)
       // ONE timer, longer than the longest animation. Counting animationend events was the first
       // attempt and it leaked every node: pseudo-element animations fire on the originating
       // element too, so the expected count was wrong and the tidy never reached it. A single
       // timeout cannot miscount.
-      window.setTimeout(() => burst.remove(), 900)
+      window.setTimeout(() => burst.remove(), 1100)
     }
 
     window.addEventListener('pointermove', onMove, { passive: true })

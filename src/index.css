@@ -2655,7 +2655,7 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   border: 2px solid var(--accent, #ff1f8f);
   box-shadow: 0 0 18px var(--accent, #ff1f8f), inset 0 0 12px var(--accent, #ff1f8f);
   transform: translate(-50%, -50%) perspective(220px) rotateX(58deg);
-  animation: burstRing 620ms cubic-bezier(0.15, 0.7, 0.2, 1) forwards;
+  animation: burstRing 780ms cubic-bezier(0.15, 0.7, 0.2, 1) forwards;
 }
 /* a hot core that flashes and dies fast — this is what sells it as light rather than as a shape */
 .click-burst::after {
@@ -2665,27 +2665,41 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   transform: translate(-50%, -50%);
   animation: burstCore 320ms ease-out forwards;
 }
-/* the spokes */
+/* THE SPOKES, ON THE FLOOR PLANE.
+   They were flat 2D lines while the ring beside them was laid back in perspective, so the burst
+   read as a star drawn ON the glass rather than as light thrown INTO the room. They now share
+   the ring's plane: the whole spoke group is rotated back on X, so a spoke pointing "up" runs
+   away from you into the scene and a spoke pointing "down" comes toward you. That single change
+   is what makes it read as depth rather than as a graphic.
+   They are also longer, brighter and slower than the first version, which was over in half a
+   second and easy to miss entirely. */
+.click-burst .spokes {
+  position: absolute; left: 0; top: 0; width: 0; height: 0;
+  transform: perspective(300px) rotateX(62deg);
+  transform-style: preserve-3d;
+}
 .click-burst i {
-  position: absolute; left: 50%; top: 50%;
-  width: var(--len, 120px); height: 2px; transform-origin: 0 50%;
-  background: linear-gradient(90deg, var(--accent, #ff1f8f), transparent);
-  box-shadow: 0 0 10px var(--accent, #ff1f8f);
+  position: absolute; left: 0; top: 0;
+  width: var(--len, 180px); height: 3px; transform-origin: 0 50%;
+  border-radius: 2px;
+  background: linear-gradient(90deg,
+    #fff 0%, var(--accent, #ff1f8f) 22%, color-mix(in srgb, var(--accent, #ff1f8f) 55%, transparent) 60%, transparent 100%);
+  box-shadow: 0 0 14px var(--accent, #ff1f8f), 0 0 30px color-mix(in srgb, var(--accent, #ff1f8f) 60%, transparent);
   transform: rotate(var(--a, 0deg)) scaleX(0);
-  animation: burstSpoke 520ms cubic-bezier(0.1, 0.8, 0.2, 1) var(--delay, 0ms) forwards;
+  animation: burstSpoke 760ms cubic-bezier(0.12, 0.85, 0.2, 1) var(--delay, 0ms) forwards;
+}
+@keyframes burstSpoke {
+  0%   { transform: rotate(var(--a, 0deg)) scaleX(0); opacity: 1; }
+  70%  { opacity: 0.9; }
+  100% { transform: rotate(var(--a, 0deg)) scaleX(1); opacity: 0; }
 }
 @keyframes burstRing {
-  from { width: 26px; height: 26px; opacity: 0.95; }
-  to   { width: 260px; height: 260px; opacity: 0; }
+  from { width: 26px; height: 26px; opacity: 1; }
+  to   { width: 340px; height: 340px; opacity: 0; }
 }
 @keyframes burstCore {
   from { opacity: 1; scale: 1; }
   to   { opacity: 0; scale: 2.6; }
-}
-@keyframes burstSpoke {
-  0%   { transform: rotate(var(--a, 0deg)) scaleX(0); opacity: 1; }
-  55%  { opacity: 1; }
-  100% { transform: rotate(var(--a, 0deg)) scaleX(1); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .click-burst { display: none; } }
 @media (pointer: coarse) { .click-burst { display: none; } }
