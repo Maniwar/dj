@@ -2807,3 +2807,15 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 :root.glass-frost .player.minimized .shade-btn {
   box-shadow: inset 0 1px 0 rgba(255, 250, 235, 0.18);
 }
+
+/* THE CHASSIS BEHIND THE MINI BAR.
+   The shade going translucent was necessary and not sufficient: `.player` paints its own
+   radial-gradient fill, transparent only in the middle (42%) and opaque out at the rim. Expanded,
+   the shade sits in that clear centre and the glass reads. MINIMIZED, the whole player IS the
+   40px strip, so it lies entirely in the opaque outer stop — and you see black THROUGH perfectly
+   working glass. That is why the finish looked broken in mini and correct when open.
+   The border layer is kept; only the fill is dropped, so the gilt edge survives. */
+:root.glass-on .player.minimized,
+:root.glass-frost .player.minimized {
+  background: transparent padding-box, var(--grad-gilt-border) border-box;
+}
