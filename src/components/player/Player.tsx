@@ -447,14 +447,12 @@ export default function Player() {
               onClick={toggleGlass}
               aria-label="Panel finish"
               title={
-                glass === 'off'
-                  ? 'Solid panel — tap for clear glass'
-                  : glass === 'clear'
-                    ? 'CLEAR glass — tap for frosted'
-                    : 'FROSTED glass — tap for solid'
+                glass === 'frost'
+                  ? 'FROSTED glass — tap for clear'
+                  : 'CLEAR glass — tap for frosted'
               }
             >
-              {glass === 'off' ? '◧' : glass === 'clear' ? '◨' : '◩'}
+              {glass === 'frost' ? '◩' : '◨'}
             </button>
             <button
               className="tbtn viz"

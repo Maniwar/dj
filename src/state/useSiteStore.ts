@@ -129,7 +129,13 @@ export const useSiteStore = create<SiteState>((set) => ({
   })(),
   toggleGlass: () =>
     set((s) => {
-      const order = ['off', 'clear', 'frost'] as const
+      // SOLID is not in the cycle. It earns its place as a fallback - for reduced motion, and
+      // as the cheap option when nothing else can render - but it is the least interesting of
+      // the three, and spending a third of an interactive cycle returning to a plain dark panel
+      // is a poor trade. Especially on a phone, where this button is only reachable by expanding
+      // the player first. The toggle now swaps between the two MATERIALS; 'off' remains a valid
+      // stored value and simply steps into the cycle at clear.
+      const order = ['clear', 'frost'] as const
       const glass = order[(order.indexOf(s.glass) + 1) % order.length]
       try { localStorage.setItem('so.glass', glass) } catch { /* private mode */ }
       return { glass }
