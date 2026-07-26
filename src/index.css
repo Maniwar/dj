@@ -1557,8 +1557,15 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .player.minimized .player-shade {
   display: flex; align-items: center; gap: 7px;
   min-height: 40px; padding: 0 8px;
-  background: linear-gradient(180deg, #12161d 0%, #0a0d13 55%, #05070b 100%);
-  border-top: 1px solid rgba(230,192,90,0.22);
+  /* The surface is driven by INHERITED CUSTOM PROPERTIES, not by finish-specific rules that
+     have to out-specify this one. Custom properties inherit from :root, so setting them under
+     .glass-on/.glass-frost reaches this element no matter what any breakpoint declares here —
+     which is the whole reason the finish was not taking effect before. Every fallback is the
+     solid skin, so with no finish class this renders exactly as it always did. */
+  background: var(--shade-bg, linear-gradient(180deg, #12161d 0%, #0a0d13 55%, #05070b 100%));
+  backdrop-filter: var(--shade-blur, none);
+  box-shadow: var(--shade-bevel, none);
+  border-top: 1px solid var(--shade-edge, rgba(230,192,90,0.22));
 }
 
 /* --- live VU: four bars off the audio vars. scaleY is composited; height would not be. --- */
@@ -2742,62 +2749,60 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    GLASS — THE MINI BAR
    ==========================================================================================
    The mini player is not a separate component: it is `.player.minimized`, the same element the
-   glass rules already dress. So glass WAS being applied to it and could not be seen, because
-   `.player.minimized .player-shade` painted an opaque gradient across the whole strip. The
-   chassis was glass; the thing sitting on it was not.
+   glass rules already dress. Glass WAS reaching it and could not be seen, because the shade
+   painted an opaque gradient across the whole strip.
 
-   These override only under the glass finishes, so the plain (non-glass) skin keeps the solid
-   strip it was designed with — the finish toggle should change the material, not the layout.
+   The first attempt fixed that with finish-specific rules that out-specified the shade rule.
+   That worked in isolation and did not work on the site, because this stylesheet has a standing
+   ordering problem — the token block is appended last and outranks the breakpoints — so
+   whichever rule happens to come later wins, and changing the finish did nothing visible.
 
-   NO SWEEPS, NO BLUR, DELIBERATELY.
+   These set INHERITED CUSTOM PROPERTIES instead. There is no specificity contest to lose: the
+   properties cascade down from :root and the shade reads them wherever it is styled. Solid is
+   the fallback baked into the shade rule, so `off` needs no rule here at all. */
 
-   The expanded panel gets animated speculars, an animated bevel and chromatic fringing. None of
-   that comes down here, and it is not an oversight. This strip is PINNED OVER FULL-SCREEN VIDEO
-   at the bottom of a phone — the exact position and the exact conditions that produced the
-   mobile-landscape flicker. An animated gradient is a repaint every frame, and a backdrop-filter
-   forces the compositor to re-read the video behind it on every one of those frames. That was
-   the flicker, and re-introducing it here to add a highlight nobody asked for would be trading a
-   working player for a shinier broken one.
-
-   So the glass here is entirely STATIC: transparency to show the room, one fixed rim light on
-   the top edge for thickness, one fixed bevel. All paint-once. It reads as the same material as
-   the expanded panel because it IS the same material — just not lit by a moving source. */
-:root.glass-on .player.minimized .player-shade,
-:root.glass-frost .player.minimized .player-shade {
-  /* Still a gradient, still darker at the bottom, but the scene now comes through it. Kept
-     denser than the expanded panel's glass on purpose: the transport controls have to stay
-     legible against whatever footage happens to be playing behind them. */
-  background: linear-gradient(180deg, rgba(18, 22, 29, 0.46) 0%, rgba(10, 13, 19, 0.58) 55%, rgba(5, 7, 11, 0.68) 100%);
-  /* thickness: a bright top edge and a soft inner shadow below it, so the strip reads as a pane
-     with depth rather than a tinted rectangle. Inset shadows do not blend with the backdrop. */
-  box-shadow:
+/* CLEAR — the scene shows through. No backdrop-filter anywhere in this finish, so it is free:
+   transparency, a rim light and a bevel are all paint-once. Kept denser than the expanded
+   panel's glass because the transport has to stay legible over whatever footage is playing. */
+:root.glass-on {
+  --shade-bg: linear-gradient(180deg, rgba(18, 22, 29, 0.42) 0%, rgba(10, 13, 19, 0.54) 55%, rgba(5, 7, 11, 0.64) 100%);
+  --shade-edge: rgba(230, 192, 90, 0.34);
+  /* thickness: bright top edge, shadow under it, and a soft inner glow so the strip reads as a
+     pane with depth rather than a tinted rectangle. Inset shadows never touch the backdrop. */
+  --shade-bevel:
     inset 0 1px 0 rgba(255, 250, 235, 0.16),
     inset 0 -1px 0 rgba(0, 0, 0, 0.4),
     inset 0 6px 12px -8px rgba(255, 240, 200, 0.1);
-  border-top: 1px solid rgba(230, 192, 90, 0.34);
 }
 
-/* Frosted is the same strip with the scene obscured rather than shown — matching how the finish
-   behaves on the expanded panel. The blur is small and, unlike the sweeps above, it is not
-   animated: a static backdrop-filter is composited once per scroll position rather than per
-   frame, which is what makes it affordable here at all. */
-:root.glass-frost .player.minimized .player-shade {
-  background: linear-gradient(180deg, rgba(18, 22, 29, 0.6), rgba(5, 7, 11, 0.76));
-  backdrop-filter: blur(9px) saturate(1.15);
+/* FROSTED — the same material with the scene obscured instead of shown, matching what the
+   finish does to the expanded panel. Denser tint AND a blur, so the two glass modes are
+   unmistakably different at a glance rather than a few percent of alpha apart. */
+:root.glass-frost {
+  --shade-bg: linear-gradient(180deg, rgba(20, 25, 33, 0.66) 0%, rgba(8, 11, 17, 0.78) 100%);
+  --shade-blur: blur(10px) saturate(1.18);
+  --shade-edge: rgba(230, 192, 90, 0.42);
 }
 
-/* On a phone the strip sits directly over playing video and the backdrop-filter is no longer a
-   one-off — every frame of that video invalidates it, so it is a per-frame re-read of the
-   backdrop in the worst place on the page. Density carries the frost instead. */
-@media (max-width: 900px) {
-  :root.glass-frost .player.minimized .player-shade {
-    backdrop-filter: none;
-    background: linear-gradient(180deg, rgba(18, 22, 29, 0.74), rgba(5, 7, 11, 0.86));
+/* NO BLUR ON A PHONE. This strip is pinned over full-screen video, so a backdrop-filter is not
+   a one-off — every video frame invalidates it, making it a per-frame re-read of the backdrop
+   in the worst place on the page. That is the mobile-landscape flicker. Density carries the
+   frost instead.
+
+   Keyed on HEIGHT as well as width, deliberately. The previous guard was `max-width: 900px`
+   and a Galaxy S20 Ultra in landscape is 915px wide — a phone that sailed past a phone check
+   and got the expensive path. This project has hit that exact trap before, with a landscape
+   phone clearing a 769px guard into the desktop grid. A landscape phone is SHORT, not narrow,
+   and width will keep lying about it. */
+@media (max-width: 900px), (max-height: 600px) {
+  :root.glass-frost {
+    --shade-blur: none;
+    --shade-bg: linear-gradient(180deg, rgba(20, 25, 33, 0.82) 0%, rgba(8, 11, 17, 0.9) 100%);
   }
 }
 
-/* The controls sitting ON the strip pick up an edge highlight for the same reason the expanded
-   panel's buttons do — without it they look printed on the glass instead of resting on it. */
+/* Controls sitting ON the strip pick up an edge highlight for the same reason the expanded
+   panel's buttons do — without it they look printed on the glass rather than resting on it. */
 :root.glass-on .player.minimized .shade-btn,
 :root.glass-frost .player.minimized .shade-btn {
   box-shadow: inset 0 1px 0 rgba(255, 250, 235, 0.18);
