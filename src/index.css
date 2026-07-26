@@ -4,6 +4,37 @@
    noir + gilded gold + oxblood velvet + platinum chrome + leopard + Ferrari red
    ================================================================= */
 :root {
+  /* ---- TYPE SCALE ------------------------------------------------------------------------
+     One ratio (1.25, major third), fluid between a phone and a large desktop. Every size on the
+     page is a PICK FROM THIS SET rather than a fresh number invented at the point of use, which
+     is the single biggest difference between a page that reads as authored and one that reads
+     as accumulated. Fluid rather than stepped so there are no breakpoints where type suddenly
+     jumps; clamp handles the ends. */
+  --step--2: clamp(0.56rem, 0.52rem + 0.18vw, 0.68rem);   /* micro-labels, badges, readouts */
+  --step--1: clamp(0.7rem,  0.65rem + 0.24vw, 0.86rem);   /* captions, eyebrows */
+  --step-0:  clamp(0.9rem,  0.84rem + 0.3vw,  1.08rem);   /* body */
+  --step-1:  clamp(1.12rem, 1.02rem + 0.5vw,  1.5rem);    /* lead-in, artist line */
+  --step-2:  clamp(1.4rem,  1.2rem + 1vw,     2.2rem);    /* sub-heads */
+  --step-3:  clamp(1.9rem,  1.4rem + 2.4vw,   3.4rem);    /* section titles */
+  --step-4:  clamp(2.6rem,  1.6rem + 5vw,     6rem);      /* names */
+  --step-5:  clamp(3.2rem,  1.6rem + 7.4vw,   8rem);      /* the marquee title */
+
+  /* ---- SPACING SCALE ---------------------------------------------------------------------
+     A 4px base doubling. Rhythm comes from re-using a small set, not from tuning each gap. */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+
+  /* ---- MEASURE ---------------------------------------------------------------------------
+     Body copy stays inside a readable line length. Long lines are the most common reason a
+     dense page feels like work to read. */
+  --measure: 62ch;
+
   --noir: #05060a;
   --noir-2: #0b0d14;
   --oxblood: #12030a;
@@ -2072,4 +2103,71 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    present, still scrolling, no longer a tenant. */
 @media (orientation: landscape) and (max-height: 560px) {
   .brandbar { padding: 2px 10px; font-size: 0.4rem; letter-spacing: 0.12em; opacity: 0.75; }
+}
+
+
+/* ============================================================================================
+   DESIGN-SYSTEM PASS
+   Everything below re-states existing components in terms of the type and spacing scales above.
+   The point is not that any single value changes much — it is that they now come from one set,
+   so vertical rhythm is consistent between sections instead of each one having been tuned in
+   isolation. Where a component had a bespoke size that the scale does not contain, it moves to
+   the nearest step deliberately rather than keeping an accident.
+   ========================================================================================== */
+
+/* --- section headers ------------------------------------------------------------------- */
+.section-title { font-size: var(--step-3); margin-bottom: var(--sp-3); }
+.section-kicker { font-size: var(--step--1); margin-bottom: var(--sp-6); letter-spacing: 0.18em; }
+
+/* --- lore slides ----------------------------------------------------------------------- */
+.lore-eyebrow { font-size: var(--step--2); margin-bottom: var(--sp-3); letter-spacing: 0.2em; }
+.lore-name { font-size: var(--step-4); margin-bottom: var(--sp-4); }
+.lore-name.hero { font-size: var(--step-5); }
+.lore-body { font-size: var(--step-0); line-height: 1.55; max-width: var(--measure); }
+.lore-tag { font-size: var(--step--2); margin-top: var(--sp-4); letter-spacing: 0.14em; }
+.lore-roster { gap: var(--sp-3); margin-top: var(--sp-4); }
+.lore-roster-name { font-size: var(--step-1); }
+.lore-roster-tag { font-size: var(--step--2); }
+.lore-roster-line { font-size: var(--step--1); line-height: 1.4; }
+.lore-panel { padding: var(--sp-5) var(--sp-6); }
+
+/* --- hero ------------------------------------------------------------------------------- */
+.hero-title .drip { font-size: var(--step-5); }
+.hero-sub { font-size: var(--step-2); letter-spacing: 0.1em; }
+.hero-artists { font-size: var(--step-1); }
+.eyebrow { font-size: var(--step--2); letter-spacing: 0.2em; }
+.hero-flex { gap: var(--sp-2); font-size: var(--step--2); }
+.hero-flex > * { padding: var(--sp-1) var(--sp-3); }
+.gauge-label { font-size: var(--step--2); letter-spacing: 0.2em; }
+.gauge-read { font-size: var(--step--2); }
+.scroll-cue { font-size: var(--step--1); letter-spacing: 0.18em; padding: var(--sp-3) var(--sp-5); }
+
+/* --- the last strays in the hero -------------------------------------------------------
+   A measurement of "how many distinct font sizes are on screen" is a blunt but honest proxy for
+   how systematic a layout is. The hero was still showing eleven; these were the components the
+   first sweep did not name, each carrying a bespoke value from whenever it was written. */
+.hitcounter .hc-label { font-size: var(--step--2); letter-spacing: 0.18em; }
+.hitcounter .hc-digit { font-size: var(--step--1); }
+/* NOT the crest mark. It is a logotype locked inside a fixed circle, not running text — its
+   size is a function of the circle, and forcing it onto the prose scale shrank it to a dot.
+   A design system covers text; it does not annex every glyph on the page. */
+.hero-crest .mono { font-size: var(--step--2); letter-spacing: 0.2em; }
+.hero-artists .aka { font-size: var(--step-0); }
+.bc-rec { font-size: var(--step--2); }
+
+/* --- journey / tour --------------------------------------------------------------------- */
+.journey-city { font-size: var(--step-5); }
+.journey-blurb { font-size: var(--step-0); line-height: 1.5; max-width: var(--measure); }
+.journey-leg, .journey-venue { font-size: var(--step--2); letter-spacing: 0.18em; }
+
+/* Rhythm inside the hero block: one gap value between every element rather than six different
+   margins, which is what made it read as a list of unrelated things stacked up. */
+@media (max-width: 768px) {
+  .hero-inner { gap: 0; }
+  .hero-title { margin-bottom: var(--sp-3); }
+  .hero-sub { margin: 0 0 var(--sp-1); }
+  .hero-artists { margin: 0 0 var(--sp-4); }
+  .hero-flex { margin: 0 0 var(--sp-4); }
+  .hero-gauge { margin: 0 0 var(--sp-5); }
+  .scroll-cue { margin: 0; }
 }
