@@ -18,11 +18,21 @@ export default function BeatCursor() {
   const reduced = useSiteStore((s) => s.reducedMotion)
   const ref = useRef<HTMLDivElement>(null)
   const lightRef = useRef<HTMLDivElement>(null)
+  // Read once; a device does not switch pointer types mid-session in any way worth re-rendering
+  // for, and this decides both what renders and what the effect listens for.
+  const fine =
+    typeof window === 'undefined' || window.matchMedia('(pointer: fine)').matches
 
   useEffect(() => {
     if (!loggedOn || reduced) return
-    // fine pointers only — there is no cursor to decorate on a touchscreen
-    if (!window.matchMedia('(pointer: fine)').matches) return
+    // TOUCH GETS THE EFFECTS, JUST NOT THE CURSOR.
+    //
+    // This used to bail outright on a coarse pointer, which was half right: there is no cursor
+    // to decorate on a touchscreen, so the halo and the carried flashlight have nothing to
+    // follow — a light that only moves between taps reads as broken. But the BURST and the
+    // TRAIL never needed a cursor. A tap is a more deliberate gesture than a click, and dragging
+    // a finger through the trail is a better way to draw than a mouse, so the two effects that
+    // survive are the two that work BETTER here.
 
     let raf = 0
     let x = -100
@@ -79,8 +89,13 @@ export default function BeatCursor() {
     // second; with a 2s life, ~100 are in flight at once. 104 slots covers it. They are cheap —
     // no blending, transform and opacity only — so the cost is a bounded set of tiny composited
     // layers rather than the unbounded node churn the very first version had.
-    const POOL = 104
-    const DROP_DISTANCE = 24
+    // Smaller pool and a longer stride on touch. Phones have a fraction of the compositor
+    // budget, this page already runs video behind everything, and a finger sweeps a short screen
+    // far faster than a mouse crosses a desktop — the same 24px stride would emit roughly twice
+    // as many particles for a stroke a third the length. This is the file that made phones warm
+    // once already; the effect is worth having, but not at any price.
+    const POOL = fine ? 104 : 44
+    const DROP_DISTANCE = fine ? 24 : 34
     const pool: HTMLDivElement[] = []
     for (let i = 0; i < POOL; i++) {
       const dot = document.createElement('div')
@@ -132,10 +147,14 @@ export default function BeatCursor() {
       )
     }
 
+    // On touch there is no hover, so a stroke has to mean a DRAG. Without this the trail would
+    // fire on the incidental pointermove events a tap produces and spray particles at every tap.
+    let dragging = false
     const onMove = (e: PointerEvent) => {
       x = e.clientX
       y = e.clientY
-      dropTrail(x, y)
+      if (fine || dragging) dropTrail(x, y)
+      if (!fine) return // no halo and no flashlight to move on a touchscreen
       // coalesce to one write per frame: pointermove can fire far more often than that
       if (!raf) raf = requestAnimationFrame(draw)
     }
@@ -149,6 +168,10 @@ export default function BeatCursor() {
     // everything it animates is transform/opacity, so a burst costs the compositor and nothing
     // else. Spokes get individual angles and lengths so no two bursts look identical.
     const onDown = (e: PointerEvent) => {
+      dragging = true
+      // a finger starts a stroke where it lands, not from wherever the last one ended
+      lastDropX = e.clientX
+      lastDropY = e.clientY
       const burst = document.createElement('div')
       burst.className = 'click-burst'
       burst.style.left = `${e.clientX}px`
@@ -175,19 +198,28 @@ export default function BeatCursor() {
       window.setTimeout(() => burst.remove(), 1100)
     }
 
+    const onUp = () => { dragging = false }
     window.addEventListener('pointermove', onMove, { passive: true })
-    window.addEventListener('pointerdown', onDown)
+    window.addEventListener('pointerdown', onDown, { passive: true })
+    window.addEventListener('pointerup', onUp, { passive: true })
+    window.addEventListener('pointercancel', onUp, { passive: true })
     document.addEventListener('pointerleave', onLeave)
     return () => {
       cancelAnimationFrame(raf)
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerdown', onDown)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onUp)
       document.removeEventListener('pointerleave', onLeave)
       pool.forEach((d) => d.remove())
     }
   }, [loggedOn, reduced])
 
   if (!loggedOn || reduced) return null
+  // The halo and the flashlight follow a pointer that only exists between taps, so they are not
+  // rendered on a touchscreen at all — the burst and the trail are appended to the body by the
+  // effect above and need no host element.
+  if (!fine) return null
   return (
     <>
       <div ref={lightRef} className="flashlight" aria-hidden />
