@@ -1084,12 +1084,23 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      letterbox: .lore-bg carries a background-COLOUR, which painted into the gaps on top of the
      blurred fill behind it. Clearing it is the whole fix — the gaps are now the same soft
      blurred edge the wide-screen slides already use, about 9% each side. */
-  .lore-video { object-fit: contain; object-position: center; }
-  .lore-stop .lore-bg {
+  /* Contain ONLY where the frame is what matters — the 16:9 scene clips. Never on the hero
+     portraits, for two separate reasons:
+       1. They are square. Contained in a 2.16:1 viewport a 2048x2048 portrait becomes a 390px
+          square with 227px gaps (27%) each side, and kbHero scales it 1 -> 1.1, so those gaps
+          swing 20px continuously. Cover fills the frame and still shows 46% of the source,
+          which is plenty for a head-and-shoulders crop.
+       2. Contain requires .lore-fill, and that is a BLURRED, 8x-scaled layer. Putting one under
+          an element that starts animating the moment the slide activates gives the compositor a
+          reason to re-rasterise mid-animation — which is the page-wide flicker that appeared on
+          Kiki's slide, the first hero you meet. Heroes never display it now. */
+  .lore-stop:not(.hero) .lore-video { object-fit: contain; object-position: center; }
+  .lore-stop:not(.hero) .lore-bg {
     background-size: contain; background-position: center;
-    background-color: transparent; /* <- the actual cause of the black bar */
+    background-color: transparent; /* the actual cause of the earlier black bar */
   }
-  .lore-stop .lore-fill { display: block; }
+  .lore-stop:not(.hero) .lore-fill { display: block; }
+  .lore-stop.hero .lore-fill { display: none; }
   .lore-video { background-color: transparent; }
   .lyric-stage { left: 3vw; right: 3vw; bottom: 58px; }
   .ls-line { font-size: clamp(0.95rem, 5.2vh, 1.5rem); line-height: 1.04; }
