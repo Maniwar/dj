@@ -2151,7 +2151,12 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 /* NOT the crest mark. It is a logotype locked inside a fixed circle, not running text — its
    size is a function of the circle, and forcing it onto the prose scale shrank it to a dot.
    A design system covers text; it does not annex every glyph on the page. */
-.hero-crest .mono { font-size: var(--step--2); letter-spacing: 0.2em; }
+/* NOT .crest .mono — that is the "SO" LOGOTYPE, set at 2rem to fit its ring. Putting it on the
+   prose scale shrank the logo itself to about ten pixels. The caption underneath is .banner,
+   and that is the only part of a crest that is text. This is the second time the same mistake
+   was made here: a design system governs running text, and a logotype is a piece of artwork
+   that happens to be made of letters. */
+.hero-crest .banner { font-size: var(--step--2); letter-spacing: 0.24em; }
 .hero-artists .aka { font-size: var(--step-0); }
 .bc-rec { font-size: var(--step--2); }
 
