@@ -45,7 +45,31 @@ export default function AudioReactive() {
     // These envelopes move slowly and nothing needs two decimal places of them. Rounding to one
     // collapses most frames into "unchanged", and an unchanged value is not written at all.
     // --m-beat stays at 2dp: it is the transient, and its resolution is what the kick reads from.
-    const COARSE = new Set(['--m-build', '--m-drop', '--m-down', '--m-hat', '--m-snare'])
+    // CALIBRATED AGAINST A MEASURED THRESHOLD, not a theory.
+    //
+    // ?freeze=others leaves only --m-beat writing — roughly 60 writes/sec — and the jitter is
+    // gone. The first pass got from ~540 to 198/sec and the jitter remained. So the ceiling is
+    // somewhere under 198, and every write removed helps.
+    //
+    // --m-beat at 2dp changes on nearly every frame, so it alone is ~60/sec of the total. At 1dp
+    // it changes about ten times across a beat envelope instead of sixty. For a glow radius and a
+    // scale of a few percent that step is imperceptible; for the write count it is the difference
+    // that matters. Everything else is coarser still.
+    const COARSE = new Set(['--m-build', '--m-drop', '--m-down', '--m-hat', '--m-snare', '--m-beat', '--m-level', '--m-bass', '--m-treble'])
+    // ONE STYLE MUTATION PER FRAME, NOT NINE.
+    //
+    // Each setProperty() on documentElement is its own style-invalidation pass. The evidence says
+    // that count is what matters, not the values: ?freeze=others leaves the EXPENSIVE variable
+    // (--m-beat, read by 55 rules) writing and has no jitter, because it is one pass per frame;
+    // ?freeze=beat has eight passes but none touches those 55 rules. Only the full state has many
+    // passes AND an expensive one — which is why removing either half fixed it, and why cutting
+    // the write count from 540/s to 198/s did not.
+    //
+    // Collecting the frame's values and assigning cssText once reproduces the ?freeze=others
+    // profile exactly — a single mutation — while keeping every variable live at full resolution.
+    // This is why FrictionOverlay's variables were moved to body: cssText replaces the whole
+    // inline style, so nothing else may live here.
+    const pending: Record<string, string> = {}
     const setVar = (name: string, v: number) => {
       if (frozen(name)) {
         if (written[name] === undefined) {
@@ -57,7 +81,7 @@ export default function AudioReactive() {
       const s = v.toFixed(COARSE.has(name) ? 1 : 2)
       if (written[name] === s) return
       written[name] = s
-      root.style.setProperty(name, s)
+      pending[name] = s
     }
     const loop = () => {
       const b = audioBus.bands
@@ -95,6 +119,14 @@ export default function AudioReactive() {
       setVar('--m-build', on ? mu.build : 0)
       setVar('--m-drop', on ? mu.drop : 0)
       // phases keep running so bar-synced sweeps stay continuous rather than snapping
+      // flush: one assignment, one invalidation pass
+      const keys = Object.keys(pending)
+      if (keys.length) {
+        root.style.cssText = Object.entries(written)
+          .map(([k, v]) => `${k}:${v}`)
+          .join(';')
+        for (const k of keys) delete pending[k]
+      }
       raf = requestAnimationFrame(loop)
     }
     raf = requestAnimationFrame(loop)

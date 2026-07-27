@@ -10,9 +10,13 @@ export default function FrictionOverlay() {
 
   useEffect(() => {
     const root = document.documentElement
-    root.style.setProperty('--friction', String(friction))
-    root.style.setProperty('--chroma', String(friction * 3))
-    root.style.setProperty('--shake', String(friction))
+    // On BODY, not documentElement. AudioReactive now owns the root element's inline style
+    // outright so it can write all nine audio variables in ONE mutation per frame; anything else
+    // living there would be wiped by that. These still inherit to every element, because every
+    // element is inside body, and they change only when the knob moves.
+    document.body.style.setProperty('--friction', String(friction))
+    document.body.style.setProperty('--chroma', String(friction * 3))
+    document.body.style.setProperty('--shake', String(friction))
     // Gate the shake animation itself, not just its amplitude. A keyframe animation on a
     // full-viewport fixed layer costs the same whether it moves 1.4px or 0 — the compositor
     // re-composites the layer either way — so at rest the animation must not exist at all.
