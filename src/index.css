@@ -126,8 +126,23 @@ body {
 /* ---------- THE BROADCAST — persistent muted "leaked club footage" ---------- */
 .broadcast { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #050302; --beat: 0; }
 .broadcast.idle { filter: brightness(0.45) saturate(1.05); }
+/* NO FILTER ON THE ANIMATED LAYER.
+   This carried `filter: brightness(0.6) saturate(1.28) contrast(1.08)` while .on animates a
+   transform, so every Ken-Burns frame had to be re-rendered through the filter pipeline instead
+   of being handed to the compositor as a plain texture — a full-screen image, at 5 megapixels on
+   a tablet, every frame. And because .on is re-applied on beat-cuts, it only ever misbehaved
+   while music was playing, which is exactly the reported symptom.
+
+   The same fix was already made for .lore-bg ("filter moved off the animated layer ... so the
+   Ken-Burns is a clean, smooth GPU texture") and simply never applied here. The darkening moves
+   to the static overlay below; brightness(0.6) is a flat 0.4 black, so the look is unchanged. */
 .bc-frame { position: absolute; inset: -5%; background-size: cover; background-position: center; opacity: 0;
-  transition: opacity 0.3s ease; filter: brightness(0.6) saturate(1.28) contrast(1.08); will-change: transform, opacity; }
+  transition: opacity 0.3s ease; will-change: transform, opacity; }
+/* The tint the filter used to provide, on a layer that never animates and therefore paints once. */
+.broadcast::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background: rgba(0, 0, 0, 0.4);
+}
 /* Pronounced per-frame Ken-Burns (both desktop beat-cuts + mobile slow rotation): a clear
    1.05 -> 1.2 zoom + drift over ~6.5s so each still visibly moves within its time on screen. */
 .bc-frame.on { opacity: 1; animation: kenburns 6.5s ease-out both; }
