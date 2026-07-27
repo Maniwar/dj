@@ -15,6 +15,6 @@ DAILY_CAP = "200"
 # cap are skipped entirely — Turnstile still stops automation, but nothing bounds a determined
 # human. Create it, paste the id, uncomment:
 #   npx wrangler kv namespace create RATE
-# [[kv_namespaces]]
-# binding = "RATE"
-# id = "..."
+[[kv_namespaces]]
+binding = "RATE"
+id = "d75127ad17a948b0939888fdb30736a3"
