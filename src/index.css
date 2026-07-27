@@ -378,7 +378,21 @@ section.hero { min-height: 100vh; min-height: 100svh; display: grid; place-items
 .gauge-fill { border-radius: 999px; }
 .gauge-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 999px; transition: width 0.2s; }
 .gauge-dew { position: absolute; top: -3px; transform: translateX(-50%); font-size: 0.55rem; color: #fff; border-left: 2px dashed #fff; padding-left: 3px; height: 22px; font-family: 'Oswald', sans-serif; }
-.gauge-read { font-family: 'Courier New', monospace; font-size: 0.82rem; color: var(--champagne); }
+/* RESERVE THE SPACE THIS LINE MIGHT NEED, RATHER THAN LETTING ITS CONTENT DICTATE IT.
+   The rig status cycles between three messages of very different lengths as the simulated
+   temperature climbs — 'NOMINAL. PUSH HARDER.' (21 chars), '❄ LIQUID-COOLING ENGAGED' (24) and
+   '⚠ THERMAL RUNAWAY IMMINENT — CRANK IT' (37). At narrower widths the longest one wraps to a
+   second line, the gauge grows, and everything below it — the CLUB HUMIDITY headline, the
+   subtitle, the CTA — moves down, then back up when the state changes again.
+   That is the periodic up-and-down shift, and it has nothing to do with audio or rendering: it
+   is a content reflow on a timer, which is why it survives ?noreact, ?nobroadcast and ?calm.
+   min-height holds two lines so the box never changes size, and tabular figures stop the
+   temperature and humidity digits changing width as they count. */
+.gauge-read {
+  font-family: 'Courier New', monospace; font-size: 0.82rem; color: var(--champagne);
+  min-height: 2.6em;
+  font-variant-numeric: tabular-nums;
+}
 .scroll-cue { display: inline-block; margin-top: 1.6rem; color: var(--gold); text-decoration: none; letter-spacing: 0.22em; font-size: 0.8rem; font-family: 'Oswald', sans-serif; animation: bob 1.8s ease-in-out infinite; }
 @keyframes bob { 50% { transform: translateY(6px); opacity: 0.6; } }
 .hitcounter { margin-top: 2rem; display: inline-flex; gap: 3px; align-items: center; font-family: 'Courier New', monospace; }
@@ -750,7 +764,11 @@ section.hero { min-height: 100vh; min-height: 100svh; display: grid; place-items
   opacity: 0; transition: opacity 0.18s ease;
 }
 .spectrum-wrap:hover .spectrum-tag, .spectrum-wrap:focus-visible .spectrum-tag { opacity: 1; }
-.lcd-meta { display: flex; justify-content: space-between; align-items: center; font-family: 'Courier New', monospace; font-size: 0.62rem; color: var(--gold-hi); margin-top: 4px; gap: 6px; }
+/* Tabular figures. This row is `space-between` and every value in it changes — elapsed time,
+   temperature, humidity, remaining time. With proportional digits a 1 is narrower than a 0, so
+   each tick nudged its neighbours sideways: the player is a fixed 348px and cannot grow, so the
+   movement showed up as the contents drifting rather than the box resizing. */
+.lcd-meta { display: flex; justify-content: space-between; align-items: center; font-family: 'Courier New', monospace; font-size: 0.62rem; color: var(--gold-hi); margin-top: 4px; gap: 6px; font-variant-numeric: tabular-nums; }
 .thermal-mini { color: var(--champagne); text-align: center; flex: 1; }
 .seek { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 999px; background: linear-gradient(90deg, var(--gold) var(--pct,0%), #1a0f05 var(--pct,0%)); cursor: pointer; }
 .seek::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #fff, var(--gold)); border: 1px solid var(--gold-shadow); box-shadow: 0 0 8px var(--gold); }
@@ -3210,3 +3228,11 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    cut, which is a small aesthetic loss on exactly the devices that cannot afford the alternative,
    and is invisible next to a background that flashes in and out. */
 :root.calm .bc-frame:not(.on) { display: none; }
+
+/* The reserve has to come AFTER the token block at ~line 2276, which re-sets .gauge-read's
+   font-size. An em-based min-height declared before it resolves against the wrong font and
+   under-reserves — measured 28px where 34 was intended, leaving a 1px shift when the longest
+   rig message wraps. Declared here it resolves against the size that actually applies.
+   3em holds two lines at every breakpoint's font-size; the gauge then never changes height,
+   whichever of the three status messages is showing. */
+.gauge-read { min-height: 3em; font-variant-numeric: tabular-nums; }
