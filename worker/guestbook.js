@@ -102,8 +102,12 @@ export default {
         //   timeout-or-duplicate   → token already spent, or older than ~5 minutes
         // Logged rather than returned: the browser gets a generic message, the operator gets
         // the actual reason. Guessing between these three costs a deploy cycle each time.
-        console.error('turnstile rejected:', JSON.stringify(verify['error-codes'] || verify))
-        return json({ error: 'verification failed' }, 403, cors)
+        const codes = (verify['error-codes'] || []).join(', ')
+        console.error('turnstile rejected:', codes || JSON.stringify(verify))
+        // The code is surfaced to the browser deliberately. It names nothing sensitive — it says
+        // which of secret/token/expiry is wrong, never their values — and without it every failure
+        // looks identical from the outside, which is what turned this into several blind rounds.
+        return json({ error: `verification failed${codes ? ` (${codes})` : ''}` }, 403, cors)
       }
     }
 
