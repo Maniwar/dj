@@ -3282,3 +3282,38 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 /* ...except the gate itself, which is the only thing anyone can actually see. */
 :root.gated .boot-gate, :root.gated .boot-gate *,
 :root.gated .boot-gate *::before, :root.gated .boot-gate *::after { animation-play-state: running !important; }
+
+/* ============================================================================================
+   CALM: FREEZE THE BLUR RADII, KEEP THE GLOW
+   ============================================================================================
+   Confirmed on the device: ?noreact removes the interface jitter entirely. That flag freezes
+   --m-beat, so what was moving was the SHADOW BLUR RADIUS on ~20 rules — `0 0 calc(6px +
+   var(--m-beat) * 22px)` and friends.
+
+   An animated blur radius is the most expensive thing a page can ask for: the shadow cannot be
+   cached and must be re-rasterized from scratch every frame, at a cost that scales with the
+   blurred area. That is exactly why this only appeared on the tablet at FULL WINDOW — more
+   elements on screen, each larger, each re-blurring 60 times a second. Shrink the window and the
+   same work fits in budget. It is also why the intensity tracked the music: --m-beat IS the
+   radius, so louder passages meant bigger blurs and more pixels.
+
+   The glow itself is kept at a fixed, generous radius — the look survives; only its per-frame
+   resizing stops. The existing calm block froze some of these and missed the banner, the badges,
+   the marquee items and the rail, which is why the effect persisted on a device already in calm. */
+:root.calm .brandbar { box-shadow: inset 0 0 18px rgba(255, 31, 143, 0.3) !important; }
+:root.calm .hero-flex span { box-shadow: 0 0 10px rgba(99, 255, 46, 0.35) !important; }
+:root.calm .hero-sub { text-shadow: 0 0 10px rgba(255, 31, 143, 0.7) !important; }
+:root.calm .divider span { box-shadow: 0 0 10px rgba(255, 31, 143, 0.45) !important; }
+:root.calm .tl-row.active { box-shadow: inset 0 0 0 1px var(--edge), 0 0 22px rgba(255, 31, 143, 0.5) !important; }
+:root.calm .tint-magenta .lm-item,
+:root.calm .tint-acid .lm-item,
+:root.calm .tint-blue .lm-item { text-shadow: 0 0 12px currentColor !important; }
+:root.calm .rail-pin.done { box-shadow: 0 0 12px var(--magenta) !important; }
+:root.calm .journey-city { filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.6)) drop-shadow(0 0 26px rgba(255, 31, 143, 0.5)) !important; }
+:root.calm .lore-name { filter: drop-shadow(0 0 16px var(--accent)) !important; }
+
+/* The player's readout row changes HEIGHT with its content: 🌡 ❄ ⚠ have different glyph metrics,
+   so the line box grows and shrinks and the panel expands and contracts under the analyser.
+   nowrap stopped it wrapping but not this. A fixed height makes the row's size independent of
+   whatever it happens to be showing. */
+.lcd-meta { height: 1.5em; align-items: center; }
