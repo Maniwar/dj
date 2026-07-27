@@ -13,6 +13,10 @@ export default function FrictionOverlay() {
     root.style.setProperty('--friction', String(friction))
     root.style.setProperty('--chroma', String(friction * 3))
     root.style.setProperty('--shake', String(friction))
+    // Gate the shake animation itself, not just its amplitude. A keyframe animation on a
+    // full-viewport fixed layer costs the same whether it moves 1.4px or 0 — the compositor
+    // re-composites the layer either way — so at rest the animation must not exist at all.
+    root.classList.toggle('friction-on', friction > 0.02)
   }, [friction])
 
   return (

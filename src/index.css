@@ -184,9 +184,18 @@ body {
    The Friction knob's shake lives on the CRT overlay instead. */
 .content { position: relative; z-index: 2; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-.friction-overlay { animation: shake 0.14s infinite steps(2); }
+/* THE SHAKE ONLY RUNS WHEN THE KNOB IS ACTUALLY UP.
+   This was unconditional, so a full-viewport fixed layer sitting above the entire page animated
+   forever on every device — at friction 0 it translated by nothing, which looks like nothing and
+   costs the same as something. The compositor cannot know the movement is zero; it re-composites
+   a viewport-sized layer every step regardless, and on a tablet at full width that is the single
+   most expensive thing on the page. FrictionOverlay adds .friction-on only above a threshold. */
+:root.friction-on .friction-overlay { animation: shake 0.14s infinite steps(2); }
+/* Calm devices never get it, however high the knob goes — a full-screen jitter is precisely the
+   effect that reads as broken on a machine that is already dropping frames. */
+:root.calm .friction-overlay { animation: none !important; }
 @keyframes shake { 0%{ transform: translate(calc(var(--shake)*-1.4px), calc(var(--shake)*1px)); } 100%{ transform: translate(calc(var(--shake)*1.4px), calc(var(--shake)*-1px)); } }
-@media (prefers-reduced-motion: reduce) { .friction-overlay { animation: none; } }
+@media (prefers-reduced-motion: reduce) { :root.friction-on .friction-overlay { animation: none; } }
 
 section { position: relative; padding: 9vh 6vw; }
 .section-title {
@@ -3109,3 +3118,38 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    filled. Clipped instead, with aria-hidden and tabIndex -1 so no real person can land on it. */
 .gb-hp { position:absolute; left:-9999px; width:1px; height:1px; opacity:0; pointer-events:none; }
 .gb-status { font-family:'Courier New',monospace; font-size:0.8rem; color:var(--acid); margin:0.75rem 0 0; letter-spacing:0.06em; }
+
+
+/* ============================================================================================
+   CALM MODE — the same calming, triggered by MEASUREMENT rather than by guessing the device
+   ============================================================================================
+   Every earlier attempt asked "what kind of device is this?" — a width, then a height, then
+   pointer:coarse. Each was wrong for some real machine, because none of them measure the thing
+   that matters: whether this device can actually keep up. A Samsung tablet with a maximised
+   window defeated all three, and the next unusual device would defeat a fourth guess.
+
+   src/lib/calmMode.ts samples real frame time and latches `.calm` on <html> when the page cannot
+   hold a reasonable rate. The media query above stays as a fast path for devices we can identify
+   up front; this is the safety net for the ones we cannot.
+
+   The rules are duplicated rather than shared because CSS cannot express "this media query OR
+   this class" in one at-rule. Generated from the block above — if you edit one, edit both. */
+:root.calm /* The beat pulse is BACK on phones. Killing it was treating the symptom: the flicker was
+     never the pulse itself, :root.calm it was a per-frame transform on a layer that had no promotion, :root.calm so
+     every beat repainted the page beneath it. All three still layers are promoted permanently
+     now (see .lore-bg, :root.calm .bc-frame, :root.calm .journey-bg below), :root.calm which makes the pulse a composited
+     transform and therefore free — and matches what desktop does, :root.calm which is what was noticed. */
+
+  .lore-name {
+    filter: drop-shadow(0 2px 0 rgba(0,0,0,0.6)) drop-shadow(0 0 18px var(--accent));
+  }:root.calm .lore-roster-name { filter: drop-shadow(0 0 10px var(--accent)); }:root.calm .hero-title { filter: drop-shadow(0 0 14px rgba(255,31,143,0.6)); }:root.calm .section-title {
+    filter: drop-shadow(0 2px 0 rgba(0,0,0,0.6)) drop-shadow(0 0 10px rgba(255,31,143,0.6));
+    text-shadow: 0 0 6px rgba(255,31,143,0.7);
+  }:root.calm .eyebrow, :root.calm .section-kicker { text-shadow: 0 0 8px currentColor; }:root.calm .journey-venue, :root.calm .lore-tag, :root.calm .journey-seed { text-shadow: 0 0 8px currentColor; }:root.calm .lore-eyebrow { text-shadow: 0 0 12px var(--accent); }:root.calm .merch-name, :root.calm .quote { text-shadow: 0 0 6px rgba(255,31,143,0.5); }:root.calm .lcd-title { text-shadow: 0 0 4px currentColor; }:root.calm .journey-city {
+    filter: drop-shadow(0 3px 0 rgba(0,0,0,0.6)) drop-shadow(0 0 26px rgba(255,31,143,0.5));
+  }:root.calm .tint-magenta .lm-item { text-shadow: 0 0 10px rgba(255,31,143,0.65); }:root.calm .tint-acid .lm-item { text-shadow: 0 0 10px rgba(99,255,46,0.6); }:root.calm .tint-blue .lm-item { text-shadow: 0 0 10px rgba(20,224,255,0.6); }
+  /* will-change: transform was set on every panel here and has been REMOVED. Promoting a
+     large semi-transparent element that sits over playing video creates and destroys a
+     compositing layer as each slide activates, and on Android that re-composites the whole
+     stack — reported as the entire site flickering as the text slides in. The panel's own
+     transition is already transform+opacity, which the compositor handles without help. */
