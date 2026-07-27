@@ -3317,3 +3317,55 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    nowrap stopped it wrapping but not this. A fixed height makes the row's size independent of
    whatever it happens to be showing. */
 .lcd-meta { height: 1.5em; align-items: center; }
+
+/* ============================================================================================
+   ISOLATION ONLY — ?nofx=blur | alpha | transform
+   ============================================================================================
+   Not optimisations and not shipped behaviour: these exist to name the cause. Each neutralises
+   ONE CLASS of beat-driven declaration across every rule, leaving the others animating, so the
+   class responsible can be identified instead of inferred.
+
+   Applied via a class on <html> rather than a media query, because the question is what the
+   PROPERTY costs, not what device is asking — the mistake this whole investigation has been
+   correcting. Nothing here is conditional on frame rate, pointer type or window size. */
+
+/* BLUR — every shadow and filter keeps its colour and its transform, but its radius stops
+   moving. An animated blur radius cannot be cached and is re-rasterised from scratch each
+   frame; a fixed one is rasterised once. If the jitter stops here, that is the cause. */
+:root.nofx-blur .brandbar { box-shadow: inset 0 0 18px rgba(255, 31, 143, 0.3) !important; }
+:root.nofx-blur .hero-flex span { box-shadow: 0 0 12px rgba(99, 255, 46, 0.4) !important; }
+:root.nofx-blur .hero-sub { text-shadow: 0 0 12px rgba(255, 31, 143, 0.7) !important; }
+:root.nofx-blur .hero-title { filter: drop-shadow(0 0 32px rgba(255, 31, 143, 0.6)) !important; }
+:root.nofx-blur .divider span { box-shadow: 0 0 12px rgba(255, 31, 143, 0.45) !important; }
+:root.nofx-blur .tl-row.active { box-shadow: inset 0 0 0 1px var(--edge), 0 0 24px rgba(255, 31, 143, 0.5) !important; }
+:root.nofx-blur .eyebrow, :root.nofx-blur .section-kicker { text-shadow: 0 0 12px currentColor !important; }
+:root.nofx-blur .journey-venue, :root.nofx-blur .lore-tag, :root.nofx-blur .journey-seed { text-shadow: 0 0 14px currentColor !important; }
+:root.nofx-blur .lore-eyebrow { text-shadow: 0 0 18px var(--accent) !important; }
+:root.nofx-blur .merch-name, :root.nofx-blur .quote { text-shadow: 0 0 10px rgba(255, 31, 143, 0.5) !important; }
+:root.nofx-blur .lcd-title { text-shadow: 0 0 8px currentColor !important; }
+:root.nofx-blur .tint-magenta .lm-item,
+:root.nofx-blur .tint-acid .lm-item,
+:root.nofx-blur .tint-blue .lm-item { text-shadow: 0 0 12px currentColor !important; }
+:root.nofx-blur .rail-pin.done { box-shadow: 0 0 14px var(--magenta) !important; }
+:root.nofx-blur .journey-city { filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.6)) drop-shadow(0 0 30px rgba(255, 31, 143, 0.5)) !important; }
+:root.nofx-blur .section-title { filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.6)) drop-shadow(0 0 24px var(--accent)) !important; }
+:root.nofx-blur .lore-roster-name { filter: drop-shadow(0 0 16px var(--accent)) !important; }
+
+/* TRANSFORM — every beat-driven scale/translate is pinned, shadows keep animating. If the
+   jitter stops here instead, the cause is composited movement at a fractional DPR, not paint. */
+:root.nofx-transform .section-title,
+:root.nofx-transform .hero-title .drip,
+:root.nofx-transform .crest .ring,
+:root.nofx-transform .lore-name,
+:root.nofx-transform .lm-item,
+:root.nofx-transform .journey-city,
+:root.nofx-transform .rail-vehicle,
+:root.nofx-transform .bc-frame,
+:root.nofx-transform .ls-ch-i,
+:root.nofx-transform .tl-row.active .tl-title { animation: none !important; scale: 1 !important; }
+:root.nofx-transform { --beat-lift: 0px !important; }
+
+/* ALPHA — colours stop responding while radius and transform keep moving. If neither blur nor
+   transform is responsible, this is the remaining paint variable. */
+:root.nofx-alpha .hero-flex span { box-shadow: 0 0 calc(6px + var(--m-beat) * 26px) rgba(99, 255, 46, 0.5) !important; }
+:root.nofx-alpha .divider span { box-shadow: 0 0 calc((var(--m-beat) + var(--m-down, 0)) * 16px) rgba(255, 31, 143, 0.5) !important; }

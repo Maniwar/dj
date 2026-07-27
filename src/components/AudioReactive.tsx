@@ -29,7 +29,19 @@ export default function AudioReactive() {
     let raf = 0
     let beat = 0, level = 0, bass = 0, treble = 0
     const written: Record<string, string> = {}
+    // ISOLATION: hold one group of variables at a constant while the rest keep updating. The
+    // WRITE still happens once and then stops for the frozen group, so this separates "the effect
+    // this variable drives is expensive" from "writing custom properties on :root is expensive".
+    const frozen = (name: string) =>
+      PERF.freeze === 'beat' ? name === '--m-beat' : PERF.freeze === 'others' ? name !== '--m-beat' : false
     const setVar = (name: string, v: number) => {
+      if (frozen(name)) {
+        if (written[name] === undefined) {
+          written[name] = 'frozen'
+          root.style.setProperty(name, name === '--m-beat' ? '0.35' : '0.2')
+        }
+        return
+      }
       const s = v.toFixed(2)
       if (written[name] === s) return
       written[name] = s

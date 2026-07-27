@@ -36,4 +36,14 @@ export const PERF = {
   // forever inside the Broadcast. ?nobroadcast removes the video, the stills AND the grain at
   // once, so it cannot tell us which of them costs. This is the flag that separates them.
   noGrain: has('nograin'),
+  // ?freeze=beat | others — ISOLATION, not optimisation.
+  //
+  // ?noreact freezes all ten audio variables at once. It proved the pump is involved in the
+  // jitter and told us nothing about WHICH part, and the two candidate causes have opposite
+  // fixes: if freezing --m-beat alone stops it, the cause is the ~20 rules that read it; if it
+  // takes freezing everything, the cause is the ACT of writing custom properties on :root, which
+  // invalidates style for the whole document regardless of what any rule does with them.
+  freeze: (/[?&]freeze=([a-z-]+)/i.exec(q)?.[1] ?? '') as '' | 'beat' | 'others',
+  // ?nofx=blur|alpha|transform — neutralise one CLASS of beat-driven declaration at a time.
+  nofx: (/[?&]nofx=([a-z]+)/i.exec(q)?.[1] ?? '') as '' | 'blur' | 'alpha' | 'transform',
 }

@@ -22,6 +22,7 @@ import BeatCursor from './components/BeatCursor'
 import SectionCut from './components/SectionCut'
 import VisualizerMode from './components/VisualizerMode'
 import { startCalmMode } from './lib/calmMode'
+import { PERF } from './lib/perfFlags'
 import { startVideoDirector } from './lib/videoDirector'
 import Diagnostics from './components/Diagnostics'
 import TourRail from './components/TourRail'
@@ -42,6 +43,11 @@ const ThermalRunaway = lazy(() => import('./components/webgl/ThermalRunaway'))
 export default function App() {
   // Measure real frame time and latch `.calm` if this device cannot keep up. Guessing the device
   // class from media queries was wrong three times in a row; this asks the machine instead.
+  // ?nofx=<class> — isolation switch, see the ISOLATION block in index.css
+  useEffect(() => {
+    if (PERF.nofx) document.documentElement.classList.add(`nofx-${PERF.nofx}`)
+  }, [])
+
   useEffect(() => startCalmMode(), [])
   // Nine <video> elements exist; only the most visible one is allowed to decode.
   useEffect(() => startVideoDirector(), [])
