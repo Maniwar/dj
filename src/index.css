@@ -2969,3 +2969,40 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
     opacity: 0.85;
   }
 }
+
+/* ============================================================================================
+   TOUR STOPS — LANDSCAPE: GIVE THE GRID A ROW TO FILL, AND EASE THE SCAN
+   ============================================================================================
+   THE READOUT. Three attempts failed to push the REC line to the floor because the premise was
+   wrong: `.journey-stop` is a grid with one IMPLICIT, content-sized row. `place-items` positions
+   the item WITHIN that row; it does not make the row fill the container. So the row was only as
+   tall as the card, and there was never any height to stretch into — absolute positioning,
+   height:100% and margin-top:auto were all competing for space that did not exist.
+   One explicit row fixes all three at once. */
+@media (max-width: 900px), (orientation: landscape) and (max-height: 620px) {
+  /* MEASURED: the stop is 412px tall and its card row was 279px. `grid-template-rows: 1fr`
+     did not fix it because the stop has a SECOND in-flow child taking the other 132px — 1fr
+     defines one explicit row and the sibling lands in an implicit auto row beside it. So
+     align-self:stretch had been working the whole time; it simply had 279px to stretch into,
+     which is why absolute positioning, height:100% and margin-top:auto all failed identically.
+     Taking the card out of the row contest gives it the frame, and `bottom` and `auto` margins
+     finally mean what they read as. The stop is already position:relative. */
+  .journey-card {
+    position: absolute;
+    inset: 0;
+  }
+}
+
+/* THE SCAN. The overlay carries two things: scanlines, and a vignette that darkens the frame
+   toward its edges. That vignette is tuned for a tall frame — on a landscape phone the viewport
+   is barely 400px high, so the 55% transparent centre is a thin band and the dark stop reaches
+   most of the picture. Short viewports get a wider clear centre and a lighter edge, which is the
+   same footage with the darkening scaled to the shape of the screen rather than to a portrait
+   assumption. The scanlines themselves are untouched — they are the texture, not the problem. */
+@media (orientation: landscape) and (max-height: 620px) {
+  .journey-scan {
+    background:
+      repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.07) 0 2px, transparent 2px 4px),
+      radial-gradient(150% 118% at 50% 46%, transparent 72%, rgba(3, 3, 8, 0.26) 100%);
+  }
+}
