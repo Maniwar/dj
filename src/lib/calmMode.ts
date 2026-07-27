@@ -38,6 +38,9 @@ export function startCalmMode(): () => void {
   const q = location.search
   if (/[?&]calm(?:&|=|$)/i.test(q)) {
     root.classList.add('calm')
+    // The forced path must do everything the measured path does, or ?calm tests something other
+    // than what a struggling device actually experiences — which makes it useless as a diagnostic.
+    refreshRenditionChoice()
     return () => {}
   }
   if (/[?&]nocalm(?:&|=|$)/i.test(q)) return () => {}
