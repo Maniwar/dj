@@ -162,13 +162,13 @@ export default function Broadcast() {
         </>
       )}
       {/* club-atmosphere overlays */}
-      <div className="bc-strobe" />
-      {!PERF.noGrain && <div className="bc-grain" />}
-      <div className="bc-scan" />
-      <div className="bc-vignette" />
-      <div className="bc-rec">
+      {!PERF.bcOff.has('strobe') && <div className="bc-strobe" />}
+      {!PERF.noGrain && !PERF.bcOff.has('grain') && <div className="bc-grain" />}
+      {!PERF.bcOff.has('scan') && <div className="bc-scan" />}
+      {!PERF.bcOff.has('vignette') && <div className="bc-vignette" />}
+      {!PERF.bcOff.has('rec') && <div className="bc-rec">
         ● REC &nbsp; {scene.city} &nbsp; · &nbsp; SO-CAM {String(frameIdx + 1).padStart(2, '0')}
-      </div>
+      </div>}
     </div>
   )
 }

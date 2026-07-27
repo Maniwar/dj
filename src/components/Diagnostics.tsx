@@ -97,9 +97,18 @@ export default function Diagnostics() {
         ] as const) {
           const node = document.querySelector(sel) as HTMLElement | null
           if (!node) continue
-          const r = node.getBoundingClientRect()
-          const x = r.left
-          const y = r.top + window.scrollY // page-relative, so scrolling is not a shift
+          // LAYOUT POSITION, NOT VISUAL POSITION.
+          //
+          // This used getBoundingClientRect(), which INCLUDES transforms — so every intended beat
+          // animation counted as a shift. A reading of "SHIFTS 244, dx 57.56, worst sect" was
+          // almost entirely .section-title's designed 10% scale, which tells us nothing about
+          // whether anything is actually moving.
+          //
+          // offsetLeft/offsetTop are layout-only and ignore transforms entirely, so a non-zero
+          // delta here means real geometry movement and nothing else. Intended pulses disappear
+          // from the count, which is the whole point of measuring.
+          const x = node.offsetLeft
+          const y = node.offsetTop
           const prev = tracked.get(key)
           if (prev) {
             const dx = Math.abs(x - prev.x)
@@ -151,7 +160,7 @@ export default function Diagnostics() {
             // Heap is not GPU memory, but a climbing heap alongside flicker points at something
             // accumulating rather than a steady-state cost.
             `heap ${heapMB}MB  longtasks ${longTasks}`,
-            `hero @ ${lastPos}`,
+            `layout @ ${lastPos}  (transforms excluded)`,
           ].join('\n')
           worst = 0
         }

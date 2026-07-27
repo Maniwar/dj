@@ -3364,3 +3364,17 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    transform is responsible, this is the remaining paint variable. */
 :root.nofx-alpha .hero-flex span { box-shadow: 0 0 calc(6px + var(--m-beat) * 26px) rgba(99, 255, 46, 0.5) !important; }
 :root.nofx-alpha .divider span { box-shadow: 0 0 calc((var(--m-beat) + var(--m-down, 0)) * 16px) rgba(255, 31, 143, 0.5) !important; }
+
+
+/* FILTER — the combination none of the other switches isolates.
+   Every beat-driven drop-shadow is pinned while scale, translate and colour keep animating. This
+   matters because a FILTERED element must be re-rasterised whenever its scale changes, and
+   .section-title carries both: `filter: drop-shadow(...)` and a per-frame `scale`. At DPR 1.75
+   each scale step lands on a different sub-pixel grid, so a large filtered heading re-rasterises
+   every beat. ?nofx=transform pinned the scale but left the filter animating; ?nofx=blur pinned
+   the radius but left the scale animating. Neither tests the pair. */
+:root.nofx-filter .section-title { filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.6)) drop-shadow(0 0 24px rgba(255, 31, 143, 0.5)) !important; }
+:root.nofx-filter .hero-title { filter: drop-shadow(0 0 32px rgba(255, 31, 143, 0.6)) !important; }
+:root.nofx-filter .journey-city { filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.6)) drop-shadow(0 0 30px rgba(255, 31, 143, 0.5)) !important; }
+:root.nofx-filter .lore-roster-name { filter: drop-shadow(0 0 16px var(--accent)) !important; }
+:root.nofx-filter .lore-name { filter: drop-shadow(0 0 16px var(--accent)) !important; }

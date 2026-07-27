@@ -36,6 +36,14 @@ export const PERF = {
   // forever inside the Broadcast. ?nobroadcast removes the video, the stills AND the grain at
   // once, so it cannot tell us which of them costs. This is the flag that separates them.
   noGrain: has('nograin'),
+  // ?bcoff=strobe,scan,vignette,rec,grain,video,stills — switch off individual pieces of the
+  // Broadcast. ?nobroadcast removes all of it at once and proved the layer is responsible;
+  // ?nograin removed one overlay and changed nothing. There are three blended full-screen
+  // overlays in there, not one, plus the video and the stills, and they have very different
+  // costs — .bc-strobe blends with SCREEN and animates its opacity every frame, which forces a
+  // framebuffer readback per frame, while .bc-grain's opacity is static. Guessing between them
+  // has already cost several rounds.
+  bcOff: new Set((/[?&]bcoff=([a-z,]+)/i.exec(q)?.[1] ?? '').split(',').filter(Boolean)),
   // ?freeze=beat | others — ISOLATION, not optimisation.
   //
   // ?noreact freezes all ten audio variables at once. It proved the pump is involved in the
@@ -45,5 +53,5 @@ export const PERF = {
   // invalidates style for the whole document regardless of what any rule does with them.
   freeze: (/[?&]freeze=([a-z-]+)/i.exec(q)?.[1] ?? '') as '' | 'beat' | 'others',
   // ?nofx=blur|alpha|transform — neutralise one CLASS of beat-driven declaration at a time.
-  nofx: (/[?&]nofx=([a-z]+)/i.exec(q)?.[1] ?? '') as '' | 'blur' | 'alpha' | 'transform',
+  nofx: (/[?&]nofx=([a-z]+)/i.exec(q)?.[1] ?? '') as '' | 'blur' | 'alpha' | 'transform' | 'filter',
 }
