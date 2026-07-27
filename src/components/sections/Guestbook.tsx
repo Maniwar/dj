@@ -15,6 +15,13 @@ const TURNSTILE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefi
 // Palette is the site's own accent set — the seed entries already use these, so new posts sit in
 // the same world instead of introducing colours that appear nowhere else.
 const POST_COLORS = ['#12e0c0', '#ff1f8f', '#8bff3b', '#e6c05a', '#5bc8ff', '#ff7a3d', '#c08bff', '#ff5b5b']
+/** ISO country code -> flag emoji. Each letter maps to its regional indicator symbol, which is
+ *  what renders as a flag — no image assets and no lookup table of 200 countries. */
+const countryFlag = (cc?: string) =>
+  cc && /^[A-Z]{2}$/.test(cc)
+    ? String.fromCodePoint(...[...cc].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65))
+    : null
+
 const POST_FLAGS = ['💦', '🔥', '💿', '📼', '🕶️', '🎧', '🍸', '⚡']
 
 /** Stable per-handle index: same name → same colour and flag, every time, on every device. */
@@ -42,6 +49,18 @@ export default function Guestbook() {
   const [body, setBody] = useState('')
   // 'idle' | 'sending' | 'queued' | the error text
   const [status, setStatus] = useState<string>('idle')
+  // Real like counts, keyed by post id, fetched once from the Worker. Only PUBLISHED posts have
+  // one: a local-only entry is invisible to everyone else, so a shared counter on it would be
+  // counting an audience of one.
+  const [globalLikes, setGlobalLikes] = useState<Record<string, number>>({})
+
+  useEffect(() => {
+    if (!ENDPOINT) return
+    fetch(`${ENDPOINT}/likes`)
+      .then((r) => (r.ok ? r.json() : {}))
+      .then((m) => setGlobalLikes(m || {}))
+      .catch(() => {}) // a missing count is not worth surfacing — the baseline still renders
+  }, [])
 
   // TURNSTILE, RENDERED EXPLICITLY.
   //
@@ -143,7 +162,13 @@ export default function Guestbook() {
       }),
     })
       .then((r) => r.json().then((j) => ({ ok: r.ok, j })))
-      .then(({ ok, j }) => setStatus(ok && j.ok ? 'queued' : j.error || 'could not send'))
+      .then(({ ok, j }) => {
+        setStatus(ok && j.ok ? 'queued' : j.error || 'could not send')
+        // Cloudflare resolves the country at the edge — it is the only place this is knowable
+        // without asking a third-party geo service on every page view.
+        const flag = countryFlag(j?.country)
+        if (flag) setMine((m) => m.map((x) => (x.id === post.id ? { ...x, flag } : x)))
+      })
       .catch(() => setStatus('could not send'))
       .finally(() => {
         // reset the widget so a second entry gets a fresh token
@@ -152,7 +177,28 @@ export default function Guestbook() {
       })
   }
 
-  const like = (id: string) => setLiked((l) => ({ ...l, [id]: !l[id] }))
+  const like = (id: string) => {
+    // Local-only posts keep the old toggle: there is no shared counter to move.
+    if (!ENDPOINT || id.startsWith('me-')) {
+      setLiked((l) => ({ ...l, [id]: !l[id] }))
+      return
+    }
+    // Published posts are ONE-WAY. A global counter that can be decremented invites exactly the
+    // behaviour you would expect, and "unlike" has no meaning to the person who came back to see
+    // whether anyone liked their entry.
+    if (liked[id]) return
+    setLiked((l) => ({ ...l, [id]: true }))
+    setGlobalLikes((g) => ({ ...g, [id]: (g[id] ?? 0) + 1 })) // optimistic
+    fetch(`${ENDPOINT}/like`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id }),
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      // replace the optimistic guess with the server's number, so two devices converge
+      .then((j) => j?.n != null && setGlobalLikes((g) => ({ ...g, [id]: j.n })))
+      .catch(() => {})
+  }
 
   return (
     <section className="guestbook" id="guestbook">
@@ -203,7 +249,10 @@ export default function Guestbook() {
 
         <div className="gb-list">
           {posts.map((p) => {
-            const bonus = liked[p.id] ? 1 : 0
+            // Seed count is the fictional baseline; real likes stack on top of it. The local
+            // bonus applies only to local-only posts, where there is no server number to use.
+            const bonus = p.id.startsWith('me-') && liked[p.id] ? 1 : 0
+            const real = globalLikes[p.id] ?? 0
             return (
               <article className="gb-post" key={p.id}>
                 <div className="gb-side" style={{ borderColor: p.color }}>
@@ -217,7 +266,7 @@ export default function Guestbook() {
                     onClick={() => like(p.id)}
                     aria-pressed={!!liked[p.id]}
                   >
-                    ♥ {p.likes + bonus}
+                    ♥ {p.likes + real + bonus}
                   </button>
                 </div>
                 <pre className="gb-text">{p.body}</pre>

@@ -58,6 +58,61 @@ export default {
           'access-control-max-age': '86400',
         },
       })
+    const path = new URL(request.url).pathname
+
+    // ---- LIKES ---------------------------------------------------------------------------------
+    // Counts live in the same KV namespace as the rate limits, stored in each key's METADATA
+    // rather than its value. That is the whole trick: list({prefix}) returns names AND metadata in
+    // one operation, so the whole map costs a single call instead of one read per post. Storing
+    // counts in values would mean N reads to render a page.
+    //
+    // Two writers landing together can lose one increment — KV has no atomic counter. For hearts
+    // on a joke guestbook that is the right trade against the complexity of Durable Objects.
+    if (path === '/likes' && request.method === 'GET') {
+      if (!env.RATE) return json({}, 200, cors)
+      const out = {}
+      const list = await env.RATE.list({ prefix: 'like:' })
+      for (const k of list.keys) out[k.name.slice(5)] = k.metadata?.n ?? 0
+      return new Response(JSON.stringify(out), {
+        status: 200,
+        headers: {
+          'content-type': 'application/json',
+          'access-control-allow-origin': cors,
+          // Briefly cacheable: a heart count nobody refreshes for is not worth a request per view,
+          // and 30s of staleness is invisible while still feeling live when someone returns.
+          'cache-control': 'public, max-age=30',
+        },
+      })
+    }
+
+    if (path === '/like' && request.method === 'POST') {
+      if (!env.RATE) return json({ ok: true, n: 0 }, 200, cors)
+      let id
+      try {
+        id = String((await request.json()).id || '')
+      } catch {
+        return json({ error: 'bad json' }, 400, cors)
+      }
+      // Only ids that look like published posts. Local-only entries are invisible to everyone
+      // else, so a shared counter on one would be counting an audience of one.
+      if (!/^[a-z0-9][a-z0-9-]{1,60}$/i.test(id) || id.startsWith('me-'))
+        return json({ error: 'unknown post' }, 400, cors)
+
+      // No Turnstile here on purpose — a challenge per heart would be a worse experience than the
+      // feature is worth. A per-IP hourly cap is the proportionate control for a number.
+      const ip = request.headers.get('CF-Connecting-IP') || 'unknown'
+      const lk = `lrate:${ip}`
+      const used = Number((await env.RATE.get(lk)) || 0)
+      if (used >= 60) return json({ error: 'slow down' }, 429, cors)
+      await env.RATE.put(lk, String(used + 1), { expirationTtl: 3600 })
+
+      const key = `like:${id}`
+      const cur = await env.RATE.getWithMetadata(key)
+      const n = (cur.metadata?.n ?? 0) + 1
+      await env.RATE.put(key, '', { metadata: { n } })
+      return json({ ok: true, n }, 200, cors)
+    }
+
     if (request.method !== 'POST') return json({ error: 'POST only' }, 405, cors)
     if (origin && !allowed.includes(origin)) return json({ error: 'origin not allowed' }, 403, cors)
 
@@ -177,6 +232,10 @@ export default {
       return json({ error: 'could not submit, try later' }, 502, cors)
     }
 
-    return json({ ok: true }, 200, cors)
+    // The country comes back so the site can flag the post with where it was signed from.
+    // Cloudflare resolves it at the edge, which is the only place it is knowable — the browser
+    // cannot tell you this without a third-party geo lookup, and that would be a request to
+    // somebody else's server on every page view.
+    return json({ ok: true, country }, 200, cors)
   },
 }
