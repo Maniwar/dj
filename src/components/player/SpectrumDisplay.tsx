@@ -26,13 +26,35 @@ export default function SpectrumDisplay() {
     let raf = 0
     const dpr = Math.min(2, window.devicePixelRatio || 1)
 
-    const resize = () => {
-      const r = canvas.getBoundingClientRect()
-      canvas.width = r.width * dpr
-      canvas.height = r.height * dpr
+    // RESIZE WITHOUT FEEDBACK.
+    //
+    // This was `new ResizeObserver(() => { getBoundingClientRect(); canvas.width = ... })` observing
+    // the canvas itself. Writing canvas.width/height changes the element's INTRINSIC size, which the
+    // observer sees as a resize, which writes it again — a loop that browsers only sometimes break
+    // cleanly. The visible result is the analyser jumping and the player resizing with it, and
+    // because it is a timing race it appears under load and never in emulation.
+    //
+    // Two changes break it. The size comes from the observer's own contentRect instead of a fresh
+    // getBoundingClientRect(), so no forced synchronous layout happens inside a layout callback.
+    // And the write is guarded: if the pixel dimensions have not actually changed, nothing is
+    // written, so the observer has nothing to react to and the loop cannot start.
+    let lastW = 0
+    let lastH = 0
+    const applySize = (cssW: number, cssH: number) => {
+      const w = Math.max(1, Math.round(cssW * dpr))
+      const h = Math.max(1, Math.round(cssH * dpr))
+      if (w === lastW && h === lastH) return // the guard that ends the feedback loop
+      lastW = w
+      lastH = h
+      canvas.width = w
+      canvas.height = h
     }
-    resize()
-    const ro = new ResizeObserver(resize)
+    const r0 = canvas.getBoundingClientRect()
+    applySize(r0.width, r0.height)
+    const ro = new ResizeObserver((entries) => {
+      const box = entries[0]?.contentRect
+      if (box) applySize(box.width, box.height)
+    })
     ro.observe(canvas)
 
     const draw = () => {
