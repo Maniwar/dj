@@ -3006,3 +3006,31 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
       radial-gradient(150% 118% at 50% 46%, transparent 72%, rgba(3, 3, 8, 0.26) 100%);
   }
 }
+
+/* ============================================================================================
+   TOUR STOPS — DESKTOP: TYPE IN THE CORNER, NOT OVER THE CREW
+   ============================================================================================
+   The phone breakpoints got this and desktop did not, on the reasoning that a wide viewport has
+   room for a centred block. It does not: the footage is a full-bleed crowd shot, so "room" is
+   still somebody's face. Same doctrine as the hero and the phone stops — the frame is a sleeve,
+   the type lives in a corner, the picture owns the rest.
+
+   ULTRAWIDE-SAFE BY CONSTRUCTION. The card BOX stays centred and capped, and only the text
+   inside it moves left. Anchoring the box itself to the left edge (place-items: * start) would
+   send the type to the far rim of a 7K panel, away from the capped footage — the drift that
+   already had to be fixed for the tour rail and the marquees. A centred, capped box tracks the
+   band at every width, so this needs no ultrawide special case. */
+@media (min-width: 901px) {
+  .journey-card {
+    width: 100%;
+    max-width: min(92vw, 1380px);
+    text-align: left;
+    padding: 0 clamp(1rem, 3vw, 3rem);
+  }
+  /* it was `margin: 0 auto`, which re-centred the paragraph inside a now left-aligned card */
+  .journey-blurb { margin: 0 0 1rem; max-width: 46ch; }
+  .journey-leg { margin-bottom: 0.75rem; }
+  /* The city name is the anchor of the whole composition, so it keeps its scale — the fix here
+     is where the block sits, not how big it is. Desktop has the height that landscape lacked. */
+  .journey-city { transform-origin: left center; }
+}
