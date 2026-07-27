@@ -23,7 +23,7 @@ export default function AudioReactive() {
     if (PERF.noReact) {
       // low-power: set neutral values once, no per-frame writes
       for (const v of ['--m-beat', '--m-level', '--m-bass', '--m-treble']) root.style.setProperty(v, '0.2')
-      for (const v of ['--m-snare', '--m-hat', '--m-down', '--m-build', '--m-drop', '--m-bar']) root.style.setProperty(v, '0')
+      for (const v of ['--m-snare', '--m-hat', '--m-down', '--m-build', '--m-drop']) root.style.setProperty(v, '0')
       return
     }
     let raf = 0
@@ -34,6 +34,18 @@ export default function AudioReactive() {
     // this variable drives is expensive" from "writing custom properties on :root is expensive".
     const frozen = (name: string) =>
       PERF.freeze === 'beat' ? name === '--m-beat' : PERF.freeze === 'others' ? name !== '--m-beat' : false
+    // WRITE AS SELDOM AS POSSIBLE — the write itself is the cost.
+    //
+    // Proven on the device: freezing --m-beat alone removed the jitter, and so did freezing the
+    // other nine while --m-beat kept updating. Neutralising every class of EFFECT
+    // (?nofx=blur|alpha|transform) changed nothing. So the expense is the act of setting a custom
+    // property on :root, not anything the CSS does with the value: unregistered custom properties
+    // inherit, so each write marks the whole document for style re-resolution.
+    //
+    // These envelopes move slowly and nothing needs two decimal places of them. Rounding to one
+    // collapses most frames into "unchanged", and an unchanged value is not written at all.
+    // --m-beat stays at 2dp: it is the transient, and its resolution is what the kick reads from.
+    const COARSE = new Set(['--m-build', '--m-drop', '--m-down', '--m-hat', '--m-snare'])
     const setVar = (name: string, v: number) => {
       if (frozen(name)) {
         if (written[name] === undefined) {
@@ -42,7 +54,7 @@ export default function AudioReactive() {
         }
         return
       }
-      const s = v.toFixed(2)
+      const s = v.toFixed(COARSE.has(name) ? 1 : 2)
       if (written[name] === s) return
       written[name] = s
       root.style.setProperty(name, s)
@@ -70,7 +82,9 @@ export default function AudioReactive() {
       // per-frame recalculation (2 decimals is finer than any of the visuals resolve).
       setVar('--m-beat', beat)
       setVar('--m-level', gain(level, 1.6, 0.8))
-      setVar('--m-bass', gain(bass, 1.7, 0.78))
+      // --m-bass and --m-treble look unused in index.css and are NOT: the player's VU bars read
+      // them through inline styles in Player.tsx. Only --m-bar is genuinely read by nothing.
+      setVar('--m-bass', gain(bass, 1.5, 0.8))
       setVar('--m-treble', gain(treble, 1.7, 0.8))
       // Per-instrument + structural channels, so each visual can react to the part of the kit
       // that actually suits it instead of everything firing off the kick.
@@ -81,7 +95,6 @@ export default function AudioReactive() {
       setVar('--m-build', on ? mu.build : 0)
       setVar('--m-drop', on ? mu.drop : 0)
       // phases keep running so bar-synced sweeps stay continuous rather than snapping
-      setVar('--m-bar', mu.barPhase)
       raf = requestAnimationFrame(loop)
     }
     raf = requestAnimationFrame(loop)
