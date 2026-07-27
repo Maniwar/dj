@@ -46,20 +46,18 @@ export function prefersHdVideo(): boolean {
   // on a metered or slow connection the smaller file wins regardless of how big the panel is
   if (conn?.saveData || /(^|-)2g$/.test(conn?.effectiveType ?? '')) return (cached = false)
 
-  // A TOUCH DEVICE NEVER GETS HD, however many pixels it has.
+  // HD IS EARNED, NOT ASSUMED — and never withheld from a screen that deserves it.
   //
-  // Pixel count was the only test here, and it is a measure of the SCREEN, not of the machine
-  // behind it. A Samsung Tab Ultra with its browser maximised is ~1848 CSS px at DPR 2 — 3696
-  // physical — so it sailed past this threshold and was handed 1080p to decode alongside the
-  // WebGL rig, on a tablet GPU. Shrinking the window dropped it under the line and back to 720p,
-  // which is why the flicker looked like it depended on window size: it did, but only because
-  // window size was standing in for which video file got loaded. Confirmed by ?nobroadcast
-  // removing the symptom entirely.
+  // The first fix here banned HD outright on touch devices, which stopped the flicker on a
+  // struggling tablet by permanently serving soft video to every capable one. That is the wrong
+  // trade: a large high-density panel is exactly where 1080p is worth having.
   //
-  // Phones and tablets have mobile-class video decoders and a shared memory bus no matter how
-  // many pixels the panel has. `(pointer: coarse)` identifies them at any window size and does
-  // not change when the user resizes, so the choice cannot flip mid-session.
-  if (window.matchMedia?.('(pointer: coarse)').matches) return (cached = false)
+  // So the decision now follows MEASUREMENT. calmMode samples real frame time and latches `.calm`
+  // when the device cannot keep up; while that is unset, resolution alone decides, so a capable
+  // tablet gets HD like any other big display. Once it latches, this drops to SD and stays there
+  // for the session — and because calmMode calls refreshRenditionChoice(), the downgrade lands at
+  // the next natural scene change rather than restarting whatever is playing.
+  if (document.documentElement.classList.contains('calm')) return (cached = false)
 
   // physical pixels, not CSS pixels: that's what the compositor actually has to fill, so a
   // retina laptop at 1512 CSS px is really driving 3024 and does benefit from the larger source

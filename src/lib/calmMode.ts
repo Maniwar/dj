@@ -1,3 +1,5 @@
+import { refreshRenditionChoice } from './videoRendition'
+
 // CALM MODE — measured, not guessed.
 //
 // Every previous attempt at this asked "what KIND of device is this?" via media queries: a width,
@@ -74,6 +76,9 @@ export function startCalmMode(): () => void {
       // page is idle or backgrounded, which would otherwise look identical to a slow device.
       if (frames >= 20 && slow / frames >= SLOW_RATIO) {
         root.classList.add('calm')
+        // Let the video layer re-decide too. It deliberately does NOT swap a playing clip — the
+        // lighter rendition lands at the next scene change, which nobody perceives as a change.
+        refreshRenditionChoice()
         cancelAnimationFrame(raf)
         raf = 0
         return
