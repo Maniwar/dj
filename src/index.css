@@ -3168,3 +3168,33 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      compositing layer as each slide activates, and on Android that re-composites the whole
      stack — reported as the entire site flickering as the text slides in. The panel's own
      transition is already transform+opacity, which the compositor handles without help. */
+
+/* ============================================================================================
+   CALM: SHRINK THE BACKGROUND LAYER, DO NOT JUST SLOW IT DOWN
+   ============================================================================================
+   Reported at 60fps, 0% slow frames — and with the background missing entirely, black except one
+   strip. That combination is not a performance problem: the device had frames to spare and still
+   could not show the layer. It is the GPU failing to allocate it.
+
+   .bc-frame is inset:-5%, permanently promoted by will-change, and Ken-Burns scales it to 1.2.
+   At 1691x960 and DPR 1.75 that is a promoted texture in the region of 6-9 megapixels, and
+   tile-based mobile GPUs drop layers they cannot fit. The flicker is that layer being evicted
+   and re-allocated.
+
+   So on a device that has already told us it is struggling, the fix is to make the layer SMALL
+   enough to exist, rather than to animate it more cheaply:
+     - no overscan, so the texture is viewport-sized rather than 110% of it
+     - no Ken-Burns, which is what pushed it to 1.2x of that
+     - no beat scale, which recomposites the largest layer on the page on every kick
+     - no will-change, so the browser can un-promote it instead of holding it resident
+   The still remains, the tint remains, the composition is unchanged. Only the motion goes. */
+:root.calm .bc-frame {
+  inset: 0;
+  scale: 1 !important;
+  animation: none !important;
+  will-change: auto;
+}
+:root.calm .journey-bg {
+  animation: none !important;
+  will-change: auto;
+}
