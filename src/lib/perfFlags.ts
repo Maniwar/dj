@@ -9,7 +9,23 @@ const has = (k: string) => new RegExp(`[?&]${k}(?:=(?:1|true|on))?(?:&|$)`, 'i')
 // The mobile flicker was isolated (via ?nobroadcast) to the FOOTAGE layer, not the shader —
 // so keep the reactive lasers (shader) ON everywhere and instead calm the Broadcast on
 // mobile (static frame, no blend-modes). ?noshader / ?lowpower still force it off.
-const isMobile = typeof matchMedia !== 'undefined' && matchMedia('(max-width: 768px)').matches
+// PERFORMANCE CLASS FOLLOWS THE HARDWARE, NOT THE WINDOW.
+//
+// This was `max-width: 768px` alone, which meant a tablet with its browser maximised measured as a
+// desktop and got the full desktop workload — frameloop 'always', top shader tier, every effect
+// promoted — on mobile-class silicon. The symptom was a Samsung Tab Ultra flickering violently at
+// full width and running perfectly the moment the window was made smaller, which reads as
+// nonsense until you notice that shrinking the window is what finally tripped the 768px test.
+//
+// `(pointer: coarse)` is the honest signal: phones and tablets report it at any window size, and
+// it does not change when the user resizes, so the tier cannot thrash mid-session. Desktops report
+// `fine` — including touchscreen laptops, whose PRIMARY pointer is still the trackpad.
+//
+// The width test is kept as well, so a genuinely tiny viewport is still treated gently.
+// This is the same trap as the 900px frosted-glass guard and the 15vw city headline: viewport
+// width keeps being used as a proxy for device capability, and it keeps being wrong.
+const mq = (q: string) => typeof matchMedia !== 'undefined' && matchMedia(q).matches
+const isMobile = mq('(pointer: coarse)') || mq('(max-width: 768px)')
 const low = has('lowpower')
 export const PERF = {
   isMobile,
