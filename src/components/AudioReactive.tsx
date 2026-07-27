@@ -28,6 +28,9 @@ export default function AudioReactive() {
     }
     let raf = 0
     let beat = 0, level = 0, bass = 0, treble = 0
+    // Device pixel ratio, read once: it is what decides whether a translation is representable
+    // without re-rasterising the glyphs.
+    const DPR = window.devicePixelRatio || 1
     const written: Record<string, string> = {}
     // ISOLATION: hold one group of variables at a constant while the rest keep updating. The
     // WRITE still happens once and then stops for the frozen group, so this separates "the effect
@@ -83,7 +86,7 @@ export default function AudioReactive() {
         }
         return
       }
-      const s = v.toFixed(COARSE.has(name) ? 1 : 2)
+      const s = name === '--beat-lift' ? `${v.toFixed(3)}px` : v.toFixed(COARSE.has(name) ? 1 : 2)
       if (written[name] === s) return
       written[name] = s
       pending[name] = s
@@ -123,6 +126,23 @@ export default function AudioReactive() {
       setVar('--m-down', on ? mu.downbeat : 0)
       setVar('--m-build', on ? mu.build : 0)
       setVar('--m-drop', on ? mu.drop : 0)
+
+      // --beat-lift: SNAPPED TO WHOLE DEVICE PIXELS, and computed here rather than in CSS.
+      //
+      // This was a derived custom property: calc((beat + down*0.8 + drop*1.2) * -7px), read by
+      // .hero-title .drip (CLUB HUMIDITY), .section-title and .lore-name as translateY. A
+      // translation of a fractional pixel forces text to be re-rasterised on a different
+      // sub-pixel grid, and on a DPR 1.75 display that is visible as shimmer.
+      //
+      // It explains the bisect exactly. --m-level does not feed this, so beat+level produces the
+      // same ~11 distinct offsets as beat alone and is clean; --m-down does, so beat+down
+      // produces ~121 and jitters. No cumulative-work account predicts that difference.
+      //
+      // Rounding to a multiple of 1/dpr means every offset lands on a whole device pixel, so the
+      // glyphs rasterise identically each time however many distinct values the audio produces.
+      // Computing it here also removes a CSS-level variable-to-variable dependency chain.
+      const liftPx = (on ? beat + (mu.downbeat ?? 0) * 0.8 + (mu.drop ?? 0) * 1.2 : 0) * -7
+      setVar('--beat-lift', Math.round(liftPx * DPR) / DPR)
       // phases keep running so bar-synced sweeps stay continuous rather than snapping
       // flush: one assignment, one invalidation pass
       const keys = Object.keys(pending)

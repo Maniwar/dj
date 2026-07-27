@@ -858,7 +858,11 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 :root {
   /* the KICK throws headings up; the DOWNBEAT (every 4th) throws them noticeably higher, so
      the motion has bar structure instead of one identical thump forever */
-  --beat-lift: calc((var(--m-beat) + var(--m-down, 0) * 0.8 + var(--m-drop, 0) * 1.2) * -7px);
+  /* --beat-lift is now computed in JS and snapped to whole device pixels (AudioReactive.tsx).
+     As a CSS calc it produced arbitrary fractional-pixel translations, which re-rasterise text on
+     a different sub-pixel grid at fractional DPR. The fallback keeps it defined before the first
+     audio frame. */
+  --beat-lift: 0px;
   /* neon rides the kick, and the whole rig gets HOTTER through a build-up */
   --beat-glow: calc((var(--m-beat) + var(--m-build, 0) * 0.7) * 46px);
 }
