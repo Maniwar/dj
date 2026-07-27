@@ -1318,9 +1318,7 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .lm-dot { opacity: 0.55; font-style: normal; }
 .tint-magenta .lm-item { color: var(--magenta); text-shadow: 0 0 8px rgba(255,31,143,0.65); }
 .tint-acid .lm-item { color: var(--acid); text-shadow: 0 0 8px rgba(99,255,46,0.6); }
-.tint-acid .lm-run { filter: drop-shadow(0 0 calc(2px + var(--m-beat) * 14px) rgba(99,255,46,0.55)); }
 .tint-blue .lm-item { color: var(--blue); text-shadow: 0 0 8px rgba(20,224,255,0.6); }
-.tint-blue .lm-run { filter: drop-shadow(0 0 calc(2px + var(--m-beat) * 14px) rgba(20,224,255,0.55)); }
 
 /* =========================================================
    KARAOKE PANEL
