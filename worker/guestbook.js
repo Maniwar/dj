@@ -86,14 +86,33 @@ export default {
       if (!verify.success) return json({ error: 'verification failed' }, 403, cors)
     }
 
-    // Rate limit per IP, if a KV namespace is bound. Optional because Turnstile already stops
-    // automation; this catches a determined human hammering the form.
+    // ---- FLOOD CONTROL -----------------------------------------------------------------------
+    // Turnstile stops automation, so anything reaching here is either a person or someone paying
+    // to solve challenges. Neither should be able to file an unbounded number of issues.
+    //
+    // Two limits, because they fail differently. PER-IP catches one person hammering the form and
+    // is trivially evaded by rotating addresses. The GLOBAL DAILY CAP is the one that actually
+    // holds: whatever the source, the queue cannot receive more than a fixed number of issues in a
+    // day. Losing a few genuine entries during an attack is a far better outcome than ten thousand
+    // issues to bulk-close, and a guestbook on a joke site does not legitimately see 200 signatures
+    // in a day.
     if (env.RATE) {
       const ip = request.headers.get('CF-Connecting-IP') || 'unknown'
-      const key = `gb:${ip}`
-      const seen = Number((await env.RATE.get(key)) || 0)
-      if (seen >= 5) return json({ error: 'slow down — try again later' }, 429, cors)
-      await env.RATE.put(key, String(seen + 1), { expirationTtl: 3600 })
+      const perIp = Number((await env.RATE.get(`gb:ip:${ip}`)) || 0)
+      if (perIp >= 5) return json({ error: 'slow down — try again later' }, 429, cors)
+
+      const day = new Date().toISOString().slice(0, 10)
+      const cap = Number(env.DAILY_CAP || 200)
+      const today = Number((await env.RATE.get(`gb:day:${day}`)) || 0)
+      if (today >= cap) {
+        // Answer as though it worked, for the same reason the honeypot does: an attacker who sees
+        // failure adapts, one who sees success moves on. The entry is simply dropped.
+        console.warn(`daily cap ${cap} reached — dropping submissions`)
+        return json({ ok: true }, 200, cors)
+      }
+
+      await env.RATE.put(`gb:ip:${ip}`, String(perIp + 1), { expirationTtl: 3600 })
+      await env.RATE.put(`gb:day:${day}`, String(today + 1), { expirationTtl: 172800 })
     }
 
     const repo = env.QUEUE_REPO || 'Maniwar/club-humidity-guestbook'

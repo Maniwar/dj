@@ -6,11 +6,15 @@ compatibility_date = "2026-01-01"
 # Not secrets — these are safe in git. Anything sensitive goes in `wrangler secret put`.
 ALLOWED_ORIGIN = "https://club-humidity.com,http://localhost:4173,http://localhost:5173"
 QUEUE_REPO = "Maniwar/club-humidity-guestbook"
+# Hard ceiling on issues filed per day, whatever the source. A guestbook on a joke site does not
+# legitimately see this many signatures, and the cost of an attack should be a quiet day rather
+# than a queue nobody can face.
+DAILY_CAP = "200"
 
-# Optional per-IP rate limit. Create with:
+# REQUIRED for flood control. Without this binding both the per-IP limit and the global daily
+# cap are skipped entirely — Turnstile still stops automation, but nothing bounds a determined
+# human. Create it, paste the id, uncomment:
 #   npx wrangler kv namespace create RATE
-# then paste the id below and uncomment. Turnstile already stops automation; this is for a
-# determined human hammering the form.
 # [[kv_namespaces]]
 # binding = "RATE"
 # id = "..."

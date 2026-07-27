@@ -59,4 +59,23 @@ authority is not.
   motive rather than the symptom, and costs a real visitor nothing.
 - **280 characters** — period-correct, and long spam payloads do not fit.
 - **Turnstile** — the actual defence. Everything above is cheap screening for what gets past it.
-- **Rate limit** — optional KV binding, for a determined human rather than a bot.
+- **Rate limit** — per-IP, 5/hour.
+- **Global daily cap** — 200 issues/day, whatever the source. This is the one that actually
+  holds: per-IP limits are trivially evaded by rotating addresses, so the cap is what bounds a
+  determined attacker. Past it, submissions are silently dropped and answered as success.
+
+## What an attacker can actually achieve
+
+Worth being precise, because the answer shapes how much defence is warranted.
+
+| | Possible? |
+|---|---|
+| Get spam onto club-humidity.com | **No.** The wall is a static file; publishing needs a commit |
+| Deface or alter the site | **No.** No write path exists |
+| Read anything | **No.** The Worker only writes |
+| Flood the issue queue | Bounded at `DAILY_CAP` |
+| Burn Worker requests | Cloudflare free tier is 100k/day |
+
+The worst realistic outcome is a quiet day for the guestbook and some issues to bulk-close. That
+is why there is no elaborate defence here: the architecture removes the prize, and the rest is
+housekeeping. **Set up the KV namespace** — without it both limits are skipped.
