@@ -931,7 +931,19 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .divider span { box-shadow: 0 0 calc((var(--m-beat) + var(--m-down, 0)) * 16px)
   rgba(255,31,143, calc(var(--m-beat) * 0.6 + var(--m-down, 0) * 0.5)); }
 /* scrolling lyric text rides the beat as well */
-.lm-item { transform: scale(calc(1 + var(--m-beat) * 0.035)); display: inline-block; }
+/* THE BEAT PULSE LIVES ON THE RUN, NOT ON EVERY WORD.
+   Measured: 471 elements recompute when a beat variable changes, and 400 of them are .lm-item —
+   85% of all beat-driven work is the lyric marquee's words, each carrying a transform AND a
+   text-shadow. That is the cumulative budget the jitter sits on top of: bisecting the variables
+   showed any TWO of beat/level/down are fine together and all THREE are not, with no single rule
+   reading all three, so it is aggregate work rather than one bad declaration.
+
+   .lm-run is the scrolling container — one element per marquee instead of four hundred words.
+   Scaling it pulses the whole strip together, which for text sliding past at speed is
+   indistinguishable from scaling each word, and it takes the beat-driven element count from 471
+   to about 71. */
+.lm-run { scale: calc(1 + var(--m-beat) * 0.035); }
+.lm-item { display: inline-block; }
 /* the player's LCD track title glows with the track it's playing */
 .lcd-title { text-shadow: 0 0 calc(2px + var(--m-beat) * 14px) currentColor; }
 
@@ -1304,9 +1316,11 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .lm-run { display: inline-block; white-space: nowrap; animation: marquee-seamless 40s linear infinite; will-change: transform; }
 .lm-item { font-family: 'Anton', sans-serif; text-transform: uppercase; font-size: clamp(1rem, 2.6vw, 1.7rem); letter-spacing: 0.02em; }
 .lm-dot { opacity: 0.55; font-style: normal; }
-.tint-magenta .lm-item { color: var(--magenta); text-shadow: 0 0 calc(6px + var(--m-beat) * 22px) rgba(255,31,143,0.65); }
-.tint-acid .lm-item { color: var(--acid); text-shadow: 0 0 calc(6px + var(--m-beat) * 22px) rgba(99,255,46,0.6); }
-.tint-blue .lm-item { color: var(--blue); text-shadow: 0 0 calc(6px + var(--m-beat) * 22px) rgba(20,224,255,0.6); }
+.tint-magenta .lm-item { color: var(--magenta); text-shadow: 0 0 8px rgba(255,31,143,0.65); }
+.tint-acid .lm-item { color: var(--acid); text-shadow: 0 0 8px rgba(99,255,46,0.6); }
+.tint-acid .lm-run { filter: drop-shadow(0 0 calc(2px + var(--m-beat) * 14px) rgba(99,255,46,0.55)); }
+.tint-blue .lm-item { color: var(--blue); text-shadow: 0 0 8px rgba(20,224,255,0.6); }
+.tint-blue .lm-run { filter: drop-shadow(0 0 calc(2px + var(--m-beat) * 14px) rgba(20,224,255,0.55)); }
 
 /* =========================================================
    KARAOKE PANEL
