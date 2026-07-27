@@ -22,6 +22,7 @@ import BeatCursor from './components/BeatCursor'
 import SectionCut from './components/SectionCut'
 import VisualizerMode from './components/VisualizerMode'
 import { startCalmMode } from './lib/calmMode'
+import Diagnostics from './components/Diagnostics'
 import TourRail from './components/TourRail'
 import Lyrics from './components/player/Lyrics'
 import { useSiteStore } from './state/useSiteStore'
@@ -64,6 +65,7 @@ export default function App() {
       <PauseOffscreen />
       <BeatCursor />
       <VisualizerMode />
+      <Diagnostics />
       <FrictionOverlay />
 
       <div className="content">
