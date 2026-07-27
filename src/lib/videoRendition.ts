@@ -46,6 +46,21 @@ export function prefersHdVideo(): boolean {
   // on a metered or slow connection the smaller file wins regardless of how big the panel is
   if (conn?.saveData || /(^|-)2g$/.test(conn?.effectiveType ?? '')) return (cached = false)
 
+  // A TOUCH DEVICE NEVER GETS HD, however many pixels it has.
+  //
+  // Pixel count was the only test here, and it is a measure of the SCREEN, not of the machine
+  // behind it. A Samsung Tab Ultra with its browser maximised is ~1848 CSS px at DPR 2 — 3696
+  // physical — so it sailed past this threshold and was handed 1080p to decode alongside the
+  // WebGL rig, on a tablet GPU. Shrinking the window dropped it under the line and back to 720p,
+  // which is why the flicker looked like it depended on window size: it did, but only because
+  // window size was standing in for which video file got loaded. Confirmed by ?nobroadcast
+  // removing the symptom entirely.
+  //
+  // Phones and tablets have mobile-class video decoders and a shared memory bus no matter how
+  // many pixels the panel has. `(pointer: coarse)` identifies them at any window size and does
+  // not change when the user resizes, so the choice cannot flip mid-session.
+  if (window.matchMedia?.('(pointer: coarse)').matches) return (cached = false)
+
   // physical pixels, not CSS pixels: that's what the compositor actually has to fill, so a
   // retina laptop at 1512 CSS px is really driving 3024 and does benefit from the larger source
   const physical = window.innerWidth * (window.devicePixelRatio || 1)
