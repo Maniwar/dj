@@ -4,6 +4,9 @@ import { GUESTBOOK_SEED, type GuestPost } from '../../data/guestbook.seed'
 const LS_POSTS = 'ch_guestbook_posts'
 const LS_LIKES = 'ch_guestbook_likes'
 
+const ENDPOINT = import.meta.env.VITE_GUESTBOOK_ENDPOINT as string | undefined
+const TURNSTILE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined
+
 const RANDOM_HANDLES = ['xX_r4ver_Xx', 'moisture_maxx', 'euro_trash_420', 'dialup_deb', 'sub_woofer_stan']
 
 function load<T>(key: string, fallback: T): T {
@@ -20,6 +23,22 @@ export default function Guestbook() {
   const [liked, setLiked] = useState<Record<string, boolean>>(() => load(LS_LIKES, {}))
   const [name, setName] = useState('')
   const [body, setBody] = useState('')
+  // 'idle' | 'sending' | 'queued' | the error text
+  const [status, setStatus] = useState<string>('idle')
+
+  // Turnstile's script is loaded only when the guestbook is actually wired up, and only once.
+  // Pulling in a third-party script on a page that has no endpoint to post to would be a request
+  // and a widget for nothing.
+  useEffect(() => {
+    if (!ENDPOINT || !TURNSTILE_KEY) return
+    if (document.getElementById('cf-turnstile-script')) return
+    const el = document.createElement('script')
+    el.id = 'cf-turnstile-script'
+    el.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
+    el.async = true
+    el.defer = true
+    document.head.appendChild(el)
+  }, [])
 
   useEffect(() => localStorage.setItem(LS_POSTS, JSON.stringify(mine)), [mine])
   useEffect(() => localStorage.setItem(LS_LIKES, JSON.stringify(liked)), [liked])
@@ -42,8 +61,39 @@ export default function Guestbook() {
       body: text,
       likes: 0,
     }
+    // THE LOCAL ECHO STAYS. The submitter sees their own entry immediately, whether or not it is
+    // ever approved — otherwise the form feels broken while they wait, and this is what has always
+    // made the wall feel alive. What is public and what you can see are simply different things.
     setMine((m) => [post, ...m])
     setBody('')
+
+    // With no endpoint configured the guestbook behaves exactly as it always has: a private,
+    // per-device wall. That is a working feature, not a broken one, so the absence of a backend
+    // must never surface as an error.
+    if (!ENDPOINT) return
+
+    setStatus('sending')
+    const form = e.target as HTMLFormElement
+    const token =
+      (form.querySelector('[name="cf-turnstile-response"]') as HTMLInputElement | null)?.value ?? ''
+    fetch(ENDPOINT, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        name: handle,
+        body: text,
+        token,
+        // honeypot: hidden from people, filled by bots that complete every field
+        website: (form.querySelector('[name="website"]') as HTMLInputElement | null)?.value ?? '',
+      }),
+    })
+      .then((r) => r.json().then((j) => ({ ok: r.ok, j })))
+      .then(({ ok, j }) => setStatus(ok && j.ok ? 'queued' : j.error || 'could not send'))
+      .catch(() => setStatus('could not send'))
+      .finally(() => {
+        // reset the widget so a second entry gets a fresh token
+        ;(window as any).turnstile?.reset?.()
+      })
   }
 
   const like = (id: string) => setLiked((l) => ({ ...l, [id]: !l[id] }))
@@ -71,10 +121,31 @@ export default function Guestbook() {
             maxLength={280}
             onChange={(e) => setBody(e.target.value)}
           />
-          <button className="gb-submit" type="submit">
-            POST ►
+          {/* HONEYPOT. Hidden from people and from screen readers, present in the DOM for bots
+              that fill every field. Not display:none — some bots skip those. */}
+          <input
+            name="website"
+            className="gb-hp"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+          />
+          <button className="gb-submit" type="submit" disabled={status === 'sending'}>
+            {status === 'sending' ? 'SENDING…' : 'POST ►'}
           </button>
         </form>
+
+        {ENDPOINT && TURNSTILE_KEY && (
+          <div className="cf-turnstile" data-sitekey={TURNSTILE_KEY} data-theme="dark" />
+        )}
+
+        {status !== 'idle' && status !== 'sending' && (
+          <p className="gb-status" role="status">
+            {status === 'queued'
+              ? '>> ENTRY RECEIVED. THE DOOR STAFF ARE REVIEWING IT. <<'
+              : `>> ${status} <<`}
+          </p>
+        )}
 
         <div className="gb-list">
           {posts.map((p) => {

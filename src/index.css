@@ -3095,3 +3095,9 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
       radial-gradient(155% 120% at 50% 46%, transparent 76%, rgba(3, 3, 8, 0.18) 100%);
   }
 }
+
+/* Honeypot: reachable by a bot filling every field, invisible and unfocusable for everyone else.
+   Deliberately NOT display:none — some bots skip hidden inputs, and the point is that it gets
+   filled. Clipped instead, with aria-hidden and tabIndex -1 so no real person can land on it. */
+.gb-hp { position:absolute; left:-9999px; width:1px; height:1px; opacity:0; pointer-events:none; }
+.gb-status { font-family:'Courier New',monospace; font-size:0.8rem; color:var(--acid); margin:0.75rem 0 0; letter-spacing:0.06em; }
