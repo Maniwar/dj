@@ -1487,7 +1487,15 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    The glow is kept, frozen at roughly where it sits on a moderate beat, so nothing looks
    flat. Beat reaction is not lost either: the transform-based lift and scale further up are
    composited, cost nothing, and still pulse. Only the repaint-forcing half is switched off. */
-@media (max-width: 768px), (max-height: 600px) {
+/* (pointer: coarse) catches TABLETS, which the width and height tests miss entirely. A Samsung
+   Tab Ultra with its browser maximised is ~1848x1152 — neither narrow nor short — so it kept every
+   one of the audio-driven text-shadows and filters below. Those REPAINT on every frame --m-beat
+   changes, which is every frame music is playing: violent flicker at full width, smooth the moment
+   the window is made smaller, and only ever while a track plays.
+
+   The JS side (PERF.isMobile) keys on the same signal. CSS cannot read that flag, so this states
+   it independently — change one, change both. */
+@media (max-width: 768px), (max-height: 600px), (pointer: coarse) {
   /* The beat pulse is BACK on phones. Killing it was treating the symptom: the flicker was
      never the pulse itself, it was a per-frame transform on a layer that had no promotion, so
      every beat repainted the page beneath it. All three still layers are promoted permanently
