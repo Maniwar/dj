@@ -36,6 +36,11 @@ export default function Guestbook() {
   // The script itself is only loaded when the guestbook is actually wired up. Pulling in a
   // third-party script on a page with nowhere to post would be a request and a widget for nothing.
   const widgetRef = useRef<HTMLDivElement>(null)
+  // Turnstile's widget id. The token is read through getResponse(id), NOT by finding the hidden
+  // cf-turnstile-response input: that input lives inside the div Turnstile renders into, which is
+  // a SIBLING of the form, so form.querySelector never found it and every submission went out
+  // with an empty token. Asking the API removes the dependency on where the widget sits.
+  const widgetId = useRef<string | null>(null)
   useEffect(() => {
     if (!ENDPOINT || !TURNSTILE_KEY) return
     let cancelled = false
@@ -44,7 +49,7 @@ export default function Guestbook() {
       const ts = (window as any).turnstile
       if (cancelled || !ts || !widgetRef.current) return
       if (widgetRef.current.childElementCount) return // already rendered
-      ts.render(widgetRef.current, { sitekey: TURNSTILE_KEY, theme: 'dark' })
+      widgetId.current = ts.render(widgetRef.current, { sitekey: TURNSTILE_KEY, theme: 'dark' })
     }
 
     if ((window as any).turnstile) {
@@ -106,8 +111,9 @@ export default function Guestbook() {
 
     setStatus('sending')
     const form = e.target as HTMLFormElement
+    const ts = (window as any).turnstile
     const token =
-      (form.querySelector('[name="cf-turnstile-response"]') as HTMLInputElement | null)?.value ?? ''
+      (widgetId.current != null ? ts?.getResponse?.(widgetId.current) : ts?.getResponse?.()) ?? ''
     fetch(ENDPOINT, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -124,7 +130,8 @@ export default function Guestbook() {
       .catch(() => setStatus('could not send'))
       .finally(() => {
         // reset the widget so a second entry gets a fresh token
-        ;(window as any).turnstile?.reset?.()
+        // reset the specific widget, so a second entry gets a fresh token
+        ;(window as any).turnstile?.reset?.(widgetId.current ?? undefined)
       })
   }
 
