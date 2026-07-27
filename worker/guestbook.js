@@ -95,7 +95,16 @@ export default {
         method: 'POST',
         body: form,
       }).then((r) => r.json())
-      if (!verify.success) return json({ error: 'verification failed' }, 403, cors)
+      if (!verify.success) {
+        // siteverify names its own cause in error-codes, and the distinctions matter:
+        //   invalid-input-secret   → TURNSTILE_SECRET is wrong, or belongs to another widget
+        //   invalid-input-response → the token is malformed or empty
+        //   timeout-or-duplicate   → token already spent, or older than ~5 minutes
+        // Logged rather than returned: the browser gets a generic message, the operator gets
+        // the actual reason. Guessing between these three costs a deploy cycle each time.
+        console.error('turnstile rejected:', JSON.stringify(verify['error-codes'] || verify))
+        return json({ error: 'verification failed' }, 403, cors)
+      }
     }
 
     // ---- FLOOD CONTROL -----------------------------------------------------------------------

@@ -7,6 +7,23 @@ const LS_LIKES = 'ch_guestbook_likes'
 const ENDPOINT = import.meta.env.VITE_GUESTBOOK_ENDPOINT as string | undefined
 const TURNSTILE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as string | undefined
 
+// Every local post was hardcoded to one cyan, so a wall of them read as one person talking to
+// themselves. The colour is DERIVED FROM THE HANDLE rather than picked at random: the same name
+// always gets the same colour, which reads as identity, while random would repaint someone on
+// every reload and make two entries by the same person look like two strangers.
+//
+// Palette is the site's own accent set — the seed entries already use these, so new posts sit in
+// the same world instead of introducing colours that appear nowhere else.
+const POST_COLORS = ['#12e0c0', '#ff1f8f', '#8bff3b', '#e6c05a', '#5bc8ff', '#ff7a3d', '#c08bff', '#ff5b5b']
+const POST_FLAGS = ['💦', '🔥', '💿', '📼', '🕶️', '🎧', '🍸', '⚡']
+
+/** Stable per-handle index: same name → same colour and flag, every time, on every device. */
+const handleHash = (h: string) => {
+  let n = 0
+  for (let i = 0; i < h.length; i++) n = (n * 31 + h.charCodeAt(i)) >>> 0
+  return n
+}
+
 const RANDOM_HANDLES = ['xX_r4ver_Xx', 'moisture_maxx', 'euro_trash_420', 'dialup_deb', 'sub_woofer_stan']
 
 function load<T>(key: string, fallback: T): T {
@@ -92,8 +109,8 @@ export default function Guestbook() {
     const post: GuestPost = {
       id: `me-${now.getTime()}`,
       user: handle,
-      flag: '💦',
-      color: '#12e0c0',
+      flag: POST_FLAGS[handleHash(handle) % POST_FLAGS.length],
+      color: POST_COLORS[handleHash(handle) % POST_COLORS.length],
       time: now.toISOString().slice(0, 16).replace('T', ' '),
       body: text,
       likes: 0,
