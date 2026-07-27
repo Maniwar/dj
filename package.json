@@ -7,13 +7,14 @@
   "scripts": {
     "gen:tracks": "node scripts/build-tracks.mjs",
     "gen:lyrics": "node scripts/build-lyrics.mjs",
-    "prebuild": "npm run gen:tracks",
+    "prebuild": "npm run gen:tracks && npm run gen:seo",
     "predev": "node scripts/build-tracks.mjs",
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "gen:images": "node scripts/gen-gemini-images.mjs",
-    "gen:videos": "node scripts/gen-atlascloud-videos.mjs"
+    "gen:videos": "node scripts/gen-atlascloud-videos.mjs",
+    "gen:seo": "node scripts/build-seo.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.114.0",
