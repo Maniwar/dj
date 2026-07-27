@@ -3198,3 +3198,15 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   animation: none !important;
   will-change: auto;
 }
+
+/* HALVE THE BACKGROUND MEMORY ON A CALM DEVICE.
+   The Broadcast keeps TWO .bc-frame layers alive at all times so it can cross-fade between
+   stills. Both hold a full-screen background image and both are promoted, so the pair is resident
+   permanently — roughly 13MB of texture each at 1691x960 @1.75, on top of the video and the
+   shader canvas. That is the set ?nobroadcast removes, and removing it is what stops the flicker.
+
+   `display: none` on the inactive one takes it out of the layer tree entirely rather than merely
+   making it transparent — an opacity-0 layer is still allocated. The cross-fade becomes a hard
+   cut, which is a small aesthetic loss on exactly the devices that cannot afford the alternative,
+   and is invisible next to a background that flashes in and out. */
+:root.calm .bc-frame:not(.on) { display: none; }
