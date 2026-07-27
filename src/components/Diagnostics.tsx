@@ -60,6 +60,13 @@ export default function Diagnostics() {
             `video ${playing}/${vids.length} playing  ${src || '—'}`,
             `canvases ${document.querySelectorAll('canvas').length}  anims ${document.getAnimations?.().length ?? '?'}`,
             `cores ${navigator.hardwareConcurrency ?? '?'}  mem ${(navigator as any).deviceMemory ?? '?'}GB`,
+            // BROWSER-LEVEL ZOOM. If the whole interface appears to pulse — player, analyser and
+            // effects together — and no CSS transform sits on a common ancestor, the remaining
+            // explanation is the visual viewport itself scaling. Android reports pinch-zoom and
+            // font-boosting here, and neither is visible from any stylesheet.
+            `vv scale ${(visualViewport?.scale ?? 1).toFixed(3)}  off ${Math.round(visualViewport?.offsetTop ?? 0)}  vvh ${Math.round(visualViewport?.height ?? 0)}`,
+            // and whether anything large is carrying a live transform right now
+            `root tf ${getComputedStyle(document.documentElement).transform}  body tf ${getComputedStyle(document.body).transform}`,
           ].join('\n')
           worst = 0
         }
