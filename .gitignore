@@ -9,6 +9,11 @@ smoke-shots
 # secrets — API keys must never reach GitHub
 .env
 .env.*
+# ...except this one. It holds ONLY public values — the Turnstile SITE key and the Worker URL,
+# both of which ship in the JS bundle regardless — and GitHub Actions needs them at build time.
+# Ignoring it would leave the guestbook permanently dormant in production while working locally,
+# which is the kind of failure nobody notices. Secrets still live only in Worker secrets.
+!.env.production
 !.env.example
 
 # intermediate uncompressed video renders (we commit the compressed .mp4)
