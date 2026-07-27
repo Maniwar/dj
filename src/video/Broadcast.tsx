@@ -163,7 +163,7 @@ export default function Broadcast() {
       )}
       {/* club-atmosphere overlays */}
       <div className="bc-strobe" />
-      <div className="bc-grain" />
+      {!PERF.noGrain && <div className="bc-grain" />}
       <div className="bc-scan" />
       <div className="bc-vignette" />
       <div className="bc-rec">

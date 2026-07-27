@@ -3267,3 +3267,18 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    or right at the same moment it moved up or down. Reported as jerking up and to the left.
    Pinning the width makes the block's dimensions constant, so nothing re-centres. */
 .hero-gauge { width: min(480px, 100%); }
+
+
+/* NOTHING ANIMATES BEHIND THE GATE.
+   Measured: 27 running animations while the login screen is still up. The Broadcast, every
+   marquee and every gold sheen are mounted and animating behind an OPAQUE overlay, so none of
+   that work reaches a viewer — it is pure heat, and it means the device arrives at the main page
+   already loaded, which is exactly when the flicker shows up.
+   Mounting early is deliberate and stays: it is what lets assets precache during the boot
+   sequence. Only the animation is paused, so nothing about load order changes.
+   `.content` is excluded from nothing here — the gate covers the page, so pausing is invisible
+   by definition, and everything resumes the moment the class comes off. */
+:root.gated *, :root.gated *::before, :root.gated *::after { animation-play-state: paused !important; }
+/* ...except the gate itself, which is the only thing anyone can actually see. */
+:root.gated .boot-gate, :root.gated .boot-gate *,
+:root.gated .boot-gate *::before, :root.gated .boot-gate *::after { animation-play-state: running !important; }

@@ -32,4 +32,8 @@ export const PERF = {
   noShader: low || has('noshader'),
   noReact: low || has('noreact'),
   noBroadcast: has('nobroadcast'),
+  // ?nograin — drops ONLY .bc-grain, the full-screen mix-blend-mode: overlay layer that animates
+  // forever inside the Broadcast. ?nobroadcast removes the video, the stills AND the grain at
+  // once, so it cannot tell us which of them costs. This is the flag that separates them.
+  noGrain: has('nograin'),
 }

@@ -35,6 +35,19 @@ export default function Diagnostics() {
     let maxDx = 0
     let maxDy = 0
     let prevRect: { x: number; y: number } | null = null
+    let blendCount = 0
+    let promotedCount = 0
+    let pausedAnims = 0
+    let heapMB = 0
+    let longTasks = 0
+
+    // Long tasks block the main thread for >50ms. They do not show up in a frame-rate average,
+    // which is why this page can read 60fps while visibly misbehaving.
+    let po: PerformanceObserver | null = null
+    try {
+      po = new PerformanceObserver((l) => { longTasks += l.getEntries().length })
+      po.observe({ entryTypes: ['longtask'] })
+    } catch { /* not supported everywhere */ }
 
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick)
@@ -50,6 +63,19 @@ export default function Diagnostics() {
         slowPct = frames ? Math.round((slow / frames) * 100) : 0
         frames = slow = 0
         windowStart = now
+
+        // These walk the DOM, so they run once per half-second window rather than per frame.
+        const all = document.querySelectorAll<HTMLElement>('body *')
+        let b = 0, pr = 0
+        all.forEach((el) => {
+          const cs = getComputedStyle(el)
+          if (cs.mixBlendMode !== 'normal') b++
+          if (cs.willChange !== 'auto' || cs.transform !== 'none') pr++
+        })
+        blendCount = b
+        promotedCount = pr
+        pausedAnims = (document.getAnimations?.() ?? []).filter((a) => a.playState === 'paused').length
+        heapMB = Math.round(((performance as any).memory?.usedJSHeapSize ?? 0) / 1048576)
 
         // sample the headline's position each window; any change is a real layout shift
         const h = document.querySelector('.hero-title') as HTMLElement | null
@@ -93,6 +119,14 @@ export default function Diagnostics() {
             // and whether anything large is carrying a live transform right now
             `root tf ${getComputedStyle(document.documentElement).transform}  body tf ${getComputedStyle(document.body).transform}`,
             `SHIFTS ${moves}  max dx ${maxDx}px  dy ${maxDy}px`,
+            // BLEND LAYERS force the compositor to read back the framebuffer to blend against
+            // whatever is beneath. On a tile-based mobile GPU that is the classic cause of layers
+            // being evicted and re-allocated, which is what flicker looks like. Counting them
+            // separates "too much work" from "too much blending".
+            `blend ${blendCount}  promoted ${promotedCount}  paused-anims ${pausedAnims}`,
+            // Heap is not GPU memory, but a climbing heap alongside flicker points at something
+            // accumulating rather than a steady-state cost.
+            `heap ${heapMB}MB  longtasks ${longTasks}`,
             `hero @ ${lastPos}`,
           ].join('\n')
           worst = 0
@@ -100,7 +134,10 @@ export default function Diagnostics() {
       }
     }
     raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
+    return () => {
+      cancelAnimationFrame(raf)
+      po?.disconnect()
+    }
   }, [on])
 
   if (!on) return null

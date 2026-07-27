@@ -48,6 +48,17 @@ export default function App() {
 
   const bumpHits = useSiteStore((s) => s.bumpHits)
   const loggedOn = useSiteStore((s) => s.loggedOn)
+  const booting = useSiteStore((s) => s.booting)
+
+  // Pause everything behind the boot gate. Mounting early stays — that is what precaches during
+  // the boot sequence — but nothing behind an opaque overlay needs to animate. Measured: 27
+  // running animations on the login screen, none of them visible to anyone.
+  const behindGate = !loggedOn || booting
+  useEffect(() => {
+    document.documentElement.classList.toggle('gated', behindGate)
+  }, [behindGate])
+
+
   useEffect(() => {
     const id = setInterval(bumpHits, 4200) // hit-counter creeps up while you watch
     return () => clearInterval(id)
