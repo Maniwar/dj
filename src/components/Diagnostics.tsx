@@ -25,6 +25,16 @@ export default function Diagnostics() {
     let windowStart = last
     let fps = 0
     let slowPct = 0
+    // MEASURE THE JERK ITSELF, on the device, rather than inferring it from a headless test that
+    // sets the text directly. The real app changes this content through a React re-render, and
+    // the readings change character COUNT (43°C -> 9°C), not just glyph width — neither of which
+    // a scripted string swap reproduces. This records where the headline and the player actually
+    // sit, how often that changes, and by how much.
+    let lastPos = ''
+    let moves = 0
+    let maxDx = 0
+    let maxDy = 0
+    let prevRect: { x: number; y: number } | null = null
 
     const tick = (now: number) => {
       raf = requestAnimationFrame(tick)
@@ -40,6 +50,21 @@ export default function Diagnostics() {
         slowPct = frames ? Math.round((slow / frames) * 100) : 0
         frames = slow = 0
         windowStart = now
+
+        // sample the headline's position each window; any change is a real layout shift
+        const h = document.querySelector('.hero-title') as HTMLElement | null
+        if (h) {
+          const r = h.getBoundingClientRect()
+          const x = Math.round(r.left)
+          const y = Math.round(r.top + window.scrollY) // page-relative, so scrolling is not a shift
+          if (prevRect && (prevRect.x !== x || prevRect.y !== y)) {
+            moves++
+            maxDx = Math.max(maxDx, Math.abs(x - prevRect.x))
+            maxDy = Math.max(maxDy, Math.abs(y - prevRect.y))
+          }
+          prevRect = { x, y }
+          lastPos = `${x},${y}`
+        }
 
         const el = ref.current
         if (el) {
@@ -67,6 +92,8 @@ export default function Diagnostics() {
             `vv scale ${(visualViewport?.scale ?? 1).toFixed(3)}  off ${Math.round(visualViewport?.offsetTop ?? 0)}  vvh ${Math.round(visualViewport?.height ?? 0)}`,
             // and whether anything large is carrying a live transform right now
             `root tf ${getComputedStyle(document.documentElement).transform}  body tf ${getComputedStyle(document.body).transform}`,
+            `SHIFTS ${moves}  max dx ${maxDx}px  dy ${maxDy}px`,
+            `hero @ ${lastPos}`,
           ].join('\n')
           worst = 0
         }
