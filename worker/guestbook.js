@@ -45,7 +45,19 @@ export default {
     const origin = request.headers.get('Origin') || ''
     const cors = allowed.includes(origin) ? origin : allowed[0]
 
-    if (request.method === 'OPTIONS') return json({ ok: true }, 204, cors)
+    // 204 must have NO body — constructing a Response with one throws, and the Worker then
+    // returns 500 to the preflight, which the browser reports only as a generic network failure.
+    // That is why a broken preflight is so easy to misread as "the endpoint is unreachable".
+    if (request.method === 'OPTIONS')
+      return new Response(null, {
+        status: 204,
+        headers: {
+          'access-control-allow-origin': cors,
+          'access-control-allow-headers': 'content-type',
+          'access-control-allow-methods': 'POST, OPTIONS',
+          'access-control-max-age': '86400',
+        },
+      })
     if (request.method !== 'POST') return json({ error: 'POST only' }, 405, cors)
     if (origin && !allowed.includes(origin)) return json({ error: 'origin not allowed' }, 403, cors)
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { GUESTBOOK_SEED, type GuestPost } from '../../data/guestbook.seed'
 
 const LS_POSTS = 'ch_guestbook_posts'
@@ -26,18 +26,50 @@ export default function Guestbook() {
   // 'idle' | 'sending' | 'queued' | the error text
   const [status, setStatus] = useState<string>('idle')
 
-  // Turnstile's script is loaded only when the guestbook is actually wired up, and only once.
-  // Pulling in a third-party script on a page that has no endpoint to post to would be a request
-  // and a widget for nothing.
+  // TURNSTILE, RENDERED EXPLICITLY.
+  //
+  // The implicit mode — drop a .cf-turnstile div and let the script find it — scans the DOM when
+  // the script loads and does not watch for later additions. This section mounts with React, well
+  // after that scan, so the widget silently never appeared: no error, no iframe, and every
+  // submission rejected 403 because the token was empty. Explicit render removes the race.
+  //
+  // The script itself is only loaded when the guestbook is actually wired up. Pulling in a
+  // third-party script on a page with nowhere to post would be a request and a widget for nothing.
+  const widgetRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!ENDPOINT || !TURNSTILE_KEY) return
-    if (document.getElementById('cf-turnstile-script')) return
-    const el = document.createElement('script')
-    el.id = 'cf-turnstile-script'
-    el.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
-    el.async = true
-    el.defer = true
-    document.head.appendChild(el)
+    let cancelled = false
+
+    const render = () => {
+      const ts = (window as any).turnstile
+      if (cancelled || !ts || !widgetRef.current) return
+      if (widgetRef.current.childElementCount) return // already rendered
+      ts.render(widgetRef.current, { sitekey: TURNSTILE_KEY, theme: 'dark' })
+    }
+
+    if ((window as any).turnstile) {
+      render()
+    } else if (!document.getElementById('cf-turnstile-script')) {
+      const el = document.createElement('script')
+      el.id = 'cf-turnstile-script'
+      el.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
+      el.async = true
+      el.defer = true
+      el.onload = render
+      document.head.appendChild(el)
+    } else {
+      // script already in flight from an earlier mount — poll briefly for the global
+      const t = window.setInterval(() => {
+        if ((window as any).turnstile) {
+          window.clearInterval(t)
+          render()
+        }
+      }, 120)
+      window.setTimeout(() => window.clearInterval(t), 8000)
+    }
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => localStorage.setItem(LS_POSTS, JSON.stringify(mine)), [mine])
@@ -135,9 +167,7 @@ export default function Guestbook() {
           </button>
         </form>
 
-        {ENDPOINT && TURNSTILE_KEY && (
-          <div className="cf-turnstile" data-sitekey={TURNSTILE_KEY} data-theme="dark" />
-        )}
+        {ENDPOINT && TURNSTILE_KEY && <div ref={widgetRef} className="cf-turnstile" />}
 
         {status !== 'idle' && status !== 'sending' && (
           <p className="gb-status" role="status">
