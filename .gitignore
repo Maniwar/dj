@@ -37,3 +37,6 @@ artwork/canvas/raw/
 # scripts/build-seo.mjs (which prebuild runs) but are deliberately COMMITTED: they are the
 # site's crawlable surface, and a diff is the only practical way to review what search
 # engines will be served. Regenerate with `npm run gen:seo` rather than editing by hand.
+
+# Local operational notes — deliberately untracked, not for the public repo.
+worker/SETUP.local.md
