@@ -34,7 +34,8 @@ export default function Diagnostics() {
     let moves = 0
     let maxDx = 0
     let maxDy = 0
-    let prevRect: { x: number; y: number } | null = null
+    const tracked = new Map<string, { x: number; y: number }>()
+    let worstEl = '-'
     let blendCount = 0
     let promotedCount = 0
     let pausedAnims = 0
@@ -77,20 +78,43 @@ export default function Diagnostics() {
         pausedAnims = (document.getAnimations?.() ?? []).filter((a) => a.playState === 'paused').length
         heapMB = Math.round(((performance as any).memory?.usedJSHeapSize ?? 0) / 1048576)
 
-        // sample the headline's position each window; any change is a real layout shift
-        const h = document.querySelector('.hero-title') as HTMLElement | null
-        if (h) {
-          const r = h.getBoundingClientRect()
-          const x = Math.round(r.left)
-          const y = Math.round(r.top + window.scrollY) // page-relative, so scrolling is not a shift
-          if (prevRect && (prevRect.x !== x || prevRect.y !== y)) {
-            moves++
-            maxDx = Math.max(maxDx, Math.abs(x - prevRect.x))
-            maxDy = Math.max(maxDy, Math.abs(y - prevRect.y))
+        // WATCH SEVERAL ELEMENTS, AT SUB-PIXEL PRECISION.
+        //
+        // Reported: SHIFTS 0 while movement is plainly visible. Two blind spots caused that.
+        // Rounding to whole pixels hides a half-pixel shift, and at DPR 1.75 — a FRACTIONAL
+        // ratio — half-pixel movement is exactly what layer re-rasterization produces and is
+        // clearly visible on screen. And watching only .hero-title says nothing about the player
+        // or anything else the eye is actually following.
+        //
+        // If these stay perfectly still while movement is still visible, the conclusion is firm:
+        // it is not layout at all, it is rasterization, and no amount of reserving space will fix
+        // it.
+        for (const [key, sel] of [
+          ['hero', '.hero-title'],
+          ['play', '.player'],
+          ['gaug', '.hero-gauge'],
+          ['sect', '.section-title'],
+        ] as const) {
+          const node = document.querySelector(sel) as HTMLElement | null
+          if (!node) continue
+          const r = node.getBoundingClientRect()
+          const x = r.left
+          const y = r.top + window.scrollY // page-relative, so scrolling is not a shift
+          const prev = tracked.get(key)
+          if (prev) {
+            const dx = Math.abs(x - prev.x)
+            const dy = Math.abs(y - prev.y)
+            // 0.01px filters float noise without hiding a genuine half-pixel move
+            if (dx > 0.01 || dy > 0.01) {
+              moves++
+              if (dx > maxDx) maxDx = dx
+              if (dy > maxDy) maxDy = dy
+              worstEl = key
+            }
           }
-          prevRect = { x, y }
-          lastPos = `${x},${y}`
+          tracked.set(key, { x, y })
         }
+        lastPos = [...tracked.entries()].map(([k, v]) => `${k} ${v.x.toFixed(1)},${v.y.toFixed(1)}`).join('  ')
 
         const el = ref.current
         if (el) {
@@ -118,7 +142,7 @@ export default function Diagnostics() {
             `vv scale ${(visualViewport?.scale ?? 1).toFixed(3)}  off ${Math.round(visualViewport?.offsetTop ?? 0)}  vvh ${Math.round(visualViewport?.height ?? 0)}`,
             // and whether anything large is carrying a live transform right now
             `root tf ${getComputedStyle(document.documentElement).transform}  body tf ${getComputedStyle(document.body).transform}`,
-            `SHIFTS ${moves}  max dx ${maxDx}px  dy ${maxDy}px`,
+            `SHIFTS ${moves}  dx ${maxDx.toFixed(2)}  dy ${maxDy.toFixed(2)}  worst ${worstEl}`,
             // BLEND LAYERS force the compositor to read back the framebuffer to blend against
             // whatever is beneath. On a tile-based mobile GPU that is the classic cause of layers
             // being evicted and re-allocated, which is what flicker looks like. Counting them
