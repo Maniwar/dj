@@ -22,6 +22,7 @@ import BeatCursor from './components/BeatCursor'
 import SectionCut from './components/SectionCut'
 import VisualizerMode from './components/VisualizerMode'
 import { startCalmMode } from './lib/calmMode'
+import { startVideoDirector } from './lib/videoDirector'
 import Diagnostics from './components/Diagnostics'
 import TourRail from './components/TourRail'
 import Lyrics from './components/player/Lyrics'
@@ -42,6 +43,8 @@ export default function App() {
   // Measure real frame time and latch `.calm` if this device cannot keep up. Guessing the device
   // class from media queries was wrong three times in a row; this asks the machine instead.
   useEffect(() => startCalmMode(), [])
+  // Nine <video> elements exist; only the most visible one is allowed to decode.
+  useEffect(() => startVideoDirector(), [])
 
   const bumpHits = useSiteStore((s) => s.bumpHits)
   const loggedOn = useSiteStore((s) => s.loggedOn)
