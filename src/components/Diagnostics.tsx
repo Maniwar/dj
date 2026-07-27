@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { BUILD_STAMP } from '../version'
+import { PERF } from '../lib/perfFlags'
 
 // On-screen diagnostics, shown only with ?diag.
 //
@@ -41,6 +42,13 @@ export default function Diagnostics() {
     let pausedAnims = 0
     let heapMB = 0
     let longTasks = 0
+    const liveVars = PERF.live.size
+      ? [...PERF.live].join(',')
+      : PERF.freeze === 'beat'
+        ? 'all except beat'
+        : PERF.freeze === 'others'
+          ? 'beat only'
+          : 'ALL'
 
     // Long tasks block the main thread for >50ms. They do not show up in a frame-rate average,
     // which is why this page can read 60fps while visibly misbehaving.
@@ -160,6 +168,8 @@ export default function Diagnostics() {
             // Heap is not GPU memory, but a climbing heap alongside flicker points at something
             // accumulating rather than a steady-state cost.
             `heap ${heapMB}MB  longtasks ${longTasks}`,
+            // which audio variables are actually updating — so a bisect run is unambiguous
+            `live vars ${liveVars}`,
             `layout @ ${lastPos}  (transforms excluded)`,
           ].join('\n')
           worst = 0

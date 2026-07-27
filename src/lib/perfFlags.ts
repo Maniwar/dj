@@ -52,6 +52,12 @@ export const PERF = {
   // takes freezing everything, the cause is the ACT of writing custom properties on :root, which
   // invalidates style for the whole document regardless of what any rule does with them.
   freeze: (/[?&]freeze=([a-z-]+)/i.exec(q)?.[1] ?? '') as '' | 'beat' | 'others',
+  // ?live=beat,level,down,... — ALLOWLIST. Only the named variables update; every other one is
+  // written once and then held. This is the bisect instrument: ?freeze=others (only --m-beat
+  // live) has no jitter and the full set does, so no single variable causes it — it is a
+  // combination, and the only way to find which is to add them back one at a time.
+  // Empty means "all live", i.e. normal behaviour.
+  live: new Set((/[?&]live=([a-z,]+)/i.exec(q)?.[1] ?? '').split(',').filter(Boolean)),
   // ?nofx=blur|alpha|transform — neutralise one CLASS of beat-driven declaration at a time.
   nofx: (/[?&]nofx=([a-z]+)/i.exec(q)?.[1] ?? '') as '' | 'blur' | 'alpha' | 'transform' | 'filter',
 }

@@ -32,8 +32,13 @@ export default function AudioReactive() {
     // ISOLATION: hold one group of variables at a constant while the rest keep updating. The
     // WRITE still happens once and then stops for the frozen group, so this separates "the effect
     // this variable drives is expensive" from "writing custom properties on :root is expensive".
-    const frozen = (name: string) =>
-      PERF.freeze === 'beat' ? name === '--m-beat' : PERF.freeze === 'others' ? name !== '--m-beat' : false
+    const frozen = (name: string) => {
+      // ?live= wins when present: only the named variables keep updating.
+      if (PERF.live.size) return !PERF.live.has(name.replace('--m-', ''))
+      if (PERF.freeze === 'beat') return name === '--m-beat'
+      if (PERF.freeze === 'others') return name !== '--m-beat'
+      return false
+    }
     // WRITE AS SELDOM AS POSSIBLE — the write itself is the cost.
     //
     // Proven on the device: freezing --m-beat alone removed the jitter, and so did freezing the
