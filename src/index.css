@@ -3235,4 +3235,26 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    rig message wraps. Declared here it resolves against the size that actually applies.
    3em holds two lines at every breakpoint's font-size; the gauge then never changes height,
    whichever of the three status messages is showing. */
-.gauge-read { min-height: 3em; font-variant-numeric: tabular-nums; }
+/* FIXED HEIGHT, NOT A MINIMUM — the box must be the same size at EVERY width.
+   min-height only helps where the content happens to fit under it: at any width where the long
+   rig message wraps to a third line, or where a wider font pushes it over, the box grows again
+   and everything below moves. A fixed height with overflow hidden cannot change size for any
+   content, at any width, in any font — which is the only version of this that is actually a fix
+   rather than a value that works on the screens I happened to measure.
+   Two lines is enough for all three messages down to phone widths; anything longer clips rather
+   than shoving the page around, which is the right trade for a decorative status readout. */
+.gauge-read {
+  height: 3em;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The player's readout row must never wrap. It is a fixed 348px wide but NOT a fixed height, so
+   a wrap adds a line and the panel expands and constricts — reported as the player growing and
+   shrinking with the humidity text. nowrap makes that structurally impossible instead of
+   depending on the strings staying short. */
+.lcd-meta {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow: hidden;
+}
