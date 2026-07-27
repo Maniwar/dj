@@ -1,0 +1,16 @@
+name = "club-humidity-guestbook"
+main = "guestbook.js"
+compatibility_date = "2026-01-01"
+
+[vars]
+# Not secrets — these are safe in git. Anything sensitive goes in `wrangler secret put`.
+ALLOWED_ORIGIN = "https://club-humidity.com,http://localhost:4173,http://localhost:5173"
+QUEUE_REPO = "Maniwar/club-humidity-guestbook"
+
+# Optional per-IP rate limit. Create with:
+#   npx wrangler kv namespace create RATE
+# then paste the id below and uncomment. Turnstile already stops automation; this is for a
+# determined human hammering the form.
+# [[kv_namespaces]]
+# binding = "RATE"
+# id = "..."
