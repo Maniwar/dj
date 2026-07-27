@@ -3258,3 +3258,12 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   white-space: nowrap;
   overflow: hidden;
 }
+
+/* WIDTH MUST BE CONTENT-INDEPENDENT TOO, NOT JUST HEIGHT.
+   Fixing the height stopped the vertical jump and left a horizontal one: the hero block is
+   centred, so if its WIDEST child changes width the whole block re-centres and everything slides
+   sideways. The gauge was that widest child — 'NOMINAL. PUSH HARDER.' and '⚠ THERMAL RUNAWAY
+   IMMINENT — CRANK IT' are very different widths — so each status change nudged the headline left
+   or right at the same moment it moved up or down. Reported as jerking up and to the left.
+   Pinning the width makes the block's dimensions constant, so nothing re-centres. */
+.hero-gauge { width: min(480px, 100%); }
