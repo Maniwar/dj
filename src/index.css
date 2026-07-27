@@ -3020,7 +3020,10 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    send the type to the far rim of a 7K panel, away from the capped footage — the drift that
    already had to be fixed for the tour rail and the marquees. A centred, capped box tracks the
    band at every width, so this needs no ultrawide special case. */
-@media (min-width: 901px) {
+/* min-height as well as min-width: a Galaxy S20 Ultra in landscape is 915px WIDE and would
+   otherwise take the desktop rules, which is the same trap that put the frosted-glass blur onto
+   phones. A landscape phone is short, not narrow. */
+@media (min-width: 901px) and (min-height: 621px) {
   .journey-card {
     width: 100%;
     max-width: min(92vw, 1380px);
@@ -3033,4 +3036,62 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   /* The city name is the anchor of the whole composition, so it keeps its scale — the fix here
      is where the block sits, not how big it is. Desktop has the height that landscape lacked. */
   .journey-city { transform-origin: left center; }
+}
+
+/* ============================================================================================
+   TOUR STOPS — DESKTOP: READOUT TO THE FLOOR, HEADER UP AND OUT
+   ============================================================================================
+   Same treatment the phone breakpoints already got, for the same reason: the REC line is camera
+   furniture and belongs burned into the bottom of the frame, not trailing the blurb like a third
+   paragraph. The card takes the whole frame so `margin-top: auto` has somewhere to push to — but
+   it keeps the centred 1380px cap, because an absolutely-positioned card at inset:0 would span a
+   7K panel edge to edge and take the type with it.
+
+   The block also moves UP and LEFT. It was vertically centred, which on a full-bleed crowd shot
+   is the worst place for it; sitting high-left it reads as a title card over the picture rather
+   than as a label stuck on someone's face. */
+@media (min-width: 901px) and (min-height: 621px) {
+  .journey-card {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: min(92vw, 1380px);
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    /* clear of the section header at the top, tight to the left rail */
+    padding: clamp(7.5rem, 19vh, 13rem) clamp(0.5rem, 2vw, 2rem) 0 clamp(0.5rem, 1.4vw, 1.5rem);
+  }
+  .journey-seed { margin: auto 0 clamp(1.4rem, 4vh, 3rem); }
+}
+
+/* ============================================================================================
+   THE SCAN OVERLAY — LIGHTER EVERYWHERE, THINNER ON PHONES
+   ============================================================================================
+   Two separate complaints, two separate causes.
+
+   TOO DARK: the radial is a vignette that reaches 0.4 black at the rim with the clear centre
+   ending at 55%, so well over half the picture carries some darkening. It exists to keep type
+   legible, but the type now sits in a corner with its own shadow and no longer needs the whole
+   frame dimmed to survive.
+
+   TOO THICK ON MOBILE: the scanlines are 2px dark in a 4px period — a 50% duty cycle, which is
+   a heavy screen door over the footage. On a phone at DPR 3 that 2px band is 6 device pixels and
+   also beats against the panel grid, which is what makes the video look degraded rather than
+   textured. A 1px line in a 4px period is a quarter of the coverage and reads as CRT texture
+   instead of blinds. */
+.journey-scan {
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.055) 0 1px, transparent 1px 3px),
+    radial-gradient(140% 104% at 50% 45%, transparent 66%, rgba(3, 3, 8, 0.24) 100%);
+}
+@media (max-width: 900px), (orientation: landscape) and (max-height: 620px) {
+  .journey-scan {
+    background:
+      repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.038) 0 1px, transparent 1px 4px),
+      radial-gradient(155% 120% at 50% 46%, transparent 76%, rgba(3, 3, 8, 0.18) 100%);
+  }
 }
