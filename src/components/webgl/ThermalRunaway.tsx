@@ -279,20 +279,6 @@ function Mainstage() {
 }
 
 export default function ThermalRunaway() {
-  // A CALM DEVICE DOES NOT GET THE SHADER.
-  //
-  // Reported at 60fps with 0% slow frames and the background still flickering in and out. That
-  // is not a shortage of TIME, it is a shortage of GPU MEMORY: a tile-based mobile GPU evicting
-  // promoted layers it cannot keep resident, then re-allocating them. Frame timing cannot see it,
-  // which is why every measurement looked healthy while the screen misbehaved.
-  //
-  // This canvas is one of the largest resident layers on the page, alongside the video and the
-  // still. On a device that has already flagged itself as struggling, the correct move is to stop
-  // holding a full-screen WebGL surface at all — the lasers are the most expensive thing here and
-  // the least load-bearing, since the footage and the lighting rig in the video carry the look.
-  if (typeof document !== 'undefined' && document.documentElement.classList.contains('calm'))
-    return null
-
   const reduced = useSiteStore((s) => s.reducedMotion)
   if (reduced || PERF.noShader) return <div className="thermal-fallback" aria-hidden />
   return (
