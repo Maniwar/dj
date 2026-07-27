@@ -21,6 +21,10 @@
 // scroll that parks between two sections cannot flip playback back and forth every frame.
 
 const SWITCH_MARGIN = 0.15 // a challenger must beat the incumbent by this much to take over
+// How visible a clip must be to keep decoding even when it is not the winner. Low enough that a
+// section is already moving by the time it is worth looking at, high enough that clips far off
+// screen — which is most of the nine — never decode at all.
+const WARM_RATIO = 0.2
 
 let observer: IntersectionObserver | null = null
 let mo: MutationObserver | null = null
@@ -48,13 +52,25 @@ function apply() {
   }
   if (bestRatio <= 0) best = null
 
+  // WARM-UP, so nothing is ever seen as a frozen frame.
+  //
+  // Pausing everything except the winner is correct at rest and wrong during a scroll: a paused
+  // clip holds a still frame, so a section would scroll into view showing a photograph and only
+  // start moving once the director handed it playback. Anything already meaningfully on screen is
+  // therefore allowed to run, not just the single most visible one.
+  //
+  // This still fixes the actual problem. The bad case was TWO clips decoding while PARKED — the
+  // steady state, most of the time. Now the second decoder only exists during the seconds of an
+  // actual transition, which is both bounded and the moment it is least noticeable.
   for (const v of videos) {
-    if (v === best) {
+    const r = ratios.get(v) ?? 0
+    const shouldRun = v === best || r >= WARM_RATIO
+    if (shouldRun) {
       // Only ever resume something that was already meant to be playing. A muted background clip
       // that a section paused for its own reasons stays paused.
       if (v.paused && v.dataset.wantPlay === '1') v.play().catch(() => {})
     } else if (!v.paused) {
-      // Remember that this one wanted to play, so it can resume when it becomes the visible one.
+      // Remember that this one wanted to play, so it can resume when it becomes visible again.
       v.dataset.wantPlay = '1'
       v.pause()
     }
