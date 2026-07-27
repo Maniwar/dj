@@ -175,7 +175,18 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- A REAL <h1> IN THE SHELL. The app renders one in the hero, but client-side, so a parser
+           fetching this URL saw no heading at all — Bing's analyser flagged exactly that. The copy
+           in <noscript> does not count either: parsers treat fallback content as inactive.
+
+           It sits INSIDE #root deliberately. React clears the container when it mounts, so this is
+           replaced by the real hero rather than lingering as a duplicate heading or as hidden text
+           that says something the page does not. Clipped rather than display:none so it is exposed
+           to screen readers during the moment before hydration, and so it is never a flash of
+           unstyled type over the boot sequence. -->
+      <h1 class="boot-h1" style="position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0">Club Humidity &mdash; The Moist Mix 2002 by SYSTEM OVERLOAD</h1>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
     <!-- REAL CONTENT FOR NON-JS AGENTS, and the site's only internal link graph.
          The app is client-rendered behind a LOG ON gate, so a crawler otherwise receives an empty

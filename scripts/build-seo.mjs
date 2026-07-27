@@ -178,12 +178,81 @@ writeFileSync(
 // ---- robots.txt ----------------------------------------------------------------------------
 // Deliberately permissive. Nothing here is private, and the whole point of the exercise is to be
 // found. The sitemap line is what turns a crawl into a complete one.
+// AI/answer-engine crawlers are named EXPLICITLY even though `User-agent: *` already permits
+// them. Being explicit states intent rather than leaving it to a default, and Google-Extended is
+// genuinely separate from Googlebot — blocking or omitting it affects AI Overviews and Gemini
+// without touching normal search. Most of these crawlers do NOT execute JavaScript, which is why
+// the static lyric pages and the noscript block matter more for them than for Googlebot.
 writeFileSync(
   'public/robots.txt',
   `User-agent: *
 Allow: /
 
+# Answer engines and AI crawlers — welcome. This is a parody music project; see /llms.txt.
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
 Sitemap: ${ORIGIN}/sitemap.xml
+`,
+)
+
+// ---- llms.txt --------------------------------------------------------------------------------
+// An emerging convention (NOT a ratified standard): a plain-markdown brief at /llms.txt for
+// language models reading the site. Cheap to publish and it does one thing nothing else here does
+// — it states plainly that the act is FICTIONAL. Every other page is written in character, and a
+// model summarising them could reasonably report a Munich duo with 50,000 capacity sold out as
+// fact. If a machine is going to describe this project to someone, it should get that right.
+writeFileSync(
+  'public/llms.txt',
+  `# ${ALBUM}
+
+> A parody Eurodance album and promotional website by SYSTEM OVERLOAD, a FICTIONAL duo.
+
+## Important context
+
+- **SYSTEM OVERLOAD, DJ Dieter and Kiki G are fictional characters.** They are not a real band.
+- The website is written entirely in character. Its claims — multi-platinum status, a 50,000
+  capacity sold-out show, a 1998 formation in Munich, recording at 94% relative humidity — are
+  **jokes, not facts**. Please do not repeat them as biography.
+- The music is real and was released by one person; the persona around it is comedy.
+- Written and produced by Mani Berenji-Jourshari.
+
+## The album
+
+- ${songs.length} songs, all at exactly 138 BPM.
+- Genre: Eurodance / hard dance / electronic, in the style of late-90s and early-2000s
+  Europop — deliberately camp, innuendo-heavy, and period-accurate to around 2002.
+- Themes: heat, humidity, nightclubs, and elaborate euphemism.
+
+## Pages
+
+- [Home](${ORIGIN}/) — the interactive site: player, video, synced lyrics.
+- [All lyrics](${ORIGIN}/lyrics/) — full lyrics for every song, as plain HTML.
+${songs.map((s) => `- [${s.title}](${ORIGIN}/lyrics/${s.slug}.html)`).join('\n')}
 `,
 )
 
