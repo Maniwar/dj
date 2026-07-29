@@ -987,8 +987,22 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    viewport (~720px) instead of 14,206px, so the words move ~8px at the same beat rather than
    170px, in line with every other beat-driven element on the page. The element count is
    unchanged at one per marquee, so the reason this moved off .lm-item in the first place still
-   holds. */
-.lyric-marquee { scale: calc(1 + var(--m-beat) * 0.035); }
+   holds.
+
+   AND THAT WAS ALSO WRONG, ON THE DEVICE THAT MATTERED. `.lm-run` carries `will-change: transform`
+   and is therefore a PROMOTED LAYER — scaling it was a cheap composited operation with a terrible
+   lever arm. `.lyric-marquee` is not promoted: it is a full-width in-flow block with a background,
+   two borders and 400 text spans inside it, so scaling THAT repaints and re-rasterises the whole
+   strip every frame. At DPR 1.75 that is 400 glyph runs redrawn on every beat, and on the Samsung
+   tablet it was immediately and obviously worse than the bug it replaced.
+
+   SO THE PULSE IS GONE. Not moved a third time — removed. Three facts make that the right answer
+   rather than a retreat: the marquee already scrolls continuously and is the most kinetic element
+   on the page, so it is the one thing that does not need help reading as alive; the beat scale
+   only arrived in 364922b as a PERFORMANCE measure (moving work off 400 words), never as a design
+   decision; and any scale on this element is either a huge lever arm (on the strip) or a full
+   repaint (on the box). The words keep their --fx glow, and every other element on the page still
+   carries the beat. */
 .lm-item { display: inline-block; }
 /* the player's LCD track title glows with the track it's playing */
 .lcd-title { text-shadow: 0 0 calc(2px + var(--m-beat) * 14px) currentColor; }

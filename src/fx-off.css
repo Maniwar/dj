@@ -220,8 +220,11 @@
 :root.fx-off-beatTransform .ls-word.now { transform: translateY(-0.12em) scale(1.12) !important; }
 /* `scale` is an independent property here (it composes with each layer's own transform), so it
    has to be pinned separately — setting `transform` would not touch it. */
-/* .lyric-marquee, not .lm-run — the beat scale moved to the clip box to kill the 170px
-   horizontal slam caused by scaling a 28,436px strip about its centre. See index.css. */
+/* The marquee's beat scale is GONE from the shipped CSS — see the long note in index.css. Both
+   places it could live were wrong: on the 28,436px strip it became a 170px horizontal slam, and
+   on the clip box it repainted 400 spans every frame. Pinned here anyway so the switch stays
+   honest if either ever comes back. */
+:root.fx-off-beatTransform .lm-run,
 :root.fx-off-beatTransform .lyric-marquee { scale: 1 !important; }
 
 
