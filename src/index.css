@@ -3310,15 +3310,31 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      - no beat scale, which recomposites the largest layer on the page on every kick
      - no will-change, so the browser can un-promote it instead of holding it resident
    The still remains, the tint remains, the composition is unchanged. Only the motion goes. */
+/* MOTION IS REDUCED HERE, NOT REMOVED.
+   This used to be `animation: none`, which made the calm page — and therefore the whole bottom of
+   the profile ladder — completely still. A static backdrop is not a cheaper Club Humidity, it is
+   a broken one, and the drift is the single thing that makes a still read as footage.
+   The memory argument the block above makes is really about TEXTURE SIZE, and that is a function
+   of the zoom CEILING, not of whether anything moves: the full Ken-Burns ends at 1.2x of a 110%
+   overscanned layer, which is what made it expensive. `kenburnsCalm` ends at 1.04x of a layer
+   with no overscan at all, so the resident texture is smaller than the old `scale: 1` case was
+   with overscan, and the backdrop still drifts. The `display: none` saving below is untouched and
+   is where the real memory win always was. */
 :root.calm .bc-frame {
   inset: 0;
   scale: 1 !important;
-  animation: none !important;
   will-change: auto;
 }
+:root.calm .bc-frame.on { animation: kenburnsCalm 14s ease-out both !important; }
 :root.calm .journey-bg {
-  animation: none !important;
+  animation: kenburnsCalm 14s ease-out both !important;
   will-change: auto;
+}
+/* Slow and shallow: 4% over 14s is movement you notice only if you look for it, which is the
+   point — it costs a fraction of the full pan and still stops the frame reading as a photograph. */
+@keyframes kenburnsCalm {
+  from { transform: scale(1) translate(0, 0); }
+  to { transform: scale(1.04) translate(-0.8%, -0.6%); }
 }
 
 /* HALVE THE BACKGROUND MEMORY ON A CALM DEVICE.

@@ -11,8 +11,33 @@ import { useThermalReadout } from '../../hooks/useThermalReadout'
 import SpectrumDisplay from './SpectrumDisplay'
 import BootlegSwitch from './BootlegSwitch'
 import Knob from './Knob'
-import { setIntensityPref } from '../../perf/fxState'
+import { setIntensityPref, setProfile, perfState, subscribePerfState } from '../../perf/fxState'
 import { FX_DEFAULT } from '../../perf/fxCurve'
+import type { ProfileId } from '../../perf/profiles'
+
+// THE FOUR RUNGS THE FX BUTTON CYCLES, heaviest first, wrapping back to Full.
+//
+// These are the same profiles the panel offers and auto-detection picks, deliberately: a report
+// that says "smooth on Lean" has to be reproducible with one tap, and it cannot be if the button
+// walks a different axis. The mark is what distinguishes the rungs at 40px — full has none, so
+// the default state reads as a plain "FX" rather than as a setting someone has changed.
+const FX_RUNGS: ReadonlyArray<{ id: ProfileId; label: string; mark: string }> = [
+  { id: 'full', label: 'Full', mark: '' },
+  { id: 'balanced', label: 'Balanced', mark: '·' },
+  { id: 'lean', label: 'Lean', mark: '··' },
+  { id: 'minimal', label: 'Minimal', mark: '···' },
+]
+
+/**
+ * Which rung is showing. `auto` reads as Full because detection is ADVISORY and resolveOff()
+ * treats it as Full — reporting the recommendation here instead would make the button claim a
+ * state the page is not in.
+ */
+function rungOf(s: { profile: ProfileId | 'auto' }): number {
+  const id = s.profile === 'auto' ? 'full' : s.profile
+  const i = FX_RUNGS.findIndex((r) => r.id === id)
+  return i < 0 ? 0 : i
+}
 
 function fmt(s: number) {
   if (!isFinite(s) || s < 0) s = 0
@@ -30,6 +55,11 @@ export default function Player() {
   const duration = usePlayerStore((s) => s.duration)
   const volume = usePlayerStore((s) => s.volume)
   const intensity = useSiteStore((s) => s.intensity)
+  // Which rung the FX button is showing. Read from perf state rather than held locally, so the
+  // button stays truthful when the profile is changed from the panel, from ?profile= or by
+  // auto-detection — three other writers, all of which used to leave this control lying.
+  const [fxRung, setFxRung] = useState(() => rungOf(perfState()))
+  useEffect(() => subscribePerfState(() => setFxRung(rungOf(perfState()))), [])
   const toggleLyrics = useSiteStore((s) => s.toggleLyrics)
   const lyricsOpen = useSiteStore((s) => s.lyricsOpen)
   const videoEnabled = useSiteStore((s) => s.videoEnabled)
@@ -320,18 +350,16 @@ export default function Player() {
               a 40px strip has no room for a drag target, and off / half / default is the whole
               useful range of a control most people will touch once. */}
           <button
-            className={`shade-fx${intensity > 0 ? ' on' : ''}`}
-            onClick={() => setIntensityPref(intensity === 0 ? FX_DEFAULT / 2 : intensity < FX_DEFAULT ? FX_DEFAULT : 0)}
-            aria-label={`Effect intensity ${Math.round(intensity * 100)} of 100 — tap to change`}
-            title={
-              intensity === 0
-                ? 'Effects OFF — tap for half'
-                : intensity < FX_DEFAULT
-                  ? 'Effects at half — tap for full'
-                  : 'Effects on — tap to turn them off'
-            }
+            className={`shade-fx${fxRung > 0 ? ' on' : ''}`}
+            onClick={() => setProfile(FX_RUNGS[(fxRung + 1) % FX_RUNGS.length].id)}
+            aria-label={`Effects: ${FX_RUNGS[fxRung].label}. Tap for ${
+              FX_RUNGS[(fxRung + 1) % FX_RUNGS.length].label
+            }.`}
+            title={`Effects: ${FX_RUNGS[fxRung].label} — tap for ${
+              FX_RUNGS[(fxRung + 1) % FX_RUNGS.length].label
+            }`}
           >
-            FX{intensity === 0 ? '\u00b7' : intensity < FX_DEFAULT ? '\u00bd' : ''}
+            FX{FX_RUNGS[fxRung].mark}
           </button>
           <span className="shade-time">{fmt(currentTime)}</span>
           <button

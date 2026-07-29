@@ -48,3 +48,34 @@ export function fxMultiplier(dial: number): number {
   if (d <= FX_DEFAULT) return d / FX_DEFAULT
   return 1 + ((d - FX_DEFAULT) / (1 - FX_DEFAULT)) * (FX_MAX_MULTIPLIER - 1)
 }
+
+// ============================================================================================
+// MOTION IS CLAMPED. ORNAMENT IS NOT.
+// ============================================================================================
+// The dial reaches the page through two channels (see intensity.ts). The static one — glow
+// radii, alphas, opacities — can safely run the full 0..1.4: at 0 it is simply absent, at 1.4 it
+// is gaudy, and neither hurts. The dynamic one is different at BOTH ends, and one multiplier
+// serving both was wrong twice over.
+//
+// AT THE TOP: --m-* values are pre-multiplied at the source, and one of them, --beat-lift, is a
+// translateY on the whole content layer. It already travels 12-14px at the shipped setting; at
+// 1.4x that is close to 30px of the type, the badges and the player all moving together against
+// a background video that does not move. It was reported as "the site shakes at 100%", which is
+// exactly what it was. Amplifying whole-page translation is also the precise defect this project
+// spent weeks chasing, so the ceiling for motion is the amplitude the site was tuned at: 1.0.
+//
+// AT THE BOTTOM: a multiplier of 0 makes every audio variable the constant 0, so the type stops
+// responding to the music entirely. That produces a page that is technically running but reads as
+// broken — a club with the lights on. The registry marks the beat response `essential` for this
+// reason, and marking it essential is worthless if the multiplier feeding it is zero. So motion
+// keeps a floor: quieter than shipped, never absent.
+export const FX_MOTION_MIN = 0.3
+export const FX_MOTION_MAX = 1
+
+/**
+ * The multiplier for anything that MOVES — every --m-* value, and --beat-lift with it.
+ * Clamped to [0.3, 1]: the beat is always legible, and never larger than the tuned amplitude.
+ */
+export function fxMotionMultiplier(dial: number): number {
+  return Math.max(FX_MOTION_MIN, Math.min(FX_MOTION_MAX, fxMultiplier(dial)))
+}

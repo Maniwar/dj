@@ -160,9 +160,27 @@ function clampTo(p: ProfileId, floorId: ProfileId): ProfileId {
   return profileIndex(p) > profileIndex(floorId) ? floorId : p
 }
 
+/**
+ * ADVISORY, NOT AUTOMATIC. The verdict is recorded — the panel shows it, the export carries it —
+ * but it does NOT restyle the page.
+ *
+ * The first version applied it. On a perfectly healthy desktop, twenty seconds after load, the
+ * page silently acquired eighteen fx-off classes and `.calm`: the player glass gone, the
+ * per-letter lyric animation gone, the frosted cards gone. It shipped to production that way, and
+ * a visitor who did not know the panel existed had no way back. The measurement was not even
+ * wrong — headless Chrome IS slow — it simply should never have been wired to the page.
+ *
+ * The judgement is worth keeping and the automatic application is not, because the two failure
+ * modes are wildly asymmetric. Guessing too cautiously costs a device some effects it could have
+ * afforded, and nobody can tell. Guessing too aggressively silently rewrites the site for
+ * everyone, which is what happened. A recommendation a person accepts has neither failure mode.
+ *
+ * `?profile=` and the panel still apply a profile immediately; those are explicit requests.
+ */
 function apply(v: Verdict): void {
   if (!autoArmed()) return
-  // Never an upgrade. See the one-way note at the top.
+  // Never an upgrade. See the one-way note at the top — kept because the RECOMMENDATION should
+  // not oscillate either: a device that dips once should not be told "actually you're fine".
   const next = worseOf(currentDetected(), v.profile)
   if (next === currentDetected() && perfState().detected !== null) return
   setDetectedProfile({ ...v, profile: next })

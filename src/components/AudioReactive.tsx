@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { audioBus } from '../audio/audioBus'
 import { PERF } from '../lib/perfFlags'
 import { useFxOn } from '../perf/useFx'
-import { getFxMultiplier } from '../perf/intensity'
+import { getFxMotionMultiplier } from '../perf/intensity'
 
 // Pumps the live audio bands onto :root as CSS custom properties so the ENTIRE PAGE
 // can react to the music in pure CSS (no per-element JS). One rAF loop, throttled
@@ -33,7 +33,7 @@ export default function AudioReactive() {
       // The resting values are scaled by the dial like everything else, so that at intensity 0 —
       // where this branch is always the one taken, because `audioPump` is retired below 0.02 —
       // every audio variable is a hard 0 and the page has no residual pulse in it at all.
-      const rest = (0.2 * getFxMultiplier()).toFixed(2)
+      const rest = (0.2 * getFxMotionMultiplier()).toFixed(2)
       for (const v of ['--m-beat', '--m-level', '--m-bass', '--m-treble']) root.style.setProperty(v, rest)
       for (const v of ['--m-snare', '--m-hat', '--m-down', '--m-build', '--m-drop']) root.style.setProperty(v, '0')
       root.style.setProperty('--beat-lift', '0px')
@@ -104,7 +104,7 @@ export default function AudioReactive() {
     // Read per frame rather than captured, because the dial can move while the loop is running
     // and re-running the effect on every drag frame would tear down and rebuild the rAF loop.
     const setVar = (name: string, v: number) => {
-      const fx = getFxMultiplier()
+      const fx = getFxMotionMultiplier()
       if (frozen(name)) {
         if (written[name] === undefined) {
           // The REAL value, not a sentinel. `written` is not a set of "have I handled this yet"

@@ -150,11 +150,24 @@ export function autoArmed(): boolean {
  * sits above every threshold in the registry: nothing is retired until the dial is turned down.
  */
 export function resolveOff(s: Readonly<PerfState> = state): FxId[] {
-  const profile = PROFILE_BY_ID[s.profile === 'auto' ? (s.detected ?? 'full') : s.profile]
+  // `auto` resolves to `full`, NOT to whatever was detected. Detection is advisory — see
+  // setDetectedProfile. This is the single line that decides whether a frame-time measurement is
+  // allowed to rewrite the page, and it is not.
+  const profile = PROFILE_BY_ID[s.profile === 'auto' ? 'full' : s.profile]
   const off = new Set<FxId>(profile.off)
   for (const id of ALL_FX_IDS) {
     if (s.intensity <= FX_BY_ID[id].minIntensity) off.add(id)
   }
+  // THE FLOOR IS STILL CLUB HUMIDITY. Neither of the two AUTOMATIC mechanisms above may retire an
+  // essential effect, so no profile and no dial position can produce a static page. Both are
+  // filtered here, in one place, rather than by pruning the profile lists and special-casing the
+  // dial — those are two edits that must agree forever, and this is one that cannot drift.
+  //
+  // This runs BEFORE the override loops on purpose: an explicit per-effect toggle, from the panel
+  // or from ?fxoff=, still wins. The benchmark ablates essentials by exactly that route, because
+  // an effect that cannot be switched off cannot be measured, and `shader` and `kenBurns` are
+  // among the things most worth measuring.
+  for (const id of ALL_FX_IDS) if (FX_BY_ID[id].essential) off.delete(id)
   // Stored overrides first, URL overrides last: the address bar is the more explicit statement
   // and is how a stored choice gets debugged from outside without clearing it.
   for (const [id, on] of Object.entries(s.overrides) as Array<[FxId, boolean]>) {
@@ -335,19 +348,14 @@ export function setProfile(p: ProfileId | 'auto'): void {
  * DOWNWARDS — see autoProfile.ts for why an upgrade is never allowed.
  */
 export function setDetectedProfile(v: Verdict): void {
-  const cap = PROFILE_BY_ID[v.profile].intensityCap
-  state = {
-    ...state,
-    detected: v.profile,
-    verdict: v,
-    source: autoArmed() ? 'auto' : state.source,
-    intensity:
-      autoArmed() && state.profile === 'auto'
-        ? state.intensityByHand
-          ? Math.min(state.intensity, cap)
-          : Math.min(FX_DEFAULT, cap)
-        : state.intensity,
-  }
+  // RECORDED, NOT APPLIED. `detected` is a RECOMMENDATION: the panel shows it, the JSON export
+  // carries it, and `resolveOff` deliberately ignores it (see the note there). Neither the
+  // profile nor the dial is touched here, so a measurement can never restyle the page on its own.
+  //
+  // This used to clamp `intensity` to the detected profile's cap as well, which is how an
+  // explicit `?intensity=1` came back as --fx 0.583 in testing: the URL was honoured and then
+  // silently overwritten a few seconds later by a measurement nobody asked for.
+  state = { ...state, detected: v.profile, verdict: v }
   apply()
 }
 

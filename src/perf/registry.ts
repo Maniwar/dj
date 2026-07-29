@@ -99,6 +99,26 @@ export type FxDef = {
    * change to the harness.
    */
   minIntensity: number
+  /**
+   * NEVER RETIRED BY THE DIAL OR BY A PROFILE — only by an explicit per-effect toggle.
+   *
+   * The first version of this registry had no such tier, and the result was a `minimal` profile
+   * and a dial-at-zero that produced a COMPLETELY STATIC PAGE: no Ken Burns, no beat response on
+   * the type, no scrolling marquee, no lasers. That is not a lighter Club Humidity, it is a
+   * different and much worse site — and it reached production before anyone looked at it.
+   *
+   * A performance floor still has to read as the thing it is a floor OF. The six effects that
+   * carry the site's identity are therefore exempt from both AUTOMATIC mechanisms. Everything
+   * ornamental — blends, blurs, glows, extra decoders — stays adjustable, and that is where the
+   * cost actually is: the census on the Tab Ultra put 36 of the 37 layers added by "effects" in
+   * the ornamental set.
+   *
+   * They remain individually switchable from the panel because the BENCHMARK must be able to
+   * ablate them; a switch that cannot be turned off cannot be measured. The distinction is
+   * between a control a visitor holds (must never produce a static page) and an instrument (must
+   * be able to). resolveOff() in fxState.ts is where that distinction is enforced.
+   */
+  essential?: true
   /** WHY it costs. Copied verbatim into the JSON export. */
   why: string
   /** What it reaches, for the panel tooltip and for grepping back to index.css / fx-off.css. */
@@ -109,6 +129,7 @@ export const FX: readonly FxDef[] = [
   // ---- shader ------------------------------------------------------------------------------
   {
     id: 'shader',
+    essential: true,
     label: 'Light rig (WebGL)',
     group: 'shader',
     cost: 3,
@@ -235,6 +256,7 @@ export const FX: readonly FxDef[] = [
   },
   {
     id: 'beatShadow',
+    essential: true,
     label: 'Beat glow on text (text-shadow)',
     group: 'audio',
     cost: 2,
@@ -255,6 +277,7 @@ export const FX: readonly FxDef[] = [
   },
   {
     id: 'beatTransform',
+    essential: true,
     label: 'Beat pulse (transform)',
     group: 'audio',
     cost: 1,
@@ -265,6 +288,7 @@ export const FX: readonly FxDef[] = [
   },
   {
     id: 'beatLift',
+    essential: true,
     label: 'Heading jump (--beat-lift)',
     group: 'audio',
     cost: 1,
@@ -275,6 +299,7 @@ export const FX: readonly FxDef[] = [
   },
   {
     id: 'audioPump',
+    essential: true,
     label: 'Audio variable pump',
     group: 'audio',
     cost: 2,
@@ -287,6 +312,7 @@ export const FX: readonly FxDef[] = [
   // ---- always-running motion ---------------------------------------------------------------
   {
     id: 'kenBurns',
+    essential: true,
     label: 'Background drift + beat zoom',
     group: 'motion',
     cost: 2,
@@ -307,6 +333,7 @@ export const FX: readonly FxDef[] = [
   },
   {
     id: 'marquees',
+    essential: true,
     label: 'Scrolling text',
     group: 'motion',
     cost: 1,

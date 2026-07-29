@@ -1,5 +1,5 @@
 import { useSiteStore } from '../state/useSiteStore'
-import { clampDial, fxMultiplier, FX_DEFAULT } from './fxCurve'
+import { clampDial, fxMultiplier, fxMotionMultiplier, FX_DEFAULT } from './fxCurve'
 
 export { FX_DEFAULT, FX_MAX_MULTIPLIER, fxMultiplier } from './fxCurve'
 
@@ -48,10 +48,20 @@ export { FX_DEFAULT, FX_MAX_MULTIPLIER, fxMultiplier } from './fxCurve'
 // consumers and evaluating getState() at module scope would make the value depend on load order.
 // The first real value arrives microseconds later, from initPerfState().
 let multiplier = fxMultiplier(FX_DEFAULT)
+let motionMultiplier = fxMotionMultiplier(FX_DEFAULT)
 
-/** The multiplier the page is currently rendering at. Read per frame by AudioReactive. */
+/** The multiplier for STATIC terms — glow radii, alphas, opacities. Spans 0..1.4. */
 export function getFxMultiplier(): number {
   return multiplier
+}
+
+/**
+ * The multiplier for anything that MOVES, clamped to [0.3, 1] — see the block in fxCurve.ts.
+ * This is what AudioReactive pre-multiplies the audio variables by, so the beat response is
+ * never absent at the bottom of the dial and never larger than the tuned amplitude at the top.
+ */
+export function getFxMotionMultiplier(): number {
+  return motionMultiplier
 }
 
 /** The dial position, 0..1 — what the knob shows and what is persisted. */
@@ -70,6 +80,7 @@ export function getIntensity(): number {
 export function setIntensity(v: number): void {
   const dial = clampDial(v)
   multiplier = fxMultiplier(dial)
+  motionMultiplier = fxMotionMultiplier(dial)
   // 3dp: the smallest step any consumer resolves is a fraction of a pixel of glow radius, and a
   // shorter token is a shorter style-invalidation payload on a control that can be dragged.
   document.body?.style.setProperty('--fx', multiplier.toFixed(3))
