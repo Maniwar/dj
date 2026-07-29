@@ -4,7 +4,6 @@ import { SCENES, hydrateRealVideo } from '../../video/broadcastFrames'
 import { withBase } from '../../lib/asset'
 import { videoSrc } from '../../lib/videoRendition'
 import { ACCENTS, useSiteStore, type AccentKey } from '../../state/useSiteStore'
-import { useFxOn } from '../../perf/useFx'
 
 // Vehicle for each leg of the world tour — the crew travels city to city as you scroll.
 const VEHICLES: Record<string, { icon: string; verb: string }> = {
@@ -21,10 +20,7 @@ export default function TourJourney() {
   // atlascloud.results.json via the hydrated SCENES, matching the Broadcast's source of truth.
   const [videoMap, setVideoMap] = useState<Record<string, string>>({})
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
-  // See Lore: off falls back to the poster Ken-Burns each city already has, and the hook is on
-  // its own line because && would short-circuit past it.
-  const sectionVideoOn = useFxOn('sectionVideo')
-  const videoEnabled = useSiteStore((s) => s.videoEnabled) && sectionVideoOn
+  const videoEnabled = useSiteStore((s) => s.videoEnabled)
   const cities = TOUR_CLIPS
 
   // Pull in real videos once (if the results file has ready clips). A city's stop swaps its

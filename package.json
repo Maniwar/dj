@@ -14,11 +14,7 @@
     "preview": "vite preview",
     "gen:images": "node scripts/gen-gemini-images.mjs",
     "gen:videos": "node scripts/gen-atlascloud-videos.mjs",
-    "gen:seo": "node scripts/build-seo.mjs",
-    "verify:fx": "node scripts/verify-fx-off.mjs",
-    "verify:diag": "node scripts/verify-diag.mjs",
-    "verify:profiles": "node scripts/verify-profiles.mjs",
-    "verify:intensity": "node scripts/verify-intensity.mjs"
+    "gen:seo": "node scripts/build-seo.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.114.0",

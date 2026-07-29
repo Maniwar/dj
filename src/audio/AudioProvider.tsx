@@ -86,19 +86,10 @@ export function AudioProvider({ children }: { children: ReactNode }) {
 
   function integrateThermal(dt: number) {
     const t = audioBus.thermal
+    const friction = useSiteStore.getState().friction
     const playing = audioBus.playing
-    // Heat in from BASS ENERGY ALONE, plus a small constant idle draw; passive cooling toward
-    // ambient. The friction knob used to contribute up to 22°C/s here, which meant a control
-    // whose job was visual quietly rewrote the site's fiction: turning the effects down made the
-    // rig run cooler, which changes the OVERHEAT / LIQUID-COOLING copy in the player, the hero
-    // gauge, the dew-point event and the hold-H meltdown. The rig heats from the music.
-    //
-    // The constant is 2.6 rather than a round number because that is what `friction * 22` came to
-    // at the knob's old default of 0.12 — i.e. the temperature curve is EXACTLY the one the site
-    // has always had for anyone who never touched the knob, which is everyone. Picking a larger
-    // idle draw would have raised the equilibrium by ~20°C and left the player sitting on
-    // OVERHEAT, turning a decoupling into a redesign of the fiction.
-    const heatIn = playing ? audioBus.bands.bass * 70 + 2.6 : 0
+    // heat in from bass energy + friction knob; passive cooling toward ambient
+    const heatIn = playing ? audioBus.bands.bass * 70 + friction * 22 : 0
     const cooling = (t.temperature - AMBIENT) * (coolingRef.current > 0 ? 3.2 : 0.55)
     t.temperature += (heatIn - cooling) * dt
     // humidity chases temperature

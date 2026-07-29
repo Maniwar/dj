@@ -6,8 +6,6 @@ import { ACCENTS, useSiteStore } from '../../state/useSiteStore'
 import { usePlayerStore } from '../../state/usePlayerStore'
 import { thermalVert, thermalFrag } from './thermalShader'
 import { PERF } from '../../lib/perfFlags'
-import { useFxOn } from '../../perf/useFx'
-import { getFxMultiplier } from '../../perf/intensity'
 
 const AMBIENT = 22
 const MAXT = 125
@@ -86,7 +84,7 @@ function Mainstage() {
       uHumidity: { value: 0.35 },
       uDew: { value: 0 },
       uOverclock: { value: 0 },
-      uIntensity: { value: 1 }, // master dial multiplier; 1 = the site as tuned
+      uFriction: { value: 0.1 },
       uSauna: { value: 0 },
       uFreq: { value: freqTex },
       uFreqCount: { value: FREQ_BINS },
@@ -291,10 +289,7 @@ function Mainstage() {
     u.uDew.value = t.dewPointHit ? 1 : Math.max(0, u.uDew.value - dt * 1.5)
     u.uOverclock.value = t.overclock
     const st = useSiteStore.getState()
-    // The MULTIPLIER, not the knob position — the same 0..1.4 number the CSS reads as --fx, so
-    // the rig and the page are scaled by one value and cannot drift apart. (The old code fed the
-    // raw knob straight in, which is why the shader's coefficients had to change with it.)
-    u.uIntensity.value = getFxMultiplier()
+    u.uFriction.value = st.friction
     u.uSauna.value = st.saunaMode ? 1 : 0
     u.uMouse.value.x += (pointer.x - u.uMouse.value.x) * Math.min(1, dt * 6)
     u.uMouse.value.y += (pointer.y - u.uMouse.value.y) * Math.min(1, dt * 6)
@@ -317,13 +312,7 @@ function Mainstage() {
 
 export default function ThermalRunaway() {
   const reduced = useSiteStore((s) => s.reducedMotion)
-  // Subscribed, not read once. This used to be PERF.noShader, parsed from the URL at load, so the
-  // `shader` switch could only be honoured by reloading — which meant the benchmark's
-  // effects-only leg measured a page with a full-viewport fragment shader still running in it.
-  // Unmounting is the whole point: it releases the WebGL context and stops the rAF loop, neither
-  // of which a root class can do.
-  const shaderOn = useFxOn('shader')
-  if (reduced || !shaderOn) return <div className="thermal-fallback" aria-hidden />
+  if (reduced || PERF.noShader) return <div className="thermal-fallback" aria-hidden />
   return (
     <div className="thermal-canvas" aria-hidden>
       <Canvas

@@ -41,7 +41,7 @@ export const thermalFrag = /* glsl */ `
   uniform float uHumidity;
   uniform float uDew;
   uniform float uOverclock;
-  uniform float uIntensity; // master dial, 0..1.4 (1.0 = the site as tuned)
+  uniform float uFriction;
   uniform float uSauna;
   uniform sampler2D uFreq;
   uniform float uFreqCount;
@@ -149,13 +149,9 @@ export const thermalFrag = /* glsl */ `
     for(int i=0;i<8;i++){
       float fi=float(i);
       vec2 org = beamOrigin(fi, pat);
-      // The rig is never perfectly still: the heads lose their footing and the beams judder,
-      // which is what a worn bootleg of a light show would actually look like. The coefficient
-      // is 0.06 rather than the old 0.34 because the dial that feeds it changed meaning — it
-      // used to arrive as the friction knob's 0.12 default (0.12*0.34 = 0.041 of judder) and now
-      // arrives as 1.0 at the same rest position. 0.06 keeps the shipped look and leaves the top
-      // of the dial's travel to make it visibly worse, which is what the top of the dial is for.
-      float jitter = (hash(vec2(fi, floor(uTime*22.0))) - 0.5) * uIntensity * 0.06;
+      // FRICTION shakes the rig itself: the heads lose their footing and the beams judder,
+      // which is what a worn bootleg of a light show would actually look like.
+      float jitter = (hash(vec2(fi, floor(uTime*22.0))) - 0.5) * uFriction * 0.34;
       float a = beamAim(fi, pat) + (fi-2.5)*fan*0.34
               + sin(sweep + fi*1.04)*(0.5 + uBuild*0.32) + jitter;
       vec2 dir = vec2(cos(a), sin(a));
@@ -391,22 +387,24 @@ export const thermalFrag = /* glsl */ `
     //  rather than people, so it's out — a fake crowd is worse than none over real footage.)
 
     // (A VHS pass lived here: head-switching band, tracking wobble, dropout streaks. Over
-    //  photographic footage it just read as dirt on the screen, so it's out. The grain below
-    //  carries the bootleg feel without the noise.)
+    //  photographic footage it just read as dirt on the screen, so it's out. The existing
+    //  grain + scanlines below already carry the bootleg feel without the noise.)
 
-    // GRAIN, and it is the last of the film-stock treatments left in here.
-    // 0.09 at a multiplier of 1 is what (0.04 + 0.12*0.42) came to at the old knob's default, so
-    // the shipped look is unchanged — but the constant floor is gone, so the dial can now reach
-    // zero grain, which the previous form could not: 0.04 of it rendered however far down the
-    // knob was turned.
-    float grain = (hash(uv*uRes + uTime)-0.5) * uIntensity * 0.09;
+    // grain (friction) + scanlines
+    float grain = (hash(uv*uRes + uTime)-0.5)*(0.04+uFriction*0.42);
     col += grain;
-    // (TAPE SCANLINES and the CHROMATIC FRINGE lived here, both keyed to the friction knob, and
-    //  both are deleted with it: they are the CRT treatment that cost legibility. The fringe is
-    //  the better riddance of the two — it evaluated rig() twice more, i.e. three times the
-    //  8-iteration beam maths per pixel, on every desktop and Surface pixel above a quarter
-    //  turn. uQuality itself stays — it still gates four other passes — but nothing here reads
-    //  it any more.)
+    // Tape scanlines — absent at friction 0, heavy at 1. They were removed as a permanent
+    // fixture because they read as dirt; as something the viewer dials in, they're the point.
+    col -= sin(uv.y*uRes.y*0.85) * 0.05 * uFriction;
+    // Chromatic fringe: the rig's red and blue pull apart, like a mistracked head.
+    // GATED, because this evaluates the whole rig twice more — three times the beam maths per
+    // pixel. Only past a quarter turn of the knob, and never on the phone tier, so the default
+    // setting costs nothing and only someone deliberately cranking it pays for it.
+    if (uQuality > 0.5 && uFriction > 0.25) {
+      float fr = uFriction * 0.012;
+      col.r += dot(rig(p + vec2(fr, 0.0), sweep, fan, uPattern), vec3(0.33)) * uFriction * 0.55;
+      col.b += dot(rig(p - vec2(fr, 0.0), sweep, fan, uPattern), vec3(0.33)) * uFriction * 0.55;
+    }
 
     // alpha = luminance so dark areas are transparent (footage shows through)
     // Hard ceiling on both brightness and alpha. Whatever the rig does, the footage underneath

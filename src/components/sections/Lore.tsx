@@ -3,7 +3,6 @@ import { LORE_STOPS } from '../../data/lore'
 import { withBase } from '../../lib/asset'
 import { videoSrc } from '../../lib/videoRendition'
 import { useSiteStore } from '../../state/useSiteStore'
-import { useFxOn } from '../../perf/useFx'
 import results from '../../data/atlascloud.results.json'
 
 // The Origin — a full-bleed scroll-journey. First the two character HERO pages (Kiki,
@@ -47,11 +46,7 @@ export default function Lore() {
   // crosses into view (starting at 0 consumed stop 0's fade-in while off-screen).
   const [active, setActive] = useState(-1)
   const stops = LORE_STOPS
-  // `sectionVideo` off falls back to each stop's still — the same path a stop with no mp4
-  // already takes — so the scene composition is unchanged and up to 7 decoders stop existing.
-  // Two statements, because && would short-circuit past the hook. See Broadcast.
-  const sectionVideoOn = useFxOn('sectionVideo')
-  const videoEnabled = useSiteStore((s) => s.videoEnabled) && sectionVideoOn
+  const videoEnabled = useSiteStore((s) => s.videoEnabled)
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
 
   // map lore stop id -> mp4 (from the AtlasCloud results, keyed "lore-<id>")

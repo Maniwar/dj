@@ -11,8 +11,6 @@ import { useThermalReadout } from '../../hooks/useThermalReadout'
 import SpectrumDisplay from './SpectrumDisplay'
 import BootlegSwitch from './BootlegSwitch'
 import Knob from './Knob'
-import { setIntensityPref } from '../../perf/fxState'
-import { FX_DEFAULT } from '../../perf/fxCurve'
 
 function fmt(s: number) {
   if (!isFinite(s) || s < 0) s = 0
@@ -29,7 +27,8 @@ export default function Player() {
   const currentTime = usePlayerStore((s) => s.currentTime)
   const duration = usePlayerStore((s) => s.duration)
   const volume = usePlayerStore((s) => s.volume)
-  const intensity = useSiteStore((s) => s.intensity)
+  const friction = useSiteStore((s) => s.friction)
+  const setFriction = useSiteStore((s) => s.setFriction)
   const toggleLyrics = useSiteStore((s) => s.toggleLyrics)
   const lyricsOpen = useSiteStore((s) => s.lyricsOpen)
   const videoEnabled = useSiteStore((s) => s.videoEnabled)
@@ -313,26 +312,6 @@ export default function Player() {
               ))}
             </div>
           )}
-          {/* THE DIAL, REACHABLE FROM THE MINI BAR. The knob lives in the expanded player, and
-              the expanded player is not the default on a phone — so the one control that can
-              rescue a struggling device, or quiet the page for someone who finds it too much,
-              was unreachable exactly where it was most needed. Three stops rather than a slider:
-              a 40px strip has no room for a drag target, and off / half / default is the whole
-              useful range of a control most people will touch once. */}
-          <button
-            className={`shade-fx${intensity > 0 ? ' on' : ''}`}
-            onClick={() => setIntensityPref(intensity === 0 ? FX_DEFAULT / 2 : intensity < FX_DEFAULT ? FX_DEFAULT : 0)}
-            aria-label={`Effect intensity ${Math.round(intensity * 100)} of 100 — tap to change`}
-            title={
-              intensity === 0
-                ? 'Effects OFF — tap for half'
-                : intensity < FX_DEFAULT
-                  ? 'Effects at half — tap for full'
-                  : 'Effects on — tap to turn them off'
-            }
-          >
-            FX{intensity === 0 ? '\u00b7' : intensity < FX_DEFAULT ? '\u00bd' : ''}
-          </button>
           <span className="shade-time">{fmt(currentTime)}</span>
           <button
             className="shade-expand"
@@ -423,22 +402,12 @@ export default function Player() {
                 onTap={toggleMute}
                 color={volume > 0.001 ? '#12e0c0' : '#7a8590'}
               />
-              {/* The master effect dial. It writes through setIntensityPref rather than the
-                  store's setter so that the knob, the diag panel's slider and the mini-bar chip
-                  are one control: the value is persisted, the profile's one-shot cap applies to
-                  it, and effects below their threshold are retired rather than merely faded. */}
-              <Knob
-                label="INTENSITY"
-                hint="Master effect intensity — 0 turns every effect off, 60 is the default look"
-                value={intensity}
-                onChange={setIntensityPref}
-                color="#ff2e9a"
-              />
+              <Knob label="FRICTION" value={friction} onChange={setFriction} color="#ff2e9a" />
             </div>
           </div>
 
           {/* Toggles get their own row. Five of them alongside transport + two knobs overflowed
-              the 348px window and pushed the INTENSITY knob outside it. */}
+              the 348px window and pushed the FRICTION knob outside it. */}
           <div className="tools">
             <button
               className={`tbtn lyr ${lyricsOpen ? 'on' : ''}`}
