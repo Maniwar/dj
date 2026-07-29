@@ -18,3 +18,8 @@ DAILY_CAP = "200"
 [[kv_namespaces]]
 binding = "RATE"
 id = "d75127ad17a948b0939888fdb30736a3"
+
+# Persist Worker logs. `wrangler tail` is live-only, which is useless for diagnosing something
+# that already happened — this keeps them queryable after the fact.
+[observability]
+enabled = true

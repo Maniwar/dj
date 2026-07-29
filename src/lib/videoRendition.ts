@@ -1,4 +1,5 @@
 import { withBase } from './asset'
+import { fxOffClass } from '../perf/fxClasses'
 
 // The clips ship in two renditions, built by scripts/build-video-renditions.mjs:
 //
@@ -52,12 +53,19 @@ export function prefersHdVideo(): boolean {
   // struggling tablet by permanently serving soft video to every capable one. That is the wrong
   // trade: a large high-density panel is exactly where 1080p is worth having.
   //
-  // So the decision now follows MEASUREMENT. calmMode samples real frame time and latches `.calm`
-  // when the device cannot keep up; while that is unset, resolution alone decides, so a capable
-  // tablet gets HD like any other big display. Once it latches, this drops to SD and stays there
-  // for the session — and because calmMode calls refreshRenditionChoice(), the downgrade lands at
-  // the next natural scene change rather than restarting whatever is playing.
+  // So the decision now follows MEASUREMENT. src/perf/autoProfile.ts samples real frame time and
+  // steps the profile down when the device cannot keep up; `lean` and `minimal` set `.calm`.
+  // While that is unset, resolution alone decides, so a capable tablet gets HD like any other big
+  // display. Once a profile sets it, this drops to SD — and because fxState calls
+  // refreshRenditionChoice() whenever `.calm` changes, the downgrade lands at the next natural
+  // scene change rather than restarting whatever is playing.
   if (document.documentElement.classList.contains('calm')) return (cached = false)
+
+  // The `hdRendition` switch, honoured the same way `.calm` already is — by reading the root
+  // class rather than by holding a second copy of the state. The decision is cached for the
+  // session, so anything that flips the class at runtime (the diag panel, the benchmark) must
+  // call refreshRenditionChoice() afterwards, exactly as fxState does when a profile applies.
+  if (document.documentElement.classList.contains(fxOffClass('hdRendition'))) return (cached = false)
 
   // physical pixels, not CSS pixels: that's what the compositor actually has to fill, so a
   // retina laptop at 1512 CSS px is really driving 3024 and does benefit from the larger source

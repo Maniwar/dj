@@ -3,6 +3,7 @@ import { audioBus } from '../audio/audioBus'
 import { withBase } from '../lib/asset'
 import { videoSrc } from '../lib/videoRendition'
 import { PERF } from '../lib/perfFlags'
+import { useFxOn } from '../perf/useFx'
 import { usePlayerStore } from '../state/usePlayerStore'
 import { useSiteStore } from '../state/useSiteStore'
 import { sceneForTrack, hydrateRealVideo, type Scene } from './broadcastFrames'
@@ -32,7 +33,16 @@ export default function Broadcast() {
   const [bSrc, setBSrc] = useState(scene.frames[1 % scene.frames.length])
   const [vidIdx, setVidIdx] = useState(0)
   const vids = scene.mp4s ?? (scene.mp4 ? [scene.mp4] : [])
-  const useVideo = vids.length > 0 && videoEnabled // real mp4 background(s), unless toggled off
+  // `bcVideo` off falls back to the SAME still frames the site already uses when no mp4 exists
+  // for a scene — the composition, the tint and the beat-cuts are unchanged. That fallback is
+  // why this switch can exist at all: hiding the <video> with CSS would leave a decoder running
+  // behind a black page, which in a benchmark reads as "the video is free".
+  //
+  // On its own line, NOT folded into the && below: `vids.length > 0 && videoEnabled` short-
+  // circuits, and a hook behind a short-circuit is a hook that is called on some renders and not
+  // others. React detects that as a changed hook order and throws out of the whole subtree.
+  const bcVideoOn = useFxOn('bcVideo')
+  const useVideo = vids.length > 0 && videoEnabled && bcVideoOn
 
   const rootRef = useRef<HTMLDivElement>(null)
   const lastCut = useRef(0)

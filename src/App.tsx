@@ -1,7 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { AudioProvider } from './audio/AudioProvider'
 import Broadcast from './video/Broadcast'
-import FrictionOverlay from './components/FrictionOverlay'
 import BootGate from './components/BootGate'
 import EasterEggs from './components/EasterEggs'
 import Player from './components/player/Player'
@@ -21,10 +20,10 @@ import PauseOffscreen from './components/PauseOffscreen'
 import BeatCursor from './components/BeatCursor'
 import SectionCut from './components/SectionCut'
 import VisualizerMode from './components/VisualizerMode'
-import { startCalmMode } from './lib/calmMode'
+import { startAutoProfile } from './perf/autoProfile'
 import { PERF } from './lib/perfFlags'
 import { startVideoDirector } from './lib/videoDirector'
-import Diagnostics from './components/Diagnostics'
+import DiagPanel from './perf/DiagPanel'
 import TourRail from './components/TourRail'
 import Lyrics from './components/player/Lyrics'
 import { useSiteStore } from './state/useSiteStore'
@@ -41,14 +40,17 @@ import { useSiteStore } from './state/useSiteStore'
 const ThermalRunaway = lazy(() => import('./components/webgl/ThermalRunaway'))
 
 export default function App() {
-  // Measure real frame time and latch `.calm` if this device cannot keep up. Guessing the device
-  // class from media queries was wrong three times in a row; this asks the machine instead.
   // ?nofx=<class> — isolation switch, see the ISOLATION block in index.css
   useEffect(() => {
     if (PERF.nofx) document.documentElement.classList.add(`nofx-${PERF.nofx}`)
   }, [])
 
-  useEffect(() => startCalmMode(), [])
+  // Measure real frame time and step DOWN the profile ladder if this device cannot keep up.
+  // Guessing the device class from media queries was wrong three times in a row; this asks the
+  // machine instead — and it asks about the TAIL, because the page held a clean 60fps average
+  // on both devices that actually have the problem. It stands down entirely if the URL or a
+  // stored choice has already decided. Replaces startCalmMode(), which is deleted.
+  useEffect(() => startAutoProfile(), [])
   // Nine <video> elements exist; only the most visible one is allowed to decode.
   useEffect(() => startVideoDirector(), [])
 
@@ -85,8 +87,13 @@ export default function App() {
       <PauseOffscreen />
       <BeatCursor />
       <VisualizerMode />
-      <Diagnostics />
-      <FrictionOverlay />
+      {/* Renders into its own shadow root hung off <html>, so it is not affected by — and cannot
+          affect — anything in .content. Opens on ?diag or five taps on the crest. */}
+      <DiagPanel />
+      {/* FrictionOverlay used to mount here: a permanently-present fixed layer at z-30 carrying
+          CRT scanlines, a 0.72-black vignette and a 7Hz shake, over the whole page. The knob it
+          served is now the master intensity dial (src/perf/intensity.ts) and reaches the page
+          through --fx and the audio variables, so there is nothing left for the layer to do. */}
 
       <div className="content">
         <BrandBar />

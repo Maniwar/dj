@@ -8,6 +8,7 @@ export default function Knob({
   size = 46,
   color = '#ff2e9a',
   onTap,
+  hint,
 }: {
   value: number
   onChange: (v: number) => void
@@ -16,6 +17,13 @@ export default function Knob({
   color?: string
   /** Fired on a CLICK — a press with no meaningful drag. Used for click-to-mute on VOL. */
   onTap?: () => void
+  /**
+   * The full sentence, for the tooltip and for assistive tech. The cap under the knob is one
+   * word wide at 0.5rem, and one word cannot say what the master dial does or that the bottom of
+   * its travel is a real off — which is the whole reason that end of the dial exists. Falls back
+   * to the label, so the other knobs are unchanged.
+   */
+  hint?: string
 }) {
   const dragRef = useRef<{ y: number; v: number; moved: boolean } | null>(null)
   const angle = -135 + value * 270
@@ -51,7 +59,8 @@ export default function Knob({
         onPointerUp={onPointerUp}
         onWheel={onWheel}
         role="slider"
-        aria-label={label}
+        title={hint ?? label}
+        aria-label={hint ?? label}
         aria-valuenow={Math.round(value * 100)}
         aria-valuemin={0}
         aria-valuemax={100}
