@@ -105,8 +105,27 @@ export default function TourJourney() {
       <div className="journey-stops">
         {cities.map((c, i) => {
           const mp4 = videoEnabled ? videoMap[c.id] : undefined
+          // data-media is what the scan layer keys its darkening off — the media is inside
+          // .journey-band now, so a sibling combinator can no longer see it. Mirrors the
+          // identical attribute on .lore-stop.
           return (
-            <div className="journey-stop" key={c.id} data-active={i === active}>
+            <div className="journey-stop" key={c.id} data-active={i === active} data-media={mp4 ? 'video' : 'still'}>
+              {/* Blurred backdrop so the crew is never cropped off the edges at narrower window
+                  widths — and so the band has something to dissolve INTO instead of a void.
+                  It is rendered for the CLIP as well as the still now. It used to be still-only,
+                  which meant that at 3840x1080 a video stop had 570px of flat nothing either
+                  side of it and the sharp clip ended on a hard vertical line — measured, and the
+                  same fault the mainstage had. The clip's own poster is this exact image, so the
+                  blur matches the footage it sits behind. It is a background-image, not a second
+                  <video>: videoDirector.ts allows one decoder at a time. */}
+              <div
+                className="journey-bg-blur"
+                style={{ backgroundImage: c.posterUrl ? `url(${withBase(c.posterUrl)})` : undefined }}
+              />
+              {/* The band CLIPS the media and carries the soft edge. Both have to happen on a
+                  wrapper: .journey-bg animates Ken-Burns plus a per-beat scale, so a mask on it
+                  would zoom and drift and the feather would breathe on every kick. */}
+              <div className="journey-band">
               {mp4 ? (
                 <video
                   className="journey-video"
@@ -122,19 +141,12 @@ export default function TourJourney() {
                   aria-hidden
                 />
               ) : (
-                <>
-                  {/* blurred backdrop + contained sharp image so the crew is never cropped
-                      off the edges at narrower window widths */}
-                  <div
-                    className="journey-bg-blur"
-                    style={{ backgroundImage: c.posterUrl ? `url(${withBase(c.posterUrl)})` : undefined }}
-                  />
-                  <div
-                    className="journey-bg"
-                    style={{ backgroundImage: c.posterUrl ? `url(${withBase(c.posterUrl)})` : undefined }}
-                  />
-                </>
+                <div
+                  className="journey-bg"
+                  style={{ backgroundImage: c.posterUrl ? `url(${withBase(c.posterUrl)})` : undefined }}
+                />
               )}
+              </div>
               <div className="journey-scan" aria-hidden />
               <div className="journey-card">
                 <span className="journey-leg">

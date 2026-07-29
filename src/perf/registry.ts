@@ -239,8 +239,8 @@ export const FX: readonly FxDef[] = [
     cost: 2,
     kind: 'css',
     minIntensity: 0.35,
-    why: 'blur(7px) on an 8x-upscaled copy of each lore scene and blur(48px)/blur(40px) behind each journey scene. Only rendered past 2.5:1 (or on a landscape phone), where the surfaces are largest. Off returns them to the default they already have at ordinary aspect ratios: hidden.',
-    targets: '.lore-fill · .journey-bg-blur',
+    why: 'blur(7px) on an 8x-upscaled copy of each lore scene and of the Broadcast, and blur(48px)/blur(40px) behind each journey scene. Only rendered past 2.5:1 (or on a landscape phone), where the surfaces are largest. Off returns them to the default they already have at ordinary aspect ratios: hidden — and the band keeps its feathered edge either way, because that is a mask, not a fill.',
+    targets: '.bc-fill · .lore-fill · .journey-bg-blur',
   },
 
   // ---- audio-driven CSS --------------------------------------------------------------------

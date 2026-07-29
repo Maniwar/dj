@@ -1,6 +1,6 @@
 import { SampleWindow, measureRefreshHz, type FrameStats } from './sampler'
 import { classify, profileIndex, worseOf, PROFILES, type ProfileId, type Verdict } from './profiles'
-import { autoArmed, isPerfStateHeld, perfState, setDetectedProfile } from './fxState'
+import { autoArmed, isPerfStateHeld, perfState, setDetectedProfile, subscribePerfState } from './fxState'
 import { useSiteStore } from '../state/useSiteStore'
 
 // ============================================================================================
@@ -92,20 +92,45 @@ async function sample(ms: number): Promise<FrameStats | null> {
  * Returns a cancel function. Cancelling stops further measurement; it never reverts a downgrade
  * that has already been applied, because reverting is an upgrade and upgrades are what the
  * one-way rule forbids.
+ *
+ * ARMING IS NOT A BOOT-TIME EVENT ANY MORE, which is what the subscription below is for. The FX
+ * button's Auto rung and the panel's `auto` segment can arm detection at any moment — that is the
+ * round trip: pick Lean by hand, change your mind, tap Auto, and the device has to be MEASURED
+ * again. A one-shot at mount could not serve that. On a visit that starts with a stored profile it
+ * never even got as far as the sampler, so Auto would have resolved to "no verdict, therefore
+ * Full" forever, and the rung would have been a decorative no-op on exactly the devices that
+ * needed it.
  */
 export function startAutoProfile(): () => void {
   if (typeof window === 'undefined') return () => {}
 
-  let cancelled = false
-  const stop = () => {
-    cancelled = true
-  }
+  let stopped = false
+  /** A measurement has been started during the CURRENT armed period. Cleared when it disarms. */
+  let startedThisArming = false
+  let inFlight = false
 
   // REDUCED MOTION SHORT-CIRCUITS, and does not measure. Someone who has asked their operating
   // system for less movement is not asking for "as much movement as this hardware can sustain",
-  // so there is nothing here that a frame-time measurement could usefully decide.
-  if (typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    if (autoArmed()) {
+  // so there is nothing here that a frame-time measurement could usefully decide. It is checked
+  // per attempt rather than once at mount because the OS setting can change mid-session, and
+  // because arming can now happen long after mount.
+  const reducedMotion = () =>
+    typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  const attempt = () => {
+    if (stopped) return
+    if (!autoArmed()) {
+      // Something above rung 5 has spoken. Do not start the clock — the sampler's rAF would be a
+      // callback on every frame of a page whose configuration is already decided — and forget that
+      // this arming ran, so that arming it AGAIN gets a fresh measurement rather than silently
+      // reusing a verdict from before the user took control.
+      startedThisArming = false
+      return
+    }
+    if (startedThisArming || inFlight) return
+    startedThisArming = true
+
+    if (reducedMotion()) {
       setDetectedProfile({
         profile: 'minimal',
         reason: 'prefers-reduced-motion is set — not measured',
@@ -114,41 +139,56 @@ export function startAutoProfile(): () => void {
         longTaskMs: 0,
         droppedFrac: 0,
       })
+      return
     }
-    return stop
+
+    inFlight = true
+    void cycle(() => stopped).finally(() => {
+      inFlight = false
+      // The arming may have changed underneath a cycle that was mid-sleep — 15 seconds is a long
+      // time to hold a page still. `startedThisArming` is false only if it did, so this restarts
+      // exactly then and is a no-op every other time (the guard above returns immediately).
+      attempt()
+    })
   }
 
-  // Nothing above rung 5 has spoken? If something has, do not even start the clock — the
-  // sampler's rAF would be a callback on every frame of a page whose configuration is already
-  // decided.
-  if (!autoArmed()) return stop
+  attempt()
+  // Every path into and out of "armed" goes through fxState and ends in a notify, so this is the
+  // complete set of moments worth reconsidering. It fires on unrelated changes too — a switch
+  // flip, a drag of the dial — which the guards above make free.
+  const unsubscribe = subscribePerfState(attempt)
 
-  void (async () => {
-    // droppedApprox is one of the four signals and it is meaningless without the real panel rate.
-    // Measured while the gate is still up, so it costs nothing extra — and measured there quite
-    // safely, because it is a median of idle deltas and does not care what is on screen.
-    await measureRefreshHz()
-    await ungated()
-    if (cancelled || !autoArmed()) return
-    await wait(GRACE_MS)
-    if (cancelled || !autoArmed()) return
+  return () => {
+    stopped = true
+    unsubscribe()
+  }
+}
 
-    const first = await decide()
-    if (cancelled || first === null) return
-    apply(first)
+/** One full measurement: grace period, a decision, then one late re-check. */
+async function cycle(isStopped: () => boolean): Promise<void> {
+  const done = () => isStopped() || !autoArmed()
+  // droppedApprox is one of the four signals and it is meaningless without the real panel rate.
+  // Measured while the gate is still up, so it costs nothing extra — and measured there quite
+  // safely, because it is a median of idle deltas and does not care what is on screen.
+  await measureRefreshHz()
+  await ungated()
+  if (done()) return
+  await wait(GRACE_MS)
+  if (done()) return
 
-    await wait(RECHECK_MS)
-    if (cancelled || !autoArmed()) return
-    const second = await decide()
-    if (cancelled || second === null) return
-    // AT MOST ONE FURTHER STEP, and only downwards. A device that keeps looking worse should not
-    // be walked all the way to `minimal` by a process the user cannot see: two visible changes to
-    // the page in one session is already the most anyone should have to notice.
-    const floorId = PROFILES[Math.min(PROFILES.length - 1, profileIndex(currentDetected()) + 1)]
-    apply({ ...second, profile: worseOf(currentDetected(), clampTo(second.profile, floorId)) })
-  })()
+  const first = await decide()
+  if (done() || first === null) return
+  apply(first)
 
-  return stop
+  await wait(RECHECK_MS)
+  if (done()) return
+  const second = await decide()
+  if (done() || second === null) return
+  // AT MOST ONE FURTHER STEP, and only downwards. A device that keeps looking worse should not
+  // be walked all the way to `minimal` by a process the user cannot see: two visible changes to
+  // the page in one session is already the most anyone should have to notice.
+  const floorId = PROFILES[Math.min(PROFILES.length - 1, profileIndex(currentDetected()) + 1)]
+  apply({ ...second, profile: worseOf(currentDetected(), clampTo(second.profile, floorId)) })
 }
 
 function currentDetected(): ProfileId {
@@ -161,21 +201,25 @@ function clampTo(p: ProfileId, floorId: ProfileId): ProfileId {
 }
 
 /**
- * ADVISORY, NOT AUTOMATIC. The verdict is recorded — the panel shows it, the export carries it —
- * but it does NOT restyle the page.
+ * ADVISORY UNLESS INVITED. The verdict is always recorded — the panel shows it, the export carries
+ * it — and it restyles the page only for someone who asked to be measured.
  *
- * The first version applied it. On a perfectly healthy desktop, twenty seconds after load, the
- * page silently acquired eighteen fx-off classes and `.calm`: the player glass gone, the
+ * The first version applied it to everyone. On a perfectly healthy desktop, twenty seconds after
+ * load, the page silently acquired eighteen fx-off classes and `.calm`: the player glass gone, the
  * per-letter lyric animation gone, the frosted cards gone. It shipped to production that way, and
  * a visitor who did not know the panel existed had no way back. The measurement was not even
  * wrong — headless Chrome IS slow — it simply should never have been wired to the page.
  *
- * The judgement is worth keeping and the automatic application is not, because the two failure
+ * The judgement is worth keeping and the UNINVITED application is not, because the two failure
  * modes are wildly asymmetric. Guessing too cautiously costs a device some effects it could have
  * afforded, and nobody can tell. Guessing too aggressively silently rewrites the site for
- * everyone, which is what happened. A recommendation a person accepts has neither failure mode.
+ * everyone, which is what happened. A recommendation a person accepts has neither failure mode —
+ * and accepting it is precisely what the Auto rung on the FX button is.
  *
- * `?profile=` and the panel still apply a profile immediately; those are explicit requests.
+ * Nothing about that decision lives here: this function writes the verdict and fxState's
+ * profileFor() decides whether it is on the page, which is why there is still exactly one place
+ * that knows. `?profile=` and the panel apply a profile immediately, as before; those are explicit
+ * requests too.
  */
 function apply(v: Verdict): void {
   if (!autoArmed()) return

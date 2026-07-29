@@ -44,6 +44,26 @@ import {
 // That is the requirement, stated plainly — a visitor's choice is never overridden by a later
 // measurement.
 //
+// AND THE ONE EXCEPTION, WHICH IS NOT AN EXCEPTION: ASKING FOR AUTO.
+//
+// `profile: 'auto'` means two different things and the difference is the whole of `autoChosen`:
+//
+//   nobody has said anything   the state a first visit boots in. Rung 6: the site as designed.
+//                              A measurement taken here is ADVISORY — it is recorded, the panel
+//                              shows it, the export carries it, and it does not touch the page.
+//                              This is the behaviour that was reverted out of production once for
+//                              silently stripping the glass and the lyric animation off healthy
+//                              machines, and it must not change. See setDetectedProfile.
+//   a person chose Auto        the mini bar's Auto rung, the panel's `auto` segment, or
+//                              ?profile=auto. Rung 4: an explicit choice, exactly like choosing
+//                              Lean, and what was chosen is "apply whatever you measure on this
+//                              device". So it DOES reach the page, and it keeps reaching it — a
+//                              later downgrade follows, because following is what was asked for.
+//
+// A measurement must never reach the page uninvited; a person asking for the measurement is the
+// invitation. Both halves live in profileFor() below, which is the only function that decides
+// which profile is in force.
+//
 // RESOLUTION IS A PURE FUNCTION of that state, and its only output is the set of `fx-off-<id>`
 // root classes plus `.calm`. No parallel channel, no second stylesheet, no component holding its
 // own copy. Everything downstream — the panel's switches, useFx's subscriptions, the benchmark's
@@ -52,8 +72,22 @@ import {
 export type FxSource = 'url' | 'stored' | 'manual' | 'auto' | 'default'
 
 export type PerfState = {
-  /** What the user or the URL asked for. 'auto' defers to `detected`. */
+  /** What the user or the URL asked for. 'auto' defers to `detected`, but only if `autoChosen`. */
   profile: ProfileId | 'auto'
+  /**
+   * Whether `profile: 'auto'` is a CHOICE rather than the absence of one.
+   *
+   * Only meaningful while `profile === 'auto'`, where it separates the two cases in the block
+   * above: false is the un-chosen boot default (detection stays advisory), true means a person
+   * asked for the measurement to be applied (it is, and it keeps being).
+   *
+   * It is a field of its own rather than being read off `source` because `source` cannot answer
+   * the question: `?fxoff=cardGlass` on a fresh device leaves `profile: 'auto'` with
+   * `source: 'url'`, and treating that as "they asked for auto" would let one per-effect flag
+   * silently opt a device into being restyled by a measurement. `source` records which rung of
+   * the ladder won; this records which of the two autos we are in.
+   */
+  autoChosen: boolean
   /** The auto-detector's verdict, or null if it has not run / was not armed. */
   detected: ProfileId | null
   /** Why the applied profile is what it is. Recorded in the export. */
@@ -81,6 +115,7 @@ export type PerfState = {
 
 let state: PerfState = {
   profile: 'auto',
+  autoChosen: false,
   detected: null,
   source: 'default',
   overrides: {},
@@ -103,16 +138,31 @@ export function perfState(): Readonly<PerfState> {
   return state
 }
 
+/**
+ * WHICH PROFILE IS IN FORCE, from a state and nothing else. The one answer.
+ *
+ * Two functions used to decide this — this one and resolveOff — and fixing only resolveOff left
+ * `.calm` still landing on a healthy desktop: no fx-off classes, glass intact, and yet the SD
+ * video rendition and the hard-cut background, because the OTHER copy was still reading
+ * `detected`. They cannot drift now: both call this, and it is pure so the panel and the report
+ * can ask it about a state they are holding rather than about the module's.
+ *
+ * `auto` resolves to FULL unless a person asked for auto, in which case it resolves to the
+ * measurement — the distinction in the block at the top of this file.
+ *
+ * NOTE THE `?? 'full'`: chosen-auto before any verdict is FULL, not something degraded. A device
+ * is innocent until measured, and Auto's first 5.5 seconds are exactly that window. (It is also
+ * what every reload looks like: the stored profile is `auto`, `detected` starts null again, and
+ * the page must not boot into a guess it has not made yet.)
+ */
+function profileFor(s: Readonly<PerfState>): ProfileId {
+  if (s.profile !== 'auto') return s.profile
+  return s.autoChosen ? (s.detected ?? 'full') : 'full'
+}
+
 /** Which profile is actually in force right now. */
 export function appliedProfile(): ProfileId {
-  if (state.profile !== 'auto') return state.profile
-  // `auto` is FULL, not the recommendation. Detection is advisory — see setDetectedProfile.
-  //
-  // This function had the same bug resolveOff() did, and fixing only that one left `.calm` still
-  // landing on a healthy desktop: no fx-off classes, glass intact, and yet the SD video rendition
-  // and the hard-cut background because THIS was still reading `detected`. Two functions deciding
-  // "which profile is in force" is one too many; they now agree because resolveOff calls this.
-  return 'full'
+  return profileFor(state)
 }
 
 export function appliedProfileDef(): Profile {
@@ -132,6 +182,13 @@ export function appliedProfileDef(): Profile {
  * The detector calls this before it starts AND again before it applies, because a person can
  * choose a profile during the 3.5 second grace period and it would be absurd for a measurement
  * that began before they touched anything to overwrite it 900ms later.
+ *
+ * BOTH AUTOS ARE ARMED — `autoChosen` is not consulted either. The un-chosen default is measured
+ * so the panel and the export have a recommendation to show; the chosen one is measured because
+ * its whole purpose is to be measured. What `autoChosen` decides is what happens to the verdict
+ * afterwards, not whether it is taken. That split is also what makes the round trip work: Lean by
+ * hand disarms this, and choosing Auto again re-arms it — mid-session, which startAutoProfile
+ * watches for, not only on the next load.
  */
 export function autoArmed(): boolean {
   return state.profile === 'auto'
@@ -156,9 +213,10 @@ export function autoArmed(): boolean {
  * sits above every threshold in the registry: nothing is retired until the dial is turned down.
  */
 export function resolveOff(s: Readonly<PerfState> = state): FxId[] {
-  // One answer to "which profile is in force", shared with the `.calm` class — see
-  // appliedProfile(), which is where `auto` resolves to `full` because detection is advisory.
-  const profile = PROFILE_BY_ID[s.profile === 'auto' ? 'full' : s.profile]
+  // One answer to "which profile is in force", shared with the `.calm` class — see profileFor(),
+  // which is where an un-chosen `auto` resolves to `full` because an uninvited measurement is
+  // advisory, and a chosen one resolves to the measurement because that is what was asked for.
+  const profile = PROFILE_BY_ID[profileFor(s)]
   const off = new Set<FxId>(profile.off)
   for (const id of ALL_FX_IDS) {
     if (s.intensity <= FX_BY_ID[id].minIntensity) off.add(id)
@@ -274,6 +332,14 @@ export function initPerfState(): Readonly<PerfState> {
   const urlProfile = PERF.profile && isProfileId(PERF.profile) ? PERF.profile : PERF.profile === 'auto' ? 'auto' : null
 
   const profile: ProfileId | 'auto' = urlProfile ?? storedProfile ?? 'auto'
+  // THE ONE PLACE THE TWO AUTOS ARE TOLD APART AT BOOT. `auto` reaching the page requires someone
+  // to have SAID auto — typed ?profile=auto, or tapped the Auto rung on a previous visit, which is
+  // what a stored 'auto' is a record of. Falling through to `'auto'` because the key is absent is
+  // the other one: a first visit, which gets the site as designed and a measurement it can ignore.
+  //
+  // Storing 'auto' is therefore not the same as storing nothing, which is why Reset drops the key
+  // rather than writing 'auto' into it — see resetPerfState.
+  const autoChosen = profile === 'auto' && (urlProfile === 'auto' || storedProfile === 'auto')
   const source: FxSource = urlProfile
     ? 'url'
     : storedProfile
@@ -290,23 +356,32 @@ export function initPerfState(): Readonly<PerfState> {
   // localStorage key is needed to carry it.
   const byHand = PERF.intensity !== null || storedIntensity !== null
   const asked = PERF.intensity ?? storedIntensity ?? getIntensity()
+
+  const booted: PerfState = {
+    profile,
+    autoChosen,
+    detected: null,
+    source,
+    overrides: readStoredOverrides(),
+    urlOverrides,
+    intensity: asked,
+    intensityByHand: byHand,
+    verdict: null,
+  }
   // The profile's cap applies AT BOOT, by the same rule setProfile uses. Without this,
   // ?profile=minimal — and a stored `minimal` from a previous visit — left the dial at its
   // default: every effect off by class, yet --fx at 1 and the audio pump still writing at full
   // strength into rules that no longer render. Two states that should be identical
   // (?profile=minimal and ?intensity=0) would have differed in the one place a benchmark reads.
-  const cap = PROFILE_BY_ID[profile === 'auto' ? 'full' : profile].intensityCap
+  //
+  // Taken through profileFor rather than from `profile` directly so the dial cannot disagree with
+  // the classes about which profile is in force. At boot they always agree that auto is Full
+  // (`detected` is null this early, on a chosen auto as much as an un-chosen one), but a second
+  // expression of the same rule is a second thing to keep in step, and this file has been bitten
+  // by exactly that once already.
+  const cap = PROFILE_BY_ID[profileFor(booted)].intensityCap
 
-  state = {
-    profile,
-    detected: null,
-    source,
-    overrides: readStoredOverrides(),
-    urlOverrides,
-    intensity: byHand ? Math.min(asked, cap) : Math.min(FX_DEFAULT, cap),
-    intensityByHand: byHand,
-    verdict: null,
-  }
+  state = { ...booted, intensity: byHand ? Math.min(asked, cap) : Math.min(FX_DEFAULT, cap) }
 
   apply()
   return state
@@ -320,14 +395,28 @@ export function initPerfState(): Readonly<PerfState> {
  * A profile chosen by a person. Persisted immediately, and it disarms auto-detection for good on
  * this device — not just for this session. Re-deciding on their behalf next visit is exactly the
  * behaviour this whole precedence ladder exists to prevent.
+ *
+ * `p === 'auto'` is the one value that RE-ARMS instead of disarming, and it is still a choice: it
+ * says "apply whatever you measure here", so from this moment the verdict reaches the page and
+ * keeps reaching it. That is the round trip the mini bar's fifth rung needs — Lean by hand, then
+ * Auto, and the device is measured again rather than being stuck on a decision nobody made.
  */
 export function setProfile(p: ProfileId | 'auto'): void {
-  const cap = PROFILE_BY_ID[p === 'auto' ? (state.detected ?? 'full') : p].intensityCap
+  const chosen: PerfState = { ...state, profile: p, autoChosen: p === 'auto' }
+  const cap = PROFILE_BY_ID[profileFor(chosen)].intensityCap
   state = {
-    ...state,
-    profile: p,
-    source: 'manual',
-    // ONE-SHOT, only here, and asymmetric on purpose.
+    ...chosen,
+    // WHO DECIDED, not who clicked. Choosing Auto on a device that has already been measured means
+    // the applied profile came from the measurement, and labelling that "your choice" in the panel
+    // and in the export would misattribute it — nobody chose Lean, the frame times did. Until
+    // there is a verdict the answer really is the person, because Auto is Full until then.
+    source: p === 'auto' && state.detected ? 'auto' : 'manual',
+    // ONE-SHOT, and asymmetric on purpose.
+    //
+    // Applied here and — by the same rule, from the same expression — in setDetectedProfile when a
+    // CHOSEN auto changes which profile is in force. That transition IS a profile change; it just
+    // has a measurement rather than a thumb behind it, and a dial that stayed at the full-strength
+    // position under an applied `lean` would be the exact dishonesty this clamp exists to stop.
     //
     // A dial nobody has touched belongs to the profile, so it is placed AT that profile's
     // position — the default look, capped — which means the ladder is reversible: Lean then Full
@@ -349,18 +438,50 @@ export function setProfile(p: ProfileId | 'auto'): void {
 }
 
 /**
- * The auto-detector's verdict. Applied only while nothing more explicit has spoken, and only
+ * The auto-detector's verdict. Recorded always; applied only to a CHOSEN auto, and only
  * DOWNWARDS — see autoProfile.ts for why an upgrade is never allowed.
  */
 export function setDetectedProfile(v: Verdict): void {
-  // RECORDED, NOT APPLIED. `detected` is a RECOMMENDATION: the panel shows it, the JSON export
-  // carries it, and `resolveOff` deliberately ignores it (see the note there). Neither the
-  // profile nor the dial is touched here, so a measurement can never restyle the page on its own.
+  // RECORDED, AND APPLIED ONLY IF INVITED. `detected` is a RECOMMENDATION by default: the panel
+  // shows it, the JSON export carries it, and profileFor() ignores it, so a measurement can never
+  // restyle the page on its own. It shipped doing that once — twenty seconds after load a
+  // perfectly healthy desktop silently acquired eighteen fx-off classes and `.calm` — and the
+  // fix was not to measure less but to stop wiring the measurement straight to the page.
   //
-  // This used to clamp `intensity` to the detected profile's cap as well, which is how an
-  // explicit `?intensity=1` came back as --fx 0.583 in testing: the URL was honoured and then
-  // silently overwritten a few seconds later by a measurement nobody asked for.
+  // The exception is the whole point of the Auto rung: if a person chose Auto, `profileFor` reads
+  // `detected`, so simply writing it here lands it on the page, and a LATER downgrade lands too.
+  // That is not the reverted behaviour returning by the back door — it is the same measurement
+  // going through the front, with someone holding the door open.
+  const before = appliedProfile()
   state = { ...state, detected: v.profile, verdict: v }
+  const after = appliedProfile()
+
+  // WHO DECIDED. On a chosen auto the answer is now the measurement whatever it says — including
+  // when it says `full`, which is not the same fact as "nobody has measured anything yet" even
+  // though the page looks identical. Set from the state rather than from `after !== before` so it
+  // agrees with the identical expression in setProfile: both routes into "auto, with a verdict"
+  // have to label the panel and the export the same way or the source line becomes a coin toss.
+  if (state.profile === 'auto' && state.autoChosen) state = { ...state, source: 'auto' }
+
+  if (after !== before) {
+    // The applied profile just changed, so the profile's one-shot dial cap applies exactly as it
+    // does in setProfile — see the long note there for why it is asymmetric.
+    //
+    // GATED ON THE APPLIED PROFILE CHANGING, which is what keeps the old bug fixed. This used to
+    // clamp unconditionally, and that is how an explicit `?intensity=1` came back as --fx 0.583 in
+    // testing: the URL was honoured and then silently overwritten a few seconds later by a
+    // measurement nobody had asked for. An advisory verdict does not move `appliedProfile()`, so
+    // it now cannot reach the dial either.
+    const cap = PROFILE_BY_ID[after].intensityCap
+    state = {
+      ...state,
+      intensity: state.intensityByHand ? Math.min(state.intensity, cap) : Math.min(FX_DEFAULT, cap),
+    }
+    // NOT PERSISTED, deliberately, unlike setProfile's clamp. What is stored is `auto`, and the
+    // point of `auto` is that it is re-decided from a fresh measurement every visit; writing the
+    // dial position a measurement implied would turn one afternoon's verdict into a preference
+    // that outlives it — and, worse, would read back at boot as "a person turned this knob".
+  }
   apply()
 }
 
@@ -386,15 +507,27 @@ export function setIntensityPref(v: number): void {
  * Forget every stored choice and re-arm auto-detection.
  *
  * `detected` is deliberately KEPT — it is a measurement of this device and is still true. What
- * changes is that the page goes back to honouring it.
+ * changes is that the page goes back to treating it as ADVICE.
+ *
+ * So this lands on the UN-CHOSEN auto (`autoChosen: false`), not on the Auto rung, and the
+ * difference is deliberate: Reset means "put this device back the way it arrived", and the way it
+ * arrived is the site as designed with a measurement it is free to ignore. Choosing to be
+ * measured is what the Auto rung on the FX button and the panel's `auto` segment are for.
+ *
+ * The alternative was tried on paper and is worse: since clearStoredPerf drops the key rather than
+ * writing 'auto' into it, a Reset that applied the verdict would look nothing like the same
+ * device one reload later — the two states this function is supposed to make identical.
  */
 export function resetPerfState(): void {
   clearStoredPerf()
   state = {
     ...state,
     profile: 'auto',
+    autoChosen: false,
     overrides: {},
-    source: state.detected ? 'auto' : 'default',
+    // 'auto' means "a measurement decided this", and after a Reset nothing measured has decided
+    // anything: the page is Full because that is where an un-chosen auto sits.
+    source: 'default',
     // The dial is one of the three things Reset clears, so it has to come back HERE too, not just
     // in localStorage. Leaving it where a profile had put it meant the page stayed visibly
     // reduced while claiming to be back on the detected profile — and a reload would then have

@@ -196,9 +196,82 @@ body {
 .bc-frame.on { opacity: 1; animation: kenburns 6.5s ease-out both; }
 @keyframes kenburns { from { transform: scale(1.05) translate(0,0); } to { transform: scale(1.2) translate(-3%, -2%); } }
 .bc-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-/* video mode only (the stills branch renders no .bc-video): the darkening that used to be a
-   filter ON the video. brightness(0.68) == a flat 0.32 black, and this layer never animates. */
-.bc-video ~ .bc-scan { background:
+
+/* ---- THE STAGE BAND AND ITS SOFT EDGE ---------------------------------------------------
+   .bc-band is a STATIC wrapper around whichever media is running — the <video> in video mode,
+   the two cross-fading .bc-frame stills otherwise. It exists for two reasons.
+
+   1. THE FEATHER HAS TO LIVE SOMEWHERE THAT DOES NOT MOVE. Past 2.5:1 (and in a short landscape
+      window) the footage stops being full-bleed and becomes a centred band, and it used to end
+      on a hard vertical line against the side columns — reported twice, from a real viewer, as
+      reading like a cut rather than a frame. The obvious fix, a mask-image on the media, does
+      not work here: .bc-frame animates Ken-Burns (scale 1.05 -> 1.2 plus a per-beat `scale`),
+      and a mask is applied in the element's own coordinate space and then transformed WITH it,
+      so the feather would zoom and drift — the edge would visibly breathe on every kick. This
+      wrapper never transforms, so the mask is fixed in device pixels. .lore-band already exists
+      for the same reason and now carries the same mask.
+   2. It takes the band GEOMETRY off .bc-frame, which fixes a latent bug fx-off.css already
+      names in its kenBurns comment: `:root.calm .bc-frame { inset: 0 }` used to override the
+      left/width that centre the frame in the band, stretching the backdrop edge-to-edge on
+      exactly the ultrawide setups the band exists for. With the geometry on the wrapper,
+      inset:0 on the frame means what it says and the band stays put.
+
+   overflow: hidden is a no-op at ordinary aspect ratios — .broadcast already clips at the same
+   rect — and past 2.5:1 it is what keeps .bc-frame's -5% horizontal overscan inside the band
+   instead of spilling into the columns. */
+.bc-band { position: absolute; inset: 0; overflow: hidden; }
+
+/* THE SIDE FILL — a blurred, over-scaled copy of the current scene, BEHIND the band, so what
+   the picture dissolves into is an out-of-focus continuation of the room rather than a void.
+   Same device as .lore-fill and .journey-bg-blur, built the same cheap way: the blur runs on a
+   1/8-scale surface which is then upscaled 8x, so the effective ~56px blur costs a 64th of what
+   it would at full size, and the -6% overscan keeps the blur's own soft edge off screen.
+
+   A SECOND <video> for this was considered and rejected: videoDirector.ts allows exactly one
+   decoder at a time because two simultaneous decodes was a measured defect. A blurred still has
+   none of that cost, and at this radius a still and a clip of the same scene are the same wash
+   of colour anyway.
+
+   It shows scene.frames[0], NOT the frame currently on screen. The stills cross-fade over 0.3s
+   on every beat-cut; a background-image cannot cross-fade, so following the cut would pop the
+   sides while the centre dissolved. Every frame of a scene is the same room at 56px of blur.
+
+   display: none by default, so at ordinary aspect ratios — where there are no side columns to
+   fill — this costs nothing at all. */
+.bc-fill {
+  display: none; position: absolute;
+  left: -6%; top: -6%; width: 14%; height: 14%; right: auto; bottom: auto;
+  transform-origin: 0 0; transform: scale(8);
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+  filter: blur(7px) brightness(0.62) saturate(1.25);
+}
+
+/* ONE SOFT EDGE FOR ALL THREE BANDED SECTIONS.
+   The mask is driven entirely by an INHERITED CUSTOM PROPERTY rather than by per-breakpoint
+   rules that would each have to out-specify this one — the same reasoning as the player shade's
+   --shade-bg. --edge-mask is defined only inside the two media queries that actually create side
+   columns (min-aspect-ratio 5/2, and short landscape); everywhere else the fallback `none` wins,
+   the mask is the CSS initial value, no stacking context is created and nothing is paid.
+   mask-repeat MUST be no-repeat: the default is repeat, which would tile the falloff across the
+   Ken-Burns overscan and produce extra feather bands inside the picture. */
+.bc-band,
+.lore-stop .lore-band,
+.journey-stop .journey-band {
+  -webkit-mask-image: var(--edge-mask, none);
+  mask-image: var(--edge-mask, none);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* video mode only: the darkening that used to be a filter ON the video. brightness(0.68) == a
+   flat 0.32 black, and this layer never animates.
+   Keyed off a data attribute, NOT off `.bc-video ~ .bc-scan`. The media now lives inside
+   .bc-band, so it is no longer a sibling of the scan layer and the old combinator matched
+   nothing — a silent 32% brightening of every video frame on the page. The Lore section already
+   solves the same problem the same way (.lore-stop[data-media="video"] .lore-scan); this is that
+   pattern, not a new one. Specificity goes 0,2,0 -> 0,3,0, which changes no outcome: the only
+   other rules touching .bc-scan are 0,1,0 and set different properties. */
+.broadcast[data-media="video"] .bc-scan { background:
   linear-gradient(rgba(0,0,0,0.32), rgba(0,0,0,0.32)),
   repeating-linear-gradient(0deg, rgba(0,0,0,0.10) 0 2px, transparent 2px 4px); }
 .bc-strobe { position: absolute; inset: 0; background: #fff; opacity: calc(var(--beat) * 0.18); mix-blend-mode: screen; }
@@ -507,6 +580,9 @@ section.hero { min-height: 100vh; min-height: 100svh; display: grid; place-items
       full-bleed, so the margins jumped as you scrolled between them. */
 @media (min-aspect-ratio: 5/2) {
   .lore-stop { --band: min(100%, calc(100svh * 2.5)); }
+  /* The band is also what carries the SOFT EDGE — see the --edge-mask rule near .bc-band. It
+     already had to be a static wrapper because Ken-Burns lives inside it, which is exactly the
+     property the feather needs, so the slides needed no new element at all. */
   .lore-stop .lore-band {
     /* An explicit width, NOT left+right+width:auto. For an absolutely positioned REPLACED
        element (the <video>) `width: auto` resolves to the intrinsic width and the right inset is
@@ -738,7 +814,9 @@ section.hero { min-height: 100vh; min-height: 100svh; display: grid; place-items
 /* ================= HALL OF FAME ================= */
 .hof-inner { max-width: 1200px; margin: 0 auto; }
 .marquee-track { overflow: hidden; white-space: nowrap; border-top: 1px solid var(--edge); border-bottom: 1px solid var(--edge); padding: 0.9rem 0; margin: 1rem 0 2rem; }
-.marquee-run { display: inline-block; animation: marquee-seamless 46s linear infinite; will-change: transform; }
+/* will-change removed — see the note at .lm-run, which is the same animation and the same
+   measurement. */
+.marquee-run { display: inline-block; animation: marquee-seamless 46s linear infinite; }
 .marquee-track.slow .marquee-run { animation-duration: 72s; }
 @keyframes marquee { to { transform: translateX(-100%); } }
 /* Seamless loop for DOUBLED content ({x}{x}): move exactly one copy width (-50%) so the
@@ -1403,7 +1481,18 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   border-top: 1px solid var(--edge); border-bottom: 1px solid var(--edge);
   padding: 0.65rem 0; margin: 1.6rem 0; background: rgba(0,0,0,0.4);
 }
-.lm-run { display: inline-block; white-space: nowrap; animation: marquee-seamless 40s linear infinite; will-change: transform; }
+/* NO will-change. It was here, and it was measured to do nothing: a RUNNING transform animation
+   is composited by Blink on its own, so the hint cannot promote something that is already
+   promoted. Removing it from these five and from `.marquee-run` moved the tablet's compositor
+   layer count by zero (47 -> 47 at the floor, median of three rounds).
+   It is removed anyway, for the reason the handoff gives: `will-change` is not a free lever on
+   the Mali-G925 — promoting six headings there produced a layer-eviction FLICKER on the crew
+   slide (reverted in 29cdfe4) — so a hint this large is not something to keep on the strength of
+   "it probably helps". Each of these runs is ~29,000 CSS px wide, i.e. ~52,000 device px at
+   DPR 1.75, and asking the compositor to hold five of those resident is the single biggest
+   residency request on the page. fx-off.css already sets `will-change: auto` here under
+   `fx-off-marquees`, which is now simply the state the rule ships in. */
+.lm-run { display: inline-block; white-space: nowrap; animation: marquee-seamless 40s linear infinite; }
 .lm-item { font-family: 'Anton', sans-serif; text-transform: uppercase; font-size: clamp(1rem, 2.6vw, 1.7rem); letter-spacing: 0.02em; }
 .lm-dot { opacity: 0.55; font-style: normal; }
 .tint-magenta .lm-item { color: var(--magenta); text-shadow: 0 0 calc(var(--fx, 1) * 8px) rgba(255,31,143,0.65); }
@@ -1449,6 +1538,12 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
  }
 /* blurred fill + CONTAINED sharp image so the crew is never cropped at any width */
 .journey-bg-blur { display: none; }
+/* Wrapper around the scene media — the exact counterpart of .lore-band and .bc-band, and it is
+   here for the same reasons: it CLIPS the Ken-Burns so the zoom can never spill past the band
+   edge into the side fill, and it is STATIC, so the soft edge can live on it. .journey-bg
+   animates a transform AND carries a per-beat `scale`, so a mask on the image itself would zoom
+   and drift with it and the feather width would breathe on every kick. */
+.journey-band { position: absolute; inset: 0; overflow: hidden; }
 /* City stills (STILL mode). No filter here — the darkening moved to the static scan layer below
    so this stays a clean transform-only GPU texture (same trick that made the Lore heroes
    buttery). The BEAT PULSE rides the independent `scale` property, which composes with the
@@ -1463,7 +1558,11 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   scale: calc(1 + var(--m-beat, 0) * 0.09); }
 .journey-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;
   background-color: #0a0a12; }
-.journey-video ~ .journey-scan { background:
+/* Keyed off data-media rather than `.journey-video ~ .journey-scan` for the same reason as
+   .bc-scan above: the media moved inside .journey-band and is no longer a sibling of the scan
+   layer, so the combinator would silently match nothing and every tour clip would lose its 50%
+   darkening. Same attribute pattern the Lore slides already use. */
+.journey-stop[data-media="video"] .journey-scan { background:
   linear-gradient(rgba(0,0,0,0.50), rgba(0,0,0,0.50)),
   repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0 2px, transparent 2px 4px),
   radial-gradient(135% 100% at 50% 45%, transparent 55%, rgba(3,3,8,0.4) 100%); }
@@ -1474,10 +1573,10 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .journey-scan { position: absolute; inset: 0; pointer-events: none;
   background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0 2px, transparent 2px 4px),
               radial-gradient(135% 100% at 50% 45%, transparent 55%, rgba(3,3,8,0.4) 100%); }
-/* STILLS ONLY (the video branch renders no .journey-bg sibling): re-apply the darkening that
-   used to live in the .journey-bg filter. A flat 0.4 black == brightness(0.6), same look, but
-   on a layer that never animates — so the Ken-Burns costs no repaint. */
-.journey-bg ~ .journey-scan {
+/* STILLS ONLY: re-apply the darkening that used to live in the .journey-bg filter. A flat 0.4
+   black == brightness(0.6), same look, but on a layer that never animates — so the Ken-Burns
+   costs no repaint. (Was `.journey-bg ~ .journey-scan`; see the note on the video rule above.) */
+.journey-stop[data-media="still"] .journey-scan {
   background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
               repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0 2px, transparent 2px 4px),
               radial-gradient(135% 100% at 50% 45%, transparent 55%, rgba(3,3,8,0.4) 100%);
@@ -1524,22 +1623,43 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 .rail-cap { font-family: 'Oswald', sans-serif; font-size: 0.5rem; letter-spacing: 0.22em; color: var(--gold-hi);
   writing-mode: vertical-rl; text-orientation: mixed; text-shadow: 0 0 8px rgba(230,192,90,0.4); }
 .rail-track { position: relative; flex: 1; width: 22px; }
-.rail-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; transform: translateX(-50%);
+/* ---- CENTRING BY MARGIN, NOT BY TRANSFORM --------------------------------------------------
+   The four rules below (.rail-line, .rail-fill, .rail-pin, .rail-pin b) all used to centre
+   themselves on `left: 50%` / `top: 50%` with a translate(-50%). Every dimension involved is a
+   HARD-CODED CONSTANT — 2px, 3px, 9x9, one line of text — so half of it is a constant too, and a
+   static margin does the identical job. Verified by measurement rather than by eye: all ten
+   elements' getBoundingClientRect came back byte-identical (x, y, width, height) before and
+   after, at the tablet geometry with the rail forced visible.
+
+   Worth doing because a transform is not free even when it never changes. Each one creates a
+   stacking context and a containing block for fixed-position descendants, and each one counts in
+   the `promotedLayers` census in src/perf/sampler.ts — which is the number every device export
+   in this project is quoted in. Ten of the tablet floor's entries were these, for a component
+   that is a decorative readout and is `opacity: 0` for most of the page. */
+.rail-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; margin-left: -1px;
   background: repeating-linear-gradient(180deg, rgba(230,192,90,0.4) 0 7px, transparent 7px 14px); }
-.rail-fill { position: absolute; left: 50%; top: 0; width: 3px; height: calc(var(--rail,0) * 100%); transform: translateX(-50%);
+.rail-fill { position: absolute; left: 50%; top: 0; width: 3px; height: calc(var(--rail,0) * 100%); margin-left: -1.5px;
   background: linear-gradient(180deg, var(--acid), var(--magenta)); border-radius: 2px;
   box-shadow: 0 0 calc(6px + var(--m-beat,0) * 16px) var(--magenta); }
-.rail-pin { position: absolute; left: 50%; transform: translate(-50%,-50%); width: 9px; height: 9px; border-radius: 50%;
+.rail-pin { position: absolute; left: 50%; margin: -4.5px 0 0 -4.5px; width: 9px; height: 9px; border-radius: 50%;
   background: #2a2a33; box-shadow: 0 0 0 2px #000; transition: background 0.3s ease; }
-.rail-pin b { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-family: 'Oswald', sans-serif;
+/* -0.5lh is exactly half this label's height: it is one line (white-space: nowrap) so its box
+   height IS its line box. Same measured pixels as the translateY(-50%) it replaces. */
+.rail-pin b { position: absolute; right: 16px; top: 50%; margin-top: -0.5lh; font-family: 'Oswald', sans-serif;
   font-size: 0.52rem; letter-spacing: 0.06em; color: var(--gold-deep); white-space: nowrap; opacity: 0; transition: opacity 0.3s; }
 .rail-pin.done { background: var(--acid); box-shadow: 0 0 calc(5px + var(--m-beat,0) * 14px) var(--acid), 0 0 0 2px #000; }
 .rail-pin.done b { color: var(--acid); }
 .rail-pin.now b { opacity: 1; } /* label only the current city, to keep the edge clean */
+/* The vehicle KEEPS its transform: unlike its neighbours above, this one is not a static
+   centring offset — the beat scale rewrites it every frame — and translate(-50%,-50%) of a glyph
+   whose size follows font-size has no constant to turn into a margin.
+   `will-change` lost its `top` half though. `top` is not a compositable property: naming it
+   cannot keep the compositor from doing layout, so it bought nothing, and an unhonourable hint
+   in the list is pure cost. The `transform` half is the one that does the work. */
 .rail-vehicle { position: absolute; left: 50%; top: calc(var(--rail,0) * 100%);
   /* rides the kick, and gets thrown by a DROP */
   transform: translate(-50%,-50%) scale(calc(1 + var(--m-beat,0) * 0.16 + var(--m-drop,0) * 0.3)); font-size: 1.4rem;
-  filter: drop-shadow(0 3px 5px rgba(0,0,0,0.7)); will-change: top, transform; }
+  filter: drop-shadow(0 3px 5px rgba(0,0,0,0.7)); will-change: transform; }
 .rail-pct { font-family: 'Courier New', monospace; font-size: 0.6rem; color: var(--champagne); }
 @media (max-width: 640px) { .tour-rail { right: 6px; height: 68vh; } .rail-track { width: 18px; } .rail-vehicle { font-size: 1.2rem; } }
 @media (prefers-reduced-motion: reduce) { .tour-rail { transition: opacity 0.3s ease; } }
@@ -1834,36 +1954,126 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      sat 134px inside the slides in front of it, so the page had two competing stage widths
      visible at once. One number, one edge, everywhere. */
   .broadcast { --stage: min(100%, calc(100svh * 2.5)); }
-  .bc-video {
-    left: calc((100% - var(--stage)) / 2); right: auto; width: var(--stage);
-  }
-  /* .bc-frame keeps its -5% vertical overscan for Ken-Burns; only the width is capped */
-  .bc-frame {
-    left: calc((100% - var(--stage)) / 2); right: auto; width: var(--stage);
-    top: -5%; bottom: -5%;
+  /* The BAND carries the geometry now, not the media. .bc-video and .bc-frame go back to plain
+     inset children of it — which is what lets :root.calm's `inset: 0` and fx-off's kenBurns
+     reset stop fighting the centring (see .bc-band). */
+  .bc-band { left: calc((100% - var(--stage)) / 2); right: auto; width: var(--stage); }
+  .bc-fill { display: block; }
+
+  /* HOW FAR THE PICTURE TAKES TO DISSOLVE INTO THE COLUMNS.
+     Proportional to the room the columns actually have — half the bar — with a floor so the
+     join does not snap back to a hard line just over 2.5:1 where the bar is only a few pixels
+     wide, and a ceiling so a 5120px screen does not spend 380px of picture on the transition.
+     Measured: 3840x1080 -> bar 570px, so the raw value is 285 and the 120px ceiling bites;
+     2600x1000 -> bar 50px, so the raw value is 25px and neither limit bites.
+
+     Written in VIEWPORT units on purpose. This value is read again inside .bc-band / .lore-band
+     / .journey-band, where a `%` would resolve against the BAND rather than the screen and
+     collapse to almost nothing — the custom-property equivalent of the `scale:` vs `scale()`
+     trap. vw/svh mean the same thing in every element. */
+  :root {
+    --edge-feather: clamp(20px, calc((100vw - min(100vw, 100svh * 2.5)) / 2 * 0.5), 120px);
+    /* Duplicated in the short-landscape block below — CSS cannot express "this query OR that
+       one" in one at-rule. If you edit one, edit both. */
+    --edge-mask: linear-gradient(90deg,
+      transparent 0,
+      #000 var(--edge-feather),
+      #000 calc(100% - var(--edge-feather)),
+      transparent 100%);
   }
 
-  /* the room either side of the stage */
-  .broadcast::before, .broadcast::after {
-    content: ''; position: absolute; top: 0; bottom: 0; width: calc((100% - var(--stage)) / 2 + 2px);
-    pointer-events: none; z-index: 1;
+  /* ---- THE ROOM EITHER SIDE OF THE STAGE — BOTH COLUMNS, ON ONE PSEUDO-ELEMENT --------------
+     This used to be ::before AND ::after, and that was MEASURABLY BROKEN in two ways that are
+     invisible to reading the rule and obvious the moment you measure the rendered box.
+
+     1. THE RIGHT COLUMN WAS NOT ON THE RIGHT. The base `.broadcast::after { inset: 0 }` up at
+        the top of this file sets left:0. An absolutely positioned box with left, width AND right
+        all set is over-constrained, and CSS resolves that by IGNORING `right` in a left-to-right
+        document. So `.broadcast::after { right: 0 }` here never took effect: both columns
+        rendered stacked on the LEFT. Measured at 3840x1080 —
+        getComputedStyle(document.querySelector('.broadcast'), '::after').left === '0px', and a
+        screenshot clipped to the right-hand 572px shows no speaker stack, no rack shelves and no
+        radial glow: flat #050302 against a lit crowd. That is the hardest edge on the page and
+        it is exactly the side the report was about.
+     2. THE SITE'S BLACK LEVEL WAS SWITCHED OFF PAST 2.5:1. Redefining ::after here replaced the
+        `background: rgba(0,0,0,0.4)` full-bleed tint it carries everywhere else, so ultrawide
+        ran 40% brighter than every other screen — with the rest of the stack (.lore-scan 0.30,
+        .journey-scan 0.50, .bc-vignette) still tuned underneath a layer that was not there.
+        Measured: getComputedStyle(...,'::after').backgroundColor was rgba(0,0,0,0) at 3840x1080
+        and rgba(0,0,0,0.4) at 844x390.
+
+     Painting both columns as two background LAYER STACKS on a single full-bleed ::before fixes
+     both at once: the right stack is anchored with `background-position: right`, which cannot be
+     over-constrained, and ::after is left alone to go on being the tint. The stacks are
+     no-repeat and sized to the bar, so each repeating-linear-gradient still tiles inside its own
+     column exactly as it did when the column was its own element. Eight static layers, painted
+     once. */
+  .broadcast::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    --bar: calc((100% - var(--stage)) / 2 + 2px);
     background:
-      /* feather into the frame edge so the join is a falloff, not a line */
-      linear-gradient(var(--dir, 90deg), rgba(5,3,2,0) 0%, rgba(5,3,2,0.35) 55%, rgba(5,3,2,0.62) 100%),
-      /* speaker-stack / LED columns */
+      /* --- LEFT column: 270deg puts the transparent end of the feather at the frame edge --- */
+      linear-gradient(270deg, rgba(5,3,2,0) 0%, rgba(5,3,2,0.35) 55%, rgba(5,3,2,0.62) 100%),
       repeating-linear-gradient(90deg,
         rgba(255,255,255,0.045) 0 2px,
         rgba(0,0,0,0) 2px 9px,
         rgba(0,0,0,0.28) 9px 11px,
         rgba(0,0,0,0) 11px 26px),
-      /* rack shelves */
+      repeating-linear-gradient(0deg,
+        rgba(255,255,255,0.03) 0 1px,
+        rgba(0,0,0,0) 1px 34px),
+      radial-gradient(120% 80% at 50% 30%, rgba(60,12,26,0.55), rgba(4,2,2,0.9) 70%),
+      /* --- RIGHT column: mirrored, so 90deg for the feather --- */
+      linear-gradient(90deg, rgba(5,3,2,0) 0%, rgba(5,3,2,0.35) 55%, rgba(5,3,2,0.62) 100%),
+      repeating-linear-gradient(90deg,
+        rgba(255,255,255,0.045) 0 2px,
+        rgba(0,0,0,0) 2px 9px,
+        rgba(0,0,0,0.28) 9px 11px,
+        rgba(0,0,0,0) 11px 26px),
       repeating-linear-gradient(0deg,
         rgba(255,255,255,0.03) 0 1px,
         rgba(0,0,0,0) 1px 34px),
       radial-gradient(120% 80% at 50% 30%, rgba(60,12,26,0.55), rgba(4,2,2,0.9) 70%);
+    background-repeat: no-repeat;
+    background-size: var(--bar) 100%;
+    background-position:
+      left top, left top, left top, left top,
+      right top, right top, right top, right top;
+
+    /* ---- AND THE COLUMN ITSELF HAS TO FEATHER, WHICH IT NEVER DID -----------------------
+       The comment on the first background layer has always claimed it feathers "into the frame
+       edge so the join is a falloff, not a line". Measured, it did not. That layer is only the
+       TOP of a four-layer stack, and it darkens OUTWARD (transparent at the frame edge, 0.62
+       black at the screen edge) — so what it feathers is the column's extra shading, not the
+       column. Underneath it the radial sits at rgba(4,2,2,0.9) across almost the whole bar: a
+       near-opaque slab that simply STOPS at the frame edge.
+
+       Measured at 3840x1080, luminance averaged over a 120px slab: 12.3 at x=570, 37.5 at
+       x=580, with the largest single-pixel step — 24.1 — landing exactly on x=571. Fading the
+       media in from the other side did nothing about it, because the step was never the media.
+
+       So the whole stack gets masked: fully opaque out at the screen edge, ramping to fully
+       transparent over the last --edge-feather of the bar. The middle of the mask is transparent
+       too, which costs nothing — no background layer is painted there anyway.
+       Together with the mask on .bc-band this makes the join a ~240px double dissolve:
+       architecture -> blurred .bc-fill -> sharp footage, with the fill visible underneath the
+       whole way, which is what makes it read as the picture going soft rather than fading out.
+       A stop written as `calc(var(--bar) - var(--edge-feather))` can go negative on a screen
+       barely past 2.5:1, where the bar is a few pixels wide; CSS clamps a gradient stop to the
+       largest preceding stop, so that degrades to "no feather on a bar too small to show one"
+       rather than to anything broken. */
+    --col-mask: linear-gradient(90deg,
+      #000 0,
+      #000 calc(var(--bar) - var(--edge-feather)),
+      transparent var(--bar),
+      transparent calc(100% - var(--bar)),
+      #000 calc(100% - var(--bar) + var(--edge-feather)),
+      #000 100%);
+    -webkit-mask-image: var(--col-mask);
+    mask-image: var(--col-mask);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
   }
-  .broadcast::before { left: 0; --dir: 270deg; }
-  .broadcast::after { right: 0; --dir: 90deg; }
 }
 
 
@@ -1945,7 +2155,9 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
         stopped at 2.4 and the lore slides at 2.5. Same treatment, same number as the lore band,
         so the whole page shares one rhythm instead of each section choosing its own width. */
   .journey-stop { --band: min(100%, calc(100svh * 2.5)); }
-  .journey-bg, .journey-video {
+  /* On the WRAPPER, not on the media — .journey-bg animates Ken-Burns and cannot carry the soft
+     edge, and moving the geometry up one level means the mask and the crop share one box. */
+  .journey-stop .journey-band {
     left: calc((100% - var(--band)) / 2); right: auto; width: var(--band);
   }
   .journey-stop .journey-bg-blur {
@@ -2301,8 +2513,21 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 
 /* Anything carrying a PER-FRAME transform gets a permanent layer. Not toggled — toggling the
    hint is what caused the churn — and not omitted, because without it the transform repaints
-   everything underneath. This is the rule the whole flicker saga kept teaching. */
-.bc-frame, .journey-bg { will-change: transform; }
+   everything underneath. This is the rule the whole flicker saga kept teaching.
+
+   THE JOURNEY HALF USED TO BE UNSCOPED, AND THAT SILENTLY UNDID A DELIBERATE DECISION 970 LINES
+   ABOVE. `.journey-stop[data-active="true"] .journey-bg` promotes the ONE stop you are looking
+   at; this rule named `.journey-bg` with no qualifier, so it promoted all four. Equal specificity
+   means source order wins and this sits far later in the file, so the scoped rule never had any
+   effect on the hint — exactly the trap that has already bitten .lore-band and .lore-fill.
+   Measured on the tablet geometry (1691x960 @1.75, coarse) at the floor: four permanently
+   resident ~5.3 Mpx background textures where the section had asked for one.
+
+   `.bc-frame` genuinely does want it unscoped: there are only ever two, the inactive one is
+   `display: none` under .calm (see the calm block), and .on is re-applied on beat cuts, so
+   there is no stable "active" selector to hang it off. */
+.bc-frame { will-change: transform; }
+.journey-stop[data-active="true"] .journey-bg { will-change: transform; }
 
 /* The travel rail overlapped the city copy in landscape, and on touch it is already inert, so
    on a phone in landscape it is simply not drawn: a decorative readout is not worth sitting on
@@ -2316,7 +2541,7 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      between sections — the same misalignment, just moved somewhere else. Every media element
      now shares the one band, so the edge never moves from the top of the page to the bottom. */
   .journey-stop { --band: min(100%, calc(100svh * 2.0)); }
-  .journey-bg, .journey-video {
+  .journey-stop .journey-band {
     left: calc((100% - var(--band)) / 2); right: auto; width: var(--band);
   }
   .journey-stop .journey-bg-blur {
@@ -2325,10 +2550,36 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
     filter: blur(40px) brightness(0.4) saturate(1.25);
   }
   .broadcast { --stage: min(100%, calc(100svh * 2.0)); }
-  .bc-video { left: calc((100% - var(--stage)) / 2); right: auto; width: var(--stage); }
-  .bc-frame { left: calc((100% - var(--stage)) / 2); right: auto; width: var(--stage); top: -5%; bottom: -5%; }
+  .bc-band { left: calc((100% - var(--stage)) / 2); right: auto; width: var(--stage); }
   /* the ticker lines up with the frame too, rather than running the full window */
   .lyric-marquee { width: min(100%, calc(100svh * 2.0)); margin-inline: auto; }
+
+  /* ---- THE SAME SOFT EDGE, SCALED TO A WINDOW WITH NO HEIGHT ----------------------------
+     A short landscape window pillarboxes every piece of media on the page too — measured, a
+     844x390 phone gets 32px bars and a 1400x520 desktop window gets 180px — and until now the
+     picture ended on a hard line against them here as well. Below 2.5:1 there are not even any
+     speaker columns to end against: the bars are flat #050302 (the Broadcast) and #06070c (the
+     lore slides), which is the most visible version of the fault.
+
+     The FEATHER comes here; the BLURRED FILLS deliberately do not. .lore-fill is already forced
+     off in this block a few hundred lines up, and the reason is written there: re-enabling an
+     8x-upscaled blurred layer under the hero slides is what caused the flicker on Kiki. A mask
+     is not a blur — it costs one extra paint-time channel on a layer that already exists and
+     allocates no new surface — so the edge gets fixed on a landscape phone without putting back
+     the thing that broke it.
+
+     Ceiling is 40px, not 120px: with only 390-560px of height the band is small, and a feather
+     sized for a 5120px monitor would eat a visible fraction of the picture. Floor is 14px so
+     the very narrow bars (20px at 1000x480) still read as a falloff. */
+  :root {
+    --edge-feather: clamp(14px, calc((100vw - min(100vw, 100svh * 2.0)) / 2 * 0.5), 40px);
+    /* Duplicated from the min-aspect-ratio: 5/2 block above — if you edit one, edit both. */
+    --edge-mask: linear-gradient(90deg,
+      transparent 0,
+      #000 var(--edge-feather),
+      #000 calc(100% - var(--edge-feather)),
+      transparent 100%);
+  }
 }
 
 
@@ -3403,10 +3654,77 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   will-change: auto;
 }
 :root.calm .bc-frame.on { animation: kenburnsCalm 14s ease-out both !important; }
-:root.calm .journey-bg {
+/* SCOPED TO THE STOP YOU ARE LOOKING AT, which is what the un-calm rule up at
+   `.journey-stop[data-active="true"] .journey-bg` has always said and what this one forgot to.
+   Unscoped it was wrong twice over, and the second one is the embarrassing one:
+
+     1. all four stops got a RUNNING transform animation, and a running transform animation is
+        composited by Blink whether or not will-change is present — measured, by removing the
+        hint on its own and watching the layer count not move. So the `will-change: auto` below
+        bought nothing while this rule was unscoped, and .calm — the mode whose entire job is to
+        cut resident background texture — promoted FOUR ~5.3 Mpx layers where `full` promotes one.
+     2. `both` + 14s from page load means every stop finished its drift within the first quarter
+        minute of the visit, i.e. long before you have scrolled anywhere near Sao Paulo. The
+        drift that the block above calls "the single thing that makes a still read as footage"
+        was, under .calm, never once visible. Starting it at activation is what makes it play
+        while someone is actually looking at it.
+
+   So this is cheaper AND more correct, which is the only reason it is safe to change something
+   the flicker saga touched. */
+:root.calm .journey-bg { will-change: auto; }
+:root.calm .journey-stop[data-active="true"] .journey-bg {
   animation: kenburnsCalm 14s ease-out both !important;
-  will-change: auto;
 }
+
+/* .lore-bg BELONGS IN THIS BLOCK AND WAS NEVER ADDED TO IT.
+   registry.ts's kenBurns entry names the cost precisely — "13 viewport-sized permanently-promoted
+   textures (2 broadcast frames, 7 lore, 4 journey) ... index.css already diagnoses this as GPU
+   layer eviction and only fixes it inside :root.calm" — and the fix above reaches the 2 and the 4
+   and not the 7. The largest group had no calm treatment at all. Measured at the tablet's floor
+   (1691x960 @1.75, coarse, ?profile=minimal&intensity=0): seven `.lore-bg` each ~5.0 Mpx, every
+   one of them permanently promoted and six of them not even on screen.
+
+   TWO THINGS PROMOTE A .lore-bg, AND REMOVING EITHER ONE ALONE DOES NOTHING. That was worth
+   measuring rather than reasoning about, because the obvious edit is a no-op:
+     - `will-change: transform` (the base rule), and
+     - the kbPan/kbHero animation, which is declared on ALL SEVEN and merely play-state:paused —
+       and Blink composites a PAUSED transform animation exactly as it composites a running one.
+   Dropping the hint alone measured 48 -> 49 layers. Dropping the animation alone measured
+   48 -> 48. Dropping both took the tablet floor from 47 to 33 compositor layers.
+
+   THE ANIMATION IS SCOPED TO A WINDOW, NOT TO THE ACTIVE SLIDE. Scoping it to [data-active] is
+   what the note beside `.lore-bg` says was tried and reverted: the layer is then built and torn
+   down at the instant a slide activates, which is the instant it is centred in the viewport, and
+   that churn is what flickered. A window of active +/- 1 moves both events a full 100vh away from
+   the viewport edge — the slide whose layer is being created is one whole screen below, the one
+   losing its layer is one whole screen above — so the churn still happens and is never on screen
+   while it does. At most three of the seven are ever resident.
+
+   .calm-ONLY, DELIBERATELY. `full` and `balanced` are untouched, so a healthy device cannot
+   regress from this at all; only a device that has already been measured as struggling, or has
+   explicitly asked for `lean`/`minimal`, trades a hidden layer transition for 14 layers. That is
+   the same bargain the `:root.calm .bc-frame:not(.on) { display: none }` rule below already
+   strikes when it turns the cross-fade into a hard cut. */
+/* The hero/chapter split travels as INHERITED CUSTOM PROPERTIES rather than as a second pair of
+   selectors. `.lore-stop.hero .lore-bg` outranks `.lore-stop .lore-bg`, so writing the hero
+   animation-name the way the un-calm rule does would have re-armed kbHero on all three hero
+   slides AFTER `animation: none` had switched them off — the window would have leaked, and it
+   would have leaked silently because the leak is invisible in the stylesheet and only shows up
+   in a layer count. Carrying the name on the stop instead means the window rule below is the
+   one and only place the animation is ever switched on. */
+:root.calm .lore-stop { --kb: kbPan; --kb-dur: 18s; }
+:root.calm .lore-stop.hero { --kb: kbHero; --kb-dur: 15s; }
+:root.calm .lore-bg { will-change: auto; }
+:root.calm .lore-stop .lore-bg { animation: none; }
+:root.calm .lore-stop[data-active="true"] .lore-bg,
+:root.calm .lore-stop[data-active="true"] + .lore-stop .lore-bg,
+:root.calm .lore-stop:has(+ .lore-stop[data-active="true"]) .lore-bg {
+  animation: var(--kb, kbPan) var(--kb-dur, 18s) ease-in-out infinite alternate;
+  animation-play-state: paused;
+}
+/* Same specificity as the window rule above and deliberately after it: the active slide is in
+   that selector list too, and this is what flips it from paused to running. */
+:root.calm .lore-stop[data-active="true"] .lore-bg { animation-play-state: running; }
 /* Slow and shallow: 4% over 14s is movement you notice only if you look for it, which is the
    point — it costs a fraction of the full pan and still stops the frame reading as a photograph. */
 @keyframes kenburnsCalm {

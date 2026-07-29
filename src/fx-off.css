@@ -135,10 +135,16 @@
 
 /* ---- blurFills ----------------------------------------------------------------------------
    `display: none` is the correct neutralisation here rather than a compromise: it is the value
-   both elements already carry by DEFAULT (index.css `.lore-bg-blur`/`.journey-bg-blur`), and
-   they are only switched on past 2.5:1 or on a landscape phone. Off, the letterbox gaps show the
-   Broadcast footage through — which is what the lore band was designed around before the fill
-   was added. Removing the blur instead would leave an 8x-upscaled image, which looks broken. */
+   all three elements already carry by DEFAULT (index.css `.bc-fill`/`.lore-fill`/
+   `.journey-bg-blur`), and they are only switched on past 2.5:1 or on a landscape phone. Off,
+   the letterbox gaps show the Broadcast footage through — which is what the lore band was
+   designed around before the fill was added. Removing the blur instead would leave an
+   8x-upscaled image, which looks broken.
+   THE SOFT EDGE SURVIVES THIS SWITCH. The feather is a mask on the band (index.css --edge-mask),
+   not part of the fill, so turning the fills off still gives a falloff — the picture dissolves
+   into the columns / the Broadcast behind instead of into a blurred copy of itself. That is the
+   point: this switch buys back blur cost without putting the hard letterbox line back. */
+:root.fx-off-blurFills .bc-fill,
 :root.fx-off-blurFills .lore-fill,
 :root.fx-off-blurFills .journey-bg-blur,
 :root.fx-off-blurFills .journey-stop .journey-bg-blur { display: none !important; }
@@ -247,10 +253,13 @@
    animation, the per-frame beat scale, the permanent promotion hint, and the overscan that makes
    the texture larger than the viewport in the first place.
 
-   Only top/bottom of the overscan is reset. `.bc-frame`'s LEFT and WIDTH are what centre it into
-   the capped stage band past 2.5:1 and on a landscape phone; `inset: 0` would override those and
-   stretch the backdrop edge-to-edge on exactly the ultrawide setups the band exists for. (The
-   calm block has that bug today.) */
+   The overscan can now be reset with a plain `inset: 0`. It used to have to be `top`/`bottom`
+   only, because `.bc-frame`'s LEFT and WIDTH were what centred it into the capped stage band
+   past 2.5:1 and on a landscape phone, and `inset: 0` would have overridden those and stretched
+   the backdrop edge-to-edge on exactly the ultrawide setups the band exists for. That geometry
+   moved to the .bc-band wrapper when the soft edge was added, so the frame is a plain inset
+   child again and this is no longer a trap — for either this switch or :root.calm, which had
+   the same bug for the same reason. */
 :root.fx-off-kenBurns .bc-frame,
 :root.fx-off-kenBurns .lore-bg,
 :root.fx-off-kenBurns .journey-bg {
@@ -258,7 +267,7 @@
   scale: 1 !important;
   will-change: auto !important;
 }
-:root.fx-off-kenBurns .bc-frame { top: 0 !important; bottom: 0 !important; }
+:root.fx-off-kenBurns .bc-frame { inset: 0 !important; }
 
 
 /* ---- goldSheen ---------------------------------------------------------------------------- */

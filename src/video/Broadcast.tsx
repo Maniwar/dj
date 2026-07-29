@@ -145,32 +145,47 @@ export default function Broadcast() {
       className={`broadcast ${loggedOn ? 'live' : 'idle'}`}
       aria-hidden
       data-city={scene.city}
+      /* The scan layer keys its video-only darkening off this. It used to use
+         `.bc-video ~ .bc-scan`, which stopped matching the moment the media moved inside
+         .bc-band — same fix, and the same attribute, as .lore-stop[data-media]. */
+      data-media={useVideo ? 'video' : 'still'}
     >
-      {useVideo ? (
-        <video
-          key={vids[vidIdx % vids.length]}
-          className="bc-video"
-          src={videoSrc(vids[vidIdx % vids.length])}
-          autoPlay
-          muted
-          playsInline
-          loop={vids.length === 1}
-          onEnded={() => vids.length > 1 && setVidIdx((i) => (i + 1) % vids.length)}
-        />
-      ) : (
-        <>
-          {/* stable divs (no key on src change) so a beat-cut swaps the backgroundImage
-              in place instead of remounting + re-decoding the frame (the mobile flash) */}
-          <div
-            className={`bc-frame ${showA ? 'on' : ''}`}
-            style={{ backgroundImage: `url(${withBase(aSrc)})` }}
+      {/* Blurred side fill, BEHIND the band. Only visible past 2.5:1 or in a short landscape
+          window, where the footage is a centred band and there is bar to fill — everywhere else
+          .bc-fill is display:none and this div costs nothing. It shows the scene's FIRST frame
+          rather than whichever one is on screen: see the .bc-fill comment in index.css (a
+          background-image cannot cross-fade, so following the beat-cut would pop the sides).
+          Deliberately NOT a second <video>: videoDirector.ts allows one decoder at a time. */}
+      <div className="bc-fill" style={{ backgroundImage: `url(${withBase(scene.frames[0])})` }} />
+      {/* The band is the static wrapper the soft edge hangs off. It cannot be the media itself —
+          .bc-frame animates Ken-Burns, and a mask would be transformed along with it. */}
+      <div className="bc-band">
+        {useVideo ? (
+          <video
+            key={vids[vidIdx % vids.length]}
+            className="bc-video"
+            src={videoSrc(vids[vidIdx % vids.length])}
+            autoPlay
+            muted
+            playsInline
+            loop={vids.length === 1}
+            onEnded={() => vids.length > 1 && setVidIdx((i) => (i + 1) % vids.length)}
           />
-          <div
-            className={`bc-frame ${!showA ? 'on' : ''}`}
-            style={{ backgroundImage: `url(${withBase(bSrc)})` }}
-          />
-        </>
-      )}
+        ) : (
+          <>
+            {/* stable divs (no key on src change) so a beat-cut swaps the backgroundImage
+                in place instead of remounting + re-decoding the frame (the mobile flash) */}
+            <div
+              className={`bc-frame ${showA ? 'on' : ''}`}
+              style={{ backgroundImage: `url(${withBase(aSrc)})` }}
+            />
+            <div
+              className={`bc-frame ${!showA ? 'on' : ''}`}
+              style={{ backgroundImage: `url(${withBase(bSrc)})` }}
+            />
+          </>
+        )}
+      </div>
       {/* club-atmosphere overlays */}
       {!PERF.bcOff.has('strobe') && <div className="bc-strobe" />}
       {!PERF.noGrain && !PERF.bcOff.has('grain') && <div className="bc-grain" />}

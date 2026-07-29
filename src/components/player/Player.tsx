@@ -11,32 +11,91 @@ import { useThermalReadout } from '../../hooks/useThermalReadout'
 import SpectrumDisplay from './SpectrumDisplay'
 import BootlegSwitch from './BootlegSwitch'
 import Knob from './Knob'
-import { setIntensityPref, setProfile, perfState, subscribePerfState } from '../../perf/fxState'
+import { setIntensityPref, setProfile, perfState, appliedProfile, subscribePerfState } from '../../perf/fxState'
 import { FX_DEFAULT } from '../../perf/fxCurve'
-import type { ProfileId } from '../../perf/profiles'
+import { PROFILE_BY_ID, type ProfileId } from '../../perf/profiles'
 
-// THE FOUR RUNGS THE FX BUTTON CYCLES, heaviest first, wrapping back to Full.
+// THE FIVE RUNGS THE FX BUTTON CYCLES: Auto, then the four profiles heaviest-first, wrapping back
+// to Auto.
 //
-// These are the same profiles the panel offers and auto-detection picks, deliberately: a report
-// that says "smooth on Lean" has to be reproducible with one tap, and it cannot be if the button
-// walks a different axis. The mark is what distinguishes the rungs at 40px — full has none, so
-// the default state reads as a plain "FX" rather than as a setting someone has changed.
-const FX_RUNGS: ReadonlyArray<{ id: ProfileId; label: string; mark: string }> = [
-  { id: 'full', label: 'Full', mark: '' },
-  { id: 'balanced', label: 'Balanced', mark: '·' },
-  { id: 'lean', label: 'Lean', mark: '··' },
-  { id: 'minimal', label: 'Minimal', mark: '···' },
+// The four profiles are the same ones the panel offers and auto-detection picks, deliberately: a
+// report that says "smooth on Lean" has to be reproducible with one tap, and it cannot be if the
+// button walks a different axis. AUTO IS THE FIFTH because the detector had no way to be acted
+// on: it measured the device, wrote a recommendation into the panel and the export, and — quite
+// deliberately, see fxState — never touched the page. On a phone, where the panel is five taps
+// behind a hidden gesture, that made the measurement invisible to the person it was about. This
+// button is where they say yes to it.
+const FX_RUNGS: ReadonlyArray<{ id: ProfileId | 'auto'; label: string }> = [
+  { id: 'auto', label: 'Auto' },
+  { id: 'full', label: 'Full' },
+  { id: 'balanced', label: 'Balanced' },
+  { id: 'lean', label: 'Lean' },
+  { id: 'minimal', label: 'Minimal' },
 ]
 
 /**
- * Which rung is showing. `auto` reads as Full because detection is ADVISORY and resolveOff()
- * treats it as Full — reporting the recommendation here instead would make the button claim a
- * state the page is not in.
+ * What distinguishes the levels at 40px. Full has no mark, so the default state reads as a plain
+ * "FX" rather than as a setting someone has changed.
  */
-function rungOf(s: { profile: ProfileId | 'auto' }): number {
-  const id = s.profile === 'auto' ? 'full' : s.profile
-  const i = FX_RUNGS.findIndex((r) => r.id === id)
-  return i < 0 ? 0 : i
+const RUNG_MARK: Record<ProfileId, string> = { full: '', balanced: '·', lean: '··', minimal: '···' }
+
+type FxChip = {
+  /** Index into FX_RUNGS — what one more tap advances from. */
+  rung: number
+  /** The face of the button. Four characters at most; see the note in fxChip(). */
+  text: string
+  /** The full sentence for the aria-label and the tooltip, where there is room to be clear. */
+  now: string
+  next: string
+  /** Whether the page is actually running reduced, which is what the lit state means. */
+  reduced: boolean
+}
+
+/**
+ * Everything the chip shows, derived from perf state. Read live rather than held locally, so the
+ * button stays truthful when the profile is changed from the panel, from ?profile= or by
+ * auto-detection — three other writers, all of which used to leave this control lying.
+ *
+ * TWO FACTS IN FOUR CHARACTERS, which is the whole design problem here. Under Auto the button has
+ * to say both THAT it is on Auto and WHICH rung Auto landed on, and there is no room for a
+ * sentence; those live in the aria-label and the title, which is also where a screen reader and a
+ * hovering mouse can afford them.
+ *
+ *   FX  FX·  FX··  FX···        a profile someone picked, by name, marked by level.
+ *   AUTO  AUTO·  AUTO··  AUTO···   Auto, marked by the level it resolved to.
+ *
+ * The word rather than a letter is measured, not stylistic. On a 375px viewport Oswald at 0.52rem
+ * (8.32px) sets the widest face, "AUTO···", in 36.4px against "FX···" at 26.2px; the strip's
+ * scrollWidth still equals its clientWidth, because the 10px comes out of the title marquee, which
+ * is the one element in the row that can ellipsis and is already flex 1 1 60px for that reason.
+ * A lone "A" would have fitted too, and was rejected on a different measurement: it would have sat
+ * two chips away from the A-SIDE / BOOTLEG pressing badges in the same strip and read as one.
+ *
+ * AN UN-CHOSEN AUTO SHOWS "FX", not "AUTO". Every first visit boots with profile 'auto' and
+ * detection merely advisory, so a button reading AUTO there would be claiming a mode the page is
+ * not in — and would make the one state that IS Auto indistinguishable from the state that is
+ * simply the site as designed.
+ */
+function fxChip(): FxChip {
+  const s = perfState()
+  const applied = appliedProfile()
+  const onAuto = s.profile === 'auto' && s.autoChosen
+  const i = FX_RUNGS.findIndex((r) => r.id === (onAuto ? 'auto' : applied))
+  const rung = i < 0 ? 1 : i
+  return {
+    rung,
+    text: `${onAuto ? 'AUTO' : 'FX'}${RUNG_MARK[applied]}`,
+    now: onAuto
+      ? s.detected
+        ? `Auto — this device measured ${PROFILE_BY_ID[applied].label}`
+        : 'Auto — measuring this device; running Full until it decides'
+      : FX_RUNGS[rung].label,
+    next: FX_RUNGS[(rung + 1) % FX_RUNGS.length].label,
+    // LIT WHEN THE PAGE IS REDUCED, not when a choice has been made. The chip answers "is the site
+    // running as designed?", and under Auto that answer belongs to the measurement: Auto resolved
+    // to Full is the full site and reads as one, Auto resolved to Lean is not.
+    reduced: applied !== 'full',
+  }
 }
 
 function fmt(s: number) {
@@ -55,11 +114,11 @@ export default function Player() {
   const duration = usePlayerStore((s) => s.duration)
   const volume = usePlayerStore((s) => s.volume)
   const intensity = useSiteStore((s) => s.intensity)
-  // Which rung the FX button is showing. Read from perf state rather than held locally, so the
-  // button stays truthful when the profile is changed from the panel, from ?profile= or by
-  // auto-detection — three other writers, all of which used to leave this control lying.
-  const [fxRung, setFxRung] = useState(() => rungOf(perfState()))
-  useEffect(() => subscribePerfState(() => setFxRung(rungOf(perfState()))), [])
+  // What the FX button is showing. Recomputed on every perf-state change, which now includes the
+  // detector's verdict landing on an Auto the visitor chose: the page changes under them and the
+  // control has to change with it.
+  const [fx, setFx] = useState(fxChip)
+  useEffect(() => subscribePerfState(() => setFx(fxChip())), [])
   const toggleLyrics = useSiteStore((s) => s.toggleLyrics)
   const lyricsOpen = useSiteStore((s) => s.lyricsOpen)
   const videoEnabled = useSiteStore((s) => s.videoEnabled)
@@ -343,23 +402,20 @@ export default function Player() {
               ))}
             </div>
           )}
-          {/* THE DIAL, REACHABLE FROM THE MINI BAR. The knob lives in the expanded player, and
-              the expanded player is not the default on a phone — so the one control that can
-              rescue a struggling device, or quiet the page for someone who finds it too much,
-              was unreachable exactly where it was most needed. Three stops rather than a slider:
-              a 40px strip has no room for a drag target, and off / half / default is the whole
-              useful range of a control most people will touch once. */}
+          {/* THE EFFECT CONTROL, REACHABLE FROM THE MINI BAR. The knob lives in the expanded
+              player, and the expanded player is not the default on a phone — so the one control
+              that can rescue a struggling device, or quiet the page for someone who finds it too
+              much, was unreachable exactly where it was most needed. Named stops rather than a
+              slider: a 40px strip has no room for a drag target, and a profile someone can name
+              is reproducible in a bug report in a way that "the knob was about here" is not.
+              Auto is one of the stops, so the visitor can also hand the decision back. */}
           <button
-            className={`shade-fx${fxRung > 0 ? ' on' : ''}`}
-            onClick={() => setProfile(FX_RUNGS[(fxRung + 1) % FX_RUNGS.length].id)}
-            aria-label={`Effects: ${FX_RUNGS[fxRung].label}. Tap for ${
-              FX_RUNGS[(fxRung + 1) % FX_RUNGS.length].label
-            }.`}
-            title={`Effects: ${FX_RUNGS[fxRung].label} — tap for ${
-              FX_RUNGS[(fxRung + 1) % FX_RUNGS.length].label
-            }`}
+            className={`shade-fx${fx.reduced ? ' on' : ''}`}
+            onClick={() => setProfile(FX_RUNGS[(fx.rung + 1) % FX_RUNGS.length].id)}
+            aria-label={`Effects: ${fx.now}. Tap for ${fx.next}.`}
+            title={`Effects: ${fx.now} · tap for ${fx.next}`}
           >
-            FX{FX_RUNGS[fxRung].mark}
+            {fx.text}
           </button>
           <span className="shade-time">{fmt(currentTime)}</span>
           <button
