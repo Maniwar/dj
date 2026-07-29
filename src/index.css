@@ -948,6 +948,37 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 /* story/city headings dance + light up too, so the beat is felt everywhere you scroll */
 .lore-name { transform: translateY(var(--beat-lift)) scale(calc(1 + var(--m-beat) * 0.055));
   transform-origin: left center; }
+
+/* THE BEAT SCALES HAVE TO BE ON PROMOTED LAYERS, OR THEY REPAINT THE PAGE UNDER THEM.
+   The comment above says the beat is "carried by transform — composited, free". That was the
+   intent and it was not true: none of these elements had a compositor layer, so a per-frame scale
+   re-rasterised the glyphs AND dirtied everything beneath them. On a Samsung Tab Ultra in Chrome's
+   desktop-site mode the result was the entire foreground — type, effects and player together —
+   lurching on every beat over a video that does not move.
+
+   Isolated on the device by elimination, not by argument: ?fxoff=audioPump stopped it (so it is
+   audio-driven), the paint family (beatFilter/beatShadow/beatBoxShadow) did NOT, beatLift alone
+   did NOT, and adding beatTransform DID. It is these scales.
+
+   Why only that one device: this is the same trap perfFlags.ts documents four times over — every
+   mitigation in this file is gated on VIEWPORT WIDTH, and the tablet is the only machine that is
+   mobile silicon at desktop width. A phone matches `max-width: 768px` and gets the treatment at
+   index.css:1641, whose comment already recorded this exact diagnosis — "a per-frame transform on
+   a layer that had no promotion, so every beat repainted the page beneath it". The tablet in
+   desktop mode matches no such block and never received the fix. A desktop GPU simply absorbs
+   the repaint, which is why nothing else in the fleet shows it.
+
+   Promotion, not removal — the pulse is unchanged on every device. About twenty elements, against
+   the ~104 layer promotions just removed from .glow-trail and a measured Surface budget of ~180,
+   so this spends a small part of what that freed. These are also the correct use of the hint:
+   elements that genuinely transform every frame while music plays, which is exactly what
+   `will-change` is for. */
+.section-title,
+.hero-title .drip,
+.crest .ring,
+.tl-row.active .tl-title,
+.lore-name,
+.journey-city { will-change: transform; }
 .lore-stop.side-right .lore-name { transform-origin: right center; }
 /* (.journey-city's own shimmer + lift live in its main rule further down — setting them here
     would be overridden by that later declaration.) */
