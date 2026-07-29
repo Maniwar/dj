@@ -106,7 +106,13 @@ export function perfState(): Readonly<PerfState> {
 /** Which profile is actually in force right now. */
 export function appliedProfile(): ProfileId {
   if (state.profile !== 'auto') return state.profile
-  return state.detected ?? 'full'
+  // `auto` is FULL, not the recommendation. Detection is advisory — see setDetectedProfile.
+  //
+  // This function had the same bug resolveOff() did, and fixing only that one left `.calm` still
+  // landing on a healthy desktop: no fx-off classes, glass intact, and yet the SD video rendition
+  // and the hard-cut background because THIS was still reading `detected`. Two functions deciding
+  // "which profile is in force" is one too many; they now agree because resolveOff calls this.
+  return 'full'
 }
 
 export function appliedProfileDef(): Profile {
@@ -150,9 +156,8 @@ export function autoArmed(): boolean {
  * sits above every threshold in the registry: nothing is retired until the dial is turned down.
  */
 export function resolveOff(s: Readonly<PerfState> = state): FxId[] {
-  // `auto` resolves to `full`, NOT to whatever was detected. Detection is advisory — see
-  // setDetectedProfile. This is the single line that decides whether a frame-time measurement is
-  // allowed to rewrite the page, and it is not.
+  // One answer to "which profile is in force", shared with the `.calm` class — see
+  // appliedProfile(), which is where `auto` resolves to `full` because detection is advisory.
   const profile = PROFILE_BY_ID[s.profile === 'auto' ? 'full' : s.profile]
   const off = new Set<FxId>(profile.off)
   for (const id of ALL_FX_IDS) {
