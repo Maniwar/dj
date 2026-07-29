@@ -2885,7 +2885,14 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      because it is one layer, not twelve. */
   background: radial-gradient(circle, rgba(255,255,255,0.95) 0%, var(--accent, #ff1f8f) 40%, transparent 70%);
   opacity: 0; /* pooled nodes sit invisible until they are used */
-  will-change: transform, opacity;
+  /* NO will-change. This rule carried `will-change: transform, opacity`, and because the pool is
+     104 nodes that is 104 PERMANENT compositor layers — measured as 104 of the ~125 promotions on
+     the whole page at its floor, for elements that are invisible at opacity 0 almost all the time.
+     `will-change` is a hint to promote AHEAD of an animation; it is not what makes one smooth.
+     The fade here is driven by element.animate(), and the compositor promotes an element for the
+     duration of a transform/opacity animation on its own — so the hint bought nothing and cost the
+     entire layer budget of a Surface, which collapses from 56fps to 17fps somewhere past 180
+     layers. The dozen trail nodes actually in flight are still promoted, exactly while they move. */
 }
 /* The fade is driven from JS with .animate() rather than a CSS class, because restarting a CSS
    animation on a recycled node requires forcing a reflow and that is the one thing this effect
