@@ -64,24 +64,31 @@ function urlAsksForDiag(): boolean {
   return typeof location !== 'undefined' && /[?&]diag(?:&|=|$)/i.test(location.search)
 }
 
-function storedOpen(): boolean {
+/**
+ * THE PANEL DOES NOT SURVIVE A RELOAD, DELIBERATELY.
+ *
+ * It used to: the open state was written to `so.diag` and read back at boot, so once anyone had
+ * opened it once the panel came back on EVERY subsequent load of club-humidity.com, with no
+ * `?diag` and no explanation. Reported from the tablet, where it had quietly become part of the
+ * site. A developer tool that installs itself permanently after a single visit is a bug, not a
+ * convenience — and the two ways in are already cheap: `?diag` in the URL, or five taps on the
+ * crest, which exists precisely so this needs no keyboard on a tablet.
+ *
+ * The stored key is actively cleared rather than merely ignored, so anyone already carrying one
+ * from an earlier build is released from it on their next load instead of having to find it in
+ * devtools.
+ */
+function clearStoredOpen(): void {
   try {
-    return localStorage.getItem(DIAG_KEY) === '1'
+    localStorage.removeItem(DIAG_KEY)
   } catch {
-    return false
-  }
-}
-
-function rememberOpen(open: boolean): void {
-  try {
-    localStorage.setItem(DIAG_KEY, open ? '1' : '0')
-  } catch {
-    /* private mode — the panel just won't survive a reload */
+    /* private mode — nothing was stored to begin with */
   }
 }
 
 export default function DiagPanel() {
-  const [open, setOpen] = useState(() => urlAsksForDiag() || storedOpen())
+  const [open, setOpen] = useState(urlAsksForDiag)
+  useEffect(clearStoredOpen, [])
 
   // OPENING IT WITHOUT A KEYBOARD. ?diag works, but the tablet is the device with the problem and
   // typing a query string into Android Chrome mid-session is enough friction that the measurement
@@ -100,7 +107,7 @@ export default function DiagPanel() {
       taps.push(now)
       if (taps.length >= TAP_COUNT) {
         taps = []
-        rememberOpen(true)
+        /* not remembered — see clearStoredOpen */
         setOpen(true)
       }
     }
@@ -135,7 +142,7 @@ export default function DiagPanel() {
     <Panel
       host={hostRef.current}
       onClose={() => {
-        rememberOpen(false)
+        /* not remembered — see clearStoredOpen */
         setOpen(false)
       }}
     />,
