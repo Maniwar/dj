@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { audioBus } from '../audio/audioBus'
 import { PERF } from '../lib/perfFlags'
+import { useFxOn } from '../perf/useFx'
+import { getFxMultiplier } from '../perf/intensity'
 
 // Pumps the live audio bands onto :root as CSS custom properties so the ENTIRE PAGE
 // can react to the music in pure CSS (no per-element JS). One rAF loop, throttled
@@ -18,12 +20,23 @@ const gain = (x: number, g: number, gamma: number) =>
   Math.min(1, Math.pow(Math.max(0, x), gamma) * g)
 
 export default function AudioReactive() {
+  // Subscribed rather than read once from the URL, so the `audioPump` switch is honoured live —
+  // by the panel, and by the benchmark's no-audio-css row, which previously asked for the pump to
+  // stop and measured it still running. Flipping it re-runs this effect: the cleanup cancels the
+  // rAF loop, and the branch below pins the variables at neutral.
+  const pump = useFxOn('audioPump')
   useEffect(() => {
     const root = document.documentElement
-    if (PERF.noReact) {
-      // low-power: set neutral values once, no per-frame writes
-      for (const v of ['--m-beat', '--m-level', '--m-bass', '--m-treble']) root.style.setProperty(v, '0.2')
+    if (!pump) {
+      // low-power: set neutral values once, no per-frame writes. cssText is not used here — the
+      // loop is not running, so there is nothing to rebuild and nothing else writes this element.
+      // The resting values are scaled by the dial like everything else, so that at intensity 0 —
+      // where this branch is always the one taken, because `audioPump` is retired below 0.02 —
+      // every audio variable is a hard 0 and the page has no residual pulse in it at all.
+      const rest = (0.2 * getFxMultiplier()).toFixed(2)
+      for (const v of ['--m-beat', '--m-level', '--m-bass', '--m-treble']) root.style.setProperty(v, rest)
       for (const v of ['--m-snare', '--m-hat', '--m-down', '--m-build', '--m-drop']) root.style.setProperty(v, '0')
+      root.style.setProperty('--beat-lift', '0px')
       return
     }
     let raf = 0
@@ -75,18 +88,45 @@ export default function AudioReactive() {
     //
     // Collecting the frame's values and assigning cssText once reproduces the ?freeze=others
     // profile exactly — a single mutation — while keeping every variable live at full resolution.
-    // This is why FrictionOverlay's variables were moved to body: cssText replaces the whole
-    // inline style, so nothing else may live here.
+    // This is also why the master dial publishes `--fx` on <body> and not here: cssText replaces
+    // the whole inline style attribute, so anything else written to this element is erased on the
+    // next frame. Nothing else may live here. (The friction knob's variables were moved to body
+    // for the same reason before it was retired.)
     const pending: Record<string, string> = {}
+    // THE MASTER DIAL IS APPLIED HERE, AT THE SOURCE — not in the ~94 rules downstream.
+    //
+    // Every rule that reacts to the music reads one of these variables, so scaling the VALUE
+    // scales the reaction, and not one selector had to be touched to make the dial reach them.
+    // It also produces the right thing at 0 for free: every variable becomes the constant "0.0",
+    // the dedupe below matches on every frame, `pending` stays empty, and the per-frame cssText
+    // write — the cost this file spent weeks isolating — stops entirely. No extra branch.
+    //
+    // Read per frame rather than captured, because the dial can move while the loop is running
+    // and re-running the effect on every drag frame would tear down and rebuild the rAF loop.
     const setVar = (name: string, v: number) => {
+      const fx = getFxMultiplier()
       if (frozen(name)) {
         if (written[name] === undefined) {
-          written[name] = 'frozen'
-          root.style.setProperty(name, name === '--m-beat' ? '0.35' : '0.2')
+          // The REAL value, not a sentinel. `written` is not a set of "have I handled this yet"
+          // flags — it is the source the cssText flush below is rebuilt from, so storing the
+          // string 'frozen' meant the very next flush emitted `--m-beat:frozen`, an invalid token
+          // that overwrote the correct one-time value. Every ?live= and ?freeze= bisect run since
+          // that flush was introduced measured a page whose frozen variables were unset.
+          const held =
+            name === '--beat-lift' ? '0px' : ((name === '--m-beat' ? 0.35 : 0.2) * fx).toFixed(2)
+          written[name] = held
+          root.style.setProperty(name, held)
         }
         return
       }
-      const s = name === '--beat-lift' ? `${v.toFixed(3)}px` : v.toFixed(COARSE.has(name) ? 1 : 2)
+      // --beat-lift is SNAPPED TO WHOLE DEVICE PIXELS, and the snap has to happen AFTER the dial
+      // is applied or the scaling puts the offsets straight back onto fractional pixels — which
+      // is the exact shimmer the snap was added to remove (commit "Snap --beat-lift to whole
+      // device pixels"). That is why the rounding lives here and not at the call site.
+      const s =
+        name === '--beat-lift'
+          ? `${Math.round(v * fx * DPR) / DPR}px`
+          : (v * fx).toFixed(COARSE.has(name) ? 1 : 2)
       if (written[name] === s) return
       written[name] = s
       pending[name] = s
@@ -142,7 +182,7 @@ export default function AudioReactive() {
       // glyphs rasterise identically each time however many distinct values the audio produces.
       // Computing it here also removes a CSS-level variable-to-variable dependency chain.
       const liftPx = (on ? beat + (mu.downbeat ?? 0) * 0.8 + (mu.drop ?? 0) * 1.2 : 0) * -7
-      setVar('--beat-lift', Math.round(liftPx * DPR) / DPR)
+      setVar('--beat-lift', liftPx)
       // phases keep running so bar-synced sweeps stay continuous rather than snapping
       // flush: one assignment, one invalidation pass
       const keys = Object.keys(pending)
@@ -156,6 +196,6 @@ export default function AudioReactive() {
     }
     raf = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(raf)
-  }, [])
+  }, [pump])
   return null
 }

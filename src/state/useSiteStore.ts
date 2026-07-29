@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { FX_DEFAULT } from '../perf/fxCurve'
 
 // The light rig takes its colour from wherever you are in the story, so the lasers belong to
 // the section instead of washing everything the same pink. Values are 0..1 RGB for the shader.
@@ -55,7 +56,18 @@ function initialViz(): VizMode {
 type SiteState = {
   loggedOn: boolean // has the user clicked LOG ON & PLUG IN?
   booting: boolean // dial-up handshake in progress
-  friction: number // 0..1 — the Friction Knob. Higher = more chromatic aberration + CRT shake.
+  /**
+   * 0..1 — THE MASTER INTENSITY DIAL. Was `friction`, which drove CRT scanlines, a chromatic
+   * split and a full-viewport shake; all three are gone (they cost legibility and bought
+   * nothing). It now scales EVERY effect on the site at once — see src/perf/intensity.ts for the
+   * response curve and for the two mechanisms it feeds (--fx, and the pre-multiplied --m-* pump).
+   *
+   * This field is the value's public home, but it is NOT where a change should be written:
+   * fxState.setIntensityPref owns the preference (it persists it, and it is the same value the
+   * diag panel's slider and the profile caps act on). All this field does is hold the resolved
+   * number for the components that render from it.
+   */
+  intensity: number
   saunaMode: boolean // secret unlock
   reducedMotion: boolean
   hits: number // fake 2004 hit-counter
@@ -78,7 +90,7 @@ type SiteState = {
   toggleRepeat: () => void
   logOn: () => void
   finishBoot: () => void
-  setFriction: (v: number) => void
+  setIntensity: (v: number) => void
   toggleSauna: () => void
   toggleLyrics: () => void
   toggleVideo: () => void
@@ -90,7 +102,13 @@ const seededHits = 4_019_202 // "since 2002" — grows while you watch
 export const useSiteStore = create<SiteState>((set) => ({
   loggedOn: false,
   booting: false,
-  friction: 0.12,
+  // The dial's rest position. 0.6 is not a taste call: it is the point on the response curve
+  // where the multiplier is exactly 1.0, i.e. where every effect renders at the value it was
+  // tuned to. It reads FX_DEFAULT from src/perf/fxCurve.ts rather than restating 0.6, because a
+  // second copy of "the default" that drifted would boot the site at a strength nothing was
+  // tuned at. (fxCurve is a leaf module for exactly this: it imports nothing, so there is no
+  // cycle between the store and the perf harness.)
+  intensity: FX_DEFAULT,
   saunaMode: false,
   reducedMotion:
     typeof window !== 'undefined' &&
@@ -171,7 +189,7 @@ export const useSiteStore = create<SiteState>((set) => ({
     }),
   logOn: () => set({ loggedOn: true, booting: true }),
   finishBoot: () => set({ booting: false }),
-  setFriction: (v) => set({ friction: Math.max(0, Math.min(1, v)) }),
+  setIntensity: (v) => set({ intensity: Math.max(0, Math.min(1, v)) }),
   toggleSauna: () => set((s) => ({ saunaMode: !s.saunaMode })),
   toggleLyrics: () => set((s) => ({ lyricsOpen: !s.lyricsOpen })),
   toggleVideo: () => set((s) => ({ videoEnabled: !s.videoEnabled })),
