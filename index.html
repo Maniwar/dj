@@ -35,12 +35,18 @@
     <meta name="twitter:title" content="SYSTEM OVERLOAD — CLUB HUMIDITY // The Moist Mix 2002" />
     <meta name="twitter:description" content="The multi-platinum, moisture-laden album from DJ Dieter &amp; Kiki G. LOG ON. PLUG IN. STAY MOIST." />
     <meta name="twitter:image" content="https://club-humidity.com/assets/video/frames/club-floor.jpg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@300;400;500;600;700&family=Barlow+Condensed:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap"
-      rel="stylesheet"
-    />
+    <!-- SELF-HOSTED TYPE. This was a <link> to fonts.googleapis.com and nothing else: the site
+         carried zero @font-face rules and zero font files, so its ENTIRE identity depended on a
+         third-party CDN answering. Three of its six font stacks end in a bare `sans-serif`, so
+         when that request does not land the design does not degrade, it disappears — reported
+         from a Windows Surface where the fonts silently never loaded while the same build was
+         fine on macOS and Android.
+         289KB, latin subset, 12 faces, served from our own origin. Also removes two DNS+TLS
+         handshakes from the critical path and stops leaking every visitor's IP to Google. -->
+    <link rel="preload" href="/fonts/anton-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/oswald-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/barlow-condensed-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="/fonts/fonts.css" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%A6%3C/text%3E%3C/svg%3E" />
     <!-- Structured data: lets search engines read this as an ALBUM with named tracks rather
          than as one unlabelled page, and is how the site gets associated with the release

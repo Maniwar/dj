@@ -969,8 +969,26 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    .lm-run is the scrolling container — one element per marquee instead of four hundred words.
    Scaling it pulses the whole strip together, which for text sliding past at speed is
    indistinguishable from scaling each word, and it takes the beat-driven element count from 471
-   to about 71. */
-.lm-run { scale: calc(1 + var(--m-beat) * 0.035); }
+   to about 71.
+
+   THE SCALE GOES ON THE CLIP BOX, NOT ON THE STRIP. This is the fix for the whole-foreground
+   shake, and the bug is a lever arm rather than a wrong number.
+
+   `.lm-run` is the SCROLLING strip, measured 28,436px wide. `transform-origin: 50% 50%` puts its
+   pivot ~14,206px from its left edge, and the words actually on screen sit almost exactly that
+   far from the pivot — so a 3.5% scale resolves to about −497px of HORIZONTAL translation per
+   unit of --m-beat. Measured: −170px at the average beat of 0.34, −285px at a 0.57 peak. Five
+   strips doing that in unison, over a video that does not move, is not a pulse; it reads as the
+   entire foreground slamming sideways on every kick. Screenshots caught a strip jumping a word
+   and a half mid-phrase.
+
+   `.lyric-marquee` is the viewport-width clip box the strip scrolls inside. Scaling THAT gives
+   the same visual pulse — the type still swells on the beat — with a lever arm of half a
+   viewport (~720px) instead of 14,206px, so the words move ~8px at the same beat rather than
+   170px, in line with every other beat-driven element on the page. The element count is
+   unchanged at one per marquee, so the reason this moved off .lm-item in the first place still
+   holds. */
+.lyric-marquee { scale: calc(1 + var(--m-beat) * 0.035); }
 .lm-item { display: inline-block; }
 /* the player's LCD track title glows with the track it's playing */
 .lcd-title { text-shadow: 0 0 calc(2px + var(--m-beat) * 14px) currentColor; }

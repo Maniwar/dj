@@ -220,7 +220,9 @@
 :root.fx-off-beatTransform .ls-word.now { transform: translateY(-0.12em) scale(1.12) !important; }
 /* `scale` is an independent property here (it composes with each layer's own transform), so it
    has to be pinned separately — setting `transform` would not touch it. */
-:root.fx-off-beatTransform .lm-run { scale: 1 !important; }
+/* .lyric-marquee, not .lm-run — the beat scale moved to the clip box to kill the 170px
+   horizontal slam caused by scaling a 28,436px strip about its centre. See index.css. */
+:root.fx-off-beatTransform .lyric-marquee { scale: 1 !important; }
 
 
 /* ---- beatLift -----------------------------------------------------------------------------
