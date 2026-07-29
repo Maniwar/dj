@@ -948,6 +948,32 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 /* story/city headings dance + light up too, so the beat is felt everywhere you scroll */
 .lore-name { transform: translateY(var(--beat-lift)) scale(calc(1 + var(--m-beat) * 0.055));
   transform-origin: left center; }
+
+/* BEAT SCALES ARE GENTLER ON TOUCH HARDWARE. Not off — gentler.
+   Isolated on a Samsung Tab Ultra by elimination rather than by argument: ?fxoff=audioPump stopped
+   the whole-foreground shake (so it is audio-driven), the paint family did NOT, beatLift alone did
+   NOT, and adding beatTransform DID. It is these scales, and nothing else.
+   Promotion was tried first, as the obvious answer, and is NOT the fix: `will-change: transform`
+   on these six selectors did not stop the shake and gave the crew slide a layer-eviction flicker
+   on the same Mali GPU. Reverted in 29cdfe4. So the cost is the rasterisation of large type at a
+   changing scale, which a compositor layer cannot avoid — only a smaller scale can.
+   `pointer: coarse`, deliberately NOT a width. The tablet is the only machine in the fleet that is
+   mobile silicon at desktop viewport width, and every existing mitigation in this file is gated on
+   width, which is why it received none of them — the same trap perfFlags.ts documents four times.
+   Hardware does not change when the window does.
+   Roughly half amplitude. The type still swells on every beat; it stops re-rasterising a 137px
+   heading across a 10% range sixty times a second. Desktop is untouched. */
+@media (pointer: coarse) {
+  .section-title {
+    transform: skewX(-5deg) translateY(var(--beat-lift))
+               scale(calc(1 + var(--m-beat) * 0.045 + var(--m-down, 0) * 0.02 + var(--m-drop, 0) * 0.04));
+  }
+  .hero-title .drip { transform: translateY(var(--beat-lift)) scale(calc(1 + var(--m-beat) * 0.03)); }
+  .crest .ring { transform: scale(calc(1 + var(--m-beat) * 0.05)); }
+  .lore-name { transform: translateY(var(--beat-lift)) scale(calc(1 + var(--m-beat) * 0.025)); }
+  /* .journey-city is NOT here — its base rule is ~550 lines further down, so an override at this
+     point loses the cascade on source order. It lives beside that rule instead. */
+}
 .lore-stop.side-right .lore-name { transform-origin: right center; }
 /* (.journey-city's own shimmer + lift live in its main rule further down — setting them here
     would be overridden by that later declaration.) */
@@ -1470,6 +1496,18 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   background: var(--grad-gold); background-size: 100% 220%; -webkit-background-clip: text; background-clip: text; color: transparent;
   -webkit-text-stroke: 1.5px rgba(255,255,255,0.3);
   filter: drop-shadow(0 3px 0 rgba(0,0,0,0.6)) drop-shadow(0 0 calc(20px + var(--m-beat)*40px) rgba(255,31,143,0.5)); }
+/* Gentler beat scale on touch hardware — the companion to the block near .lore-name, and it has
+   to live HERE, after the rule above, rather than beside its siblings. Equal specificity means
+   SOURCE ORDER decides, and .journey-city's base rule is ~550 lines further down the file than the
+   others: the override sat earlier, lost the cascade silently, and measured 10.0% growth on both
+   pointer types when it should have been 4.5% on one. Same trap the design-token block at the end
+   of this file sets for anything that tries to override it from a media query. */
+@media (pointer: coarse) {
+  .journey-city {
+    transform: skewX(-5deg) translateY(var(--beat-lift))
+               scale(calc(1 + var(--m-beat) * 0.045 + var(--m-drop, 0) * 0.04));
+  }
+}
 .journey-venue { display: block; font-family: 'Barlow Condensed', sans-serif; font-style: italic; color: var(--acid);
   letter-spacing: 0.1em; margin: 0.4rem 0 1rem; font-size: 1.2rem; }
 .journey-blurb { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; color: #eef3f7; line-height: 1.4; margin: 0 auto 1rem; max-width: 520px; }
