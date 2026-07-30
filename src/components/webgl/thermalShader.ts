@@ -386,7 +386,17 @@ export const thermalFrag = /* glsl */ `
         // The ease-in means 94% of the journey is done by 75% of the time -- that acceleration is the
         // point -- so the constants have to be set against the CURVE, not against the endpoints: an
         // earlier attempt at 1.32 put the drop off-screen by t=0.70 and wasted a third of every run.
-        float y = uv.y - (1.02 - fall*1.035);     // enters just above the frame, exits just below it
+        // THE TAIL HAS TO CLEAR THE FRAME, NOT JUST THE HEAD. At 1.035 the head reached -0.015 by
+        // t=1 -- barely past the bottom edge -- while the track behind it decays as exp(-y*3.4) and
+        // is still plainly visible half a screen higher. So the cycle wrapped with a long tail on
+        // screen, and the exit envelope below had to fade it out in place. Reported as runners
+        // fading while the tip of their tail was still visible, which is exactly what that was.
+        //
+        // 1.60 carries the head to -0.58, far enough that the track behind it is off-frame too. The
+        // cost is that roughly the last quarter of each cycle happens below the screen, which is not
+        // waste -- it is the time the tail takes to drain off, and it is the only way an exit reads
+        // as leaving rather than dissolving.
+        float y = uv.y - (1.02 - fall*1.60);
 
         // RUNNERS MERGE INTO EACH OTHER TOO. The two passes are computed independently, so a fine
         // stream and a heavy one could occupy the same lane and simply draw over one another --
@@ -425,7 +435,11 @@ export const thermalFrag = /* glsl */ `
         // fade began. The fall now carries the head clear of the bottom edge (below), and the envelope
         // only closes over the last 6% of the cycle, by which point it is already off-screen. So the
         // fade exists to prevent a pop at the wrap, not to remove a drop you can still see.
-        float life = smoothstep(0.0, 0.07, t) * smoothstep(1.0, 0.94, t);
+        // NO EXIT FADE. The trailing smoothstep(1.0, 0.94, t) existed to hide the wrap, and hiding a
+        // wrap by fading is what made a runner vanish mid-screen. With the travel above carrying the
+        // whole drop and its track past the bottom edge, there is nothing left to hide: it leaves
+        // because it has gone, which is what water does. Only the birth ramp remains.
+        float life = smoothstep(0.0, 0.07, t);
 
         // the track wanders -- water follows the imperfections in the glass, it does not fall straight
         float wob = sin((uv.y + rnd*6.283)*17.0)*0.010 + sin((uv.y + rnd2*4.0)*41.0)*0.004;
@@ -772,7 +786,11 @@ export const thermalFrag = /* glsl */ `
     // uniform duplicating it on the CPU -- the absorption test has to be the same maths that draws
     // the runner or beads would vanish under drops that are not there.
     float wet = clamp((uHumidity*0.60 + uDew*0.80) * max(fog, uDew*0.7), 0.0, 1.0);
-    float runAmount = 0.20 + wet*0.46;
+    // RAISED TO PAY FOR THE LONGER EXIT. Carrying the whole drop and its track past the bottom edge
+    // means a runner is only on screen for about 40% of its cycle, against 88% when the head stopped
+    // just below the frame -- so at the old density the glass would simply look 2.2x drier. This is
+    // not more water, it is the same amount of water visible for less of the time, compensated.
+    float runAmount = 0.36 + wet*0.54;
     // Derived ONCE per pixel and handed to droplets(), rather than four times inside its loops.
     float bLane0; float bRy0 = runnerHeadY(uv.x, 0.0, runAmount, bLane0);
     float bLane1; float bRy1 = runnerHeadY(uv.x, 1.0, runAmount, bLane1);
