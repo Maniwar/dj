@@ -2619,6 +2619,32 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
   }
   .broadcast { --stage: min(100%, calc(100svh * 2.0)); }
   .bc-band { left: calc((100% - var(--stage)) / 2); right: auto; width: var(--stage); }
+
+  /* ---- THE ANDROID LANDSCAPE FLICKER ---------------------------------------------------------
+     Bisected on the real device, not emulated: `?fxoff=bcGrain,bcScan,bcVignette,bcStrobe` stops
+     it and `?fxoff=bandFeather` does not. So the cause is these four full-viewport overlays, and
+     the feather is exonerated -- it stays.
+     WHY THEY AND NOT THE MASK: three of the four carry a mix-blend-mode (grain overlay, scan
+     multiply, strobe screen) and the strobe additionally rewrites its opacity every frame, which
+     the registry calls uncacheable by construction. A blend layer has to read back its backdrop,
+     and it is charged for its whole bounds -- .bc-grain is 1061px wide at 915px of viewport -- not
+     for the sliver that happens to be visible. Making .lore-stop transparent so the side bars could
+     show the club stopped the lore slides occluding them, so that readback came back on every
+     frame. It lands hardest on `crew`, which is a hero slide and the one this file already records
+     as the flicker-prone case.
+     THE BARS DO NOT GO BACK TO BLACK, which is the reason this is the fix rather than a revert of
+     the transparency: the lasers and the sauna steam are separate full-viewport layers (the steam is
+     .content::before, not a Broadcast child), so the bars keep moving light with these four gone --
+     confirmed on the device.
+     SHORT LANDSCAPE ONLY. Ultrawide and desktop keep all four in their side columns, where there is
+     no flicker and far more GPU headroom.
+     .bc-scan is NORMALISED, NOT REMOVED -- it carries the flat 32% black that replaced the video's
+     old darkening, so deleting it would lighten the whole site. Same treatment fx-off.css gives it.
+     No !important anywhere here, deliberately: these win on source order, which leaves the
+     registry's fx-off rules and the diag panel still able to override them. */
+  .bc-grain, .bc-strobe, .bc-vignette { display: none; }
+  .bc-scan { mix-blend-mode: normal; }
+
   /* the ticker lines up with the frame too, rather than running the full window */
   .lyric-marquee { width: min(100%, calc(100svh * 2.0)); margin-inline: auto; }
 
