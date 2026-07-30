@@ -271,6 +271,8 @@ function Mainstage() {
       scale,
       tier: tier.current,
       tierMultiplier: TIERS[tier.current],
+      tierCount: TIERS.length,
+      topMultiplier: TIERS[0],
       dpr: dprNow,
       cssW: size.width,
       cssH: size.height,

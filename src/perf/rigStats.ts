@@ -24,6 +24,10 @@ export type RigStats = {
   tier: number
   /** The multiplier that tier applies to the budgeted scale. */
   tierMultiplier: number
+  /** How many rungs the ladder has, so the panel can say "1 of 5" rather than a bare index. */
+  tierCount: number
+  /** The multiplier of the BEST rung, i.e. TIERS[0]. Above 1 means supersampling is available. */
+  topMultiplier: number
   /** window.devicePixelRatio. `scale` at parity with this is native rendering. */
   dpr: number
   /** CSS size of the canvas. */
@@ -59,7 +63,11 @@ export function rigStatsLine(): string {
   if (!s) return 'rig: not mounted'
   const pct = Math.round(s.nativeFraction * 100)
   const verdict = pct >= 99 ? 'native' : `${pct}% of native — upscaled`
-  const t = s.tier > 0 ? ` · tier ${s.tier} (x${s.tierMultiplier})` : ''
+  // SPELLED OUT, because "tier 1 (x1)" was read as "the 2x tier" -- the index and the multiplier
+  // happened to both be 1, and nothing said which end of the ladder 0 was. Tier 0 is the BEST rung.
+  const rung = s.tier === 0 ? 'top rung' : `${s.tier} of ${s.tierCount - 1} below top`
+  const head = s.topMultiplier > 1 && s.tier > 0 ? ` · x${s.topMultiplier} rung available` : ''
+  const t = ` · tier ${s.tier} (x${s.tierMultiplier}, ${rung})${head}`
   const q = s.quality > 0.5 ? '' : ' · reduced passes'
   return `rig ${s.bufferW}x${s.bufferH} @ ${s.scale.toFixed(2)}x (dpr ${s.dpr}) — ${verdict}${t}${q}`
 }
