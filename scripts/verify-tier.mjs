@@ -134,7 +134,7 @@ check('at the bottom tier it still samples instead of switching itself off (the 
 check('exactly at the slow threshold is not slow',
   run(rep(SLOW, 6)).tier, 0)
 check('exactly at the fast line does not climb',
-  run(rep(19, 40), 1).tier, 1)
+  run(rep(24, 40), 1).tier, 1)
 
 console.log(`\n${pass} passed, ${fail} failed`)
 process.exit(fail ? 1 : 0)

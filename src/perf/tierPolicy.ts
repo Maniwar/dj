@@ -55,11 +55,24 @@ export const WINDOWS_TO_CLIMB = 8
  * climbing answer different questions -- "is this unacceptable?" and "is there room to spare?" --
  * and a single number cannot express both.
  *
- * 19ms because frame time is QUANTISED BY VSYNC: a 60Hz display can deliver 16.7ms, 33.3ms or 50ms
- * and nothing in between. 19 sits just above the 16.7 floor, so it means "essentially every frame
- * is landing" and cannot be satisfied by a machine that is missing any meaningful share of them.
+ * 24ms, raised from 19 after watching it fail on a machine that should have sailed through.
+ *
+ * The reasoning for 19 was that vsync quantises frame time -- a 60Hz display delivers 16.7, 33.3 or
+ * 50ms and nothing between -- so 19 sits just above the floor and means "essentially every frame is
+ * landing". Correct in principle, wrong in practice, because the two numbers being compared come
+ * from different clocks. The perf panel reported p50 17, p95 17, max 18 while the tier sampler's own
+ * windows were never once under 19: useFrame's delta carries per-frame overhead the panel's sampler
+ * does not see, so a machine measured at 17ms is measured HERE at 19-plus.
+ *
+ * That left it stuck between the thresholds: too slow to climb, not slow enough to drop, pinned at
+ * native forever with `climb 0/8` resetting every window. A dead zone is the worst failure mode
+ * here, because nothing about it looks broken.
+ *
+ * 24 keeps the important property -- it is far below the 33.3ms half-rate line, so a machine
+ * actually missing vsync cannot satisfy it -- while leaving real margin above what a healthy 60fps
+ * machine reports through this particular clock.
  */
-export const FAST_MS = 19
+export const FAST_MS = 24
 /** A tier that has failed this many times is not offered again until headroom earns it back. */
 export const MAX_RETRIES = 2
 /**
