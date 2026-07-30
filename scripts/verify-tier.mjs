@@ -51,19 +51,23 @@ check('a transient hitch is undone: drop, then idle, and it returns to native',
   run([...rep(50,4), ...rep(5, 8)]).tier, 0)
 check('climbing needs 8 good windows, not 7',
   run([...rep(50,4), ...rep(5, 7)]).tier, 1)
-check('"not slow" is nowhere near enough — 30ms against a 42ms budget must NOT climb',
-  run([...rep(50,4), ...rep(30, 40)]).tier, 1)
+// The mid-band moved with the calibration. 30ms used to sit between the thresholds; now that the
+// rig's healthy cadence is 33.3ms, 30ms is FASTER than the metronome and climbing on it is correct.
+// 40ms is the value that is now genuinely in between: slower than the metronome, but not slow
+// enough to be worth surrendering resolution over.
+check('40ms is in between — slower than the metronome, not slow enough to drop, must NOT climb',
+  run([...rep(50,4), ...rep(40, 40)]).tier, 1)
 
 // The one that mattered. `dt` is wall-clock frame delta, so it is vsync-locked: a 60Hz display
 // reports ~16.7ms when the GPU is completely idle. A climb threshold below that floor is never
 // satisfiable and the whole recovery path is dead code on the commonest display there is -- which
 // is exactly what shipped at HEADROOM 0.7 (15.4ms).
-check('A HEALTHY 60Hz MACHINE CAN CLIMB — 16.7ms is the vsync floor, not a slow frame',
-  run([...rep(50,4), ...rep(16.7, 20)]).tier, 0)
-check('a healthy 120Hz machine climbs too',
-  run([...rep(50,4), ...rep(8.3, 20)]).tier, 0)
-check('a 30Hz-locked machine (33ms) holds its tier — not slow enough to drop, not fast enough to climb',
-  run([...rep(50,4), ...rep(33.3, 60)]).tier, 1)
+check('A RIG HITTING ITS 30fps METRONOME CAN CLIMB — 33.3ms is healthy here, not slow',
+  run([...rep(50,4), ...rep(33.3, 20)]).tier, 0)
+check('a rig running faster than its metronome climbs too',
+  run([...rep(50,4), ...rep(20, 20)]).tier, 0)
+check('a rig MISSING metronome ticks (50ms avg) drops rather than holding',
+  run(rep(50, 40)).tier, MAX)
 check('from the bottom tier it climbs all the way back given enough headroom',
   run(rep(5, 100), MAX).tier, 0)
 
@@ -134,7 +138,7 @@ check('at the bottom tier it still samples instead of switching itself off (the 
 check('exactly at the slow threshold is not slow',
   run(rep(SLOW, 6)).tier, 0)
 check('exactly at the fast line does not climb',
-  run(rep(24, 40), 1).tier, 1)
+  run(rep(36, 40), 1).tier, 1)
 
 console.log(`\n${pass} passed, ${fail} failed`)
 process.exit(fail ? 1 : 0)

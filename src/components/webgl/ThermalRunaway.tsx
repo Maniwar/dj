@@ -4,7 +4,7 @@ import * as THREE from 'three'
 import { audioBus } from '../../audio/audioBus'
 import { ACCENTS, effectiveAccent, useSiteStore } from '../../state/useSiteStore'
 import { publishRigStats, publishTierDebug, publishRigLive } from '../../perf/rigStats'
-import { tierMove, newTierState } from '../../perf/tierPolicy'
+import { tierMove, newTierState, RIG_FRAME_MS } from '../../perf/tierPolicy'
 import { fxOffClass } from '../../perf/fxClasses'
 import { usePlayerStore } from '../../state/usePlayerStore'
 import { thermalVert, thermalFrag } from './thermalShader'
@@ -311,7 +311,7 @@ function Mainstage() {
       if (audioBus.playing) quiet = 0
       else if (quiet++ > 2) return
       invalidate()
-    }, 33) // ~30fps
+    }, RIG_FRAME_MS) // ~30fps — tierPolicy derives its thresholds from this, so they stay in step
     return () => window.clearInterval(id)
   }, [invalidate])
 

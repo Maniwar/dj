@@ -72,7 +72,27 @@ export const WINDOWS_TO_CLIMB = 8
  * actually missing vsync cannot satisfy it -- while leaving real margin above what a healthy 60fps
  * machine reports through this particular clock.
  */
-export const FAST_MS = 24
+/**
+ * THE RIG RUNS AT 30fps ON PURPOSE, and every threshold before this one ignored that.
+ *
+ * ThermalRunaway sets frameloop="demand" and drives it from a setInterval at RIG_FRAME_MS -- a
+ * deliberate half-rate cap, since a music visualiser does not need 60. So the rig's HEALTHY frame
+ * time is 33.3ms, not 16.7. Three thresholds were picked here (22, 19, 24) by reading the perf
+ * panel's p95 of 17ms, which is the PAGE's frame time and says nothing about the rig's cadence.
+ *
+ * The result was a dead zone with no exit: 33.3 is above every one of those climb thresholds and
+ * below the 42ms drop threshold, so the rig could neither climb nor drop and sat at native forever
+ * with climb 0/8 resetting every window. Nothing about it looked broken, which is how it survived
+ * four rounds of diagnosis.
+ *
+ * Derived from RIG_FRAME_MS now so the two cannot drift apart if the metronome is ever retuned:
+ *   climb  <= 36ms   the metronome is being hit essentially every tick
+ *   drop   >  42ms   24fps, the rate the site owner asked to protect
+ * A missed tick costs 66.7ms, so a window containing any meaningful share of them lands well past
+ * the drop line, while a clean one sits at 33.3 and comfortably under the climb line.
+ */
+export const RIG_FRAME_MS = 33
+export const FAST_MS = RIG_FRAME_MS + 3
 /** A tier that has failed this many times is not offered again until headroom earns it back. */
 export const MAX_RETRIES = 2
 /**
