@@ -214,7 +214,14 @@ export const thermalFrag = /* glsl */ `
             smoothstep(0.02, -0.03, ry0 - buv.y) * step(abs(fract(buv.x*11.0) - 0.5), lane0*11.0)
           + smoothstep(0.02, -0.03, ry1 - buv.y) * step(abs(fract(buv.x*19.0) - 0.5), lane1*19.0);
         float taken = clamp(swept, 0.0, 1.0);
-        acc += (body + max(rim, 0.0) + spec) * bFade * pres * (1.0 - taken);
+        // THE MOMENT OF MERGING, which was missing. Fading a bead out as the drop arrives is correct
+        // but invisible -- it looks like the bead happened to dry just then. Real coalescence is
+        // sudden and bright: surface tension snaps the bead into the runner. So the instant it is
+        // being taken, it FLARES. taken*(1-taken) peaks at the halfway point and is zero at both
+        // ends, so the flash exists only during the transition and cannot leave a permanent mark.
+        float merge = taken * (1.0 - taken) * 4.0;
+        acc += (body + max(rim, 0.0) + spec) * bFade * pres * (1.0 - taken)
+             + (body + spec) * bFade * pres * merge * 1.6;
         // LENS DISPLACEMENT. A drop is a converging lens: the further off its axis you look, the more
         // it bends, and it inverts -- so the offset points back toward the centre and grows with
         // distance from it. Accumulated rather than sampled here, so the whole field costs ONE pair of
@@ -256,7 +263,11 @@ export const thermalFrag = /* glsl */ `
     float speed = (0.05 + rnd2*0.09) * (0.70 + sz*0.45);
     float t = fract(rnd*4.7 + uTime*speed);
     float fall = 1.0 - (1.0 - t)*(1.0 - t);
-    lane = 0.055 * sz;
+    // The swept lane is the drop's own width, not the column's. At 0.055 this came out as roughly
+    // 0.6 of a half-column, so a runner cleared nearly everything either side of it -- beads
+    // disappeared in places the drop never went, which reads as random vanishing rather than as
+    // something being picked up.
+    lane = 0.018 * sz;
     return 1.08 - fall*1.00;
   }
 
@@ -328,11 +339,23 @@ export const thermalFrag = /* glsl */ `
         // fat one. fall is how far it has travelled, so the head grows 0.75x -> 1.55x across its
         // run. It also already falls faster as it goes (the ease-in on t), so the two compound the way
         // they do physically: heavier, therefore quicker.
-        float mass = 0.75 + fall * 0.80;
+        // 0.6x -> 2.2x across the run. The previous 0.75 -> 1.55 was a 2x diameter change spread over
+        // the whole fall, which is real but not legible; a drop that arrives at the bottom visibly
+        // fatter than it started is the whole point of the merge.
+        float mass = 0.60 + fall * 1.60;
         float hr = max(0.085 * sz * mass, oxPx*2.0);
-        // Soft-edged, reverted. A 2px edge on a bright streak is a white line, not a drop -- see the
-        // note in droplets(). Water reads by its gradient here, not by an outline.
-        float head = smoothstep(hr, hr*0.30, length(vec2(ox, y*0.62)));
+        // A RUNNER HEAD IS A BEAD THAT IS MOVING, and it has to be built like one. It used to be a
+        // single soft blob -- smoothstep(hr, hr*0.30, ...) -- with none of the lens treatment the
+        // clinging beads get, so runners and beads read as two different substances. That is why the
+        // merging never registered: you cannot see one thing absorb another when they do not look
+        // like the same thing. Body, refractive rim and a specular in the same up-left key light as
+        // droplets() uses, so a runner is recognisably a drop, just a heavier one that is travelling.
+        vec2 hq = vec2(ox, y*0.62);
+        float hd = length(hq);
+        float hBody = smoothstep(hr, hr*0.30, hd) * 0.55;
+        float hRim  = (smoothstep(hr*1.02, hr*0.80, hd) - smoothstep(hr*0.80, hr*0.52, hd)) * 0.70;
+        float hSpec = smoothstep(hr*0.30, 0.0, length(hq - vec2(-0.28, 0.30)*hr)) * 0.95;
+        float head = hBody + max(hRim, 0.0) + hSpec;
         // TRACK: wet glass BEHIND the head, i.e. above it, evaporating as it ages.
         // The old version used smoothstep(-0.01, 0.16, y), which RISES with y -- so the trail was
         // brightest at its oldest end and faded toward the drop, backwards. Now a sharp mask keeps it
