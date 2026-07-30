@@ -127,10 +127,19 @@ export const thermalFrag = /* glsl */ `
         // A LONGER, GENTLER EVAPORATION. The hold used to end at 0.42 and the bead was gone by 0.72;
         // it now holds to 0.34 and takes until 0.80 to vanish -- about 11.5s of a 25s cycle spent
         // visibly drying rather than 7.5s.
-        float bLife = smoothstep(0.0, 0.10, drip) * smoothstep(0.80, 0.34, drip);
+        // SIZE AND BRIGHTNESS ARE SEPARATE CURVES, which is what "get smaller and then fade away"
+        // actually requires. Driving both off one envelope meant they hit zero together, and since a
+        // typical bead is only about 9px across, scaling it to 18% put it at 1.7px -- SUB-PIXEL, where
+        // it can only pop. That is the blink: not a missing fade, a shape too small to still be a
+        // shape by the time the fade got going.
+        // bLife is the shrink and it bottoms out at 55%, so a bead stays resolvable the whole way.
+        // bFade is the brightness and it runs LATER and LONGER, so the sequence reads as: hold, get
+        // noticeably smaller, then dim away at a size you can still see.
+        float bLife = smoothstep(0.0, 0.10, drip) * smoothstep(0.72, 0.30, drip);
+        float bFade = smoothstep(0.0, 0.08, drip) * smoothstep(0.94, 0.44, drip);
         // and it SHRINKS as it goes, because an evaporating drop gets smaller, it does not just dim.
         // Down to 0.18 rather than 0.45, so it visibly dwindles to almost nothing before it is gone.
-        float bShrink = 0.18 + 0.82*bLife;
+        float bShrink = 0.55 + 0.45*bLife;
         vec2 c=vec2((rnd-0.5)*0.30, 0.32-drip*0.64); // stays clear of the cell edge
         // ISOTROPIC DISTANCE. gv = uv*s makes each cell (uRes.x/s) x (uRes.y/s) PIXELS, which is not
         // square -- 36x23 at a 660x420 render -- so length(f-c) was measuring in a stretched space and
@@ -145,7 +154,10 @@ export const thermalFrag = /* glsl */ `
         // that on the way out. Flooring the shrunk value instead pinned every evaporating bead at
         // 2.2px and it stopped shrinking -- so it dimmed at a fixed size, which is not what drying
         // looks like. Going sub-pixel is fine here because bLife is fading it out at the same time.
-        float radFull = max(0.055 + rnd2*rnd2*0.21, 2.2 * s / max(uRes.y, 1.0));
+        // Minimum raised 0.055 -> 0.085: at 18 cells over 1363px a cell is 76px, so 0.055 was a 4px
+        // bead with nowhere to shrink to. 0.085 is ~6.5px at full size and ~3.6px shrunk, which stays
+        // visible while it dims.
+        float radFull = max(0.085 + rnd2*rnd2*0.20, 2.6 * s / max(uRes.y, 1.0));
         float rad = radFull * bShrink;
         // A drop is a lens: it refracts at the edge and is nearly clear through the middle. The rim
         // carries the read and is deliberately SOFT -- a hard ring reads as a bubble outline, which
@@ -170,7 +182,7 @@ export const thermalFrag = /* glsl */ `
         float rim  = (smoothstep(rad*1.04, rad*0.84, d) - smoothstep(rad*0.84, rad*0.55, d)) * 0.46;
         // Offset up-left, consistent for every bead, because one room has one key light.
         float spec = smoothstep(rad*0.34, 0.0, length(((f - c) - vec2(-0.30, 0.30)*rad)*vec2(aspect,1.0))) * 0.85;
-        acc += (body + max(rim, 0.0) + spec) * bLife * pres;
+        acc += (body + max(rim, 0.0) + spec) * bFade * pres;
       }
     }
     return clamp(acc,0.0,1.0);
@@ -216,14 +228,20 @@ export const thermalFrag = /* glsl */ `
         float speed = (0.05 + rnd2*0.09) * (0.70 + sz*0.45);
         float t = fract(uTime*speed + rnd*4.7);
         float fall = 1.0 - (1.0 - t)*(1.0 - t);   // ease-in, i.e. accelerating downward
-        float y = uv.y - (1.08 - fall*1.16);      // head position, starting above frame
+        float y = uv.y - (1.08 - fall*1.00);      // enters above the frame, fades out low in it
 
         // LIFE ENVELOPE, and it is the fix for "the water just disappears into nothing randomly".
         // t is a fract(), so at the wrap the drop teleported from the bottom of its run back to the
         // top and its entire trail vanished in a single frame -- while the trail was still at 35%
         // brightness, so it was a hard cut, not an exit. This ramps a runner up as it enters and back
         // to ZERO before the wrap, so nothing ever blinks out mid-frame: it runs off and fades.
-        float life = smoothstep(0.0, 0.09, t) * smoothstep(1.0, 0.80, t);
+        // FADES BEFORE IT LEAVES, which it did not before: the head crosses the bottom of the frame
+        // at about t=0.74, and the fade did not start until 0.80 -- so the drop simply exited and the
+        // envelope was fading something already off-screen. Reported as "just leaves the screen
+        // suddenly", and that is what it was doing. The fade now runs 0.60 -> 0.93, which is while the
+        // head is still in the lower part of the picture, so a runner thins out and dissipates on the
+        // glass instead of sliding off the edge.
+        float life = smoothstep(0.0, 0.09, t) * smoothstep(0.93, 0.60, t);
 
         // the track wanders -- water follows the imperfections in the glass, it does not fall straight
         float wob = sin((uv.y + rnd*6.283)*17.0)*0.010 + sin((uv.y + rnd2*4.0)*41.0)*0.004;
