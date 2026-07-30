@@ -221,7 +221,12 @@ export const thermalFrag = /* glsl */ `
         float body = smoothstep(rad, rad*0.20, d) * 0.62;
         float rim  = (smoothstep(rad*1.03, rad*0.86, d) - smoothstep(rad*0.86, rad*0.62, d)) * 0.20;
         // Offset up-left, consistent for every bead, because one room has one key light.
-        float spec = smoothstep(rad*0.34, 0.0, length(((f - c) - vec2(-0.30, 0.30)*rad)*vec2(aspect,1.0))) * 0.85;
+        // THE HIGHLIGHT BELONGS AT THE BOTTOM. It sat at (-0.30, +0.30) -- upper left, lit like a
+        // sphere -- which is what made these read as bubbles once they were big enough to see. A drop
+        // on vertical glass is not a ball: it is a lens held by surface tension, thickest at the
+        // bottom where gravity pools it, so that is where light concentrates and where the bright
+        // spot sits. Smaller and tighter too, since a flatter surface makes a smaller caustic.
+        float spec = smoothstep(rad*0.26, 0.0, length(((f - c) - vec2(-0.10, -0.34)*rad)*vec2(aspect,1.0))) * 0.80;
         // ABSORBED BY A PASSING RUNNER. The bead's own uv is (id + 0.5 + c)/s; if the runner in that
         // column is now BELOW it and the bead sits inside its lane, that water has already been swept
         // up. Faded over a short distance rather than cut, so a bead is taken as the drop arrives
@@ -705,6 +710,9 @@ export const thermalFrag = /* glsl */ `
     // Flat rig for the sharp beam cores (and the whole rig on phones); the volumetric heads add
     // the depth on top. Together: crisp beams that also occupy real space.
     vec3 beams = rig(p, sweep, fan, uPattern);
+    // Kept before the volumetric is folded in, because the refraction pass below needs the rig as it
+    // was at THIS pixel to difference against. beams stops being that one line later.
+    vec3 rigStraight = beams;
     col += beams * (uQuality > 0.5 ? 0.72 : 1.0);
     if (uQuality > 0.5) {
       vec3 vol = volumetric(p, sweep);
@@ -1120,11 +1128,40 @@ export const thermalFrag = /* glsl */ `
     // is lensing that genuinely tracks the footage -- a drop passing over a laser in the picture
     // flares, one over a dark jacket stays quiet -- rather than a painted-on highlight that looks the
     // same over everything.
+    // The raw displacement, kept separate from the video's. uRefract gates the FOOTAGE pass because
+    // it reports whether there is a frame to sample at all -- it is 0 on stills and with video off.
+    // The rig is procedural and needs no texture, so gating the beam pass on it would have meant the
+    // lasers bend only while a video happens to be playing and go rigid the moment a still comes up.
+    vec2 wdisp = beadDisp + runDisp;
+    vec2 duv = wdisp * uRefract;
     if (uRefract > 0.001) {
-      vec2 duv = (beadDisp + runDisp) * uRefract;
       vec3 behind = texture2D(uBackdrop, uv + duv).rgb;
       vec3 straight = texture2D(uBackdrop, uv).rgb;
       col += max(behind - straight, vec3(0.0)) * 1.6;
+    }
+
+    // ---- AND THE LIGHT RIG BENDS TOO ----
+    // The footage refracted and the beams did not, so a drop sitting on a laser bent the picture
+    // behind the beam while leaving the beam itself ruler-straight -- water on top of a photograph of
+    // a light rather than water in front of a light. The beams are the highest-contrast thing on the
+    // screen, so they are exactly where a lens would read most.
+    //
+    // The rig is procedural, so there is no buffer to re-sample the way uBackdrop is; "what does the
+    // beam look like three pixels over" means evaluating rig() again. Hence the guard: only pixels
+    // that actually carry displacement pay for it, which is a few percent of the frame, and dry
+    // frames skip it entirely. The alternative -- hoisting droplets() and runners() 400 lines above
+    // rig() so the UV could be perturbed once, for free -- is the cheaper design, but it reorders the
+    // middle of the shader and GLSL is not type-checked by the build.
+    //
+    // Same honesty as the footage pass: screen blend can only ADD, so this emits the positive
+    // difference rather than substituting. A drop over a beam flares where the bent light is
+    // brighter, and stays quiet where it is not.
+    float dmag = dot(wdisp, wdisp);
+    if (dmag > 1e-9) {
+      // wdisp is in uv space; p is aspect-corrected, so x has to be scaled to match.
+      vec2 dp = vec2(wdisp.x * aspect, wdisp.y) * 0.55;
+      vec3 bent = rig(p + dp, sweep, fan, uPattern);
+      col += max(bent - rigStraight, vec3(0.0)) * 0.9;
     }
 
     // overclock shimmer
