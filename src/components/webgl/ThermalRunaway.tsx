@@ -41,7 +41,22 @@ const FREQ_BINS = 64
 // too LOW has no such feedback: it just renders soft forever on hardware that had headroom to spare.
 const PIXEL_BUDGET = 5_500_000
 const MIN_SCALE = 0.55 // never go so soft that the beams smear
-const MAX_SCALE = 1.4
+// 2, not 1.4, and this is the cap that was actually keeping the rig soft on a retina display.
+//
+// shaderScale already does Math.min(dpr, fit), so it never supersamples past the device's own
+// pixels -- MAX_SCALE exists only to stop an absurd buffer on a very high DPR panel. At 1.4 it was
+// doing something quite different: on ANY dpr-2 display it clamped the render to 1.4x CSS when
+// native is 2.0x, i.e. 70% of native, and then the browser upscaled it. Raising PIXEL_BUDGET did
+// nothing for those machines because this, not the budget, was the binding constraint -- which is
+// why the fx layer still read as soft after the budget change.
+//
+//   1871x679 @2   ->  was 2619x951 upscaled to 3742x1358;  now 3742x1358 native
+//   1440x900 @2   ->  was 2016x1260 upscaled to 2880x1800; now 2880x1800 native
+//
+// Cost is bounded by PIXEL_BUDGET regardless: 1871x679 at scale 2 is 5.08Mpx against the 5.5M
+// budget, so `fit` is not even the limiting term there. And the tier sampler still steps down if
+// the GPU cannot hold it.
+const MAX_SCALE = 2
 
 function shaderScale(cssW: number, cssH: number): number {
   if (typeof window === 'undefined') return 1
