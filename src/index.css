@@ -177,7 +177,24 @@ body {
 /* opacity carries the dial: the rig fades out as the dial comes down and is gone at 0 (where the
    component is unmounted anyway, below its 0.15 threshold — this covers the range in between).
    It is composited, so a value under 1 costs nothing the screen blend was not already paying. */
-.thermal-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; mix-blend-mode: screen; opacity: var(--fx, 1); }
+/* THE RIG IS SCALED BACK, and this is the layer that was actually washing the picture out.
+   Reported as milky, low-contrast, "doesn't look realistic" across many screenshots. The cause is
+   visible once music is playing: a radial burst of beams plus bloom, screen-blended over the whole
+   viewport, and `screen` can only ever LIGHTEN. At --fx 1.4 that blows the footage out -- deep tones
+   vanish and the frame goes grey.
+   WHY THIS TOOK SO LONG TO FIND, because it is a trap worth writing down: AUDIO DOES NOT PLAY IN
+   HEADLESS CHROME. With no audio, beatIndex never advances and uBeat/uLevel/uDrop stay at 0, so the
+   shader renders an IDLE, nearly dark rig. Every measurement of "the shader's contribution" taken on
+   this machine was therefore measuring a rig that was not doing anything, and it consistently came
+   back as ~1.6% of contrast -- which is true of an idle rig and meaningless for a playing one. Four
+   other theories were tested and discarded against those numbers. Nothing here can be verified from
+   a headless capture; it needs a real browser with sound.
+   `var(--fx)` alone was also a dead control above the default dial: the multiplier is already 1.0 at
+   the shipped position of 0.6, and CSS clamps opacity at 1, so every dial position from 0.6 upward
+   rendered this layer identically at full strength. Multiplying gives the dial real travel across its
+   entire range and puts the black level back. The rig still reads: it is beams against a dark room,
+   which is what a rig in a dark room looks like. */
+.thermal-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; mix-blend-mode: screen; opacity: calc(var(--fx, 1) * 0.6); }
 .thermal-fallback { position: fixed; inset: 0; z-index: 1; background: radial-gradient(120% 90% at 50% 20%, rgba(58,13,23,0.5) 0%, transparent 70%); pointer-events: none; }
 .thermal-canvas canvas { display: block; }
 
