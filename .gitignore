@@ -45,3 +45,8 @@ artwork/canvas/raw/
 
 # Local operational notes — deliberately untracked, not for the public repo.
 worker/SETUP.local.md
+
+# `wrangler dev --local` writes its Miniflare state here — an emulated copy of the KV namespace,
+# including whatever like counts a local run happened to create. Local scratch, never the source of
+# truth, and committing it would let a dev machine's test data look like production data.
+.wrangler/
