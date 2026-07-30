@@ -40,23 +40,24 @@ export type TierState = {
 export type TierMove = 'down' | 'up' | 'hold'
 
 /** Windows above `slowMs` before dropping a tier. */
-export const STRIKES_TO_DROP = 2
+export const STRIKES_TO_DROP = 4
 /** Windows with headroom before climbing back. */
 export const WINDOWS_TO_CLIMB = 8
 /**
- * Climbing needs the frame time under this fraction of `slowMs`, not merely under it.
+ * The frame time that counts as fast enough to CLIMB, in milliseconds. An ABSOLUTE number, not a
+ * fraction of the drop threshold, and they had to be separated.
  *
- * THIS NUMBER IS BOUNDED FROM BELOW BY VSYNC, which is easy to get wrong and was: at 0.7 the climb
- * threshold is 15.4ms, and a 60Hz display cannot report a frame delta below 16.7ms no matter how
- * idle the GPU is. `dt` is wall-clock time between rendered frames, not GPU work, so the floor is
- * the refresh interval. A threshold under that floor is never satisfied and the rig can never climb
- * -- the recovery path exists but is dead code on the most common display in the world.
+ * As a fraction it was `slowMs * 0.84`, which silently couples the two: raising the drop threshold
+ * to 42ms (24fps) to stop the rig being twitchy would move the climb threshold to 35ms, so it would
+ * climb while running at 28fps, immediately fail, and hunt between rungs forever. Dropping and
+ * climbing answer different questions -- "is this unacceptable?" and "is there room to spare?" --
+ * and a single number cannot express both.
  *
- * 0.84 puts it at 18.5ms: comfortably ABOVE the 16.7ms vsync floor so a healthy 60Hz machine
- * qualifies, and comfortably BELOW the 22ms slow threshold so there is real hysteresis between
- * dropping and climbing rather than a single line to oscillate across.
+ * 19ms because frame time is QUANTISED BY VSYNC: a 60Hz display can deliver 16.7ms, 33.3ms or 50ms
+ * and nothing in between. 19 sits just above the 16.7 floor, so it means "essentially every frame
+ * is landing" and cannot be satisfied by a machine that is missing any meaningful share of them.
  */
-export const HEADROOM = 0.84
+export const FAST_MS = 19
 /** A tier that has failed this many times is not offered again until headroom earns it back. */
 export const MAX_RETRIES = 2
 /**
@@ -107,10 +108,10 @@ export function tierMove(
   }
 
   st.strikes = 0
-  // "Not slow" is not enough to justify climbing — a window sitting just under the threshold will
-  // go straight back over it at higher resolution, and the visible result is a rig that flickers
-  // between two sharpness levels every few seconds.
-  if (avgMs >= slowMs * HEADROOM) {
+  // "Not slow" is nowhere near enough to justify climbing. With the drop threshold at 24fps there
+  // is an enormous band between "not dropping tiers" and "has capacity to spare", and a window
+  // anywhere in it will go straight back over the line at higher resolution.
+  if (avgMs >= FAST_MS) {
     st.fast = 0
     return 'hold'
   }

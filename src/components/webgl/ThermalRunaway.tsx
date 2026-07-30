@@ -239,7 +239,14 @@ function Mainstage() {
   // back once the machine shows sustained headroom -- but a false positive still costs several
   // seconds at the wrong resolution, so the settle window below stays generous.
   const acc = useRef({ frames: 0, time: 0, settleUntil: 0, policy: newTierState(TIERS.length) })
-  const SLOW_MS = 22 // ~45fps; below this we are visibly dropping frames
+  // 42ms, i.e. 24fps, and sustained over 4 windows rather than 2 -- roughly four seconds.
+  //
+  // This was 22ms. Frame time is quantised by vsync: a 60Hz display delivers 16.7, 33.3 or 50ms and
+  // nothing between, so 22 did not mean "45fps", it meant "about a third of frames missed vsync" --
+  // a hair-trigger sitting barely above the floor. A machine measured at 59fps with p50 and p95 both
+  // 17ms had walked all the way to the bottom tier because of it. Quality should be surrendered when
+  // the page is genuinely unpleasant, not when it hiccups.
+  const SLOW_MS = 42
 
   const applyScale = useCallback(() => {
     // The budget is enforced HERE, on the final scale, not inside shaderScale. shaderScale bounds
