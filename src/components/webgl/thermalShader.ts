@@ -536,9 +536,14 @@ export const thermalFrag = /* glsl */ `
   // cover is how much of this pixel the paper occupies, kept separate from its colour. A flake is
   // opaque card, not a light: in front of a bright surface it has to BLOCK what is behind it, and
   // colour alone cannot express that when everything composites additively.
-  vec3 confetti(vec2 uv, float aspect, float amount, vec3 accent, out float cover){
+  // reflUV is where this flake MIRRORS FROM. Foil is a mirror, so what belongs on it is a warped
+  // image of the room -- and the warp is what distinguishes a reflection from a decal: the same grid
+  // printed flat reads as the flake being transparent, but skewed and swimming with the tumble it
+  // reads as metal. Accumulated coverage-weighted, then normalised by cover at the call site.
+  vec3 confetti(vec2 uv, float aspect, float amount, vec3 accent, out float cover, out vec2 reflUV){
     vec3 acc = vec3(0.0);
     cover = 0.0;
+    reflUV = vec2(0.0);
     for(int c=0; c<2; c++){
       float cols = 22.0 + float(c)*15.0;
       float x = uv.x*cols;
@@ -576,6 +581,12 @@ export const thermalFrag = /* glsl */ `
                               : vec3(0.36, 0.68, 1.00);   // ice blue
         acc += tint * fl * life;
         cover += fl * life;
+        // A tilted mirror shifts what it shows by its own slope, and stretches it along the axis it
+        // is turned about. rq is the position within the flake in its OWN rotated frame, so feeding
+        // that back as an offset makes the reflected image slide across the flake as it spins and
+        // squash as it turns edge-on -- which is exactly what catches the eye on real foil.
+        vec2 tilt = vec2(sin(spin), cos(spin*1.3)) * 0.075;
+        reflUV += (uv + tilt + rq * 2.4) * fl * life;
       }
     }
     return acc;
@@ -1088,7 +1099,8 @@ export const thermalFrag = /* glsl */ `
       // the total light arriving at this point -- no second lookup needed.
       vec3 lightHere = beams;
       float flakeCover;
-      vec3 flakes = confetti(uv, aspect, 0.34, uAccent, flakeCover);
+      vec2 reflUV;
+      vec3 flakes = confetti(uv, aspect, 0.34, uAccent, flakeCover, reflUV);
       // Self-light raised 0.30 -> 0.60. Making the flakes beam-lit was right, but beams cover a small
       // share of the frame, so paper falling through the dark half of the shot was effectively
       // invisible -- the same mistake that hid the water. Foil catches SOME light from the room even
@@ -1147,8 +1159,18 @@ export const thermalFrag = /* glsl */ `
       // linear: dim surroundings leave it near matte, a bright one makes it glint. That is the
       // difference between paper and foil, and it comes back without reintroducing any structure,
       // since ambient carries none.
-      col += flakeTint * ambient * occ * 1.9;
-      col += flakeTint * ambient * ambient * occ * 1.1;
+      // THE WALL COMES BACK, AS A REFLECTION. A flat ambient wash made the flakes solid but dead --
+      // foil in front of a wall of lights shows that wall. The grid was only wrong before because it
+      // was printed straight through, pixel-aligned with the wall behind, which reads as the paper
+      // being transparent. Sampled at reflUV instead it arrives rotated, offset and stretched by the
+      // flake's own tumble, so it swims across the surface and reads as something being mirrored.
+      // Same cell maths as the wall itself, so it is recognisably the same grid.
+      vec2 ruv = reflUV / max(flakeCover, 1e-3);
+      float rgY = smoothstep(gap*0.4, gap*1.4, fract(ruv.y * uRes.y / cellPx));
+      float rgX = smoothstep(gap*0.4, gap*1.4, fract(ruv.x * uRes.x / cellPx));
+      float mirror = 0.35 + 0.65 * rgX * rgY;   // never fully dark: the gaps between cells still glow
+      col += flakeTint * ambient * occ * 1.9 * mirror;
+      col += flakeTint * ambient * ambient * occ * 1.1 * mirror;
       vec3 flakeLight = flakes * (0.60 + lightHere * 1.9) * uConfetti * (0.78 + uBeat * 0.32);
       col += flakeLight;
       // Foil is a mirror, so a flake passing a drop should put a glint in it -- but each flake is a
