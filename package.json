@@ -22,7 +22,8 @@
     "verify:video": "node scripts/verify-video-pref.mjs",
     "deploy:worker": "wrangler deploy --config worker/wrangler.toml",
     "worker:tail": "wrangler tail --config worker/wrangler.toml",
-    "verify:tier": "node scripts/verify-tier.mjs"
+    "verify:tier": "node scripts/verify-tier.mjs",
+    "qa:fx": "node scripts/fx-visual-qa.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.114.0",

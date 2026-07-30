@@ -51,7 +51,7 @@ const FREQ_BINS = 64
 // windows AND climbs back once headroom returns, so an over-ambitious budget costs a few seconds of
 // adjustment rather than a permanently soft session. The old budget had to be conservative because
 // degradation was one-way.
-const PIXEL_BUDGET = 8_000_000
+const PIXEL_BUDGET = 13_500_000
 const MIN_SCALE = 0.55 // never go so soft that the beams smear
 // 2, not 1.4, and this is the cap that was actually keeping the rig soft on a retina display.
 //
@@ -84,8 +84,8 @@ const MAX_SCALE = 2
 // first impression than a slightly soft one. Instead the rig proves it has headroom -- 8 windows
 // under budget -- and only then spends it on sharpness. Under load it steps down exactly as
 // before, and tierPolicy's one-free-retry rule stops it hunting between two rungs.
-const TIERS = [1.5, 1.25, 1, 0.8, 0.65, 0.5]
-const START_TIER = 2 // the 1.0 rung: native, and where every session begins
+const TIERS = [2, 1, 0.8, 0.65, 0.5]
+const START_TIER = 1 // the 1.0 rung: native, and where every session begins
 
 function shaderScale(cssW: number, cssH: number): number {
   if (typeof window === 'undefined') return 1
@@ -227,7 +227,11 @@ function Mainstage() {
     // whole point: 1.5x scale is 2.25x the fragments.
     const raw = shaderScale(size.width, size.height) * TIERS[tier.current]
     const area = Math.max(1, size.width * size.height)
-    const scale = Math.max(MIN_SCALE, Math.min(raw, Math.sqrt(PIXEL_BUDGET / area)))
+    // MAX_SCALE is an ABSOLUTE ceiling here, not just a cap on the base. Without it a dpr-2 display
+    // would take its native 2.0 base into the 2x rung and ask for 4.0 -- sixteen times the fragments
+    // of CSS resolution, for no benefit, since a dpr-2 panel already gets 4 samples per CSS pixel
+    // from the browser. Supersampling is for displays that do not have that, i.e. dpr 1.
+    const scale = Math.max(MIN_SCALE, Math.min(raw, MAX_SCALE, Math.sqrt(PIXEL_BUDGET / area)))
     gl.setPixelRatio(scale)
     uniforms.uRes.value.set(size.width * scale, size.height * scale)
     uniforms.uPxScale.value = scale

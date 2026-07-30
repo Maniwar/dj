@@ -50,3 +50,6 @@ worker/SETUP.local.md
 # including whatever like counts a local run happened to create. Local scratch, never the source of
 # truth, and committing it would let a dev machine's test data look like production data.
 .wrangler/
+
+# visual QA renders from scripts/fx-visual-qa.mjs — local artefacts, not source
+.fx-qa/

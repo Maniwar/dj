@@ -868,10 +868,22 @@ export const thermalFrag = /* glsl */ `
     // changes every time uPattern cycles the size. Reported as "sometimes the led still produce the
     // wrong pattern, sometimes it looks sharp other times not", which is exactly what a non-integer
     // grid does. floor(x + 0.5) rather than a round() call, which GLSL ES 1.0 does not have.
-    float cellPx = max(floor(cellDisplayPx * uPxScale + 0.5), 5.0);
+    // THE FLOOR IS IN DISPLAY PIXELS, NOT BUFFER PIXELS. It was max(..., 5.0), i.e. five pixels of
+    // the BUFFER -- so the wall silently changed density with the render scale. At native the 4px
+    // cell was inflated to 5 (the buffer cannot express a lit square with a dark edge in fewer);
+    // supersampled 2x, 8 buffer px divided by 2 is 4 display px, so the same wall drew 25% more
+    // cells. Two render scales, two different-looking walls, which is half of "sometimes the led
+    // produces the wrong pattern". Scaling the floor by uPxScale pins the wall to a fixed DISPLAY
+    // size and lets extra buffer resolution do what it should: resolve the same cell more finely.
+    float cellPx = max(floor(cellDisplayPx * uPxScale + 0.5), 5.0 * uPxScale);
     // The gap is ONE canvas pixel wide whatever the cell size, instead of a fixed 0.12-0.40 fraction
     // that got narrower in absolute terms as cells grew and vanished as they shrank.
-    float gap = 1.0 / cellPx;
+    // ONE DISPLAY PIXEL, not one buffer pixel. As a buffer pixel the gap survived native and then
+    // thinned to 2/3 of a pixel at the 1.5x rung and half a pixel at 2x, where downsampling averages
+    // it into its neighbours -- the grid washing out into soft uneven stripes exactly when the rig
+    // had MORE resolution to draw it with. uPxScale keeps the dark edge one pixel of the picture
+    // the viewer is actually looking at.
+    float gap = uPxScale / cellPx;
     float cellY = smoothstep(gap*0.4, gap*1.4, fract(uv.y * uRes.y / cellPx));
     float cellX = smoothstep(gap*0.4, gap*1.4, fract(uv.x * uRes.x / cellPx));
     col += wallCol * step(uv.y, lip) * cellY * cellX * (0.34 + uBeat*0.42 + uDrop*0.6);
