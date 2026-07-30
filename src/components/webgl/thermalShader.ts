@@ -763,6 +763,12 @@ export const thermalFrag = /* glsl */ `
     float aspect = uRes.x/max(1.0,uRes.y);
     vec2 p = vec2((uv.x-0.5)*aspect, uv.y-0.5);
     vec3 col = vec3(0.0);
+    // AMBIENT: the light in the room WITHOUT its fine structure. col carries every cell edge, gap and
+    // beam core, so anything lit by sampling col inherits that pattern -- which is how the confetti
+    // ended up with the LED grid printed straight through it, and read as being behind the wall
+    // despite occluding it correctly. A flake is lit by the wall's GLOW, not by a pixel-accurate copy
+    // of its pixels.
+    vec3 ambient = vec3(0.0);
 
     // thin sweeping laser streaks (magenta / acid-green / blue / cyan), HARD beat-reactive:
     // each kick jolts the sweep, fattens the beam, and flares its brightness so the lasers
@@ -1051,6 +1057,9 @@ export const thermalFrag = /* glsl */ `
     vec3 wallLight = wallCol * step(wuv.y, lip) * cellY * cellX * (0.34 + uBeat*0.42 + uDrop*0.6);
     col += wallLight;
     beams += wallLight * 0.30;
+    // The same wall WITHOUT the cell mask -- its average emission, which is what actually falls on
+    // anything in front of it. cellY*cellX is the grid; omitting it leaves the glow.
+    ambient += wallCol * step(wuv.y, lip) * (0.34 + uBeat*0.42 + uDrop*0.6) * 0.85;
     // soft spill of light up off the strip
     col += wallCol * step(uv.y, lip + 0.075) * smoothstep(lip + 0.075, lip, uv.y) * (0.05 + uLevel*0.05);
 
@@ -1107,12 +1116,19 @@ export const thermalFrag = /* glsl */ `
       // So the blocked light is captured rather than discarded, tinted by the flake's own colour and
       // re-emitted. A gold flake over a green wall goes bright gold; the same flake over a dark
       // patch of footage stays dim, because there was nothing there to intercept.
-      float occ = clamp(flakeCover, 0.0, 1.0) * 0.90 * smoothstep(0.0, 0.12, uConfetti);
-      vec3 blocked = col * occ;
+      // 0.97, not 0.90. The 10% left passing through was still enough to print a readable LED grid
+      // inside every flake -- the wall is near saturation, so a tenth of it is not faint. Paper is
+      // opaque; the residue was only ever there out of caution.
+      float occ = clamp(flakeCover, 0.0, 1.0) * 0.97 * smoothstep(0.0, 0.12, uConfetti);
       // flakes is tint * coverage, so dividing coverage out recovers the colour on its own.
       vec3 flakeTint = flakes / max(flakeCover, 1e-3);
-      col -= blocked;
-      col += blocked * flakeTint * 0.95;
+      // Block what is behind, then light the paper from AMBIENT rather than from what was blocked.
+      // Reflecting the blocked light re-drew the LED grid inside every flake -- the wall's cells came
+      // through the paper and it read as transparent no matter how much light was removed. Ambient
+      // carries the wall's glow with none of its structure, so a flake over the wall goes bright and
+      // solid, and one over a dark part of the frame stays dim.
+      col *= 1.0 - occ;
+      col += flakeTint * ambient * occ * 1.15;
       vec3 flakeLight = flakes * (0.60 + lightHere * 1.9) * uConfetti * (0.78 + uBeat * 0.32);
       col += flakeLight;
       // Foil is a mirror, so a flake passing a drop should put a glint in it -- but each flake is a

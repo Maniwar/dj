@@ -50,6 +50,11 @@ const SCENARIOS = {
     uni: { uBeat: 1, uDown: 1, uLevel: 0.9, uBass: 0.9, uSong: 0.3 },
     band: [0.7, 1.0], // the wall itself
   },
+  confettiwall: {
+    why: 'confetti crossing the LED wall — the interaction three fixes in a row were shipped blind on',
+    uni: { uConfetti: 1, uBeat: 1, uDown: 1, uLevel: 0.9, uBass: 0.9, uSong: 0.3, uHumidity: 0 },
+    band: [0.7, 1.0], // the wall itself, which is the whole point of this one
+  },
   water: {
     why: 'beads and runners — fine curved edges and specular highlights, where aliasing shows worst',
     uni: { uDew: 1, uHumidity: 0.9, uLevel: 0.5, uBeat: 0.4, uSong: 0.3 },
