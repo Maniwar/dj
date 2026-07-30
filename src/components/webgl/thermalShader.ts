@@ -102,7 +102,11 @@ export const thermalFrag = /* glsl */ `
         float drip=fract(uTime*0.04+rnd*7.0);
         vec2 c=vec2((rnd-0.5)*0.30, 0.32-drip*0.64); // stays clear of the cell edge
         float d=length(f-c);
-        float rad = 0.055 + rnd2*rnd2*0.21;
+        // Floored PER LAYER, in pixels. The radius is in cell units and the two layers have different
+        // cell sizes, so one fixed minimum cannot serve both: at grid 18 a 0.055 radius is 2.8 canvas
+        // px, but on the finer grid the same number is 1.7 px and the smallest beads aliased away.
+        // 2.2*s/uRes.y is 2.2 canvas pixels expressed in THIS layer's cell units.
+        float rad = max(0.055 + rnd2*rnd2*0.21, 2.2 * s / max(uRes.y, 1.0));
         // A drop is a lens: it refracts at the edge and is nearly clear through the middle. The rim
         // carries the read and is deliberately SOFT -- a hard ring reads as a bubble outline, which
         // is what the first attempt at this looked like.
@@ -143,17 +147,30 @@ export const thermalFrag = /* glsl */ `
         float t = fract(uTime*speed + rnd*4.7);
         float fall = 1.0 - (1.0 - t)*(1.0 - t);   // ease-in, i.e. accelerating downward
         float y = uv.y - (1.08 - fall*1.16);      // head position, starting above frame
+
+        // LIFE ENVELOPE, and it is the fix for "the water just disappears into nothing randomly".
+        // t is a fract(), so at the wrap the drop teleported from the bottom of its run back to the
+        // top and its entire trail vanished in a single frame -- while the trail was still at 35%
+        // brightness, so it was a hard cut, not an exit. This ramps a runner up as it enters and back
+        // to ZERO before the wrap, so nothing ever blinks out mid-frame: it runs off and fades.
+        float life = smoothstep(0.0, 0.09, t) * smoothstep(1.0, 0.80, t);
+
         // the track wanders -- water follows the imperfections in the glass, it does not fall straight
         float wob = sin((uv.y + rnd*6.283)*17.0)*0.010 + sin((uv.y + rnd2*4.0)*41.0)*0.004;
         float ox = (fx + wob) / max(cols*0.06, 0.35);
         // HEAD: the bead itself, slightly taller than wide because it is being pulled
         float head = smoothstep(0.085, 0.0, length(vec2(ox, y*0.62)));
-        // TRACK: wet glass ABOVE the head, thinner than the bead and fading with age
-        float above = smoothstep(-0.01, 0.16, y);
-        float track = smoothstep(0.030, 0.0, abs(ox)) * above * (0.35 + 0.65*(1.0-t));
+        // TRACK: wet glass BEHIND the head, i.e. above it, evaporating as it ages.
+        // The old version used smoothstep(-0.01, 0.16, y), which RISES with y -- so the trail was
+        // brightest at its oldest end and faded toward the drop, backwards. Now a sharp mask keeps it
+        // behind the head and an exponential decay evaporates it with distance, which is why a real
+        // trail is a tail rather than a full-height line.
+        float behind = smoothstep(-0.005, 0.028, y);
+        float dry = exp(-max(y, 0.0) * 3.4);
+        float track = smoothstep(0.030, 0.0, abs(ox)) * behind * dry;
         // a couple of stragglers left along the track, so it is not a clean line
         float bead = smoothstep(0.030, 0.0, length(vec2(ox, fract(y*7.0 + rnd*3.0) - 0.5)*vec2(1.0,0.55)));
-        acc += head + track*0.42 + bead*above*0.16;
+        acc += (head + track*0.55 + bead*behind*dry*0.30) * life;
       }
     }
     return acc;
@@ -255,7 +272,7 @@ export const thermalFrag = /* glsl */ `
       // beam, which is the residual "lasers still look pixelated". Floored, the narrow groups stay
       // visibly narrower than the rest without going below what the buffer can draw.
       float wRaw = (0.0030 + uBeat*0.012 + uBass*0.004 + uDrop*0.02) * beamWidth(fi); // fattens on the hit
-      float w = max(wRaw, 1.8 / max(uRes.y, 1.0));
+      float w = max(wRaw, 2.0 / max(uRes.y, 1.0));
       float core = smoothstep(w, 0.0, d) * att;
       // Halo width/strength are deliberately restrained: the alpha of this whole layer is its
       // own luminance, so an over-bright halo turns the overlay opaque and BURIES the footage
@@ -362,7 +379,7 @@ export const thermalFrag = /* glsl */ `
     // 2.3px, so the old fixed 0.34-of-a-cell radius was 0.8px -- SUB-PIXEL, which is why the dust
     // shimmered and crawled instead of hanging in the air. Sub-pixel geometry cannot be drawn; it can
     // only alias.
-    float mrad = max(0.34, 1.2 * 300.0 / max(uRes.y, 1.0));
+    float mrad = max(0.34, 1.8 * 300.0 / max(uRes.y, 1.0));
     float dot2 = smoothstep(mrad, 0.0, length(fract(dgrid) - jitter));
     col += vec3(1.0) * mote * dot2 * dot(beams, vec3(0.36)) * 0.5;
 
@@ -473,10 +490,14 @@ export const thermalFrag = /* glsl */ `
       // step() gave it binary edges, so it staircased and strobed instead of tumbling. The edge width
       // is one cell-space pixel, and the thin axis is floored so a flake seen edge-on never becomes
       // thinner than a pixel (which is what made them vanish and flicker rather than turn).
+      // cpx is EXACTLY ONE CANVAS PIXEL expressed in cell units, so every number below is in pixels.
+      // The first pass floored the thin axis at 0.75 of a pixel, which is still sub-pixel and still
+      // aliases -- that is the residual "confetti is pretty pixelated". A flake seen edge-on now never
+      // goes below 2 pixels, and the anti-aliased edge is a full pixel rather than 0.9 of one.
       float cpx = max(34.0/max(uRes.x,1.0), 20.0/max(uRes.y,1.0));
       float ax = 0.085;
-      float ay = max(0.028 + 0.03 * abs(sin(spin)), cpx*0.75);
-      float e = cpx * 0.9;
+      float ay = max(0.028 + 0.03 * abs(sin(spin)), cpx*2.0);
+      float e = cpx * 1.0;
       float flake = smoothstep(ax + e, ax - e, abs(rf.x)) * smoothstep(ay + e, ay - e, abs(rf.y));
       vec3 gold = mix(vec3(1.0, 0.82, 0.35), uAccent, step(0.65, r3));
       col += gold * flake * uConfetti * (0.55 + uBeat * 0.4);
