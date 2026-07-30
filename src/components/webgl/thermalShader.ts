@@ -199,8 +199,13 @@ export const thermalFrag = /* glsl */ `
         // condensation. Water on glass is a filled lens: a soft body, a brighter edge where it
         // refracts, and a small hard SPECULAR where the light source catches it. That specular is the
         // single thing that makes a blob read as wet, and it was missing entirely.
-        float body = smoothstep(rad, rad*0.28, d) * 0.34;
-        float rim  = (smoothstep(rad*1.04, rad*0.84, d) - smoothstep(rad*0.84, rad*0.55, d)) * 0.46;
+        // FILLED, NOT OUTLINED. The rim carried 0.46 against a body of 0.34 -- the outline outweighed
+        // the fill, which is precisely what a soap bubble looks like, and is what "the droplets kind
+        // of look like bubbles" was pointing at. A drop of water on glass is a solid little lens with
+        // a bright edge, not a ring: the body now dominates and the rim is a highlight on it rather
+        // than the thing you mostly see.
+        float body = smoothstep(rad, rad*0.20, d) * 0.62;
+        float rim  = (smoothstep(rad*1.03, rad*0.86, d) - smoothstep(rad*0.86, rad*0.62, d)) * 0.20;
         // Offset up-left, consistent for every bead, because one room has one key light.
         float spec = smoothstep(rad*0.34, 0.0, length(((f - c) - vec2(-0.30, 0.30)*rad)*vec2(aspect,1.0))) * 0.85;
         // ABSORBED BY A PASSING RUNNER. The bead's own uv is (id + 0.5 + c)/s; if the runner in that
@@ -210,9 +215,15 @@ export const thermalFrag = /* glsl */ `
         vec2 buv = (id + 0.5 + c) / s;
         float lane0; float ry0 = runnerHeadY(buv.x, 0.0, runAmount, lane0);
         float lane1; float ry1 = runnerHeadY(buv.x, 1.0, runAmount, lane1);
+        // ABSORBED AS THE DROP ARRIVES, not after it has gone past. The window used to be
+        // smoothstep(0.02, -0.03, ...), i.e. the bead only began to go once the head was already
+        // BELOW it -- so for the frames where they crossed, both were drawn on top of one another and
+        // it read as a streak sliding over a bead rather than taking it. Reported exactly that way.
+        // Now the fade starts while the head is still 0.07 above the bead and is complete by the time
+        // it arrives, so the bead is gone INTO the drop rather than behind it.
         float swept =
-            smoothstep(0.02, -0.03, ry0 - buv.y) * step(abs(fract(buv.x*11.0) - 0.5), lane0*11.0)
-          + smoothstep(0.02, -0.03, ry1 - buv.y) * step(abs(fract(buv.x*19.0) - 0.5), lane1*19.0);
+            smoothstep(0.07, 0.005, ry0 - buv.y) * step(abs(fract(buv.x*11.0) - 0.5), lane0*11.0)
+          + smoothstep(0.07, 0.005, ry1 - buv.y) * step(abs(fract(buv.x*19.0) - 0.5), lane1*19.0);
         float taken = clamp(swept, 0.0, 1.0);
         // THE MOMENT OF MERGING, which was missing. Fading a bead out as the drop arrives is correct
         // but invisible -- it looks like the bead happened to dry just then. Real coalescence is
@@ -352,8 +363,8 @@ export const thermalFrag = /* glsl */ `
         // droplets() uses, so a runner is recognisably a drop, just a heavier one that is travelling.
         vec2 hq = vec2(ox, y*0.62);
         float hd = length(hq);
-        float hBody = smoothstep(hr, hr*0.30, hd) * 0.55;
-        float hRim  = (smoothstep(hr*1.02, hr*0.80, hd) - smoothstep(hr*0.80, hr*0.52, hd)) * 0.70;
+        float hBody = smoothstep(hr, hr*0.22, hd) * 0.80;
+        float hRim  = (smoothstep(hr*1.02, hr*0.84, hd) - smoothstep(hr*0.84, hr*0.60, hd)) * 0.28;
         float hSpec = smoothstep(hr*0.30, 0.0, length(hq - vec2(-0.28, 0.30)*hr)) * 0.95;
         float head = hBody + max(hRim, 0.0) + hSpec;
         // TRACK: wet glass BEHIND the head, i.e. above it, evaporating as it ages.
