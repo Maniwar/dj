@@ -608,8 +608,25 @@ export const thermalFrag = /* glsl */ `
          * smoothstep(0.05, 0.0, abs(vr - (1.0-uVocal)*0.5)) * 0.45;
     // FOLLOW SPOT — a head that tracks your cursor. uMouse was already being smoothed every
     // frame and never read by anything; now the rig acknowledges you're in the room.
+    // FOLDED INTO THE LIGHT FIELD, not just added to the picture. The follow spot was written
+    // straight into col, while beams -- which is what the water, the confetti and the dust read to
+    // decide how lit they are -- was finalised further up. So the one light in the room that answers
+    // to the visitor was the one light nothing reacted to: you could move the cursor over a drop and
+    // it stayed dark. Adding it to beams as well as to col means condensation under the cursor
+    // brightens, a flake crossing it flares, and the dust in it glitters -- the spot behaves like a
+    // real head rather than a decal.
+    // Weighted a little higher into the field than into the picture: the spot is soft and wide, so
+    // the direct contribution has to stay subtle to avoid a milky patch, but the things it LIGHTS
+    // should respond to it clearly.
     vec2 mpos = vec2((uMouse.x-0.5)*aspect, uMouse.y-0.5);
-    col += uAccent * smoothstep(0.40, 0.0, length(p - mpos)) * (0.045 + uBeat*0.11);
+    vec3 spot = uAccent * smoothstep(0.40, 0.0, length(p - mpos)) * (0.045 + uBeat*0.11);
+    col += spot;
+    // 5x, not 2x. The spot itself is deliberately dim in the picture (0.045 + uBeat*0.11) so it does
+    // not leave a milky patch, but that same value fed into the light field only made the water under
+    // the cursor 20% brighter -- present in a measurement, invisible to a person. Weighted up, drops
+    // under the cursor roughly double, which is what "the light interacts with them" has to look like
+    // to be worth having. It only reaches the particles; the direct contribution to col is unchanged.
+    beams += spot * 5.0;
     // DROP = the whole room blows open
     // ROOM FLASH, cut from 0.3 to 0.09. Measured by ablation on a standalone render of this shader
     // with the audio uniforms forced to a drop: this one term was 22% of the whole drop wash, and it is
