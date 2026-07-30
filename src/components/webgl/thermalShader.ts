@@ -505,7 +505,17 @@ export const thermalFrag = /* glsl */ `
         float e  = pxh;                                       // one pixel of antialiased edge
         float fl = smoothstep(aw+e, aw-e, abs(rq.x)) * smoothstep(ah+e, ah-e, abs(rq.y));
         float life = smoothstep(0.0, 0.06, t) * smoothstep(1.0, 0.88, t);
-        acc += mix(vec3(1.0, 0.82, 0.35), accent, step(0.6, h3)) * fl * life;
+        // FOUR COLOURS, NOT TWO. It was gold or the track accent, and under a screen blend over
+        // bright footage both wash toward white -- reported as the flakes looking clear, like strips
+        // of cellophane rather than paper. A real cannon fires a mixed bag, and colour is what makes
+        // additive blending read as an object rather than a highlight: a saturated green flake stays
+        // green over a pale shot, where a near-white one just disappears into it.
+        // Saturated deliberately. These are small and fast, so anything subtle is lost.
+        vec3 tint = h3 < 0.28 ? vec3(1.00, 0.78, 0.28)   // gold foil
+                  : h3 < 0.52 ? accent                    // the track's own accent
+                  : h3 < 0.76 ? vec3(0.30, 1.00, 0.48)    // acid green
+                              : vec3(0.36, 0.68, 1.00);   // ice blue
+        acc += tint * fl * life;
       }
     }
     return acc;

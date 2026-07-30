@@ -441,12 +441,21 @@ function Mainstage() {
     // and this baseline never once fired. Confetti has only ever appeared on mu.drop, which is a
     // genuine drop detector firing once or twice a track. That is the answer to "what triggers the
     // confetti, I do not see it": nothing did, most of the time.
-    // 0.55 ambient, not 0.26. This is one of two multiplicative dimmers on the same effect -- the
-    // shader also scales the flakes by (0.55 + uBeat*0.4) -- and 0.26 x 0.55 is 14%, so a fully lit
-    // flake emitted 0.086 under a screen blend and simply did not appear over bright footage.
-    // Reported as the confetti being almost transparent. Neither number was wrong on its own; they
-    // were tuned in different passes and nothing looked at the product.
-    u.uConfetti.value = Math.max(confettiRef.current, audioBus.playing ? 0.55 : 0.0)
+    // CONFETTI COMES AND GOES. It used to be a constant floor -- 0.26, then 0.55 once the flakes
+    // were finally bright enough to see -- which meant paper fell continuously for the entire track.
+    // Raising the level to fix the transparency turned "faintly always there" into "obviously always
+    // there", and a constant was the wrong mechanism for it either way: a club does not run the
+    // cannons non-stop, and something permanently on stops registering as an event at all.
+    //
+    // A swell instead, on the same principle as the water's fog cycle: about 14s of fall, then ~34s
+    // of clear, shaped by a sine so it drifts in and thins out rather than switching. Driven from
+    // uTime so it stays in step with the shader and does not jump when the tab is backgrounded.
+    //
+    // confettiRef is untouched and still wins via Math.max -- a drop fires the cannons whenever the
+    // track calls for it, cycle or no cycle. This only governs the ambient drift in between.
+    const cph = (u.uTime.value / 48.0) % 1.0
+    const amb = cph < 0.3 ? Math.sin(Math.PI * (cph / 0.3)) * 0.6 : 0.0
+    u.uConfetti.value = Math.max(confettiRef.current, audioBus.playing ? amb : 0.0)
     // Cursor history and the last click, straight through — no smoothing here, because the trail's
     // own spacing IS the smoothing and the click is meant to be instant.
     for (let i = 0; i < 8; i++) u.uTrail.value[i].set(trail[i].x, trail[i].y)
