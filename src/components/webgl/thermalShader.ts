@@ -649,7 +649,18 @@ export const thermalFrag = /* glsl */ `
     // point here (foil, not dust), but they're small and rotated so they never read as the grid
     // they came from. Rides its own slow envelope so the fall outlasts the drop itself.
     if (uConfetti > 0.01) {
-      col += confetti(uv, aspect, 0.34, uAccent) * uConfetti * (0.55 + uBeat * 0.4);
+      // LIT BY THE RIG, not by itself. Every particle in here used to carry its own colour and
+      // ignore the lights entirely -- a gold flake was gold whether it fell through a beam or through
+      // darkness, which is the main reason the effects read as stickers on the picture rather than as
+      // objects in the room. beams and vol are already computed above, so the light reaching this
+      // point in space costs nothing extra to look up.
+      // A little self-colour remains so paper is still visible in the dark; the rest is reflection,
+      // so a flake FLARES as it crosses a beam and goes dim between them.
+      // beams already has the volumetric pass folded into it (see beams += vol above), so it IS
+      // the total light arriving at this point -- no second lookup needed.
+      vec3 lightHere = beams;
+      vec3 flakes = confetti(uv, aspect, 0.34, uAccent);
+      col += flakes * (0.30 + lightHere * 2.2) * uConfetti * (0.55 + uBeat * 0.4);
     }
     // DROP = pyro. Rays fire out of the middle for the length of the release.
     //
@@ -758,7 +769,9 @@ export const thermalFrag = /* glsl */ `
     float fog = smoothstep(0.05, 0.30, fogPh) * smoothstep(1.0, 0.75, fogPh);
     float wetness = fog * smoothstep(0.30, 0.78, uHumidity);
     float beads = droplets(uv, aspect, wetness * 0.26 * (uQuality > 0.5 ? 1.0 : 1.45));
-    col += vec3(0.8,0.9,1.0) * beads * 0.44;
+    // Water catches the light too. A droplet is a lens: in the dark it is nearly invisible, and when
+    // a beam crosses it, it lights up. Same lookup as the confetti -- the field is already computed.
+    col += beads * (vec3(0.8,0.9,1.0) * 0.16 + beams * 1.9);
 
     // ---- LIQUID COOLING: WATER ON THE LENS ----
     // This replaces a full-frame noise wash that was the reported milky static. That version ran
@@ -781,7 +794,8 @@ export const thermalFrag = /* glsl */ `
     // Dimmer as well as softer. 0.34 was set when the runners were barely visible at all, before the
     // edges were sharpened; sharpened AND at that gain they read as bright white lines drawn over the
     // footage. Soft edges plus a lower gain is what water on glass looks like against a dark scene.
-    col += vec3(0.66,0.80,0.94) * clamp(run, 0.0, 1.5) * (0.20 + uDew*0.30);
+    col += clamp(run, 0.0, 1.5) * (vec3(0.66,0.80,0.94) * 0.09 + beams * 1.5)
+         * (0.55 + uDew*0.75);
 
     // overclock shimmer
     col += vec3(0.4,1.0,0.6) * uOverclock * 0.1 * (0.5+0.5*sin(uTime*8.0));
