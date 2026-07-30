@@ -201,10 +201,25 @@ body {
   content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1;
   background: rgba(0, 0, 0, 0.4);
 }
-/* Pronounced per-frame Ken-Burns (both desktop beat-cuts + mobile slow rotation): a clear
-   1.05 -> 1.2 zoom + drift over ~6.5s so each still visibly moves within its time on screen. */
+/* Per-frame Ken-Burns (both desktop beat-cuts + mobile slow rotation): a 1.04 -> 1.09 zoom + drift
+   over ~6.5s so each still visibly moves within its time on screen.
+   IT USED TO END AT 1.2, AND THAT WAS TWO DEFECTS AT ONCE.
+   Memory: the Android flicker is layer EVICTION, so it is driven by resident texture bytes, not by
+   paint cost. At 844x390 the band is full-bleed 844px, and a 1.2 overscan made this one layer a
+   1051px-wide texture -- with an A/B pair of frames plus 7 lore and 4 journey stills also resident.
+   Dropping to 1.09 takes it to 920px, about a quarter less area on the largest textures on the
+   page, and the reported flicker is specifically on the STILLS -- the only surfaces with overscan.
+   Framing: videos are `object-fit: cover` at exactly band width, i.e. no overscan at all, while
+   .lore-bg and .journey-bg sit at base scale 1.0. So a Broadcast photo was showing ~80% of its
+   image where a video in the same box showed 100% -- one frame width, visibly different crop, which
+   is what "the photos are not the same width as the videos" was pointing at once the bars were
+   gone.
+   THE TRANSLATE SCALES WITH IT, and has to: drift may never exceed half the overscan or the layer
+   pans past its own edge and exposes the ground. 1.09 gives 4.5% of margin per side, so -1.5%/-1%
+   keeps a 3x safety factor. `kenburnsCalm` already ended at 1.04 for the same memory reason, so
+   this brings the two within one step of each other instead of a 5x gap. */
 .bc-frame.on { opacity: 1; animation: kenburns 6.5s ease-out both; }
-@keyframes kenburns { from { transform: scale(1.05) translate(0,0); } to { transform: scale(1.2) translate(-3%, -2%); } }
+@keyframes kenburns { from { transform: scale(1.04) translate(0,0); } to { transform: scale(1.09) translate(-1.5%, -1%); } }
 .bc-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
 /* ---- THE STAGE BAND AND ITS SOFT EDGE ---------------------------------------------------
