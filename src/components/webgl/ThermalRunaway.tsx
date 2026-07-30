@@ -319,8 +319,14 @@ function Mainstage() {
     u.uVocal.value = audioBus.vocal
     // The drop envelope itself is gone in ~1s, but confetti has to keep falling after that —
     // hold the peak and bleed it away over ~4s.
-    confettiRef.current = Math.max(mu.drop, confettiRef.current - dt / 4.0)
-    u.uConfetti.value = confettiRef.current
+    // A LONGER TAIL AND A BASELINE, because "I don't see confetti falling" was correct: this was
+    // driven ONLY by mu.drop, which is a genuine drop detector firing once or twice in a whole
+    // track, with a 4s decay. So confetti existed for about four seconds per song and was gone.
+    // The tail is 11s now -- a cannon's worth of paper takes a while to come down -- and there is a
+    // small constant fall underneath it, so the air is never completely empty. The drop still
+    // produces the burst; it is no longer the only thing that produces anything.
+    confettiRef.current = Math.max(mu.drop, confettiRef.current - dt / 11.0)
+    u.uConfetti.value = Math.max(confettiRef.current, mu.bpm > 0 ? 0.24 : 0.0)
     // Ease toward the current section's colour rather than snapping — a hard cut in the rig
     // colour on a scroll boundary looks like a bug; a ~1s fade reads as the lighting following
     // the story. (Same rate regardless of framerate.)

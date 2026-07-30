@@ -130,8 +130,16 @@ export const thermalFrag = /* glsl */ `
         // A drop is a lens: it refracts at the edge and is nearly clear through the middle. The rim
         // carries the read and is deliberately SOFT -- a hard ring reads as a bubble outline, which
         // is what the first attempt at this looked like.
-        float body = smoothstep(rad, rad*0.35, d) * 0.18;
-        float rim  = (smoothstep(rad*1.06, rad*0.78, d) - smoothstep(rad*0.78, rad*0.40, d)) * 0.8;
+        // EDGES AT PIXEL SCALE, not at a fraction of the shape. This is what read as soft, and it is
+        // independent of render scale: the body used to fade from rad to rad*0.35, i.e. over 65% of
+        // its own radius -- a 28px bead with an 18px gradient is a smudge, however many pixels it is
+        // drawn with. Same for the rim, which spanned rad*1.06 down to rad*0.40. A real drop has a
+        // hard boundary; what is soft about it is the refraction inside, not the outline.
+        // epx is 2 canvas pixels in THIS layer's cell units, so both edges are 2px wherever they land.
+        float epx = 2.0 * s / max(uRes.y, 1.0);
+        float body = smoothstep(rad, rad - epx, d) * 0.16;
+        float rimR = rad * 0.82;
+        float rim  = (smoothstep(rimR + epx*1.6, rimR, d) - smoothstep(rimR, rimR - epx*1.6, d)) * 0.95;
         acc += (body + max(rim, 0.0)) * bLife;
       }
     }
@@ -195,7 +203,9 @@ export const thermalFrag = /* glsl */ `
         // pixel is (1/uRes.x)/(cols*0.06) in these units.
         float oxPx = (1.0/max(uRes.x,1.0)) / max(cols*0.06, 0.35);
         float hr = max(0.085 * sz, oxPx*2.0);
-        float head = smoothstep(hr, 0.0, length(vec2(ox, y*0.62)));
+        // Crisp edge: 2 canvas px of falloff at the boundary rather than a gradient across the whole
+        // radius, which is what made the running drops read as smudges rather than water.
+        float head = smoothstep(hr, hr - oxPx*2.0, length(vec2(ox, y*0.62)));
         // TRACK: wet glass BEHIND the head, i.e. above it, evaporating as it ages.
         // The old version used smoothstep(-0.01, 0.16, y), which RISES with y -- so the trail was
         // brightest at its oldest end and faded toward the drop, backwards. Now a sharp mask keeps it
@@ -206,9 +216,9 @@ export const thermalFrag = /* glsl */ `
         // The track scales with the drop but less than proportionally -- a fat drop leaves a wider
         // wet path, not a proportionally wider one. Floored at 2 canvas px like the head.
         float tw = max(0.030 * (0.60 + sz*0.40), oxPx*2.0);
-        float track = smoothstep(tw, 0.0, abs(ox)) * behind * dry;
+        float track = smoothstep(tw, tw - oxPx*1.6, abs(ox)) * behind * dry;
         // a couple of stragglers left along the track, so it is not a clean line
-        float bead = smoothstep(tw, 0.0, length(vec2(ox, fract(y*7.0 + rnd*3.0) - 0.5)*vec2(1.0,0.55)));
+        float bead = smoothstep(tw, tw - oxPx*1.6, length(vec2(ox, fract(y*7.0 + rnd*3.0) - 0.5)*vec2(1.0,0.55)));
         acc += (head + track*0.55 + bead*behind*dry*0.30) * life;
       }
     }
@@ -364,13 +374,24 @@ export const thermalFrag = /* glsl */ `
       // uDrop fattening halved: 0.02 in p units is about 18 canvas pixels of extra core on every one
       // of the eight beams at once, which ablation put at 11% of the drop wash. Halved, the beams still
       // visibly swell on the hit without the whole rig turning into a single bright mass.
-      float wRaw = (0.0030 + uBeat*0.012 + uBass*0.004 + uDrop*0.010) * beamWidth(fi); // fattens on the hit
+      // BEAM WIDTH, and this is why the lasers read as soft rather than sharp. w is the smoothstep
+      // edge in p units, and p.y spans 1.0 over uRes.y -- so at 1363px tall, w=0.0030 is a 4px
+      // half-width, i.e. an 8px beam. Reasonable. But uBeat*0.012 is FOUR TIMES the base, so on a
+      // full kick w reached 0.0186: a FIFTY pixel core, six times wider, with a halo nine times
+      // wider again. Beats are near-continuous in this music, so the beams spent most of their life
+      // as fat diffuse bands. No render scale fixes that -- it is the geometry.
+      // The beat still widens them, just by about 2x rather than 6x, so a kick reads as a pulse
+      // instead of a bloom. uDrop keeps a bigger share because a drop should genuinely flare.
+      float wRaw = (0.0030 + uBeat*0.0030 + uBass*0.0010 + uDrop*0.006) * beamWidth(fi);
       float w = max(wRaw, 2.0 / max(uRes.y, 1.0));
       float core = smoothstep(w, 0.0, d) * att;
       // Halo width/strength are deliberately restrained: the alpha of this whole layer is its
       // own luminance, so an over-bright halo turns the overlay opaque and BURIES the footage
       // underneath. The footage is the star; the rig lights it.
-      float halo = smoothstep(w*9.0, 0.0, d) * att;
+      // Halo narrowed 9x -> 5x and its weight cut below. At 9x it was a 225px glow around a beam on
+      // a kick, and with hero gains reaching ~13x the halo term saturated across all of it -- so the
+      // wide soft glow, not the core, was what the eye actually read as "the laser".
+      float halo = smoothstep(w*5.0, 0.0, d) * att;
       vec3 lc = fi<1.5 ? vec3(1.0,0.12,0.56)
               : (fi<3.5 ? vec3(0.08,0.88,1.0)
               : (fi<5.5 ? vec3(0.39,1.0,0.18)
@@ -379,7 +400,7 @@ export const thermalFrag = /* glsl */ `
       // reading — Kiki's pages go magenta, Dieter's cold blue, Ibiza sunrise gold. Alternating
       // beams keep their own hue so the fan still reads as multi-coloured rather than flat.
       lc = mix(lc, uAccent, mod(fi, 2.0) < 0.5 ? 0.78 : 0.30);
-      c += lc * (core + halo*0.06) * beamGain(fi, pat) * (0.9 + uHat*0.5);
+      c += lc * (core + halo*0.035) * beamGain(fi, pat) * (0.9 + uHat*0.5);
     }
     return c;
   }
