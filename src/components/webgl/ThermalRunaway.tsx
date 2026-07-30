@@ -77,6 +77,10 @@ function Mainstage() {
       uBuild: { value: 0 },
       uDrop: { value: 0 },
       uAccent: { value: new THREE.Vector3(1.0, 0.12, 0.56) },
+      // The render scale, so the shader can tell canvas pixels from display pixels. Anything sized
+      // in "pixels" (the LED cells) has to be converted through this or it changes size whenever the
+      // budget or the tier moves the scale.
+      uPxScale: { value: 1 },
       uQuality: { value: PERF.isMobile ? 0 : 1 }, // phones skip the costliest shader passes
       uSong: { value: 0 }, // per-track lighting design (stable hash of the slug)
       uPattern: { value: 0 }, // which rig look is up; changes every 4 bars
@@ -121,6 +125,7 @@ function Mainstage() {
     const scale = shaderScale(size.width, size.height) * TIERS[tier.current]
     gl.setPixelRatio(scale)
     uniforms.uRes.value.set(size.width * scale, size.height * scale)
+    uniforms.uPxScale.value = scale
     // past the first step-down, drop the costliest shader passes as well
     uniforms.uQuality.value = PERF.isMobile || tier.current >= 2 ? 0 : 1
   }, [size, gl, uniforms])

@@ -20,6 +20,10 @@ export const thermalFrag = /* glsl */ `
 
   uniform float uTime;
   uniform vec2  uRes;
+  // The canvas renders BELOW display resolution by design (PIXEL_BUDGET in ThermalRunaway), so
+  // anything sized in "pixels" has to know which pixels it means. uRes is CANVAS pixels; multiply a
+  // display-pixel size by uPxScale to get canvas pixels.
+  uniform float uPxScale;
   uniform vec2  uMouse;
   uniform float uBass;
   uniform float uLevel;
@@ -347,7 +351,12 @@ export const thermalFrag = /* glsl */ `
     vec2 dcell = floor(dgrid);
     float mote = step(0.9975, hash(dcell));
     vec2 jitter = vec2(hash(dcell + 11.3), hash(dcell + 27.9));
-    float dot2 = smoothstep(0.34, 0.0, length(fract(dgrid) - jitter));
+    // Radius floored to just over a canvas pixel. At 300 cells across a ~700px canvas a cell is
+    // 2.3px, so the old fixed 0.34-of-a-cell radius was 0.8px -- SUB-PIXEL, which is why the dust
+    // shimmered and crawled instead of hanging in the air. Sub-pixel geometry cannot be drawn; it can
+    // only alias.
+    float mrad = max(0.34, 1.2 * 300.0 / max(uRes.y, 1.0));
+    float dot2 = smoothstep(mrad, 0.0, length(fract(dgrid) - jitter));
     col += vec3(1.0) * mote * dot2 * dot(beams, vec3(0.36)) * 0.5;
 
     // WET FLOOR. This club is always soaked, so the stage floor mirrors the rig: the lights now
@@ -415,7 +424,15 @@ export const thermalFrag = /* glsl */ `
     // You liked the fine cells AND the chunky ones, so the panel changes resolution with the
     // rig cue — fine 3px dots, mid 6px, chunky 10px blocks — cycling on the bar line like the
     // rest of the show rather than sitting at one size forever.
-    float cellPx = uPattern < 1.5 ? 3.0 : (uPattern < 3.5 ? 6.0 : 10.0);
+    // CELL SIZE IS IN DISPLAY PIXELS, which is what the note above claims but was not true: uRes is
+    // CANVAS resolution, so dividing by a raw cellPx made the cell that many CANVAS pixels -- i.e.
+    // cellPx/scale display pixels. At the 0.55 scale a wide viewport lands on, a "3px" cell rendered
+    // at 5.5px and the panel changed size with the render scale rather than staying put.
+    // Converted through uPxScale, then floored at 2 canvas pixels: below that the canvas physically
+    // cannot resolve a cell and the grid just aliases, so the fine mode gets as close as the buffer
+    // allows instead of asking for detail that does not exist.
+    float cellDisplayPx = uPattern < 1.5 ? 3.0 : (uPattern < 3.5 ? 6.0 : 10.0);
+    float cellPx = max(cellDisplayPx * uPxScale, 2.0);
     float cellY = smoothstep(0.12, 0.40, fract(uv.y * uRes.y / cellPx));
     float cellX = smoothstep(0.12, 0.40, fract(uv.x * uRes.x / cellPx));
     col += wallCol * step(uv.y, lip) * cellY * cellX * (0.34 + uBeat*0.42 + uDrop*0.6);
@@ -434,8 +451,17 @@ export const thermalFrag = /* glsl */ `
       vec2 f = fract(cg) - vec2(0.5 + (r2 - 0.5) * 0.6, 1.0 - fall);
       float spin = uTime * (1.4 + r3 * 2.6) + r1 * 6.28;
       vec2 rf = vec2(f.x * cos(spin) - f.y * sin(spin), f.x * sin(spin) + f.y * cos(spin));
-      // a thin flake: wide in one axis, nearly flat in the other, and it flickers edge-on
-      float flake = step(abs(rf.x), 0.085) * step(abs(rf.y), 0.028 + 0.03 * abs(sin(spin)));
+      // A thin flake: wide in one axis, nearly flat in the other, so it flickers edge-on as it spins.
+      // ANTI-ALIASED, and it has to be: the flake is about 3.5 x 1.2 CANVAS pixels and it is ROTATED,
+      // and a rotated hard-edged rectangle a pixel or two thick is the worst aliasing case there is --
+      // step() gave it binary edges, so it staircased and strobed instead of tumbling. The edge width
+      // is one cell-space pixel, and the thin axis is floored so a flake seen edge-on never becomes
+      // thinner than a pixel (which is what made them vanish and flicker rather than turn).
+      float cpx = max(34.0/max(uRes.x,1.0), 20.0/max(uRes.y,1.0));
+      float ax = 0.085;
+      float ay = max(0.028 + 0.03 * abs(sin(spin)), cpx*0.75);
+      float e = cpx * 0.9;
+      float flake = smoothstep(ax + e, ax - e, abs(rf.x)) * smoothstep(ay + e, ay - e, abs(rf.y));
       vec3 gold = mix(vec3(1.0, 0.82, 0.35), uAccent, step(0.65, r3));
       col += gold * flake * uConfetti * (0.55 + uBeat * 0.4);
     }
