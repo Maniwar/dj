@@ -1084,10 +1084,19 @@ export const thermalFrag = /* glsl */ `
       vec3 rayCol = mix(uAccent, vec3(1.0, 0.86, 0.52), 0.25 + 0.55 * rh1);
       // A PULSE on the beat, so the fan breathes instead of sitting there decaying smoothly.
       float pulse = 0.78 + 0.42 * uBeat;
-      col += rayCol * rays * burst * reach * pulse * 0.66;
+      // INTO beams AS WELL AS col, because the water reads its light from beams. The starburst was
+      // the one emitter that only ever wrote to col, so the brightest event on the page -- the drop,
+      // the moment the room blows open -- left every bead and runner exactly as dim as it found them.
+      // Everything else already feeds this field: the rig, the volumetric shafts, the cursor trail,
+      // the click burst and the spotlight. This was simply missed.
+      vec3 rayLight = rayCol * rays * burst * reach * pulse * 0.66;
+      col += rayLight;
+      beams += rayLight;
       // A HOT CORE at the convergence. Every ray meets there and the eye expects a flash; without it
       // the middle of the burst is the dimmest part of it, which is backwards.
-      col += mix(rayCol, vec3(1.0), 0.55) * smoothstep(0.075, 0.0, r) * burst * 0.55;
+      vec3 coreLight = mix(rayCol, vec3(1.0), 0.55) * smoothstep(0.075, 0.0, r) * burst * 0.55;
+      col += coreLight;
+      beams += coreLight;
     }
 
     // CONDENSATION beading over the whole "lens" — the humidity signature.
