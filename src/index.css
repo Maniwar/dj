@@ -2661,18 +2661,24 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      old darkening, so deleting it would lighten the whole site. Same treatment fx-off.css gives it.
      No !important anywhere here, deliberately: these win on source order, which leaves the
      registry's fx-off rules and the diag panel still able to override them. */
-  /* NOTHING IS DONE TO THE BROADCAST OVERLAYS HERE ANY MORE, and the two failed attempts are worth
-     recording so they are not retried.
-     Attempt 1 hid .bc-grain/.bc-strobe/.bc-vignette. It DID stop the flicker -- it matches the
-     bisect that passed on the device -- but it emptied the side bars, and that silently killed the
-     feather too: the mask fades the band edge into whatever is behind it, so with the bars black it
-     was dissolving black into black.
-     Attempt 2 kept them and only removed the mix-blend-mode, on the theory that the backdrop
-     readback was the whole cost. The flicker came straight back on the device. So the cost is the
-     LAYERS BEING COMPOSITED AT ALL under an unoccluded stop, not merely their blend mode.
-     The fix is therefore upstream of all of this: give the stop an opaque ground again so the
-     overlays are occluded exactly as they were before the side bars were opened up -- that state had
-     no flicker -- and make that ground carry the visual interest itself. See .lore-stop below. */
+  /* ---- THE ANDROID LANDSCAPE FLICKER: the one configuration that works -----------------------
+     This replicates `?fxoff=bcGrain,bcScan,bcVignette,bcStrobe` exactly, because that is the only
+     configuration ever confirmed to stop it on the device. Three theories of WHY were tested and all
+     three were wrong, so the rules below are matched to the evidence rather than to a mechanism:
+       - `?fxoff=bandFeather` does not help, so the mask is not involved and the feather stays.
+       - Removing only the mix-blend-mode (b8df1a0) did not help, so it is not the backdrop readback.
+       - Restoring an opaque ground on the stop (18067fc) did not help either, so it is not occlusion:
+         these layers are allocated and invalidated whether or not something covers them. .bc-grain is
+         1061px wide with grainshift running infinitely and .bc-strobe rewrites its opacity every
+         frame, and that cost is paid regardless of what is painted on top.
+     So the layers go, and the side bars are carried by the static gradient on .lore-stop below --
+     which is what makes this acceptable now and did not exist when hiding them was first tried.
+     .bc-scan is NORMALISED, NOT REMOVED: it carries the flat 32% black that replaced the video's own
+     darkening, so deleting it would lighten the whole site. Exactly what fx-off.css does with it.
+     No !important, so the diag panel and the registry's fx-off rules can still override all of this.
+     SHORT LANDSCAPE ONLY -- desktop and ultrawide keep every one of these. */
+  .bc-grain, .bc-strobe, .bc-vignette { display: none; }
+  .bc-scan { mix-blend-mode: normal; }
 
   /* the ticker lines up with the frame too, rather than running the full window */
   .lyric-marquee { width: min(100%, calc(100svh * 2.0)); margin-inline: auto; }
