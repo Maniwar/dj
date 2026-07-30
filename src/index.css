@@ -2677,7 +2677,21 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      darkening, so deleting it would lighten the whole site. Exactly what fx-off.css does with it.
      No !important, so the diag panel and the registry's fx-off rules can still override all of this.
      SHORT LANDSCAPE ONLY -- desktop and ultrawide keep every one of these. */
-  .bc-grain, .bc-strobe, .bc-vignette { display: none; }
+  /* NARROWED to the two layers that can actually be doing this. The bisect that passed on the
+     device switched off four at once, so it proved the SET is sufficient, not that every member is
+     necessary -- and hiding all four cost the whole look in landscape ("flicker gone, but so are all
+     the fx").
+     .bc-vignette is restored: line 326 gives it no animation and no mix-blend-mode, so it is a
+     static radial gradient and cannot be driving a compositor flicker.
+     .bc-scan is restored to visible and merely normalised -- it keeps the flat 32% black that
+     replaced the video's own darkening, so removing it would lighten the whole site.
+     That leaves the two with a genuine per-frame cost: .bc-grain is 1061px wide with grainshift on an
+     infinite loop, and .bc-strobe rewrites its opacity every frame under a screen blend. If the
+     flicker is gone with just these two off, they are the cause and everything else comes back.
+     STILL NOT ISOLATED TO ONE. Narrowing further needs them individually switchable at this
+     breakpoint, which a media query cannot express -- a ?fxon= flag cannot undo a `display: none`
+     that is not keyed to a class. That is the next step if the grain is worth recovering. */
+  .bc-grain, .bc-strobe { display: none; }
   .bc-scan { mix-blend-mode: normal; }
 
   /* the ticker lines up with the frame too, rather than running the full window */
