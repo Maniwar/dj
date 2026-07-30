@@ -67,6 +67,26 @@ await build({
 })
 const { classify, PROFILE_BY_ID, PROFILES, P95_BOUNDS } = await import(`file://${bundle}`)
 
+// THE ESSENTIALS FLOOR, READ FROM THE REGISTRY. resolveOff() deletes every `essential` id before it
+// applies the overrides, so a profile's declared `off` set is NOT what lands on the page: `minimal`
+// declares all 28 ids and resolves to 21. This script used to compare against the declared sets and
+// against a literal 27, so it reported six failures for behaviour that is the stated requirement --
+// "the very minimum must be ken burns and beats and the scrolling text; the site being completely
+// static is not acceptable". Derived here rather than restated so the two cannot drift.
+const regBundle = join(tmp, 'registry.mjs')
+await build({
+  entryPoints: ['src/perf/registry.ts'],
+  outfile: regBundle,
+  bundle: true,
+  format: 'esm',
+  platform: 'neutral',
+  logLevel: 'silent',
+})
+const { FX } = await import(`file://${regBundle}`)
+const ESSENTIAL = new Set(FX.filter((f) => f.essential).map((f) => f.id))
+/** What a declared profile set actually RESOLVES to once the essentials floor is applied. */
+const resolved = (ids) => ids.filter((id) => !ESSENTIAL.has(id)).slice().sort()
+
 /** A window with the given percentiles and nothing else wrong. */
 const stats = (o) => ({
   frames: 180,
@@ -148,9 +168,9 @@ const browser = await chromium.launch(launchOpts)
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } })
 const page = await ctx.newPage()
 
-const LEAN = PROFILE_BY_ID.lean.off.slice().sort()
-const BALANCED = PROFILE_BY_ID.balanced.off.slice().sort()
-const ALL = PROFILE_BY_ID.minimal.off.slice().sort()
+const LEAN = resolved(PROFILE_BY_ID.lean.off)
+const BALANCED = resolved(PROFILE_BY_ID.balanced.off)
+const ALL = resolved(PROFILE_BY_ID.minimal.off)
 
 /** Load, get past the boot gate, and report what the page resolved to. */
 async function load(query, { storage = null, settleMs = 700 } = {}) {
@@ -218,10 +238,12 @@ s.canvases >= 1
   : bad('lean keeps the shader', 'the canvas was unmounted')
 
 s = await load('profile=minimal')
-eq('?profile=minimal switches off every effect', s.off, ALL)
-s.canvases === 0 && s.shaderFallback === 1
-  ? ok('minimal unmounts the shader', 'the WebGL context is released and .thermal-fallback takes its place')
-  : bad('minimal unmounts the shader', `${s.canvases} shader canvas / ${s.shaderFallback} fallback`)
+eq('?profile=minimal switches off every non-essential effect', s.off, ALL)
+// INVERTED DELIBERATELY. `shader` is an essential id, so the floor keeps it at every profile --
+// minimal included. The old assertion here predates that requirement and asserted its opposite.
+s.canvases >= 1
+  ? ok('minimal KEEPS the shader', 'essential: the light rig survives the floor, so the page is never static')
+  : bad('minimal keeps the shader', `${s.canvases} shader canvas / ${s.shaderFallback} fallback`)
 s.bcVideo === 0
   ? ok('minimal unmounts the mainstage video', 'falls back to the stills, so no decoder is running')
   : bad('minimal unmounts the mainstage video', 'the <video> is still in the DOM')

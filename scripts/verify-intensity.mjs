@@ -65,7 +65,20 @@ await build({
   platform: 'neutral',
   logLevel: 'silent',
 })
-const { fxMultiplier, FX_DEFAULT, FX_MAX_MULTIPLIER } = await import(`file://${bundle}`)
+const { fxMultiplier, FX_DEFAULT, FX_MAX_MULTIPLIER, FX_MOTION_MIN } = await import(`file://${bundle}`)
+
+// The essentials floor, read from the registry so the count cannot drift from the source.
+const regBundle = join(tmp, 'registry.mjs')
+await build({
+  entryPoints: ['src/perf/registry.ts'],
+  outfile: regBundle,
+  bundle: true,
+  format: 'esm',
+  platform: 'neutral',
+  logLevel: 'silent',
+})
+const { FX } = await import(`file://${regBundle}`)
+const NON_ESSENTIAL = FX.filter((f) => !f.essential).length
 
 console.log('--- the curve ---')
 eq('0 is off, exactly', fxMultiplier(0), 0)
@@ -138,12 +151,25 @@ eq('--friction / --chroma / --shake resolve to nothing', s.dead, [])
 console.log('\n--- the bottom of the dial ---')
 s = await load('intensity=0')
 eq('--fx is 0', s.fx, '0.000')
-// 27 ids: every registry entry has a threshold above 0, so a strict `>` retires all of them.
-eq('every effect is retired', s.off.length, 27)
+// THE BOTTOM OF THE DIAL IS NOT A DEAD PAGE, and these three assertions used to say it was.
+//
+// The original contract here was "at 0 every effect is retired and every audio variable is a hard
+// zero". That was rejected on the device, in these words: "the very minimum must be ken burns and
+// beats with the text and stuff, and the scrolling text and everything and a few lasers -- the site
+// being completely static is not acceptable." So resolveOff() exempts the `essential` ids and
+// fxMotionMultiplier() clamps the motion multiplier to FX_MOTION_MIN rather than letting it reach 0.
+//
+// These now assert THAT contract. Left as-is they reported three failures for the required
+// behaviour, which is worse than no coverage: it trains you to read a red suite as normal.
+eq('every NON-ESSENTIAL effect is retired', s.off.length, NON_ESSENTIAL)
 // --m-beat is a REGISTERED property, so the computed value is the number, not the token that was
 // written; compare numerically or a correct "0.00" reads as a failure against a literal "0".
-eq('the beat variable is a hard zero', Number(s.beat), 0)
-eq('the heading lift is a hard zero', s.lift, '0px')
+Number(s.beat) > 0
+  ? ok('the beat variable survives the floor', `--m-beat ${s.beat} — clamped at FX_MOTION_MIN ${FX_MOTION_MIN}, not zeroed`)
+  : bad('the beat variable survives the floor', `--m-beat ${s.beat} — the motion clamp is not in effect`)
+s.lift !== '0px'
+  ? ok('the heading lift survives the floor', `--beat-lift ${s.lift}`)
+  : bad('the heading lift survives the floor', 'the lift was zeroed; essential beat motion is gone')
 eq('the light rig is not drawn', s.canvasOpacity === null || s.canvasOpacity === '0', true)
 
 console.log('\n--- the top of the dial ---')
