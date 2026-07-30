@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { audioBus } from '../../audio/audioBus'
 import { usePlayerStore } from '../../state/usePlayerStore'
-import { ACCENTS, useSiteStore, VIZ_LABEL } from '../../state/useSiteStore'
+import { ACCENTS, effectiveAccent, useSiteStore, VIZ_LABEL } from '../../state/useSiteStore'
 
 const BARS = 40
 
@@ -109,7 +109,10 @@ export default function SpectrumDisplay() {
       // already eases uAccent with a 0.35s time constant (ThermalRunaway), and the two have to agree
       // or the rig and the player disagree about what colour the room is. 0.05 per frame is that
       // same constant at 60fps: 1 - exp(-(1/60)/0.35) = 0.047.
-      const tgt = ACCENTS[accentRef.current] ?? ACCENTS.default
+      // Same rule as the light rig, from the same function and the same clock, so the player and
+      // the wall always agree. Reading the section accent directly here is what left this stuck on
+      // magenta while the wall cycled.
+      const tgt = effectiveAccent(accentRef.current, audioBus.music.beatIndex)
       const sm = smoothRef.current
       for (let i = 0; i < 3; i++) sm[i] += (tgt[i] - sm[i]) * 0.05
       const [ar, ag, ab] = sm

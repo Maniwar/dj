@@ -16,6 +16,46 @@ export const ACCENTS = {
 
 export type AccentKey = keyof typeof ACCENTS
 
+/**
+ * The order the palette is walked when no section has claimed the colour.
+ *
+ * Ordered so consecutive steps are far apart in hue -- magenta, cold blue, acid, gold, aqua -- since
+ * adjacent similar colours read as a flicker rather than a cue change. `kiki` is absent on purpose:
+ * it is byte-identical to `default`, so including it would stall the walk on pink for two steps.
+ */
+export const ACCENT_WALK: readonly AccentKey[] = [
+  'default',
+  'dieter',
+  'both',
+  'ibiza',
+  'miami',
+  'tokyo',
+  'berlin',
+]
+
+/**
+ * THE COLOUR IN FORCE, and the only definition of it.
+ *
+ * A named section owns the colour -- that association is the whole point of ACCENTS. Where nothing
+ * has claimed it (the hero, the guestbook, anywhere between sections) the palette is walked on the
+ * beat grid instead, so the rig is not stuck on house magenta for most of the page.
+ *
+ * THIS EXISTS AS ONE FUNCTION BECAUSE IT SHIPPED AS TWO. The walk was added to the shader only, so
+ * the LED wall cycled while the player's spectrum went on reading the raw section accent -- which is
+ * `default` almost everywhere. Reported as "the bottom part is cycling color now, but not the
+ * player's spectrometer, it's stuck on pink", and that was exactly right: two controls, two rules.
+ * Both callers now take their target from here, so they cannot disagree about what colour the room
+ * is. Pure, and given the beat index rather than reading the clock itself, so it stays testable.
+ */
+export function effectiveAccent(
+  accent: AccentKey,
+  beatIndex: number
+): readonly [number, number, number] {
+  if (accent !== 'default') return ACCENTS[accent] ?? ACCENTS.default
+  // 32 beats = 8 bars, the same cadence the shader's beam patterns move on.
+  return ACCENTS[ACCENT_WALK[Math.floor(beatIndex / 32) % ACCENT_WALK.length]]
+}
+
 // How the sung lyric words are drawn. Legibility over moving footage is genuinely a matter of
 // taste and of what you're watching, so this is the VIEWER's choice, cycled from the player and
 // remembered on their device.
