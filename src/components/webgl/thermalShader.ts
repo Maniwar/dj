@@ -90,6 +90,16 @@ export const thermalFrag = /* glsl */ `
   float droplets(vec2 uv, float density){
     float acc=0.0;
     for(int layer=0; layer<2; layer++){
+      // THE SECOND LAYER IS THE ONE THAT GETS DROPPED ON WEAK HARDWARE, not the whole effect.
+      // Beads used to be skipped outright once uQuality fell -- and uQuality is 0 as soon as the perf
+      // tier reaches 2, which is ONE-WAY by design, so after two slow-frame strikes the condensation
+      // vanished for the rest of the session and never came back. Reported exactly that way: the drops
+      // come on at first, disappear, and never repeat.
+      // Half the beads at half the cost is the right trade, and it matches the rule the rest of this
+      // project runs on: the floor is allowed to be cheaper, never empty. Branching on a uniform is
+      // coherent across every pixel, so the GPU genuinely skips this layer rather than executing both
+      // sides of it.
+      if(layer == 1 && uQuality < 0.5) continue;
       float s = 18.0*(1.0+float(layer)*0.65);
       vec2 gv=uv*s; vec2 id=floor(gv); vec2 f=fract(gv)-0.5;
       float rnd=hash(id+float(layer)*31.7);
@@ -594,8 +604,10 @@ export const thermalFrag = /* glsl */ `
     // droplets() is 3 nested layers of hashing, by far the most expensive thing here, so the
     // phone tier skips it entirely. Branching on a uniform is coherent across every pixel, so
     // the GPU really does skip the work rather than executing both sides.
-    float beads = 0.0;
-    if (uQuality > 0.5) beads = droplets(uv, 0.03 + uHumidity*0.20);
+    // No longer gated off entirely at low quality -- droplets() drops its second layer instead. The
+    // density is raised a little when the cheap path is active so one layer still reads as wet glass
+    // rather than as a handful of stray dots.
+    float beads = droplets(uv, (0.03 + uHumidity*0.20) * (uQuality > 0.5 ? 1.0 : 1.45));
     col += vec3(0.8,0.9,1.0) * beads * 0.44;
 
     // ---- LIQUID COOLING: WATER ON THE LENS ----
