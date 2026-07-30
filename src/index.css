@@ -306,14 +306,51 @@ body {
   linear-gradient(rgba(0,0,0,0.32), rgba(0,0,0,0.32)),
   repeating-linear-gradient(0deg, rgba(0,0,0,0.10) 0 2px, transparent 2px 4px); }
 .bc-strobe { position: absolute; inset: 0; background: #fff; opacity: calc(var(--beat) * 0.18); mix-blend-mode: screen; }
-.bc-grain { position: absolute; inset: -8%; opacity: 0.022; mix-blend-mode: overlay; animation: grainshift 0.5s steps(2) infinite;
-  /* inset -8%, not -150%. grainshift only translates by (-6%, 4%), so -8% is all the overscan
+.bc-grain { position: absolute; inset: -8%; opacity: 0.022; mix-blend-mode: overlay;
+  animation: grainshift 0.5s steps(1) infinite;
+  /* inset -8%, not -150%. grainshift only translates by a few percent, so -8% is all the overscan
      it can possibly need — but at -150% the element was 400% x 400%, i.e. SIXTEEN times the
      viewport, and it is animated AND blended. On a 7680x2160 screen that was a ~265 Mpx
      blended surface repainting twice a second for a grain texture at 7% opacity. Identical
      on screen, a twelfth of the pixels. */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
-@keyframes grainshift { 0%{ transform: translate(0,0); } 100%{ transform: translate(-6%, 4%); } }
+
+  /* ---- WHY THIS READ AS STATIC RATHER THAN GRAIN ------------------------------------------
+     Reported repeatedly as "so much white static", "still very noisy", "static going across the
+     whole screen ... doesn't look realistic". Cutting the opacity twice (0.12 -> 0.065 -> 0.032)
+     did not help, because none of the three actual causes was strength:
+
+     1. THE TILE WAS VISIBLE. The SVG carried no width/height, so it fell back to the SVG default
+        of 300x150px, and background-repeat defaults to `repeat` — one small noise patch tiled
+        across the viewport. On a 1920px screen that is ~6 repeats across, and the eye locks onto
+        a repeating pattern instantly. That is what "going across the whole screen" was: not
+        strength, structure. Now an explicit 240x240 tile with stitchTiles='stitch', which makes
+        feTurbulence continuous across tile edges so the seams genuinely disappear, plus an
+        explicit background-size so the on-screen grain size is a decision rather than a default.
+
+     2. IT HAD TWO FRAMES. `steps(2)` across a single 0%->100% keyframe pair yields exactly two
+        transform values, i.e. the same two patches alternating four times a second. Film grain
+        re-randomises continuously; two flip-flopping frames read as a digital strobe. There are
+        five distinct offsets now, held by steps(1), so it re-seats ~10 times a second and never
+        returns to the same offset twice in a row.
+
+     3. IT CLUMPED. numOctaves='2' sums a coarse octave onto the fine one, which produces blotches
+        rather than even grain. One octave at a higher baseFrequency is finer and much more even —
+        which is what actual film grain looks like at viewing distance.
+
+     Costs no more than before: same element, same blend, same opacity, one background-size more. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 150px 150px; }
+/* Five offsets, held (steps(1)) rather than interpolated, so the texture re-seats ~10x/sec instead
+   of sliding. Offsets are deliberately not multiples of each other, so the pattern does not appear
+   to pulse in step with the tile. */
+@keyframes grainshift {
+  0%   { transform: translate(0, 0); }
+  20%  { transform: translate(-3.4%, 2.6%); }
+  40%  { transform: translate(2.9%, -1.7%); }
+  60%  { transform: translate(-1.6%, -3.1%); }
+  80%  { transform: translate(3.7%, 1.1%); }
+  100% { transform: translate(-2.2%, 3.3%); }
+}
 .bc-scan { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.10) 0 2px, transparent 2px 4px); mix-blend-mode: multiply; opacity: calc(0.10 * var(--fx, 1)); }
 /* THE SITE'S BLACK LEVEL, and now the only vignette on the page.
    The deleted .crt-vignette was a second, full-page radial (transparent 52% -> 0.72 black at the
