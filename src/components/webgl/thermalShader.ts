@@ -384,7 +384,15 @@ export const thermalFrag = /* glsl */ `
       // instead of a bloom. uDrop keeps a bigger share because a drop should genuinely flare.
       float wRaw = (0.0030 + uBeat*0.0030 + uBass*0.0010 + uDrop*0.006) * beamWidth(fi);
       float w = max(wRaw, 2.0 / max(uRes.y, 1.0));
-      float core = smoothstep(w, 0.0, d) * att;
+      // A FLAT CORE WITH A HARD EDGE, which is what makes a beam read as a beam. This was
+      // smoothstep(w, 0.0, d): maximum on the axis falling smoothly to zero at w, i.e. a triangular
+      // gradient across the entire half-width. That has no edge anywhere -- it is a glow shaped like a
+      // line, and it is the single biggest reason the lasers still looked soft after the width was
+      // brought down from 51px to 19px. Narrowing a gradient just gives a narrower gradient.
+      // Now the core is uniform out to w and falls off over ~1.5 canvas pixels, so the beam has a
+      // defined body and a defined boundary; the halo below still supplies the bloom around it.
+      float epx = 1.5 / max(uRes.y, 1.0);
+      float core = smoothstep(w, max(w - epx, w*0.25), d) * att;
       // Halo width/strength are deliberately restrained: the alpha of this whole layer is its
       // own luminance, so an over-bright halo turns the overlay opaque and BURIES the footage
       // underneath. The footage is the star; the rig lights it.
@@ -513,7 +521,11 @@ export const thermalFrag = /* glsl */ `
     float r = length(p);
     // KICK = a physical shove: a ring blown outward through the haze on every kick. uBeat
     // decays 1->0, so the ring expands as the hit dies away.
-    float ring = smoothstep(0.035, 0.0, abs(r - (1.0-uBeat)*0.55)) * uBeat;
+    // The kick ring: 0.035 in p units is a 48px-thick falloff at 1363px tall, which is a soft band
+    // rather than a shock front. Tightened to a defined edge with a pixel-scale falloff, so the ring
+    // reads as something travelling outward instead of a general brightening.
+    float ringW = max(0.012, 2.0 / max(uRes.y, 1.0));
+    float ring = smoothstep(ringW, ringW*0.35, abs(r - (1.0-uBeat)*0.55)) * uBeat;
     col += vec3(1.0,0.35,0.75) * ring * 0.5;
     // SNARE = the strobe answering the kick on the backbeat (a flat flash, no colour cast)
     col += vec3(1.0) * uSnare * 0.11;
