@@ -1433,26 +1433,16 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      dissolve INTO -- the same thing the side columns do past 2.5:1. .lore-fill stays display:none:
      the blurred 8x-upscaled copy is what caused the flicker on the hero slides, and the Broadcast
      behind is a better ground than a blurred copy of the slide itself. */
-  /* A STATIC GROUND, not transparent and not flat black.
-     Transparent is what opened the bars up to the club, and it is also what let the Broadcast's four
-     animating overlays stop being occluded -- which is the flicker. Flat #06070c is what it was
-     before, and that had no flicker but read as dead space.
-     So: an opaque ground that is interesting by itself. Two gradients, both static -- no blend mode,
-     no animation, no variable -- so this is one paint at layout time and nothing per frame, and it
-     restores occlusion for everything behind it. The bars get depth and a hint of stage haze, and
-     the band's feather has something real to dissolve INTO, which is what bandFeather needs to read
-     at all. */
-  .lore-stop {
-    /* The colour is stated separately and on purpose: the `background` shorthand resets
-       background-color to transparent, so occlusion would rest entirely on the gradients painting.
-       This way the stop is opaque even if a gradient layer is dropped, and occlusion -- which is the
-       whole flicker fix -- cannot fail open. */
-    background-color: #06070c;
-    background-image:
-      radial-gradient(130% 95% at 50% 0%, rgba(74,34,96,0.60), rgba(10,7,20,0) 62%),
-      radial-gradient(90% 70% at 50% 100%, rgba(24,58,88,0.45), rgba(6,7,12,0) 70%),
-      linear-gradient(180deg, #0b0814 0%, #06070c 58%, #04030a 100%);
-  }
+  /* TRANSPARENT. Reverted from an opaque static gradient, which was a mistake worth recording.
+     .lore-stop spans the FULL VIEWPORT WIDTH, and .broadcast sits behind .content -- so making the
+     stop opaque occluded the entire Broadcast layer for the whole lore section, not just the strip
+     behind the bars it was aimed at. The footage, the scanlines and the vignette all disappeared and
+     the bars showed nothing but the gradient. Reported, correctly, as "all effects are off in mobile
+     landscape".
+     It was introduced to give the bars content after the overlays were hidden, which was solving the
+     wrong half: transparency is what lets the club show through there in the first place. The
+     flicker is handled by dropping the two per-frame layers above, which needs no ground at all. */
+  .lore-stop { background: transparent; }
   .lore-stop[data-id='stockholm'] { --focus: center 70%; }
 
   /* the copy lines up with the frame it sits on, not with the window */
