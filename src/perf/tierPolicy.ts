@@ -151,6 +151,12 @@ export function tierMove(
     return 'hold'
   }
 
+  // At the top rung there is nothing to climb to, so stop accumulating. It read "climb 48/8" in the
+  // panel, which looks like a stuck counter rather than "already as high as it goes".
+  if (tier === 0) {
+    st.fast = 0
+    return 'hold'
+  }
   st.fast++
   if (st.fast >= WINDOWS_TO_CLIMB && tier > 0) {
     if ((st.failed[tier - 1] ?? 0) < MAX_RETRIES) {

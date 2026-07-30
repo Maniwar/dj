@@ -51,7 +51,10 @@ const FREQ_BINS = 64
 // windows AND climbs back once headroom returns, so an over-ambitious budget costs a few seconds of
 // adjustment rather than a permanently soft session. The old budget had to be conservative because
 // degradation was one-way.
-const PIXEL_BUDGET = 13_500_000
+// Back to 8M. 13.5M existed only so the 2x rung could be reached; with no rung above native this
+// is just the ceiling that stops an enormous window allocating an absurd buffer, and 8M leaves
+// native comfortably reachable on the large displays this actually runs on.
+const PIXEL_BUDGET = 8_000_000
 const MIN_SCALE = 0.55 // never go so soft that the beams smear
 // 2, not 1.4, and this is the cap that was actually keeping the rig soft on a retina display.
 //
@@ -84,29 +87,24 @@ const MAX_SCALE = 2
 // first impression than a slightly soft one. Instead the rig proves it has headroom -- 8 windows
 // under budget -- and only then spends it on sharpness. Under load it steps down exactly as
 // before, and tierPolicy's one-free-retry rule stops it hunting between two rungs.
-// A 2x SUPERSAMPLING RUNG, RESTORED, and the history is worth keeping because it explains the
-// number. This was added, removed, and added again -- not from indecision but because the first two
-// judgements were made on contaminated evidence. The comparison frames labelled "lasers" and
-// "confetti" were both actually showing the LED wall (readPixels returns rows bottom-up, so the
-// crop band selected the opposite end of the frame), and once fixed, "confetti" showed water beads
-// instead, because uHumidity produces condensation through the fog cycle whatever uDew is set to.
-// Every early verdict on supersampling was therefore a verdict on the wrong effect.
+// NO RUNG ABOVE NATIVE, and this time it was measured rather than guessed at.
 //
-// With the scenarios finally isolated, the answer is mixed but net positive:
-//   the beams are smooth falloff functions and were never aliased -- 2x changes nothing on them
-//   the confetti are flat hard-edged quads -- 2x cleans their edges but cannot round the shape
-//   the starburst rays visibly staircase at native, and 2x removes it
-//   the LED wall renders IDENTICALLY at 2x, now its cell floor and gap are in display pixels,
-//     so the extra resolution goes into antialiasing the diagonals and nothing else
+// Once the thresholds were finally calibrated to the rig's own 30fps metronome, it climbed to the
+// 2x rung and stayed there, so we got a real look at the cost. The budget clamped the actual scale
+// to 1.35x -- 13.5Mpx, exactly PIXEL_BUDGET -- and at that size:
 //
-// 2 and not 1.5 because the ratio must be an integer: at 1.5 the wall's one-pixel gaps land on
-// non-integer display positions and average unevenly into their neighbours, which is visibly worse
-// than native. At exactly 2 every buffer pixel is a clean quarter of a display pixel.
+//   the page fell to about 40fps
+//   the auto profile detector demoted itself from full to balanced, p95 16.8ms -> 33.4ms
+//   the difference was not visible to the person looking at it
 //
-// It starts at native and climbs only after 8 windows of proven headroom, so the 4x fragment cost
-// is never paid by a machine that cannot afford it, and is given up again the moment it cannot.
-const TIERS = [2, 1, 0.8, 0.65, 0.5]
-const START_TIER = 1 // native: where every session begins, with the 2x rung above it
+// A cost that is measurable and a benefit that is not is a straightforward answer.
+//
+// It also exposed a gap worth recording: the rig's own sampler read avg 32.5ms at that size, well
+// inside its climb threshold, because it only ever measures its OWN rate-limited loop. A rig capped
+// at 30fps cannot detect that it is starving the rest of the page of frames. If a rung above native
+// is ever wanted again, the policy has to watch the PAGE's frame time, not the rig's.
+const TIERS = [1, 0.8, 0.65, 0.5]
+const START_TIER = 0 // native: the top of the ladder, and where every session begins
 
 function shaderScale(cssW: number, cssH: number): number {
   if (typeof window === 'undefined') return 1
