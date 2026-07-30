@@ -51,8 +51,19 @@ check('a transient hitch is undone: drop, then idle, and it returns to native',
   run([40, 40, ...rep(5, 8)]).tier, 0)
 check('climbing needs 8 good windows, not 7',
   run([40, 40, ...rep(5, 7)]).tier, 1)
-check('"not slow" is not enough — 20ms against a 22ms budget must NOT climb',
-  run([40, 40, ...rep(20, 30)]).tier, 1)
+check('"not slow" is not enough — 21ms against a 22ms budget must NOT climb',
+  run([40, 40, ...rep(21, 30)]).tier, 1)
+
+// The one that mattered. `dt` is wall-clock frame delta, so it is vsync-locked: a 60Hz display
+// reports ~16.7ms when the GPU is completely idle. A climb threshold below that floor is never
+// satisfiable and the whole recovery path is dead code on the commonest display there is -- which
+// is exactly what shipped at HEADROOM 0.7 (15.4ms).
+check('A HEALTHY 60Hz MACHINE CAN CLIMB — 16.7ms is the vsync floor, not a slow frame',
+  run([40, 40, ...rep(16.7, 20)]).tier, 0)
+check('a healthy 120Hz machine climbs too',
+  run([40, 40, ...rep(8.3, 20)]).tier, 0)
+check('a 30Hz-locked machine (33ms) never climbs — 33ms is slow, so it walks to the bottom',
+  run([40, 40, ...rep(33, 30)]).tier, MAX)
 check('from the bottom tier it climbs all the way back given enough headroom',
   run(rep(5, 100), MAX).tier, 0)
 

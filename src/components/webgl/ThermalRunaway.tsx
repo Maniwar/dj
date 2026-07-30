@@ -42,7 +42,16 @@ const FREQ_BINS = 64
 // TIERS[], and the sampler below steps the tier down after two slow-frame strikes, so a GPU that
 // cannot hold native simply drops to 0.8, 0.65 or 0.5 of it within a few seconds. A budget that is
 // too LOW has no such feedback: it just renders soft forever on hardware that had headroom to spare.
-const PIXEL_BUDGET = 5_500_000
+// 8M, so the top rung is actually reachable. A 2400x1364 dpr-1 desktop is 3.27Mpx native; the 1.5x
+// supersampling rung wants 2.25x that, 7.4Mpx, and at the old 5.5M budget the clamp in applyScale
+// would have quietly held it to 1.30x -- the rung would exist but never be reached, which is the
+// same class of dead code as the vsync bug in tierPolicy.
+//
+// Raising it is safe in a way it was NOT before this change: the ladder steps down after two slow
+// windows AND climbs back once headroom returns, so an over-ambitious budget costs a few seconds of
+// adjustment rather than a permanently soft session. The old budget had to be conservative because
+// degradation was one-way.
+const PIXEL_BUDGET = 8_000_000
 const MIN_SCALE = 0.55 // never go so soft that the beams smear
 // 2, not 1.4, and this is the cap that was actually keeping the rig soft on a retina display.
 //
@@ -60,6 +69,23 @@ const MIN_SCALE = 0.55 // never go so soft that the beams smear
 // budget, so `fit` is not even the limiting term there. And the tier sampler still steps down if
 // the GPU cannot hold it.
 const MAX_SCALE = 2
+
+// THE LADDER NOW GOES UP AS WELL AS DOWN, and the two rungs above 1.0 are the point.
+//
+// shaderScale ends in Math.min(dpr, fit) -- it will never render more pixels than the display
+// physically has. On a dpr-2 laptop that is fine, because the browser downsamples 2x for you and
+// every diagonal edge gets four samples. On a dpr-1 panel it is exactly wrong: native IS one
+// sample per pixel, so every laser, every beam edge, every ring gets a hard staircase and no
+// amount of work inside the shader can smooth it. The only cure for aliasing at dpr 1 is to
+// render ABOVE native and let the browser downsample -- supersampling, the oldest AA there is.
+//
+// It starts at NATIVE (START_TIER) rather than at the top. Starting at 1.5x would mean opening
+// every session with several seconds of jank while the sampler walked back down, which is a worse
+// first impression than a slightly soft one. Instead the rig proves it has headroom -- 8 windows
+// under budget -- and only then spends it on sharpness. Under load it steps down exactly as
+// before, and tierPolicy's one-free-retry rule stops it hunting between two rungs.
+const TIERS = [1.5, 1.25, 1, 0.8, 0.65, 0.5]
+const START_TIER = 2 // the 1.0 rung: native, and where every session begins
 
 function shaderScale(cssW: number, cssH: number): number {
   if (typeof window === 'undefined') return 1
@@ -182,7 +208,7 @@ function Mainstage() {
   // alternates between smooth and stuttering, which reads far worse than settling one tier
   // lower and staying there. Each step is followed by a settle window so the cost of the
   // resize itself is never mistaken for a slow frame.
-  const tier = useRef(0)
+  const tier = useRef(START_TIER)
   // TIME-based windows, not frame counts. Counting frames is self-defeating here: the slower
   // the machine, the longer it takes to collect the samples that would trigger the rescue. At
   // 10fps a 90-frame window is nine seconds of jank before anything happens.
@@ -191,12 +217,17 @@ function Mainstage() {
   // would pin a 3080 to the bottom tier. Degradation is no longer one-way -- tierPolicy climbs
   // back once the machine shows sustained headroom -- but a false positive still costs several
   // seconds at the wrong resolution, so the settle window below stays generous.
-  const TIERS = [1, 0.8, 0.65, 0.5] // multipliers on the budgeted scale
   const acc = useRef({ frames: 0, time: 0, settleUntil: 0, policy: newTierState(TIERS.length) })
   const SLOW_MS = 22 // ~45fps; below this we are visibly dropping frames
 
   const applyScale = useCallback(() => {
-    const scale = shaderScale(size.width, size.height) * TIERS[tier.current]
+    // The budget is enforced HERE, on the final scale, not inside shaderScale. shaderScale bounds
+    // the native-equivalent scale; the supersampling rungs multiply on top of it, so a cap applied
+    // before the multiply would not bound the buffer that actually gets allocated. Squaring is the
+    // whole point: 1.5x scale is 2.25x the fragments.
+    const raw = shaderScale(size.width, size.height) * TIERS[tier.current]
+    const area = Math.max(1, size.width * size.height)
+    const scale = Math.max(MIN_SCALE, Math.min(raw, Math.sqrt(PIXEL_BUDGET / area)))
     gl.setPixelRatio(scale)
     uniforms.uRes.value.set(size.width * scale, size.height * scale)
     uniforms.uPxScale.value = scale
@@ -217,7 +248,10 @@ function Mainstage() {
       quality: uniforms.uQuality.value,
     })
     // past the first step-down, drop the costliest shader passes as well
-    uniforms.uQuality.value = PERF.isMobile || tier.current >= 2 ? 0 : 1
+    // Relative to START_TIER, not an absolute index. This read `tier.current >= 2` when 2 meant
+    // "two steps below native"; 2 is now native itself, so left alone it would have switched the
+    // expensive passes off for everybody the moment the ladder gained its supersampling rungs.
+    uniforms.uQuality.value = PERF.isMobile || tier.current >= START_TIER + 2 ? 0 : 1
   }, [size, gl, uniforms])
 
   useEffect(() => {

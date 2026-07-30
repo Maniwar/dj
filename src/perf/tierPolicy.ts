@@ -43,8 +43,20 @@ export type TierMove = 'down' | 'up' | 'hold'
 export const STRIKES_TO_DROP = 2
 /** Windows with headroom before climbing back. */
 export const WINDOWS_TO_CLIMB = 8
-/** Climbing needs the frame time to be under this fraction of `slowMs`, not merely under it. */
-export const HEADROOM = 0.7
+/**
+ * Climbing needs the frame time under this fraction of `slowMs`, not merely under it.
+ *
+ * THIS NUMBER IS BOUNDED FROM BELOW BY VSYNC, which is easy to get wrong and was: at 0.7 the climb
+ * threshold is 15.4ms, and a 60Hz display cannot report a frame delta below 16.7ms no matter how
+ * idle the GPU is. `dt` is wall-clock time between rendered frames, not GPU work, so the floor is
+ * the refresh interval. A threshold under that floor is never satisfied and the rig can never climb
+ * -- the recovery path exists but is dead code on the most common display in the world.
+ *
+ * 0.84 puts it at 18.5ms: comfortably ABOVE the 16.7ms vsync floor so a healthy 60Hz machine
+ * qualifies, and comfortably BELOW the 22ms slow threshold so there is real hysteresis between
+ * dropping and climbing rather than a single line to oscillate across.
+ */
+export const HEADROOM = 0.84
 /** A tier that has failed this many times is never offered again this session. */
 export const MAX_RETRIES = 2
 
