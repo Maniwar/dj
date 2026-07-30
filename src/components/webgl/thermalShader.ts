@@ -215,6 +215,57 @@ export const thermalFrag = /* glsl */ `
     return acc;
   }
 
+  // ---- CONFETTI ----
+  // The old version had three faults and all three are visible at a glance.
+  //
+  //   IT COULD NOT FALL. The flake position was fract(cg) - vec2(cx, 1.0 - fall), i.e. an offset
+  //   INSIDE its own grid cell. With 20 rows a flake travelled one twentieth of the screen height and
+  //   then wrapped, so it jiggled inside a 5%-tall box forever. Reported exactly: "it just kind of
+  //   twists in place, shouldnt it be falling down".
+  //
+  //   IT WAS A LATTICE. There was no density test, so every one of the 34x20 = 680 cells held a
+  //   flake -- a perfectly regular grid, which is the "all kinda of equally spaced".
+  //
+  //   THE SPIN WAS SHEARED. fract(cg) spans 0..1 on both axes but a cell is about 74 x 46 canvas
+  //   pixels, so rotating in that space stretches the flake and changes its size with its angle. That
+  //   is a good part of what read as pixelation, on top of the sub-pixel thin axis.
+  //
+  // Rebuilt: columns, each carrying a few flakes at independent phases that fall the FULL height of
+  // the frame, drift sideways as paper does, spin rigidly in ISOTROPIC units (screen heights, so a
+  // rotation is a rotation), and fade in and out so nothing pops at the wrap.
+  vec3 confetti(vec2 uv, float aspect, float amount, vec3 accent){
+    vec3 acc = vec3(0.0);
+    for(int c=0; c<2; c++){
+      float cols = 22.0 + float(c)*15.0;
+      float x = uv.x*cols;
+      float id = floor(x);
+      float fx = fract(x) - 0.5;
+      for(int k=0; k<3; k++){
+        float fk = float(k);
+        float h1 = hash(vec2(id*1.31 + fk*7.7,  float(c)*13.3));
+        if(h1 < 1.0 - amount) continue;          // sparse and irregular, not a grid
+        float h2 = hash(vec2(id*2.17 + fk*3.1,  float(c)*5.9));
+        float h3 = hash(vec2(id*0.73 + fk*11.9, float(c)*19.1));
+        float speed = 0.09 + h2*0.15;
+        float t = fract(h1*3.1 + uTime*speed);
+        float fy = uv.y - (1.10 - t*1.24);       // enters above the frame, exits below it
+        // one canvas pixel, in screen-height units -- everything below is in these units
+        float pxh = 1.0/max(uRes.y, 1.0);
+        // fx is in column widths; convert to screen heights so x and y are the same scale
+        vec2 q = vec2(fx * aspect / cols + sin(t*6.0 + h3*6.283)*0.018, fy);
+        float spin = uTime*(1.6 + h3*2.8) + h1*6.283;
+        vec2 rq = vec2(q.x*cos(spin) - q.y*sin(spin), q.x*sin(spin) + q.y*cos(spin));
+        float aw = 0.010 + h2*0.006;                          // long axis, varied
+        float ah = max(0.0032 + 0.0040*abs(sin(spin)), pxh*2.0); // thin axis, never sub-pixel
+        float e  = pxh;                                       // one pixel of antialiased edge
+        float fl = smoothstep(aw+e, aw-e, abs(rq.x)) * smoothstep(ah+e, ah-e, abs(rq.y));
+        float life = smoothstep(0.0, 0.06, t) * smoothstep(1.0, 0.88, t);
+        acc += mix(vec3(1.0, 0.82, 0.35), accent, step(0.6, h3)) * fl * life;
+      }
+    }
+    return acc;
+  }
+
   // The whole light rig evaluated at a point. Pulled into a function so the WET FLOOR can
   // evaluate it a second time at the mirrored position — an actual reflection rather than a
   // painted-on gradient.
@@ -524,30 +575,7 @@ export const thermalFrag = /* glsl */ `
     // point here (foil, not dust), but they're small and rotated so they never read as the grid
     // they came from. Rides its own slow envelope so the fall outlasts the drop itself.
     if (uConfetti > 0.01) {
-      vec2 cg = vec2(uv.x * 34.0, uv.y * 20.0);
-      vec2 cid = floor(cg);
-      float r1 = hash(cid), r2 = hash(cid + 3.7), r3 = hash(cid + 9.1);
-      float fall = fract(r1 + uTime * (0.16 + r2 * 0.24));
-      vec2 f = fract(cg) - vec2(0.5 + (r2 - 0.5) * 0.6, 1.0 - fall);
-      float spin = uTime * (1.4 + r3 * 2.6) + r1 * 6.28;
-      vec2 rf = vec2(f.x * cos(spin) - f.y * sin(spin), f.x * sin(spin) + f.y * cos(spin));
-      // A thin flake: wide in one axis, nearly flat in the other, so it flickers edge-on as it spins.
-      // ANTI-ALIASED, and it has to be: the flake is about 3.5 x 1.2 CANVAS pixels and it is ROTATED,
-      // and a rotated hard-edged rectangle a pixel or two thick is the worst aliasing case there is --
-      // step() gave it binary edges, so it staircased and strobed instead of tumbling. The edge width
-      // is one cell-space pixel, and the thin axis is floored so a flake seen edge-on never becomes
-      // thinner than a pixel (which is what made them vanish and flicker rather than turn).
-      // cpx is EXACTLY ONE CANVAS PIXEL expressed in cell units, so every number below is in pixels.
-      // The first pass floored the thin axis at 0.75 of a pixel, which is still sub-pixel and still
-      // aliases -- that is the residual "confetti is pretty pixelated". A flake seen edge-on now never
-      // goes below 2 pixels, and the anti-aliased edge is a full pixel rather than 0.9 of one.
-      float cpx = max(34.0/max(uRes.x,1.0), 20.0/max(uRes.y,1.0));
-      float ax = 0.085;
-      float ay = max(0.028 + 0.03 * abs(sin(spin)), cpx*2.0);
-      float e = cpx * 1.0;
-      float flake = smoothstep(ax + e, ax - e, abs(rf.x)) * smoothstep(ay + e, ay - e, abs(rf.y));
-      vec3 gold = mix(vec3(1.0, 0.82, 0.35), uAccent, step(0.65, r3));
-      col += gold * flake * uConfetti * (0.55 + uBeat * 0.4);
+      col += confetti(uv, aspect, 0.34, uAccent) * uConfetti * (0.55 + uBeat * 0.4);
     }
     // DROP = pyro. Rays fire out of the middle for the length of the release.
     //

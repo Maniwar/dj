@@ -22,7 +22,24 @@ const FREQ_BINS = 64
 // upscaled by the compositor. That trade is nearly invisible here specifically because this
 // layer is beams, bloom and haze — soft, low-frequency content with no fine detail or text to
 // lose. It is the one way to keep a 4K display smooth WITHOUT cutting any of the visuals.
-const PIXEL_BUDGET = 2_300_000 // ≈ 1920x1200 worth of shader work
+// RENDER NATIVE FIRST, and let the tier system take it back if the GPU cannot hold it.
+//
+// This was 2_300_000 -- about 1920x1200 of shader work -- which meant any viewport bigger than that
+// rendered the rig BELOW display resolution and upscaled it. A 3742x1358 screen is 5.1Mpx, so it
+// landed at 0.67 linear scale, and the whole effects layer was soft by construction: reported as
+// "the entire fx layer still looks very low resolution", which it was. Every per-effect pixel floor
+// added around this file fixes ALIASING; none of them can make an upscaled buffer sharp.
+//
+// 5_500_000 covers a 5.1Mpx panel at scale 1.0, so DPR-1 displays up to about 3800x1400 now render
+// the rig at native resolution. `Math.min(dpr, fit)` still prevents supersampling beyond the device's
+// own pixels, and MAX_SCALE still caps retina.
+//
+// THE COST IS REAL: on that 3742x1358 screen this is 5.1Mpx of fragment work per frame instead of
+// 2.3Mpx, i.e. 2.2x. It is safe to ask for because asking is reversible -- applyScale multiplies by
+// TIERS[], and the sampler below steps the tier down after two slow-frame strikes, so a GPU that
+// cannot hold native simply drops to 0.8, 0.65 or 0.5 of it within a few seconds. A budget that is
+// too LOW has no such feedback: it just renders soft forever on hardware that had headroom to spare.
+const PIXEL_BUDGET = 5_500_000
 const MIN_SCALE = 0.55 // never go so soft that the beams smear
 const MAX_SCALE = 1.4
 
