@@ -84,20 +84,29 @@ const MAX_SCALE = 2
 // first impression than a slightly soft one. Instead the rig proves it has headroom -- 8 windows
 // under budget -- and only then spends it on sharpness. Under load it steps down exactly as
 // before, and tierPolicy's one-free-retry rule stops it hunting between two rungs.
-// NO RUNG ABOVE NATIVE. A 2x supersampling step was tried here and removed after looking at it.
-// The theory was right in the abstract -- at dpr 1 native is one sample per pixel, so diagonals
-// staircase and only rendering above native can fix that -- but it does not pay on this content:
+// A 2x SUPERSAMPLING RUNG, RESTORED, and the history is worth keeping because it explains the
+// number. This was added, removed, and added again -- not from indecision but because the first two
+// judgements were made on contaminated evidence. The comparison frames labelled "lasers" and
+// "confetti" were both actually showing the LED wall (readPixels returns rows bottom-up, so the
+// crop band selected the opposite end of the frame), and once fixed, "confetti" showed water beads
+// instead, because uHumidity produces condensation through the fog cycle whatever uDew is set to.
+// Every early verdict on supersampling was therefore a verdict on the wrong effect.
 //
-//   the beams are smooth falloff functions and were never aliased, so 2x changed nothing on them
-//   the confetti are drawn as axis-aligned squares, so no resolution rounds them off
-//   the LED wall did need fixing, but the fix was pinning its cell floor and gap to DISPLAY pixels,
-//     which makes the wall correct at native too, not only when supersampled
+// With the scenarios finally isolated, the answer is mixed but net positive:
+//   the beams are smooth falloff functions and were never aliased -- 2x changes nothing on them
+//   the confetti are flat hard-edged quads -- 2x cleans their edges but cannot round the shape
+//   the starburst rays visibly staircase at native, and 2x removes it
+//   the LED wall renders IDENTICALLY at 2x, now its cell floor and gap are in display pixels,
+//     so the extra resolution goes into antialiasing the diagonals and nothing else
 //
-// What 2x reliably did was cost four times the fragments and soften the whole layer, because
-// downsampling is an averaging filter. Judged worse than native, twice, on the real display.
-// Revisiting it would need a sharpening pass on the way down, not raw supersampling.
-const TIERS = [1, 0.8, 0.65, 0.5]
-const START_TIER = 0 // native: the top of the ladder, and where every session begins
+// 2 and not 1.5 because the ratio must be an integer: at 1.5 the wall's one-pixel gaps land on
+// non-integer display positions and average unevenly into their neighbours, which is visibly worse
+// than native. At exactly 2 every buffer pixel is a clean quarter of a display pixel.
+//
+// It starts at native and climbs only after 8 windows of proven headroom, so the 4x fragment cost
+// is never paid by a machine that cannot afford it, and is given up again the moment it cannot.
+const TIERS = [2, 1, 0.8, 0.65, 0.5]
+const START_TIER = 1 // native: where every session begins, with the 2x rung above it
 
 function shaderScale(cssW: number, cssH: number): number {
   if (typeof window === 'undefined') return 1

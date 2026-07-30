@@ -57,9 +57,12 @@ const SCENARIOS = {
   },
   confetti: {
     why: 'small bright particles, the classic case where one sample per pixel produces blocky squares',
-    // uDrop AND uDown must both stay 0. burst is `uDrop + uDown*0.38`, so zeroing only uDrop still
-    // fires the starburst at 38% and this frame stays a second, worse picture of the starburst.
-    uni: { uConfetti: 1, uBeat: 1, uLevel: 0.9, uBass: 0.8, uSong: 0.3 },
+    // THREE things have to be suppressed to see confetti on its own, and each was missed in turn:
+    // uDrop fires the starburst; uDown fires it too, at 38%, since burst is `uDrop + uDown*0.38`;
+    // and uHumidity (0.35 by default) produces condensation through the fog cycle whatever uDew is,
+    // so the frame filled with water beads instead. An effect this crowded needs its neighbours
+    // explicitly switched off, not merely left unset.
+    uni: { uConfetti: 1, uBeat: 1, uLevel: 0.9, uBass: 0.8, uSong: 0.3, uHumidity: 0 },
     band: [0.0, 0.55],
   },
 }
