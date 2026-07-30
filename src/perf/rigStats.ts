@@ -61,6 +61,19 @@ export function publishTierDebug(fast: number, failed: number[]): void {
   policy = { fast, failed: [...failed], windows: (policy?.windows ?? 0) + 1 }
 }
 
+/**
+ * Whether useFrame is still reaching the sampler at all, published EVERY frame.
+ *
+ * The window counter froze at 7 while the effects carried on looking alive, which is the signature
+ * of the idle return: it skips the uniform update but not the draw, so a frozen rig is visually
+ * indistinguishable from a running one. `windows` alone cannot tell "the sampler stopped" from "the
+ * sampler is running and nothing has changed", and that ambiguity cost two more round trips.
+ */
+let live: { playing: boolean; idle: number; frames: number } | null = null
+export function publishRigLive(playing: boolean, idle: number, frames: number): void {
+  live = { playing, idle, frames }
+}
+
 /** Called by ThermalRunaway whenever it recomputes the render scale. */
 export function publishRigStats(s: RigStats): void {
   stats = s
@@ -86,6 +99,7 @@ export function rigStatsLine(): string {
   const p = policy
     ? ` · climb ${policy.fast}/8 · failed [${policy.failed.join(',')}] · ${policy.windows}w`
     : ' · sampler has not run (needs audio playing)'
+  const l = live ? ` · audio ${live.playing ? 'on' : 'OFF'} · idle ${live.idle} · f${live.frames}` : ''
   const q = s.quality > 0.5 ? '' : ' · reduced passes'
-  return `rig ${s.bufferW}x${s.bufferH} @ ${s.scale.toFixed(2)}x (dpr ${s.dpr}) — ${verdict}${t}${q}${p}`
+  return `rig ${s.bufferW}x${s.bufferH} @ ${s.scale.toFixed(2)}x (dpr ${s.dpr}) — ${verdict}${t}${q}${p}${l}`
 }

@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { audioBus } from '../../audio/audioBus'
 import { ACCENTS, effectiveAccent, useSiteStore } from '../../state/useSiteStore'
-import { publishRigStats, publishTierDebug } from '../../perf/rigStats'
+import { publishRigStats, publishTierDebug, publishRigLive } from '../../perf/rigStats'
 import { tierMove, newTierState } from '../../perf/tierPolicy'
 import { fxOffClass } from '../../perf/fxClasses'
 import { usePlayerStore } from '../../state/usePlayerStore'
@@ -329,6 +329,10 @@ function Mainstage() {
     // Two frames of grace after playback stops so the beams ease out rather than freezing
     // mid-sweep, then the loop stops entirely until audio resumes. This costs nothing visually
     // and is the single largest block of avoidable GPU work on the page.
+    // Published BEFORE the return, so the panel can distinguish "the sampler stopped because the rig
+    // went idle" from "the sampler is running and nothing has changed". Those look identical from
+    // outside -- the idle path skips the uniform update but still draws, so a frozen rig looks alive.
+    publishRigLive(audioBus.playing, idle.current, acc.current.frames)
     if (!audioBus.playing) {
       idle.current++
       if (idle.current > 2) return
