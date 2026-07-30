@@ -959,7 +959,14 @@ export const thermalFrag = /* glsl */ `
     float gap = gapPx / cellPx;
     float cellY = smoothstep(gap*0.4, gap*1.4, fract(uv.y * uRes.y / cellPx));
     float cellX = smoothstep(gap*0.4, gap*1.4, fract(uv.x * uRes.x / cellPx));
-    col += wallCol * step(uv.y, lip) * cellY * cellX * (0.34 + uBeat*0.42 + uDrop*0.6);
+    // THE WALL LIGHTS THE ROOM TOO, at a fraction of its own brightness. It is a diffuse source, not
+    // a directional one -- a big lit surface behind the room rather than a head pointed at the lens --
+    // so it should wash the water near it rather than flare it the way a beam does. 0.30 is low
+    // deliberately: the wall covers a wide strip, so at full strength it would lift every bead in the
+    // lower third uniformly, which reads as the water glowing on its own rather than catching light.
+    vec3 wallLight = wallCol * step(uv.y, lip) * cellY * cellX * (0.34 + uBeat*0.42 + uDrop*0.6);
+    col += wallLight;
+    beams += wallLight * 0.30;
     // soft spill of light up off the strip
     col += wallCol * step(uv.y, lip + 0.075) * smoothstep(lip + 0.075, lip, uv.y) * (0.05 + uLevel*0.05);
 
@@ -983,7 +990,12 @@ export const thermalFrag = /* glsl */ `
       // share of the frame, so paper falling through the dark half of the shot was effectively
       // invisible -- the same mistake that hid the water. Foil catches SOME light from the room even
       // where no beam finds it.
-      col += flakes * (0.60 + lightHere * 1.9) * uConfetti * (0.55 + uBeat * 0.4);
+      vec3 flakeLight = flakes * (0.60 + lightHere * 1.9) * uConfetti * (0.55 + uBeat * 0.4);
+      col += flakeLight;
+      // Foil is a mirror, so a flake passing a drop should put a glint in it -- but each flake is a
+      // few pixels and the field is sparse, so this is a small local kick rather than a wash. 0.45,
+      // and only where a flake actually is, which is what keeps it from reading as ambient haze.
+      beams += flakeLight * 0.45;
     }
     // DROP = pyro. Rays fire out of the middle for the length of the release.
     //
