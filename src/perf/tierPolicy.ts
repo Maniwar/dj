@@ -57,8 +57,21 @@ export const WINDOWS_TO_CLIMB = 8
  * dropping and climbing rather than a single line to oscillate across.
  */
 export const HEADROOM = 0.84
-/** A tier that has failed this many times is never offered again this session. */
+/** A tier that has failed this many times is not offered again until headroom earns it back. */
 export const MAX_RETRIES = 2
+/**
+ * Windows of unbroken headroom that FORGIVE one past failure.
+ *
+ * Without this the retry budget is spent permanently, and a single bad spell strands a fast machine
+ * at the bottom tier for the whole session. Observed exactly that way: 59fps, p50 and p95 both 17ms
+ * -- a machine comfortably hitting vsync -- pinned at tier 4 and rendering 55% of native. Walking
+ * down four tiers in one bad moment marks every tier failed once, so each has a single retry left,
+ * and one more hiccup at any rung locks the bottom in.
+ *
+ * 30 windows is roughly ten seconds of sustained comfort, far longer than any transient, so a
+ * genuinely slow machine never earns credit back while a briefly-disturbed fast one always does.
+ */
+export const FORGIVE_AFTER = 30
 
 export function newTierState(tierCount: number): TierState {
   return { strikes: 0, fast: 0, failed: new Array(tierCount).fill(0) }
@@ -103,9 +116,17 @@ export function tierMove(
   }
 
   st.fast++
-  if (st.fast >= WINDOWS_TO_CLIMB && tier > 0 && (st.failed[tier - 1] ?? 0) < MAX_RETRIES) {
-    st.fast = 0
-    return 'up'
+  if (st.fast >= WINDOWS_TO_CLIMB && tier > 0) {
+    if ((st.failed[tier - 1] ?? 0) < MAX_RETRIES) {
+      st.fast = 0
+      return 'up'
+    }
+    // Blocked by the retry budget. Keep counting: if the machine stays comfortable far longer than
+    // any transient lasts, the evidence that it failed here is stale and one failure is forgiven.
+    if (st.fast >= FORGIVE_AFTER) {
+      st.failed[tier - 1] = Math.max(0, (st.failed[tier - 1] ?? 0) - 1)
+      st.fast = 0
+    }
   }
   return 'hold'
 }

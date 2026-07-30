@@ -81,10 +81,29 @@ console.log('\nCONVERGENCE — the property that stops it oscillating forever')
     seen.push(tier)
   }
   check('settles at tier 1 rather than sawtoothing between 0 and 1 forever', tier, 1)
-  const lastFifty = new Set(seen.slice(-50))
-  check('and it is genuinely settled — no tier changes in the last 50 windows',
-    [...lastFifty], [1])
+  // NOT "never moves again". Forgiveness deliberately re-offers a tier after a long stretch of
+  // headroom, because the alternative stranded fast machines at the bottom for a whole session.
+  // What convergence means now is that retries are RARE -- the rig spends its time at the best
+  // sustainable tier and dips above it occasionally, rather than hunting every few seconds.
+  const atOne = seen.filter(t => t === 1).length / seen.length
+  check('and it is settled in practice — at the sustainable tier for >90% of windows',
+    atOne > 0.9, true)
   check('tier 0 was tried exactly twice before being retired', st.failed[0], 2)
+}
+
+console.log('\nFORGIVENESS — a fast machine must not be stranded by a bad spell')
+check('a machine pinned at the bottom with its retries spent still climbs back given time',
+  run([...rep(40, 2), ...rep(5, 400)], MAX).tier, 0)
+{
+  // The counterpart: a machine that really cannot hold tier 0 must still settle, not oscillate.
+  const st = newTierState(MAX + 1)
+  let tier = 0, moves = 0
+  for (let i = 0; i < 3000; i++) {
+    const m = tierMove(tier === 0 ? 40 : 5, tier, MAX, SLOW, st)
+    if (m === 'down') { tier++; moves++ } else if (m === 'up') { tier--; moves++ }
+  }
+  check('it still converges — forgiveness costs a rare retry, not constant hunting', tier, 1)
+  check('and that retrying stays rare over 3000 windows', moves < 250, true)
 }
 
 console.log('\nEDGES')
