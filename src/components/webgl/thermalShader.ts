@@ -109,20 +109,30 @@ export const thermalFrag = /* glsl */ `
         // field read as one repeated ring rather than as condensation. Squared, so the distribution
         // is mostly small beads with a few large ones -- which is how water actually beads on glass.
         float rnd2 = hash(id*1.7 + float(layer)*11.3 + 4.2);
+        // A BEAD HAS A LIFE, and this is what was missing: drip only moved it within its cell and
+        // wrapped, so a bead once formed was drawn forever. Reported as "they just stay there the whole
+        // time and don't disappear ever". Condensation forms, sits, and evaporates -- and then that
+        // patch of glass is dry for a while before it beads again.
+        // Phases across one cycle: form over the first 8%, hold to 42%, evaporate to 72%, then ABSENT
+        // for the last 28%. The phase offset is per-bead (rnd), so neighbours are at different points
+        // in their lives rather than the whole field pulsing together.
         float drip=fract(uTime*0.04+rnd*7.0);
+        float bLife = smoothstep(0.0, 0.08, drip) * smoothstep(0.72, 0.42, drip);
+        // and it SHRINKS as it goes, because an evaporating drop gets smaller, it does not just dim
+        float bShrink = 0.45 + 0.55*bLife;
         vec2 c=vec2((rnd-0.5)*0.30, 0.32-drip*0.64); // stays clear of the cell edge
         float d=length(f-c);
         // Floored PER LAYER, in pixels. The radius is in cell units and the two layers have different
         // cell sizes, so one fixed minimum cannot serve both: at grid 18 a 0.055 radius is 2.8 canvas
         // px, but on the finer grid the same number is 1.7 px and the smallest beads aliased away.
         // 2.2*s/uRes.y is 2.2 canvas pixels expressed in THIS layer's cell units.
-        float rad = max(0.055 + rnd2*rnd2*0.21, 2.2 * s / max(uRes.y, 1.0));
+        float rad = max((0.055 + rnd2*rnd2*0.21) * bShrink, 2.2 * s / max(uRes.y, 1.0));
         // A drop is a lens: it refracts at the edge and is nearly clear through the middle. The rim
         // carries the read and is deliberately SOFT -- a hard ring reads as a bubble outline, which
         // is what the first attempt at this looked like.
         float body = smoothstep(rad, rad*0.35, d) * 0.18;
         float rim  = (smoothstep(rad*1.06, rad*0.78, d) - smoothstep(rad*0.78, rad*0.40, d)) * 0.8;
-        acc += body + max(rim, 0.0);
+        acc += (body + max(rim, 0.0)) * bLife;
       }
     }
     return clamp(acc,0.0,1.0);
@@ -607,7 +617,13 @@ export const thermalFrag = /* glsl */ `
     // No longer gated off entirely at low quality -- droplets() drops its second layer instead. The
     // density is raised a little when the cheap path is active so one layer still reads as wet glass
     // rather than as a handful of stray dots.
-    float beads = droplets(uv, (0.03 + uHumidity*0.20) * (uQuality > 0.5 ? 1.0 : 1.45));
+    // THE GLASS CAN BE DRY. The density used to be 0.03 + uHumidity*0.20, which never reaches zero --
+    // so there were always beads somewhere no matter how cool and dry the rig got, and "there should be
+    // a time there is none" was impossible. Now it is a threshold: below about 30% RH the glass is
+    // clear, and it beads up as the room gets muggier. Combined with each bead's own life cycle, the
+    // condensation genuinely comes and goes with the thermals instead of being permanent scenery.
+    float wetness = smoothstep(0.30, 0.78, uHumidity);
+    float beads = droplets(uv, wetness * 0.26 * (uQuality > 0.5 ? 1.0 : 1.45));
     col += vec3(0.8,0.9,1.0) * beads * 0.44;
 
     // ---- LIQUID COOLING: WATER ON THE LENS ----
