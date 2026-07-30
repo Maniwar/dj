@@ -705,14 +705,62 @@ export const thermalFrag = /* glsl */ `
     // its own rig: a different fan spread, a different sweep rate, and a different phase — the
     // way a lighting designer would program each track rather than running one look all night.
     // It's deterministic, so a song always looks like itself.
+    // ---- THE WATER IS COMPUTED BEFORE THE LIGHT, SO THE LIGHT CAN BEND THROUGH IT ----
+    // These two blocks used to sit ~400 lines below, after the rig had already been drawn, which is
+    // why only the FOOTAGE refracted: uBackdrop is a texture and can be re-sampled at an offset for
+    // the price of one lookup, but the rig is procedural, so by the time the displacement existed the
+    // beams were long since drawn straight.
+    //
+    // The first attempt kept the order and added a second rig() evaluation at the displaced position,
+    // emitting max(bent - straight, 0). That was wrong twice over. It only covered rig() -- the
+    // starburst and the cursor light are separate blocks -- and adding the positive difference does
+    // not BEND anything: the straight beam is still drawn underneath at full strength, so a drop over
+    // a laser got a faint one-sided flare and read as nothing happening. I had carried over the
+    // "screen blend can only ADD" rule from the footage pass, but that rule governs compositing the
+    // CANVAS over the video; inside the shader, col is ours to draw whatever we like into.
+    //
+    // So the displacement is applied to p itself, once, here. Everything downstream that works in
+    // p-space -- the beams, the volumetric shafts, the starburst, the cursor light -- is refracted by
+    // construction, for one vector add rather than a second evaluation of the most expensive function
+    // in the file. The beads and runners themselves are drawn from uv and are unaffected, which is
+    // correct: a drop does not distort itself.
+    float fogPh = fract(uTime * 0.018);
+    float fog = smoothstep(0.05, 0.30, fogPh) * smoothstep(1.0, 0.75, fogPh);
+    // THRESHOLD MOVED DOWN TO WHERE THE RIG ACTUALLY RUNS. 0.30-0.78 was chosen so the glass could
+    // be genuinely dry, and it achieves that -- but the thermal sim sits at 44-48% RH through normal
+    // play, which lands at 0.23 of full wetness, a quarter strength. Combined with the fog cycle
+    // multiplying it down further for part of every 56s, there was often almost no water on screen at
+    // all. 0.10-0.50 keeps a real dry state below ~15% RH while making ordinary humidity properly wet.
+    float wetness = fog * smoothstep(0.10, 0.50, uHumidity);
+    vec2 beadDisp;
+    // DENSITY RAISED, because the problem was never brightness. Measured with the beams zeroed, a
+    // single drop peaks at 0.465 and lifts a dark part of the frame by 0.418 -- plenty. Only 2.5% of
+    // pixels had any water on them at all, so on a busy shot you had to hunt for it. The headroom is
+    // enormous: at that coverage the water contributes about 0.01 of mean lift, against the 0.387 of
+    // the dew wash that caused the milky problem, so this can roughly double without going near it.
+    // The runner density is computed HERE, above the beads, because droplets() needs it to ask
+    // whether a runner has swept a given bead. One expression feeding both passes, rather than a
+    // uniform duplicating it on the CPU -- the absorption test has to be the same maths that draws
+    // the runner or beads would vanish under drops that are not there.
+    float wet = clamp((uHumidity*0.60 + uDew*0.80) * max(fog, uDew*0.7), 0.0, 1.0);
+    float runAmount = 0.20 + wet*0.46;
+    // Derived ONCE per pixel and handed to droplets(), rather than four times inside its loops.
+    float bLane0; float bRy0 = runnerHeadY(uv.x, 0.0, runAmount, bLane0);
+    float bLane1; float bRy1 = runnerHeadY(uv.x, 1.0, runAmount, bLane1);
+    float beads = droplets(uv, aspect, wetness * 0.78 * (uQuality > 0.5 ? 1.0 : 1.45), runAmount,
+                           bRy0, bLane0, bRy1, bLane1, beadDisp);
+    vec2 runDisp;
+    float run = runners(uv, runAmount, bRy0, bLane0, runDisp);
+
+    // uv-space displacement into p-space: x carries the aspect correction that p does.
+    vec2 wdisp = beadDisp + runDisp;
+    p += vec2(wdisp.x * aspect, wdisp.y) * 0.9;
+
     float sweep = uBar * 6.2831853 * (1.0 + floor(uSong*3.0)*0.5) + uSong*6.283;
     float fan = (0.26 + uSong*0.22) + uBuild*0.22 + uDown*0.16;
     // Flat rig for the sharp beam cores (and the whole rig on phones); the volumetric heads add
     // the depth on top. Together: crisp beams that also occupy real space.
     vec3 beams = rig(p, sweep, fan, uPattern);
-    // Kept before the volumetric is folded in, because the refraction pass below needs the rig as it
-    // was at THIS pixel to difference against. beams stops being that one line later.
-    vec3 rigStraight = beams;
     col += beams * (uQuality > 0.5 ? 0.72 : 1.0);
     if (uQuality > 0.5) {
       vec3 vol = volumetric(p, sweep);
@@ -1061,31 +1109,6 @@ export const thermalFrag = /* glsl */ `
     // This is the missing global term -- the lens fogs, beads and runs, then dries out completely
     // before it starts again. ~55s period with roughly 14s of clear glass at the end of each one,
     // which is also just how a cold lens in a hot room behaves.
-    float fogPh = fract(uTime * 0.018);
-    float fog = smoothstep(0.05, 0.30, fogPh) * smoothstep(1.0, 0.75, fogPh);
-    // THRESHOLD MOVED DOWN TO WHERE THE RIG ACTUALLY RUNS. 0.30-0.78 was chosen so the glass could
-    // be genuinely dry, and it achieves that -- but the thermal sim sits at 44-48% RH through normal
-    // play, which lands at 0.23 of full wetness, a quarter strength. Combined with the fog cycle
-    // multiplying it down further for part of every 56s, there was often almost no water on screen at
-    // all. 0.10-0.50 keeps a real dry state below ~15% RH while making ordinary humidity properly wet.
-    float wetness = fog * smoothstep(0.10, 0.50, uHumidity);
-    vec2 beadDisp;
-    // DENSITY RAISED, because the problem was never brightness. Measured with the beams zeroed, a
-    // single drop peaks at 0.465 and lifts a dark part of the frame by 0.418 -- plenty. Only 2.5% of
-    // pixels had any water on them at all, so on a busy shot you had to hunt for it. The headroom is
-    // enormous: at that coverage the water contributes about 0.01 of mean lift, against the 0.387 of
-    // the dew wash that caused the milky problem, so this can roughly double without going near it.
-    // The runner density is computed HERE, above the beads, because droplets() needs it to ask
-    // whether a runner has swept a given bead. One expression feeding both passes, rather than a
-    // uniform duplicating it on the CPU -- the absorption test has to be the same maths that draws
-    // the runner or beads would vanish under drops that are not there.
-    float wet = clamp((uHumidity*0.60 + uDew*0.80) * max(fog, uDew*0.7), 0.0, 1.0);
-    float runAmount = 0.20 + wet*0.46;
-    // Derived ONCE per pixel and handed to droplets(), rather than four times inside its loops.
-    float bLane0; float bRy0 = runnerHeadY(uv.x, 0.0, runAmount, bLane0);
-    float bLane1; float bRy1 = runnerHeadY(uv.x, 1.0, runAmount, bLane1);
-    float beads = droplets(uv, aspect, wetness * 0.78 * (uQuality > 0.5 ? 1.0 : 1.45), runAmount,
-                           bRy0, bLane0, bRy1, bLane1, beadDisp);
     // Water catches the light too. A droplet is a lens: in the dark it is nearly invisible, and when
     // a beam crosses it, it lights up. Same lookup as the confetti -- the field is already computed.
     // SELF-LIGHT RESTORED. Making the water beam-lit was right, but I took the self term from 0.44 to
@@ -1110,8 +1133,6 @@ export const thermalFrag = /* glsl */ `
     // at these numbers was tuned as though the old cost still applied and the water was invisible.
     // Gated by the same fog cycle as the beads. Runners drying on a different schedule would leave
     // water streaking down a lens that had just been declared clear.
-    vec2 runDisp;
-    float run = runners(uv, runAmount, bRy0, bLane0, runDisp);
     // Dimmer as well as softer. 0.34 was set when the runners were barely visible at all, before the
     // edges were sharpened; sharpened AND at that gain they read as bright white lines drawn over the
     // footage. Soft edges plus a lower gain is what water on glass looks like against a dark scene.
@@ -1128,40 +1149,15 @@ export const thermalFrag = /* glsl */ `
     // is lensing that genuinely tracks the footage -- a drop passing over a laser in the picture
     // flares, one over a dark jacket stays quiet -- rather than a painted-on highlight that looks the
     // same over everything.
-    // The raw displacement, kept separate from the video's. uRefract gates the FOOTAGE pass because
-    // it reports whether there is a frame to sample at all -- it is 0 on stills and with video off.
-    // The rig is procedural and needs no texture, so gating the beam pass on it would have meant the
-    // lasers bend only while a video happens to be playing and go rigid the moment a still comes up.
-    vec2 wdisp = beadDisp + runDisp;
+    // uRefract gates the FOOTAGE pass only: it reports whether there is a frame to sample at all,
+    // and is 0 on stills and with video off. The rig needs no texture, so its refraction above is
+    // deliberately NOT gated on it -- otherwise the lasers would bend only while a clip happened to
+    // be playing and go rigid the moment a still came up.
     vec2 duv = wdisp * uRefract;
     if (uRefract > 0.001) {
       vec3 behind = texture2D(uBackdrop, uv + duv).rgb;
       vec3 straight = texture2D(uBackdrop, uv).rgb;
       col += max(behind - straight, vec3(0.0)) * 1.6;
-    }
-
-    // ---- AND THE LIGHT RIG BENDS TOO ----
-    // The footage refracted and the beams did not, so a drop sitting on a laser bent the picture
-    // behind the beam while leaving the beam itself ruler-straight -- water on top of a photograph of
-    // a light rather than water in front of a light. The beams are the highest-contrast thing on the
-    // screen, so they are exactly where a lens would read most.
-    //
-    // The rig is procedural, so there is no buffer to re-sample the way uBackdrop is; "what does the
-    // beam look like three pixels over" means evaluating rig() again. Hence the guard: only pixels
-    // that actually carry displacement pay for it, which is a few percent of the frame, and dry
-    // frames skip it entirely. The alternative -- hoisting droplets() and runners() 400 lines above
-    // rig() so the UV could be perturbed once, for free -- is the cheaper design, but it reorders the
-    // middle of the shader and GLSL is not type-checked by the build.
-    //
-    // Same honesty as the footage pass: screen blend can only ADD, so this emits the positive
-    // difference rather than substituting. A drop over a beam flares where the bent light is
-    // brighter, and stays quiet where it is not.
-    float dmag = dot(wdisp, wdisp);
-    if (dmag > 1e-9) {
-      // wdisp is in uv space; p is aspect-corrected, so x has to be scaled to match.
-      vec2 dp = vec2(wdisp.x * aspect, wdisp.y) * 0.55;
-      vec3 bent = rig(p + dp, sweep, fan, uPattern);
-      col += max(bent - rigStraight, vec3(0.0)) * 0.9;
     }
 
     // overclock shimmer
