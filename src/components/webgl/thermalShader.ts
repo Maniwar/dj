@@ -103,7 +103,14 @@ export const thermalFrag = /* glsl */ `
       float s = 18.0*(1.0+float(layer)*0.65);
       vec2 gv=uv*s; vec2 id=floor(gv); vec2 f=fract(gv)-0.5;
       float rnd=hash(id+float(layer)*31.7);
-      if(rnd>1.0-density){
+      // A SOFT PRESENCE RAMP, not a binary test. the old if (rnd > 1.0 - density) is a hard threshold, and
+      // the fog cycle moves density continuously -- so as the lens dried, each bead's hash crossed
+      // the line and it popped out of existence in a single frame. Reported as "droplets just blink
+      // away instead of fading and evaporating", which is precisely what a step function does when you
+      // sweep it. Now a bead near the threshold FADES as the glass dries, over a 0.12-wide band of
+      // density. The early-out is kept so beads that are fully absent still cost nothing.
+      float pres = smoothstep(1.0 - density, 1.0 - density + 0.12, rnd);
+      if(pres > 0.002){
         // A SECOND, INDEPENDENT HASH FOR SIZE. Deriving radius from rnd tied a bead's size to
         // whether it existed at all, so every bead in a layer landed in the same narrow band and the
         // field read as one repeated ring rather than as condensation. Squared, so the distribution
@@ -117,9 +124,13 @@ export const thermalFrag = /* glsl */ `
         // for the last 28%. The phase offset is per-bead (rnd), so neighbours are at different points
         // in their lives rather than the whole field pulsing together.
         float drip=fract(uTime*0.04+rnd*7.0);
-        float bLife = smoothstep(0.0, 0.08, drip) * smoothstep(0.72, 0.42, drip);
-        // and it SHRINKS as it goes, because an evaporating drop gets smaller, it does not just dim
-        float bShrink = 0.45 + 0.55*bLife;
+        // A LONGER, GENTLER EVAPORATION. The hold used to end at 0.42 and the bead was gone by 0.72;
+        // it now holds to 0.34 and takes until 0.80 to vanish -- about 11.5s of a 25s cycle spent
+        // visibly drying rather than 7.5s.
+        float bLife = smoothstep(0.0, 0.10, drip) * smoothstep(0.80, 0.34, drip);
+        // and it SHRINKS as it goes, because an evaporating drop gets smaller, it does not just dim.
+        // Down to 0.18 rather than 0.45, so it visibly dwindles to almost nothing before it is gone.
+        float bShrink = 0.18 + 0.82*bLife;
         vec2 c=vec2((rnd-0.5)*0.30, 0.32-drip*0.64); // stays clear of the cell edge
         // ISOTROPIC DISTANCE. gv = uv*s makes each cell (uRes.x/s) x (uRes.y/s) PIXELS, which is not
         // square -- 36x23 at a 660x420 render -- so length(f-c) was measuring in a stretched space and
@@ -130,7 +141,12 @@ export const thermalFrag = /* glsl */ `
         // cell sizes, so one fixed minimum cannot serve both: at grid 18 a 0.055 radius is 2.8 canvas
         // px, but on the finer grid the same number is 1.7 px and the smallest beads aliased away.
         // 2.2*s/uRes.y is 2.2 canvas pixels expressed in THIS layer's cell units.
-        float rad = max((0.055 + rnd2*rnd2*0.21) * bShrink, 2.2 * s / max(uRes.y, 1.0));
+        // The pixel floor applies to the bead's FULL size, and the shrink is allowed to take it below
+        // that on the way out. Flooring the shrunk value instead pinned every evaporating bead at
+        // 2.2px and it stopped shrinking -- so it dimmed at a fixed size, which is not what drying
+        // looks like. Going sub-pixel is fine here because bLife is fading it out at the same time.
+        float radFull = max(0.055 + rnd2*rnd2*0.21, 2.2 * s / max(uRes.y, 1.0));
+        float rad = radFull * bShrink;
         // A drop is a lens: it refracts at the edge and is nearly clear through the middle. The rim
         // carries the read and is deliberately SOFT -- a hard ring reads as a bubble outline, which
         // is what the first attempt at this looked like.
@@ -154,7 +170,7 @@ export const thermalFrag = /* glsl */ `
         float rim  = (smoothstep(rad*1.04, rad*0.84, d) - smoothstep(rad*0.84, rad*0.55, d)) * 0.46;
         // Offset up-left, consistent for every bead, because one room has one key light.
         float spec = smoothstep(rad*0.34, 0.0, length(((f - c) - vec2(-0.30, 0.30)*rad)*vec2(aspect,1.0))) * 0.85;
-        acc += (body + max(rim, 0.0) + spec) * bLife;
+        acc += (body + max(rim, 0.0) + spec) * bLife * pres;
       }
     }
     return clamp(acc,0.0,1.0);
@@ -593,7 +609,14 @@ export const thermalFrag = /* glsl */ `
     // into stripes and moire. That is exactly what "not squares pattern at times" was: the fine mode
     // at 3 display px times a 0.67 render scale is 2.01, landing on the old floor. Reported and
     // measured. At 5 the samples are [0.00, 0.20, 0.40, 0.60, 0.80] and a square reads properly.
-    float cellPx = max(cellDisplayPx * uPxScale, 5.0);
+    // SNAPPED TO WHOLE PIXELS. This was a float, and that is why the wall was sharp at some cell
+    // sizes and mushy at others: fract(uv.y * uRes.y / cellPx) only lands on pixel boundaries when
+    // cellPx is an integer. At 5.3 or 7.4 the cell edges fall mid-pixel, so the 1px gap renders as 1px
+    // in some rows and 2px in others and the whole grid beats against the pixel lattice -- a moire that
+    // changes every time uPattern cycles the size. Reported as "sometimes the led still produce the
+    // wrong pattern, sometimes it looks sharp other times not", which is exactly what a non-integer
+    // grid does. floor(x + 0.5) rather than a round() call, which GLSL ES 1.0 does not have.
+    float cellPx = max(floor(cellDisplayPx * uPxScale + 0.5), 5.0);
     // The gap is ONE canvas pixel wide whatever the cell size, instead of a fixed 0.12-0.40 fraction
     // that got narrower in absolute terms as cells grew and vanished as they shrank.
     float gap = 1.0 / cellPx;
@@ -675,7 +698,17 @@ export const thermalFrag = /* glsl */ `
       float w = max(k * apx * 1.2, 0.012);                    // footprint of sa across one pixel
       float rays = smoothstep(1.0 - w, 1.0, sa);
       rays *= rays;                                           // tighten the core without hard edges
-      float reach = (1.0 - smoothstep(0.05, 0.82, r)) * smoothstep(0.0, 0.035, r);
+      // PER-RAY VARIATION. Thirty-two identical rays read as a test pattern rather than as pyro --
+      // visible immediately at 3x magnification. Each ray gets a stable brightness from its own index,
+      // so some punch and some are faint, and the set is reseeded per song so a track's burst is its
+      // own. The index is derived from the same angle the rays are, so it cannot drift out of step.
+      float rayId = floor((ang * k) / 3.14159265 + 0.5);
+      rays *= 0.45 + 0.75 * hash(vec2(rayId, floor(uSong * 8.0) + 3.0));
+      // The inner term only exists to avoid a singularity where every ray converges. At 0.035 of the
+      // frame height that is a 27px DARK HOLE at the convergence point, which magnification showed as
+      // an obvious blob. 0.010 is enough to keep the centre from saturating without punching a hole in
+      // the middle of the effect.
+      float reach = (1.0 - smoothstep(0.05, 0.82, r)) * smoothstep(0.0, 0.010, r);
       // 0.66 rather than 0.80. Ablation on a standalone drop render put this one effect at 19% of the
       // remaining drop wash, and -- more to the point -- at MOST of the clipping: removing it takes
       // blown pixels from 4.99% to 1.22%. The rays are what saturate, because they land on a frame where
