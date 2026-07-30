@@ -1089,7 +1089,16 @@ export const thermalFrag = /* glsl */ `
       // footage underneath is composited with mix-blend-mode: screen, which cannot darken, so a
       // flake will never block the video itself. Against the wall, which is what was reported, it
       // works properly.
-      col *= 1.0 - clamp(flakeCover, 0.0, 1.0) * 0.88 * uConfetti;
+      // OPACITY IS NOT PROPORTIONAL TO HOW MUCH CONFETTI IS FALLING. This was scaled by uConfetti,
+      // which peaks at 0.6 in the ambient swell, so a flake blocked at most 53% of what was behind
+      // it -- and a near-saturated LED wall showing through at 47% still dominates, which is why it
+      // went on reading as being behind the wall. A flake that exists is opaque card; uConfetti
+      // governs how many are falling and how brightly they are lit, not whether paper is see-through.
+      //
+      // Gated rather than scaled: smoothstep reaches full occlusion as soon as confetti is
+      // meaningfully present, and returns to zero during the clear phase of the cycle so invisible
+      // flakes cannot punch dark holes in the wall.
+      col *= 1.0 - clamp(flakeCover, 0.0, 1.0) * 0.95 * smoothstep(0.0, 0.12, uConfetti);
       vec3 flakeLight = flakes * (0.60 + lightHere * 1.9) * uConfetti * (0.78 + uBeat * 0.32);
       col += flakeLight;
       // Foil is a mirror, so a flake passing a drop should put a glint in it -- but each flake is a
