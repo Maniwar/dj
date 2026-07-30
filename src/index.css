@@ -1433,7 +1433,26 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      dissolve INTO -- the same thing the side columns do past 2.5:1. .lore-fill stays display:none:
      the blurred 8x-upscaled copy is what caused the flicker on the hero slides, and the Broadcast
      behind is a better ground than a blurred copy of the slide itself. */
-  .lore-stop { background: transparent; }
+  /* A STATIC GROUND, not transparent and not flat black.
+     Transparent is what opened the bars up to the club, and it is also what let the Broadcast's four
+     animating overlays stop being occluded -- which is the flicker. Flat #06070c is what it was
+     before, and that had no flicker but read as dead space.
+     So: an opaque ground that is interesting by itself. Two gradients, both static -- no blend mode,
+     no animation, no variable -- so this is one paint at layout time and nothing per frame, and it
+     restores occlusion for everything behind it. The bars get depth and a hint of stage haze, and
+     the band's feather has something real to dissolve INTO, which is what bandFeather needs to read
+     at all. */
+  .lore-stop {
+    /* The colour is stated separately and on purpose: the `background` shorthand resets
+       background-color to transparent, so occlusion would rest entirely on the gradients painting.
+       This way the stop is opaque even if a gradient layer is dropped, and occlusion -- which is the
+       whole flicker fix -- cannot fail open. */
+    background-color: #06070c;
+    background-image:
+      radial-gradient(130% 95% at 50% 0%, rgba(74,34,96,0.60), rgba(10,7,20,0) 62%),
+      radial-gradient(90% 70% at 50% 100%, rgba(24,58,88,0.45), rgba(6,7,12,0) 70%),
+      linear-gradient(180deg, #0b0814 0%, #06070c 58%, #04030a 100%);
+  }
   .lore-stop[data-id='stockholm'] { --focus: center 70%; }
 
   /* the copy lines up with the frame it sits on, not with the window */
@@ -2642,18 +2661,18 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      old darkening, so deleting it would lighten the whole site. Same treatment fx-off.css gives it.
      No !important anywhere here, deliberately: these win on source order, which leaves the
      registry's fx-off rules and the diag panel still able to override them. */
-  /* NORMALISED, NOT HIDDEN -- corrected. Hiding these emptied the side bars, and that silently
-     killed the feather too: the mask fades the band edge into whatever is BEHIND it, so with the
-     bars black the dissolve was black-into-black. bandFeather was still on and had nothing to
-     dissolve into.
-     What costs the readback is the BLEND MODE, not the layer, so only the blend mode goes. All four
-     keep painting -- the bars stay lit and the feather has a backdrop again.
-     .bc-vignette is NOT listed: line 326 sets no mix-blend-mode at all, so it never caused a
-     readback and hiding it bought nothing. Restored.
-     .bc-strobe keeps its per-frame opacity, which is fine once it is not blending: an opacity change
-     on an unblended layer is a compositor-only update, no backdrop read. Same for .bc-grain's
-     grainshift, which animates background-position on a normal layer. */
-  .bc-grain, .bc-strobe, .bc-scan { mix-blend-mode: normal; }
+  /* NOTHING IS DONE TO THE BROADCAST OVERLAYS HERE ANY MORE, and the two failed attempts are worth
+     recording so they are not retried.
+     Attempt 1 hid .bc-grain/.bc-strobe/.bc-vignette. It DID stop the flicker -- it matches the
+     bisect that passed on the device -- but it emptied the side bars, and that silently killed the
+     feather too: the mask fades the band edge into whatever is behind it, so with the bars black it
+     was dissolving black into black.
+     Attempt 2 kept them and only removed the mix-blend-mode, on the theory that the backdrop
+     readback was the whole cost. The flicker came straight back on the device. So the cost is the
+     LAYERS BEING COMPOSITED AT ALL under an unoccluded stop, not merely their blend mode.
+     The fix is therefore upstream of all of this: give the stop an opaque ground again so the
+     overlays are occluded exactly as they were before the side bars were opened up -- that state had
+     no flicker -- and make that ground carry the visual interest itself. See .lore-stop below. */
 
   /* the ticker lines up with the frame too, rather than running the full window */
   .lyric-marquee { width: min(100%, calc(100svh * 2.0)); margin-inline: auto; }
