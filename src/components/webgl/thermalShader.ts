@@ -757,7 +757,12 @@ export const thermalFrag = /* glsl */ `
       // a derivatives extension under Three's default GLSL ES 1.0, so this is computed by hand.
       float ang = atan(p.y, p.x);
       float k = 16.0;
-      float sa = abs(sin(ang*k + uTime*1.6));
+      // SPIN THAT DECELERATES. It was uTime*1.6 flat, so the burst rotated at a constant rate whether
+      // it had just fired or was three seconds into its decay -- which reads as a spinning texture
+      // rather than as something that was thrown. burst is 1 at the hit and decays, so this starts
+      // fast and eases off, the way a real pyro fan does as it loses energy.
+      float spinRate = 1.0 + burst * 5.5;
+      float sa = abs(sin(ang*k + uTime*spinRate));
       float apx = (1.0 / max(uRes.y, 1.0)) / max(r, 0.012);   // radians per pixel at this radius
       // 1.2 pixels, not 1.7, and gain 0.80 rather than 1.15. Widening the band to kill the aliasing
       // also ADDS light -- most of it near the centre where the band is widest -- and the first pass
@@ -774,18 +779,34 @@ export const thermalFrag = /* glsl */ `
       // so some punch and some are faint, and the set is reseeded per song so a track's burst is its
       // own. The index is derived from the same angle the rays are, so it cannot drift out of step.
       float rayId = floor((ang * k) / 3.14159265 + 0.5);
-      rays *= 0.45 + 0.75 * hash(vec2(rayId, floor(uSong * 8.0) + 3.0));
+      float rh1 = hash(vec2(rayId, floor(uSong * 8.0) + 3.0));
+      float rh2 = hash(vec2(rayId * 1.7 + 4.3, floor(uSong * 8.0) + 11.0));
+      rays *= 0.45 + 0.75 * rh1;
+      // PER-RAY REACH. Brightness alone still left every ray the same LENGTH, which is the giveaway
+      // of a procedural fan -- real pyro throws some lances much further than others.
+      float rayReach = 0.55 + 0.85 * rh2;
       // The inner term only exists to avoid a singularity where every ray converges. At 0.035 of the
       // frame height that is a 27px DARK HOLE at the convergence point, which magnification showed as
       // an obvious blob. 0.010 is enough to keep the centre from saturating without punching a hole in
       // the middle of the effect.
-      float reach = (1.0 - smoothstep(0.05, 0.82, r)) * smoothstep(0.0, 0.010, r);
+      float reach = (1.0 - smoothstep(0.05, 0.82 * rayReach, r)) * smoothstep(0.0, 0.010, r);
       // 0.66 rather than 0.80. Ablation on a standalone drop render put this one effect at 19% of the
       // remaining drop wash, and -- more to the point -- at MOST of the clipping: removing it takes
       // blown pixels from 4.99% to 1.22%. The rays are what saturate, because they land on a frame where
       // uBeat, uBass, uSnare and uLevel are already peaking together. Trimmed rather than reshaped,
       // since the reach and the spoke count are what make it read as a starburst and both were asked for.
-      col += vec3(1.0,0.72,0.34) * rays * burst * reach * 0.66;
+      // COLOUR FROM THE ROOM, not a constant. This was a hardcoded vec3(1.0,0.72,0.34) -- fixed warm
+      // gold -- which is why it looked stuck on one colour while the LED wall, the lasers and the
+      // player's spectrum all walked the palette together. It takes uAccent now, so a burst in
+      // Dieter's cold blue reads cold and one in Ibiza gold reads gold, and each RAY leans a different
+      // amount toward the pyro white so the fan is not monochrome.
+      vec3 rayCol = mix(uAccent, vec3(1.0, 0.86, 0.52), 0.25 + 0.55 * rh1);
+      // A PULSE on the beat, so the fan breathes instead of sitting there decaying smoothly.
+      float pulse = 0.78 + 0.42 * uBeat;
+      col += rayCol * rays * burst * reach * pulse * 0.66;
+      // A HOT CORE at the convergence. Every ray meets there and the eye expects a flash; without it
+      // the middle of the burst is the dimmest part of it, which is backwards.
+      col += mix(rayCol, vec3(1.0), 0.55) * smoothstep(0.075, 0.0, r) * burst * 0.55;
     }
 
     // CONDENSATION beading over the whole "lens" — the humidity signature.
