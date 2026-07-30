@@ -1137,7 +1137,18 @@ export const thermalFrag = /* glsl */ `
       // carries the wall's glow with none of its structure, so a flake over the wall goes bright and
       // solid, and one over a dark part of the frame stays dim.
       col *= 1.0 - occ;
-      col += flakeTint * ambient * occ * 1.15;
+      // BRIGHTER OFF A BRIGHT SURFACE. Removing the cell mask from the light field fixed the grid
+      // printing through the paper, but it also cost the flakes their shine over the wall: wallLight
+      // peaked at full inside every lit cell, and wallGlow is the smoothed average, so a flake that
+      // used to catch those peaks now catches the mean. Foil is not matte -- passing in front of a
+      // wall of lights is exactly when it should flare.
+      //
+      // 1.9 rather than 1.15, and a squared term on top so the response is specular rather than
+      // linear: dim surroundings leave it near matte, a bright one makes it glint. That is the
+      // difference between paper and foil, and it comes back without reintroducing any structure,
+      // since ambient carries none.
+      col += flakeTint * ambient * occ * 1.9;
+      col += flakeTint * ambient * ambient * occ * 1.1;
       vec3 flakeLight = flakes * (0.60 + lightHere * 1.9) * uConfetti * (0.78 + uBeat * 0.32);
       col += flakeLight;
       // Foil is a mirror, so a flake passing a drop should put a glint in it -- but each flake is a
