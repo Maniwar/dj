@@ -196,8 +196,25 @@ eq('--fx reaches the ceiling', s.fx, FX_MAX_MULTIPLIER.toFixed(3))
 eq('nothing is retired at the top either', s.off, [])
 
 // ...and where it is still mounted, it fades with the dial rather than switching.
+//
+// THE MULTIPLIER IS PART OF THE CONTRACT NOW, so this asserts --fx * RIG_OPACITY rather than --fx
+// alone. `opacity: var(--fx)` was a dead control above the default dial: the multiplier is already
+// 1.0 at the shipped position of 0.6 and CSS clamps opacity at 1, so every dial position from 0.6
+// upward rendered the rig identically and the dial did nothing to it. Multiplying gives the control
+// real travel across its entire range. Keep this in step with .thermal-canvas in src/index.css --
+// they are the only two places the number appears.
+const RIG_OPACITY = 0.82
 s = await load('intensity=0.4')
-eq('the light rig fades with the dial', s.canvasOpacity, String(fxMultiplier(0.4).toFixed(3)))
+// Compared NUMERICALLY with a tolerance, not as a string. getComputedStyle returns the browser's own
+// float ("0.54694"), and calc(var(--fx) * 0.82) is evaluated at full precision -- so a toFixed(3)
+// string comparison fails on the rounding alone even when the value is exactly right.
+{
+  const want = fxMultiplier(0.4) * RIG_OPACITY
+  const got = Number(s.canvasOpacity)
+  Math.abs(got - want) < 0.002
+    ? ok('the light rig fades with the dial', `${got} ~= ${want.toFixed(4)} (--fx x ${RIG_OPACITY})`)
+    : bad('the light rig fades with the dial', `got ${got}, want ~${want.toFixed(4)}`)
+}
 
 console.log('\n--- retirement order ---')
 // Half the sweep should have retired the expensive per-pixel passes and kept the cheap composited

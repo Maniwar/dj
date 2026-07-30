@@ -87,7 +87,7 @@ export const thermalFrag = /* glsl */ `
   //   FORM. A drop is a LENS, not a dot: bright rim where it refracts, darker through the middle.
   //     That is the whole difference between "water" and "speckle", and it costs one extra
   //     smoothstep. The body is kept faint and the rim carries the read.
-  float droplets(vec2 uv, float density){
+  float droplets(vec2 uv, float aspect, float density){
     float acc=0.0;
     for(int layer=0; layer<2; layer++){
       // THE SECOND LAYER IS THE ONE THAT GETS DROPPED ON WEAK HARDWARE, not the whole effect.
@@ -121,7 +121,11 @@ export const thermalFrag = /* glsl */ `
         // and it SHRINKS as it goes, because an evaporating drop gets smaller, it does not just dim
         float bShrink = 0.45 + 0.55*bLife;
         vec2 c=vec2((rnd-0.5)*0.30, 0.32-drip*0.64); // stays clear of the cell edge
-        float d=length(f-c);
+        // ISOTROPIC DISTANCE. gv = uv*s makes each cell (uRes.x/s) x (uRes.y/s) PIXELS, which is not
+        // square -- 36x23 at a 660x420 render -- so length(f-c) was measuring in a stretched space and
+        // every bead came out a squashed ellipse. Scaling x by the aspect makes the metric match
+        // pixels, so a drop is round. Same fault the confetti had, fixed there and missed here.
+        float d=length((f-c)*vec2(aspect,1.0));
         // Floored PER LAYER, in pixels. The radius is in cell units and the two layers have different
         // cell sizes, so one fixed minimum cannot serve both: at grid 18 a 0.055 radius is 2.8 canvas
         // px, but on the finer grid the same number is 1.7 px and the smallest beads aliased away.
@@ -136,11 +140,21 @@ export const thermalFrag = /* glsl */ `
         // drawn with. Same for the rim, which spanned rad*1.06 down to rad*0.40. A real drop has a
         // hard boundary; what is soft about it is the refraction inside, not the outline.
         // epx is 2 canvas pixels in THIS layer's cell units, so both edges are 2px wherever they land.
-        float epx = 2.0 * s / max(uRes.y, 1.0);
-        float body = smoothstep(rad, rad - epx, d) * 0.16;
-        float rimR = rad * 0.82;
-        float rim  = (smoothstep(rimR + epx*1.6, rimR, d) - smoothstep(rimR, rimR - epx*1.6, d)) * 0.95;
-        acc += (body + max(rim, 0.0)) * bLife;
+        // SOFT AGAIN, deliberately. These were given 2px pixel-scale edges in the same pass as the
+        // laser cores, on the theory that "everything looks soft" applied to everything. It does not:
+        // a hard-edged bright shape does not read as water, it reads as a white sticker, and the
+        // running drops in particular came back as harsh streaks. Water's OUTLINE is defined but its
+        // interior is a lens -- the softness is the whole point. Only the lasers wanted sharpening.
+        // A DROP, NOT A RING. The rim used to carry 0.85 against a body of 0.16 -- five times the
+        // weight -- so each bead rendered as an outline and the field read as soap bubbles rather than
+        // condensation. Water on glass is a filled lens: a soft body, a brighter edge where it
+        // refracts, and a small hard SPECULAR where the light source catches it. That specular is the
+        // single thing that makes a blob read as wet, and it was missing entirely.
+        float body = smoothstep(rad, rad*0.28, d) * 0.34;
+        float rim  = (smoothstep(rad*1.04, rad*0.84, d) - smoothstep(rad*0.84, rad*0.55, d)) * 0.46;
+        // Offset up-left, consistent for every bead, because one room has one key light.
+        float spec = smoothstep(rad*0.34, 0.0, length(((f - c) - vec2(-0.30, 0.30)*rad)*vec2(aspect,1.0))) * 0.85;
+        acc += (body + max(rim, 0.0) + spec) * bLife;
       }
     }
     return clamp(acc,0.0,1.0);
@@ -203,9 +217,9 @@ export const thermalFrag = /* glsl */ `
         // pixel is (1/uRes.x)/(cols*0.06) in these units.
         float oxPx = (1.0/max(uRes.x,1.0)) / max(cols*0.06, 0.35);
         float hr = max(0.085 * sz, oxPx*2.0);
-        // Crisp edge: 2 canvas px of falloff at the boundary rather than a gradient across the whole
-        // radius, which is what made the running drops read as smudges rather than water.
-        float head = smoothstep(hr, hr - oxPx*2.0, length(vec2(ox, y*0.62)));
+        // Soft-edged, reverted. A 2px edge on a bright streak is a white line, not a drop -- see the
+        // note in droplets(). Water reads by its gradient here, not by an outline.
+        float head = smoothstep(hr, hr*0.30, length(vec2(ox, y*0.62)));
         // TRACK: wet glass BEHIND the head, i.e. above it, evaporating as it ages.
         // The old version used smoothstep(-0.01, 0.16, y), which RISES with y -- so the trail was
         // brightest at its oldest end and faded toward the drop, backwards. Now a sharp mask keeps it
@@ -216,9 +230,9 @@ export const thermalFrag = /* glsl */ `
         // The track scales with the drop but less than proportionally -- a fat drop leaves a wider
         // wet path, not a proportionally wider one. Floored at 2 canvas px like the head.
         float tw = max(0.030 * (0.60 + sz*0.40), oxPx*2.0);
-        float track = smoothstep(tw, tw - oxPx*1.6, abs(ox)) * behind * dry;
+        float track = smoothstep(tw, tw*0.25, abs(ox)) * behind * dry;
         // a couple of stragglers left along the track, so it is not a clean line
-        float bead = smoothstep(tw, tw - oxPx*1.6, length(vec2(ox, fract(y*7.0 + rnd*3.0) - 0.5)*vec2(1.0,0.55)));
+        float bead = smoothstep(tw, tw*0.30, length(vec2(ox, fract(y*7.0 + rnd*3.0) - 0.5)*vec2(1.0,0.55)));
         acc += (head + track*0.55 + bead*behind*dry*0.30) * life;
       }
     }
@@ -374,32 +388,22 @@ export const thermalFrag = /* glsl */ `
       // uDrop fattening halved: 0.02 in p units is about 18 canvas pixels of extra core on every one
       // of the eight beams at once, which ablation put at 11% of the drop wash. Halved, the beams still
       // visibly swell on the hit without the whole rig turning into a single bright mass.
-      // BEAM WIDTH, and this is why the lasers read as soft rather than sharp. w is the smoothstep
-      // edge in p units, and p.y spans 1.0 over uRes.y -- so at 1363px tall, w=0.0030 is a 4px
-      // half-width, i.e. an 8px beam. Reasonable. But uBeat*0.012 is FOUR TIMES the base, so on a
-      // full kick w reached 0.0186: a FIFTY pixel core, six times wider, with a halo nine times
-      // wider again. Beats are near-continuous in this music, so the beams spent most of their life
-      // as fat diffuse bands. No render scale fixes that -- it is the geometry.
-      // The beat still widens them, just by about 2x rather than 6x, so a kick reads as a pulse
-      // instead of a bloom. uDrop keeps a bigger share because a drop should genuinely flare.
-      float wRaw = (0.0030 + uBeat*0.0030 + uBass*0.0010 + uDrop*0.006) * beamWidth(fi);
+      // The beat swells the beams and that is the effect, not a bug -- it was cut to a third for a
+      // while and the rig lost its punch. Back near the original, trimmed only slightly (0.012 ->
+      // 0.010 on the beat, drop 0.020 -> 0.014) because those two together were also feeding the
+      // drop whiteout measured in the wash pass. The floor below keeps the narrow groups drawable.
+      float wRaw = (0.0030 + uBeat*0.010 + uBass*0.0035 + uDrop*0.014) * beamWidth(fi);
       float w = max(wRaw, 2.0 / max(uRes.y, 1.0));
-      // A FLAT CORE WITH A HARD EDGE, which is what makes a beam read as a beam. This was
-      // smoothstep(w, 0.0, d): maximum on the axis falling smoothly to zero at w, i.e. a triangular
-      // gradient across the entire half-width. That has no edge anywhere -- it is a glow shaped like a
-      // line, and it is the single biggest reason the lasers still looked soft after the width was
-      // brought down from 51px to 19px. Narrowing a gradient just gives a narrower gradient.
-      // Now the core is uniform out to w and falls off over ~1.5 canvas pixels, so the beam has a
-      // defined body and a defined boundary; the halo below still supplies the bloom around it.
-      float epx = 1.5 / max(uRes.y, 1.0);
-      float core = smoothstep(w, max(w - epx, w*0.25), d) * att;
+      // A SOFT-CORED BEAM, and this is deliberate -- it was briefly given a flat top with a hard
+      // 1.5px edge, on the reasoning that a crisp edge reads as sharp. It does, and it looked wrong:
+      // a flat-topped band of colour reads as a line DRAWN on the photo rather than as light passing
+      // through haze. The gradient is not a defect to be sharpened, it is what makes the beam look
+      // like a beam. Reverted, and left alone.
+      float core = smoothstep(w, 0.0, d) * att;
       // Halo width/strength are deliberately restrained: the alpha of this whole layer is its
       // own luminance, so an over-bright halo turns the overlay opaque and BURIES the footage
       // underneath. The footage is the star; the rig lights it.
-      // Halo narrowed 9x -> 5x and its weight cut below. At 9x it was a 225px glow around a beam on
-      // a kick, and with hero gains reaching ~13x the halo term saturated across all of it -- so the
-      // wide soft glow, not the core, was what the eye actually read as "the laser".
-      float halo = smoothstep(w*5.0, 0.0, d) * att;
+      float halo = smoothstep(w*9.0, 0.0, d) * att;
       vec3 lc = fi<1.5 ? vec3(1.0,0.12,0.56)
               : (fi<3.5 ? vec3(0.08,0.88,1.0)
               : (fi<5.5 ? vec3(0.39,1.0,0.18)
@@ -408,7 +412,7 @@ export const thermalFrag = /* glsl */ `
       // reading — Kiki's pages go magenta, Dieter's cold blue, Ibiza sunrise gold. Alternating
       // beams keep their own hue so the fan still reads as multi-coloured rather than flat.
       lc = mix(lc, uAccent, mod(fi, 2.0) < 0.5 ? 0.78 : 0.30);
-      c += lc * (core + halo*0.035) * beamGain(fi, pat) * (0.9 + uHat*0.5);
+      c += lc * (core + halo*0.06) * beamGain(fi, pat) * (0.9 + uHat*0.5);
     }
     return c;
   }
@@ -521,11 +525,7 @@ export const thermalFrag = /* glsl */ `
     float r = length(p);
     // KICK = a physical shove: a ring blown outward through the haze on every kick. uBeat
     // decays 1->0, so the ring expands as the hit dies away.
-    // The kick ring: 0.035 in p units is a 48px-thick falloff at 1363px tall, which is a soft band
-    // rather than a shock front. Tightened to a defined edge with a pixel-scale falloff, so the ring
-    // reads as something travelling outward instead of a general brightening.
-    float ringW = max(0.012, 2.0 / max(uRes.y, 1.0));
-    float ring = smoothstep(ringW, ringW*0.35, abs(r - (1.0-uBeat)*0.55)) * uBeat;
+    float ring = smoothstep(0.035, 0.0, abs(r - (1.0-uBeat)*0.55)) * uBeat;
     col += vec3(1.0,0.35,0.75) * ring * 0.5;
     // SNARE = the strobe answering the kick on the backbeat (a flat flash, no colour cast)
     col += vec3(1.0) * uSnare * 0.11;
@@ -696,8 +696,17 @@ export const thermalFrag = /* glsl */ `
     // a time there is none" was impossible. Now it is a threshold: below about 30% RH the glass is
     // clear, and it beads up as the room gets muggier. Combined with each bead's own life cycle, the
     // condensation genuinely comes and goes with the thermals instead of being permanent scenery.
-    float wetness = smoothstep(0.30, 0.78, uHumidity);
-    float beads = droplets(uv, wetness * 0.26 * (uQuality > 0.5 ? 1.0 : 1.45));
+    // A LENS-WIDE FOG CYCLE, so the glass genuinely clears. Per-bead lives were not enough on their
+    // own: every bead runs on the same 25s rate with only its phase offset, so at any instant about
+    // 72% of the eligible ones are on screen and there is never a moment with nothing. Reported as
+    // "some of the water spots just stay, there is never a time where the glass is totally clear".
+    // This is the missing global term -- the lens fogs, beads and runs, then dries out completely
+    // before it starts again. ~55s period with roughly 14s of clear glass at the end of each one,
+    // which is also just how a cold lens in a hot room behaves.
+    float fogPh = fract(uTime * 0.018);
+    float fog = smoothstep(0.05, 0.30, fogPh) * smoothstep(1.0, 0.75, fogPh);
+    float wetness = fog * smoothstep(0.30, 0.78, uHumidity);
+    float beads = droplets(uv, aspect, wetness * 0.26 * (uQuality > 0.5 ? 1.0 : 1.45));
     col += vec3(0.8,0.9,1.0) * beads * 0.44;
 
     // ---- LIQUID COOLING: WATER ON THE LENS ----
@@ -714,9 +723,14 @@ export const thermalFrag = /* glsl */ `
     // a mean of 0.387; runners touch on the order of 3% of pixels, so even a gain that makes each
     // streak clearly readable costs roughly a hundredth of that in total added light. The first pass
     // at these numbers was tuned as though the old cost still applied and the water was invisible.
-    float wet = clamp(uHumidity*0.60 + uDew*0.80, 0.0, 1.0);
+    // Gated by the same fog cycle as the beads. Runners drying on a different schedule would leave
+    // water streaking down a lens that had just been declared clear.
+    float wet = clamp((uHumidity*0.60 + uDew*0.80) * max(fog, uDew*0.7), 0.0, 1.0);
     float run = runners(uv, 0.13 + wet*0.34);
-    col += vec3(0.66,0.80,0.94) * clamp(run, 0.0, 1.5) * (0.34 + uDew*0.40);
+    // Dimmer as well as softer. 0.34 was set when the runners were barely visible at all, before the
+    // edges were sharpened; sharpened AND at that gain they read as bright white lines drawn over the
+    // footage. Soft edges plus a lower gain is what water on glass looks like against a dark scene.
+    col += vec3(0.66,0.80,0.94) * clamp(run, 0.0, 1.5) * (0.20 + uDew*0.30);
 
     // overclock shimmer
     col += vec3(0.4,1.0,0.6) * uOverclock * 0.1 * (0.5+0.5*sin(uTime*8.0));
@@ -733,8 +747,19 @@ export const thermalFrag = /* glsl */ `
     // the shipped look is unchanged — but the constant floor is gone, so the dial can now reach
     // zero grain, which the previous form could not: 0.04 of it rendered however far down the
     // knob was turned.
-    float grain = (hash(uv*uRes + uTime)-0.5) * uIntensity * 0.09;
-    col += grain;
+    // NO PER-PIXEL GRAIN IN HERE ANY MORE, and this was the "soft and grainy" that survived every
+    // resolution fix. It was (hash(uv*uRes + uTime) - 0.5) * uIntensity * 0.09 added straight to col:
+    // per-canvas-pixel noise, re-rolled every frame, scaled by the dial -- so at the top of the dial
+    // (uIntensity 1.4) it was +/-0.063 on EVERY pixel of the layer. A laser at 0.5 luminance was
+    // therefore being modulated by about +/-12% per pixel, which is precisely the dithered speckle the
+    // beams and the starburst rays showed. It also dithered the ALPHA, since the alpha of this layer
+    // is its own luminance, so the transparency crawled as well.
+    //
+    // Film grain over the composite is a good thing and the site already has it -- .bc-grain, a CSS
+    // layer that sits over the footage AND the rig, which is the right place for it because grain
+    // belongs to the image as a whole rather than to one element inside it. Two grain sources stacked,
+    // and this was the one degrading its own graphics. Removed rather than reduced: there is nothing
+    // it was adding that the CSS layer does not do better and over more of the picture.
     // (TAPE SCANLINES and the CHROMATIC FRINGE lived here, both keyed to the friction knob, and
     //  both are deleted with it: they are the CRT treatment that cost legibility. The fringe is
     //  the better riddance of the two — it evaluated rig() twice more, i.e. three times the
