@@ -19,6 +19,7 @@ import { SampleWindow, measureRefreshHz } from './sampler'
 import { deviceSummary, primeDeviceInfo } from './deviceInfo'
 import { analyse, benchPreconditions, runBench, type BenchConfig, type BenchProgress, type BenchRun } from './bench'
 import { buildReport, copyReport, downloadReport } from './report'
+import { rigStatsLine } from './rigStats'
 import { PANEL_CSS } from './panelStyles'
 
 // ============================================================================================
@@ -539,6 +540,12 @@ function Panel({ host, onClose }: { host: HTMLDivElement | null; onClose: () => 
             {Math.round(intensity * 100)} → {fxMultiplier(intensity).toFixed(2)}x ·{' '}
             {Math.round(FX_DEFAULT * 100)} is the shipped look · 0 switches everything off
           </p>
+          {/* THE RENDER SCALE, which was not shown anywhere and should have been. "The fx layer looks
+              soft" was reported repeatedly while this panel displayed only the intensity multiplier —
+              a different quantity — so nothing on screen contradicted a rig that was drawing at 70% of
+              native and being upscaled. Two invisible caps were doing it. One line would have pointed
+              at both, so here it is, next to the number it was being confused with. */}
+          <p className="hint">{rigStatsLine()}</p>
         </div>
 
         {FX_GROUPS.map((g) => {

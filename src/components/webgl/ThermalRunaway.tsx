@@ -3,6 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { audioBus } from '../../audio/audioBus'
 import { ACCENTS, effectiveAccent, useSiteStore } from '../../state/useSiteStore'
+import { publishRigStats } from '../../perf/rigStats'
 import { usePlayerStore } from '../../state/usePlayerStore'
 import { thermalVert, thermalFrag } from './thermalShader'
 import { PERF } from '../../lib/perfFlags'
@@ -158,6 +159,22 @@ function Mainstage() {
     gl.setPixelRatio(scale)
     uniforms.uRes.value.set(size.width * scale, size.height * scale)
     uniforms.uPxScale.value = scale
+    // Published so the diag panel and the JSON export can SEE the render scale. Its absence is why
+    // "the fx layer looks soft" took several rounds to trace: the panel reported the intensity
+    // multiplier, which is a different quantity, while two invisible caps held the rig below native.
+    const dprNow = typeof window === 'undefined' ? 1 : window.devicePixelRatio || 1
+    publishRigStats({
+      scale,
+      tier: tier.current,
+      tierMultiplier: TIERS[tier.current],
+      dpr: dprNow,
+      cssW: size.width,
+      cssH: size.height,
+      bufferW: Math.round(size.width * scale),
+      bufferH: Math.round(size.height * scale),
+      nativeFraction: scale / dprNow,
+      quality: uniforms.uQuality.value,
+    })
     // past the first step-down, drop the costliest shader passes as well
     uniforms.uQuality.value = PERF.isMobile || tier.current >= 2 ? 0 : 1
   }, [size, gl, uniforms])

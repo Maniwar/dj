@@ -1,6 +1,7 @@
 import { APP_VERSION, BUILD_SHA, BUILD_STAMP } from '../version'
 import { PERF } from '../lib/perfFlags'
 import { prefersHdVideo } from '../lib/videoRendition'
+import { rigStats } from './rigStats'
 import { usePlayerStore } from '../state/usePlayerStore'
 import { audioBus } from '../audio/audioBus'
 import { FX, type FxId } from './registry'
@@ -83,6 +84,7 @@ export type PerfReport = {
      */
     measureEpoch: number
     renditionHd: boolean
+    rig: ReturnType<typeof rigStats>
   }
   registry: Array<{
     id: FxId
@@ -151,6 +153,11 @@ export function buildReport(runs: BenchRun[], notes = ''): PerfReport {
       videoByHand: videoByHand(),
       measureEpoch: perfState().measureEpoch,
       renditionHd: prefersHdVideo(),
+      // THE SHADER'S RENDER SCALE, which was missing and should not have been. nativeFraction is the
+      // one to read: 1.0 means the rig rasterises at the display's own pixels; below that the browser
+      // is upscaling it, and no anti-aliasing inside the shader can sharpen that. Two separate caps
+      // held it under 1.0 for months (PIXEL_BUDGET and MAX_SCALE) and neither was observable here.
+      rig: rigStats(),
     },
     // Embedded in full, not by reference. The `why` strings are the difference between "cardGlass
     // is the worst row" and "24 backdrop-filter blurs re-blur a dirty backdrop every frame".
