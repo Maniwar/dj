@@ -57,9 +57,9 @@ const SCENARIOS = {
   },
   confetti: {
     why: 'small bright particles, the classic case where one sample per pixel produces blocky squares',
-    // uDrop must stay 0: it fires the starburst, which fills the frame and makes this scenario a
-    // second, worse picture of the starburst rather than a picture of confetti.
-    uni: { uConfetti: 1, uBeat: 1, uDown: 1, uLevel: 0.9, uBass: 0.8, uSong: 0.3 },
+    // uDrop AND uDown must both stay 0. burst is `uDrop + uDown*0.38`, so zeroing only uDrop still
+    // fires the starburst at 38% and this frame stays a second, worse picture of the starburst.
+    uni: { uConfetti: 1, uBeat: 1, uLevel: 0.9, uBass: 0.8, uSong: 0.3 },
     band: [0.0, 0.55],
   },
 }
