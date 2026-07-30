@@ -95,7 +95,11 @@ export const thermalFrag = /* glsl */ `
   //   FORM. A drop is a LENS, not a dot: bright rim where it refracts, darker through the middle.
   //     That is the whole difference between "water" and "speckle", and it costs one extra
   //     smoothstep. The body is kept faint and the rim carries the read.
-  float droplets(vec2 uv, float aspect, float density, out vec2 disp){
+  // Forward declaration: droplets() asks this whether a runner has swept a bead, but the runner
+  // maths lives below it and GLSL requires a symbol to be declared before it is used.
+  float runnerHeadY(float uvx, float layer, float amount, out float lane);
+
+  float droplets(vec2 uv, float aspect, float density, float runAmount, out vec2 disp){
     float acc=0.0;
     disp=vec2(0.0);
     for(int layer=0; layer<2; layer++){
@@ -191,7 +195,18 @@ export const thermalFrag = /* glsl */ `
         float rim  = (smoothstep(rad*1.04, rad*0.84, d) - smoothstep(rad*0.84, rad*0.55, d)) * 0.46;
         // Offset up-left, consistent for every bead, because one room has one key light.
         float spec = smoothstep(rad*0.34, 0.0, length(((f - c) - vec2(-0.30, 0.30)*rad)*vec2(aspect,1.0))) * 0.85;
-        acc += (body + max(rim, 0.0) + spec) * bFade * pres;
+        // ABSORBED BY A PASSING RUNNER. The bead's own uv is (id + 0.5 + c)/s; if the runner in that
+        // column is now BELOW it and the bead sits inside its lane, that water has already been swept
+        // up. Faded over a short distance rather than cut, so a bead is taken as the drop arrives
+        // instead of blinking off ahead of it.
+        vec2 buv = (id + 0.5 + c) / s;
+        float lane0; float ry0 = runnerHeadY(buv.x, 0.0, runAmount, lane0);
+        float lane1; float ry1 = runnerHeadY(buv.x, 1.0, runAmount, lane1);
+        float swept =
+            smoothstep(0.02, -0.03, ry0 - buv.y) * step(abs(fract(buv.x*11.0) - 0.5), lane0*11.0)
+          + smoothstep(0.02, -0.03, ry1 - buv.y) * step(abs(fract(buv.x*19.0) - 0.5), lane1*19.0);
+        float taken = clamp(swept, 0.0, 1.0);
+        acc += (body + max(rim, 0.0) + spec) * bFade * pres * (1.0 - taken);
         // LENS DISPLACEMENT. A drop is a converging lens: the further off its axis you look, the more
         // it bends, and it inverts -- so the offset points back toward the centre and grows with
         // distance from it. Accumulated rather than sampled here, so the whole field costs ONE pair of
@@ -202,10 +217,39 @@ export const thermalFrag = /* glsl */ `
         // as 0.01 points of light. A lens bends most at its edge: (f - c) already supplies that
         // gradient, so the mask only has to say whether we are in the drop at all.
         float inside = smoothstep(rad, rad*0.86, d);
-        disp += -(f - c) / s * inside * bFade * pres * 3.2;
+        disp += -(f - c) / s * inside * bFade * pres * (1.0 - taken) * 3.2;
       }
     }
     return clamp(acc,0.0,1.0);
+  }
+
+  // ---- HAS A RUNNER ALREADY SWEPT THIS SPOT? ----
+  // A running drop that meets a clinging bead absorbs it and gets heavier -- which is most of what
+  // makes real water on glass look alive. A fragment shader cannot simulate that: there is no state
+  // between frames, so nothing can remember which beads have been eaten.
+  //
+  // It does not need to. Both are DETERMINISTIC functions of position and time -- the same column id
+  // and the same clock produce the same runner every frame on every machine -- so a bead can ask
+  // analytically "where is the runner in my column right now, and has it passed me?" and answer
+  // without any accumulation at all. This re-derives one column's runner with the identical maths
+  // used to draw it; the two cannot disagree because they are the same expressions.
+  //
+  // Returns the head's uv.y, and writes the lane half-width. A column with no runner returns 2.0,
+  // i.e. above everything, so nothing is ever absorbed by a drop that does not exist.
+  float runnerHeadY(float uvx, float layer, float amount, out float lane){
+    float cols = 11.0 + layer*8.0;
+    float id = floor(uvx*cols);
+    float rnd = hash(vec2(id, layer*17.3));
+    lane = 0.0;
+    if(rnd <= 1.0 - amount) return 2.0;
+    float rnd2 = hash(vec2(id*1.37 + 5.1, layer*7.9));
+    float rnd3 = hash(vec2(id*2.11 + 13.7, layer*23.1));
+    float sz = (0.55 + rnd3*rnd3*1.10) * (1.0 - layer*0.42);
+    float speed = (0.05 + rnd2*0.09) * (0.70 + sz*0.45);
+    float t = fract(rnd*4.7 + uTime*speed);
+    float fall = 1.0 - (1.0 - t)*(1.0 - t);
+    lane = 0.055 * sz;
+    return 1.08 - fall*1.00;
   }
 
   // ---- WATER RUNNING DOWN THE GLASS ----
@@ -271,7 +315,13 @@ export const thermalFrag = /* glsl */ `
         // Floored at 2 canvas px in ox units -- one ox unit spans cols*0.06 of the frame width, so a
         // pixel is (1/uRes.x)/(cols*0.06) in these units.
         float oxPx = (1.0/max(uRes.x,1.0)) / max(cols*0.06, 0.35);
-        float hr = max(0.085 * sz, oxPx*2.0);
+        // MASS ACCUMULATES ON THE WAY DOWN. A drop running over wet glass sweeps up what it crosses
+        // and gets heavier, which is why real runners start as a bead and arrive at the bottom as a
+        // fat one. fall is how far it has travelled, so the head grows 0.75x -> 1.55x across its
+        // run. It also already falls faster as it goes (the ease-in on t), so the two compound the way
+        // they do physically: heavier, therefore quicker.
+        float mass = 0.75 + fall * 0.80;
+        float hr = max(0.085 * sz * mass, oxPx*2.0);
         // Soft-edged, reverted. A 2px edge on a bright streak is a white line, not a drop -- see the
         // note in droplets(). Water reads by its gradient here, not by an outline.
         float head = smoothstep(hr, hr*0.30, length(vec2(ox, y*0.62)));
@@ -284,7 +334,7 @@ export const thermalFrag = /* glsl */ `
         float dry = exp(-max(y, 0.0) * 3.4);
         // The track scales with the drop but less than proportionally -- a fat drop leaves a wider
         // wet path, not a proportionally wider one. Floored at 2 canvas px like the head.
-        float tw = max(0.030 * (0.60 + sz*0.40), oxPx*2.0);
+        float tw = max(0.030 * (0.60 + sz*0.40) * (0.85 + mass*0.35), oxPx*2.0);
         float track = smoothstep(tw, tw*0.25, abs(ox)) * behind * dry;
         // a couple of stragglers left along the track, so it is not a clean line
         float bead = smoothstep(tw, tw*0.30, length(vec2(ox, fract(y*7.0 + rnd*3.0) - 0.5)*vec2(1.0,0.55)));
@@ -842,7 +892,13 @@ export const thermalFrag = /* glsl */ `
     // pixels had any water on them at all, so on a busy shot you had to hunt for it. The headroom is
     // enormous: at that coverage the water contributes about 0.01 of mean lift, against the 0.387 of
     // the dew wash that caused the milky problem, so this can roughly double without going near it.
-    float beads = droplets(uv, aspect, wetness * 0.45 * (uQuality > 0.5 ? 1.0 : 1.45), beadDisp);
+    // The runner density is computed HERE, above the beads, because droplets() needs it to ask
+    // whether a runner has swept a given bead. One expression feeding both passes, rather than a
+    // uniform duplicating it on the CPU -- the absorption test has to be the same maths that draws
+    // the runner or beads would vanish under drops that are not there.
+    float wet = clamp((uHumidity*0.60 + uDew*0.80) * max(fog, uDew*0.7), 0.0, 1.0);
+    float runAmount = 0.20 + wet*0.46;
+    float beads = droplets(uv, aspect, wetness * 0.45 * (uQuality > 0.5 ? 1.0 : 1.45), runAmount, beadDisp);
     // Water catches the light too. A droplet is a lens: in the dark it is nearly invisible, and when
     // a beam crosses it, it lights up. Same lookup as the confetti -- the field is already computed.
     // SELF-LIGHT RESTORED. Making the water beam-lit was right, but I took the self term from 0.44 to
@@ -867,9 +923,8 @@ export const thermalFrag = /* glsl */ `
     // at these numbers was tuned as though the old cost still applied and the water was invisible.
     // Gated by the same fog cycle as the beads. Runners drying on a different schedule would leave
     // water streaking down a lens that had just been declared clear.
-    float wet = clamp((uHumidity*0.60 + uDew*0.80) * max(fog, uDew*0.7), 0.0, 1.0);
     vec2 runDisp;
-    float run = runners(uv, 0.20 + wet*0.46, runDisp);
+    float run = runners(uv, runAmount, runDisp);
     // Dimmer as well as softer. 0.34 was set when the runners were barely visible at all, before the
     // edges were sharpened; sharpened AND at that gain they read as bright white lines drawn over the
     // footage. Soft edges plus a lower gain is what water on glass looks like against a dark scene.
