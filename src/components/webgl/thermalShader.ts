@@ -178,7 +178,13 @@ export const thermalFrag = /* glsl */ `
         // Minimum raised 0.055 -> 0.085: at 18 cells over 1363px a cell is 76px, so 0.055 was a 4px
         // bead with nowhere to shrink to. 0.085 is ~6.5px at full size and ~3.6px shrunk, which stays
         // visible while it dims.
-        float radFull = max(0.105 + rnd2*rnd2*0.22, 2.6 * s / max(uRes.y, 1.0));
+        // MUCH SMALLER. At 0.105-0.32 of a cell, and a cell being uRes.y/18 (76px at 1363), these
+        // were 16 to 50 PIXELS ACROSS. Nothing that size reads as condensation -- it reads as bubbles,
+        // which is exactly what was reported, twice. The rim/body balance was only half the problem;
+        // the other half is that a 40px sphere with a bright edge IS a bubble however it is shaded.
+        // Real lens condensation is fine: 0.038-0.115 of a cell puts these at 6 to 17px, and the
+        // density below is raised so the glass is no less wet for it.
+        float radFull = max(0.038 + rnd2*rnd2*0.077, 2.2 * s / max(uRes.y, 1.0));
         float rad = radFull * bShrink;
         // A drop is a lens: it refracts at the edge and is nearly clear through the middle. The rim
         // carries the read and is deliberately SOFT -- a hard ring reads as a bubble outline, which
@@ -278,7 +284,13 @@ export const thermalFrag = /* glsl */ `
     // 0.6 of a half-column, so a runner cleared nearly everything either side of it -- beads
     // disappeared in places the drop never went, which reads as random vanishing rather than as
     // something being picked up.
-    lane = 0.018 * sz;
+    // The lane has to be as wide as the drop VISIBLY is, or beads sitting under the head survive it
+    // and you watch a runner pass straight over them -- which is what "they run over them and they
+    // overlap" describes. The head is 0.085*sz*mass in ox units, i.e. 0.0051*sz*mass of the frame
+    // width; the lane matches that with margin so anything the water touches is taken.
+    float fallNow = 1.0 - (1.0 - t)*(1.0 - t);
+    float massNow = 0.60 + fallNow * 1.60;
+    lane = 0.016 * sz * massNow;
     return 1.08 - fall*1.00;
   }
 
@@ -323,7 +335,11 @@ export const thermalFrag = /* glsl */ `
         float speed = (0.05 + rnd2*0.09) * (0.70 + sz*0.45);
         float t = fract(uTime*speed + rnd*4.7);
         float fall = 1.0 - (1.0 - t)*(1.0 - t);   // ease-in, i.e. accelerating downward
-        float y = uv.y - (1.08 - fall*1.00);      // enters above the frame, fades out low in it
+        // Tuned so the head reaches the bottom edge at about t=0.88 and is just clear of it by t=1.0.
+        // The ease-in means 94% of the journey is done by 75% of the time -- that acceleration is the
+        // point -- so the constants have to be set against the CURVE, not against the endpoints: an
+        // earlier attempt at 1.32 put the drop off-screen by t=0.70 and wasted a third of every run.
+        float y = uv.y - (1.02 - fall*1.035);     // enters just above the frame, exits just below it
 
         // LIFE ENVELOPE, and it is the fix for "the water just disappears into nothing randomly".
         // t is a fract(), so at the wrap the drop teleported from the bottom of its run back to the
@@ -336,7 +352,14 @@ export const thermalFrag = /* glsl */ `
         // suddenly", and that is what it was doing. The fade now runs 0.60 -> 0.93, which is while the
         // head is still in the lower part of the picture, so a runner thins out and dissipates on the
         // glass instead of sliding off the edge.
-        float life = smoothstep(0.0, 0.09, t) * smoothstep(0.93, 0.60, t);
+        // A RUNNER LEAVES BY RUNNING OFF, never by fading out in the middle of the glass. This was
+        // 0.93 -> 0.60, which starts dimming while the head is still 24% up the frame -- reported as
+        // "sometimes runners disappear before they run off the screen", and it was a correction that
+        // over-shot: the original fault was the opposite, a drop that vanished by exiting before its
+        // fade began. The fall now carries the head clear of the bottom edge (below), and the envelope
+        // only closes over the last 6% of the cycle, by which point it is already off-screen. So the
+        // fade exists to prevent a pop at the wrap, not to remove a drop you can still see.
+        float life = smoothstep(0.0, 0.07, t) * smoothstep(1.0, 0.94, t);
 
         // the track wanders -- water follows the imperfections in the glass, it does not fall straight
         float wob = sin((uv.y + rnd*6.283)*17.0)*0.010 + sin((uv.y + rnd2*4.0)*41.0)*0.004;
@@ -974,7 +997,7 @@ export const thermalFrag = /* glsl */ `
     // the runner or beads would vanish under drops that are not there.
     float wet = clamp((uHumidity*0.60 + uDew*0.80) * max(fog, uDew*0.7), 0.0, 1.0);
     float runAmount = 0.20 + wet*0.46;
-    float beads = droplets(uv, aspect, wetness * 0.45 * (uQuality > 0.5 ? 1.0 : 1.45), runAmount, beadDisp);
+    float beads = droplets(uv, aspect, wetness * 0.78 * (uQuality > 0.5 ? 1.0 : 1.45), runAmount, beadDisp);
     // Water catches the light too. A droplet is a lens: in the dark it is nearly invisible, and when
     // a beam crosses it, it lights up. Same lookup as the confetti -- the field is already computed.
     // SELF-LIGHT RESTORED. Making the water beam-lit was right, but I took the self term from 0.44 to
