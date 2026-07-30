@@ -185,7 +185,14 @@ export const thermalFrag = /* glsl */ `
         // the other half is that a 40px sphere with a bright edge IS a bubble however it is shaded.
         // Real lens condensation is fine: 0.038-0.115 of a cell puts these at 6 to 17px, and the
         // density below is raised so the glass is no less wet for it.
-        float radFull = max(0.038 + rnd2*rnd2*0.077, 2.2 * s / max(uRes.y, 1.0));
+        // BEADS WERE 1-2 PIXELS. These radii are in CELL units and the grid is 18 cells across the
+        // frame, so 0.038 of a cell is 0.002 of screen height -- about 1.4px on a 682px frame, a dot
+        // rather than a drop. Rendered side by side they read as faint specks, not condensation.
+        // 2.5x puts the range at roughly 3.5-11px: small beads still dominate (the term is squared),
+        // but the big ones are now large enough to show their rim and specular, which is what makes
+        // them look like water instead of noise. Still inside the cell -- max is 0.285 of a 0.5
+        // half-cell -- so neighbouring beads do not overlap and the grid stays hidden.
+        float radFull = max(0.095 + rnd2*rnd2*0.19, 2.2 * s / max(uRes.y, 1.0));
         float rad = radFull * bShrink;
         // A drop is a lens: it refracts at the edge and is nearly clear through the middle. The rim
         // carries the read and is deliberately SOFT -- a hard ring reads as a bubble outline, which
