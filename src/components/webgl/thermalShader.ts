@@ -65,17 +65,46 @@ export const thermalFrag = /* glsl */ `
   //     sliced flat by it — which is where the square edges came from.
   // Fixed by making the cells far finer and the bead small relative to its cell, so a bead
   // never reaches the boundary that would clip it.
+  // CONDENSATION BEADS, AND WHY THEY USED TO READ AS STATIC.
+  //
+  // Reported as "milky static crap ... doesn't look like water or dew", which was exactly right and
+  // is a matter of SCALE, not strength. The grids were 46 and 85 cells across with a bead radius of
+  // 0.085 OF A CELL -- so 0.085/46 of the screen, about two pixels, and the second layer about one.
+  // At the humidities this actually runs at, density reaches ~0.28, which put on the order of 2,600
+  // one-to-two-pixel pale dots over the frame. Nothing that small can read as a droplet; it reads as
+  // sensor noise, and stacked on the film grain it read as a milky veil.
+  //
+  // Three changes, all about making a bead look like a bead:
+  //   SCALE. 18 and 30 cells instead of 46 and 85, with radius 0.16-0.26 of a cell, so a bead is
+  //     ~1% of screen width -- roughly 12px at 1200px, which is the size real condensation appears
+  //     at on a lens. Big enough to have a shape.
+  //   COUNT. Density falls from 0.04+0.30*h to 0.02+0.12*h. Around 140 beads instead of 2,600.
+  //     Condensation is discrete drops on glass, not a field.
+  //   FORM. A drop is a LENS, not a dot: bright rim where it refracts, darker through the middle.
+  //     That is the whole difference between "water" and "speckle", and it costs one extra
+  //     smoothstep. The body is kept faint and the rim carries the read.
   float droplets(vec2 uv, float density){
     float acc=0.0;
     for(int layer=0; layer<2; layer++){
-      float s = 46.0*(1.0+float(layer)*0.85);
+      float s = 18.0*(1.0+float(layer)*0.65);
       vec2 gv=uv*s; vec2 id=floor(gv); vec2 f=fract(gv)-0.5;
       float rnd=hash(id+float(layer)*31.7);
       if(rnd>1.0-density){
+        // A SECOND, INDEPENDENT HASH FOR SIZE. Deriving radius from rnd tied a bead's size to
+        // whether it existed at all, so every bead in a layer landed in the same narrow band and the
+        // field read as one repeated ring rather than as condensation. Squared, so the distribution
+        // is mostly small beads with a few large ones -- which is how water actually beads on glass.
+        float rnd2 = hash(id*1.7 + float(layer)*11.3 + 4.2);
         float drip=fract(uTime*0.04+rnd*7.0);
-        vec2 c=vec2((rnd-0.5)*0.34, 0.34-drip*0.68); // stays clear of the cell edge
+        vec2 c=vec2((rnd-0.5)*0.30, 0.32-drip*0.64); // stays clear of the cell edge
         float d=length(f-c);
-        acc += smoothstep(0.085,0.0,d);
+        float rad = 0.055 + rnd2*rnd2*0.21;
+        // A drop is a lens: it refracts at the edge and is nearly clear through the middle. The rim
+        // carries the read and is deliberately SOFT -- a hard ring reads as a bubble outline, which
+        // is what the first attempt at this looked like.
+        float body = smoothstep(rad, rad*0.35, d) * 0.18;
+        float rim  = (smoothstep(rad*1.06, rad*0.78, d) - smoothstep(rad*0.78, rad*0.40, d)) * 0.8;
+        acc += body + max(rim, 0.0);
       }
     }
     return clamp(acc,0.0,1.0);
@@ -378,22 +407,26 @@ export const thermalFrag = /* glsl */ `
     // thing the rig comments elsewhere in this file insist must not happen ("the footage is the
     // star; the rig lights it").
     //
-    // Three changes, all about CONTAINMENT rather than removal:
-    //   radius 0.85 -> 0.40, so the burst lives in the middle of the frame instead of covering it.
-    //     The falloff now starts at 0.10 as well, which hollows the very centre slightly -- real
-    //     pyro is brightest a little way out from its origin, not at a single saturated point.
-    //   gain 1.15 -> 0.5, which stops the spokes clipping to white the moment uDrop peaks.
-    //   spokes narrowed 22 -> 30, so each ray is a shaft rather than a wedge. Narrower rays read as
-    //     brighter at the same energy, which buys back some of the punch the gain cut costs.
+    // The FIRST attempt at this cut the reach to 0.40 and the gain to 0.5, which threw the effect
+    // away -- "you removed the cool center laser starburst". The starburst is wanted. What is not
+    // wanted is the whiteout, and those are separable: the whiteout came from WIDE rays covering
+    // most of the frame, not from the rays existing.
+    //   RESOLUTION. 9 -> 16 in the angular term, so 32 spokes rather than 18, and pow 22 -> 44 so
+    //     each is roughly half as wide. That is the "higher resolution" read: more, finer rays.
+    //   ENERGY. Doubling the count while halving the width is roughly energy-neutral, so the reach
+    //     goes back out to 0.82 -- nearly the original 0.85 -- and the gain to 0.95, and it still
+    //     integrates to far less total light than the version that washed the frame out.
+    //   CENTRE. A small inner hollow (falloff from 0.05) so the convergence point is a bright knot
+    //     rather than one saturated pixel, which is what made the middle of the frame blow.
     //
     // NOT VERIFIABLE FROM A HEADLESS CAPTURE: uDrop only rises when audio is playing, and audio
     // does not play in headless Chrome, so this branch is never even entered in anything measured on
     // the build machine. That is why five earlier hypotheses about the wash all scored clean here.
     if (uDrop > 0.01) {
       float ang = atan(p.y, p.x);
-      float rays = pow(abs(sin(ang*9.0 + uTime*1.6)), 30.0);
-      float reach = (1.0 - smoothstep(0.10, 0.40, r)) * smoothstep(0.0, 0.06, r);
-      col += vec3(1.0,0.72,0.34) * rays * uDrop * reach * 0.5;
+      float rays = pow(abs(sin(ang*16.0 + uTime*1.6)), 44.0);
+      float reach = (1.0 - smoothstep(0.05, 0.82, r)) * smoothstep(0.0, 0.035, r);
+      col += vec3(1.0,0.72,0.34) * rays * uDrop * reach * 0.95;
     }
 
     // CONDENSATION beading over the whole "lens" — the humidity signature.
@@ -401,8 +434,8 @@ export const thermalFrag = /* glsl */ `
     // phone tier skips it entirely. Branching on a uniform is coherent across every pixel, so
     // the GPU really does skip the work rather than executing both sides.
     float beads = 0.0;
-    if (uQuality > 0.5) beads = droplets(uv, 0.04 + uHumidity*0.30);
-    col += vec3(0.8,0.9,1.0) * beads * 0.35;
+    if (uQuality > 0.5) beads = droplets(uv, 0.02 + uHumidity*0.12);
+    col += vec3(0.8,0.9,1.0) * beads * 0.30;
 
     // liquid-cooling wash on dew point
     float water = smoothstep(0.0,0.6, fbm(vec2(uv.x*8.0, uv.y*3.0 - uTime*4.0)))*uDew;
