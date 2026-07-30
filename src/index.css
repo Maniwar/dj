@@ -1424,7 +1424,16 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      also a hero. And it buys almost nothing: every slide uses cover and fills the band, so the
      layer is only ever visible in 32px of bar. A flat ground costs nothing and cannot flicker. */
   .lore-stop .lore-fill { display: none; }
-  .lore-stop { background: #06070c; }
+  /* TRANSPARENT, so the bars show the club rather than a flat ground. The Broadcast and its
+     effect layers are ALREADY full-viewport siblings of the banded media -- measured at 915x412:
+     .broadcast/.bc-scan/.bc-vignette/.bc-strobe all 915w at x=0 and .bc-grain 1061w, against a
+     824w band inset 46px. So the effects were never missing from the side bars; this rule was
+     painting an opaque #06070c across the full width ON TOP of them. Making it transparent lets the
+     scan, grain, vignette and strobe read in the bars, and gives the band edge feather something to
+     dissolve INTO -- the same thing the side columns do past 2.5:1. .lore-fill stays display:none:
+     the blurred 8x-upscaled copy is what caused the flicker on the hero slides, and the Broadcast
+     behind is a better ground than a blurred copy of the slide itself. */
+  .lore-stop { background: transparent; }
   .lore-stop[data-id='stockholm'] { --focus: center 70%; }
 
   /* the copy lines up with the frame it sits on, not with the window */
