@@ -84,8 +84,20 @@ const MAX_SCALE = 2
 // first impression than a slightly soft one. Instead the rig proves it has headroom -- 8 windows
 // under budget -- and only then spends it on sharpness. Under load it steps down exactly as
 // before, and tierPolicy's one-free-retry rule stops it hunting between two rungs.
-const TIERS = [2, 1, 0.8, 0.65, 0.5]
-const START_TIER = 1 // the 1.0 rung: native, and where every session begins
+// NO RUNG ABOVE NATIVE. A 2x supersampling step was tried here and removed after looking at it.
+// The theory was right in the abstract -- at dpr 1 native is one sample per pixel, so diagonals
+// staircase and only rendering above native can fix that -- but it does not pay on this content:
+//
+//   the beams are smooth falloff functions and were never aliased, so 2x changed nothing on them
+//   the confetti are drawn as axis-aligned squares, so no resolution rounds them off
+//   the LED wall did need fixing, but the fix was pinning its cell floor and gap to DISPLAY pixels,
+//     which makes the wall correct at native too, not only when supersampled
+//
+// What 2x reliably did was cost four times the fragments and soften the whole layer, because
+// downsampling is an averaging filter. Judged worse than native, twice, on the real display.
+// Revisiting it would need a sharpening pass on the way down, not raw supersampling.
+const TIERS = [1, 0.8, 0.65, 0.5]
+const START_TIER = 0 // native: the top of the ladder, and where every session begins
 
 function shaderScale(cssW: number, cssH: number): number {
   if (typeof window === 'undefined') return 1
