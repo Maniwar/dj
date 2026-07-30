@@ -1390,7 +1390,13 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      89% of its height (enough for the skates at a 70% anchor: 7.8%-96.7%, hair at 14% and
      wheels at 96% both inside) and a square portrait shows 50% — a proper head-and-shoulders
      crop. Every slide is now the same width, and the copy is aligned TO that width. */
-  .lore-stop { --band: min(100%, calc(100svh * 2.0)); }
+  /* FULL BLEED IN SHORT LANDSCAPE. The band used to inset to 100svh*2.0 — 860px in a 932px
+     window — which put a ~36px black bar down each side. Reported as the media not sharing a width
+     with anything: the bars were dead space and the furniture lined up with the band while the eye
+     read the window. On a screen this small there is no room to spend on letterbox, so the media
+     takes the whole width and `cover` crops vertically instead. The per-stop --focus anchors below
+     are what keep the subject inside that crop. */
+  .lore-stop { --band: 100%; }
   .lore-stop .lore-band {
     width: var(--band); left: calc((100% - var(--band)) / 2); right: auto;
   }
@@ -2576,7 +2582,7 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      backdrop were left full-bleed at 844px, so the frame still jumped by 64px as you scrolled
      between sections — the same misalignment, just moved somewhere else. Every media element
      now shares the one band, so the edge never moves from the top of the page to the bottom. */
-  .journey-stop { --band: min(100%, calc(100svh * 2.0)); }
+  .journey-stop { --band: 100%; } /* full bleed — see .lore-stop in the landscape block above */
   .journey-stop .journey-band {
     left: calc((100% - var(--band)) / 2); right: auto; width: var(--band);
   }
@@ -2585,7 +2591,7 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
     background-size: cover; background-position: center; background-repeat: no-repeat;
     filter: blur(40px) brightness(0.4) saturate(1.25);
   }
-  .broadcast { --stage: min(100%, calc(100svh * 2.0)); }
+  .broadcast { --stage: 100%; } /* full bleed — see .lore-stop in the landscape block above */
   .bc-band { left: calc((100% - var(--stage)) / 2); right: auto; width: var(--stage); }
   /* the ticker lines up with the frame too, rather than running the full window */
   .lyric-marquee { width: min(100%, calc(100svh * 2.0)); margin-inline: auto; }
@@ -2611,15 +2617,14 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      Same --fx multiplier and the same reason it is on `body` rather than `:root` as the block
      above: this is the `bandFeather` registry effect at both breakpoints, not two effects.
      Measured at 1400x520: bar 180px, feather 40px at --fx 1.0 and 12px at 0.3. */
-  body {
-    --edge-feather: calc(clamp(14px, calc((100vw - min(100vw, 100svh * 2.0)) / 2 * 0.5), 40px) * var(--fx, 1));
-    /* Duplicated from the min-aspect-ratio: 5/2 block above — if you edit one, edit both. */
-    --edge-mask: linear-gradient(90deg,
-      transparent 0,
-      #000 var(--edge-feather),
-      #000 calc(100% - var(--edge-feather)),
-      transparent 100%);
-  }
+  /* NO MASK AT THIS BREAKPOINT ANY MORE, and the reason is that there is no longer a join for it
+     to hide. The bands above are full-bleed here, so `--edge-mask` is deliberately left undefined
+     and `mask-image: var(--edge-mask, none)` falls back to none.
+     Defining it would be actively wrong rather than merely wasted: a feather needs something on the
+     far side to dissolve INTO, and with the media running to the window edge the outer ~18px would
+     ramp to transparent over the page ground — a vignette on all four media surfaces, which is not
+     what this effect is for. The min-aspect-ratio: 5/2 block keeps its mask, because past 2.5:1 the
+     side columns are real and the join it softens genuinely exists. */
 }
 
 
