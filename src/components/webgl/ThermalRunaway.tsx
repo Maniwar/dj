@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { audioBus } from '../../audio/audioBus'
 import { ACCENTS, effectiveAccent, useSiteStore } from '../../state/useSiteStore'
-import { publishRigStats } from '../../perf/rigStats'
+import { publishRigStats, publishTierDebug } from '../../perf/rigStats'
 import { tierMove, newTierState } from '../../perf/tierPolicy'
 import { fxOffClass } from '../../perf/fxClasses'
 import { usePlayerStore } from '../../state/usePlayerStore'
@@ -353,6 +353,7 @@ function Mainstage() {
       // at 8fps still gets judged after ~1s rather than after ninety slow frames
       if (a.time >= 1000 || a.frames >= 20) {
         const move = tierMove(a.time / a.frames, tier.current, TIERS.length - 1, SLOW_MS, a.policy)
+        publishTierDebug(a.policy.fast, a.policy.failed)
         if (move !== 'hold') {
           tier.current += move === 'down' ? 1 : -1
           applyScale()

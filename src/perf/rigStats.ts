@@ -47,6 +47,20 @@ export type RigStats = {
 
 let stats: RigStats | null = null
 
+/**
+ * Live tier-policy counters, published every sampling window.
+ *
+ * These exist because the question "why is the rig not climbing?" was answered wrong twice from the
+ * outside: once as "it has not been long enough" and once as "it tried and could not hold it". Both
+ * were guesses about hidden state. `fast` says how close it is to a climb, `failed` says which rungs
+ * it has given up on, and `windows` says whether the sampler is running AT ALL -- which matters
+ * because it sits after useFrame's idle return, so it only measures while audio is playing.
+ */
+let policy: { fast: number; failed: number[]; windows: number } | null = null
+export function publishTierDebug(fast: number, failed: number[]): void {
+  policy = { fast, failed: [...failed], windows: (policy?.windows ?? 0) + 1 }
+}
+
 /** Called by ThermalRunaway whenever it recomputes the render scale. */
 export function publishRigStats(s: RigStats): void {
   stats = s
@@ -68,6 +82,10 @@ export function rigStatsLine(): string {
   const rung = s.tier === 0 ? 'top rung' : `${s.tier} of ${s.tierCount - 1} below top`
   const head = s.topMultiplier > 1 && s.tier > 0 ? ` · x${s.topMultiplier} rung available` : ''
   const t = ` · tier ${s.tier} (x${s.tierMultiplier}, ${rung})${head}`
+  // Empty when the sampler has never run — which is itself the answer, not a missing field.
+  const p = policy
+    ? ` · climb ${policy.fast}/8 · failed [${policy.failed.join(',')}] · ${policy.windows}w`
+    : ' · sampler has not run (needs audio playing)'
   const q = s.quality > 0.5 ? '' : ' · reduced passes'
-  return `rig ${s.bufferW}x${s.bufferH} @ ${s.scale.toFixed(2)}x (dpr ${s.dpr}) — ${verdict}${t}${q}`
+  return `rig ${s.bufferW}x${s.bufferH} @ ${s.scale.toFixed(2)}x (dpr ${s.dpr}) — ${verdict}${t}${q}${p}`
 }
