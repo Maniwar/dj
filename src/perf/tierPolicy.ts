@@ -35,6 +35,8 @@ export type TierState = {
   fast: number
   /** How many times each tier index has proven too expensive. Index = tier. */
   failed: number[]
+  /** How many times each tier has been forgiven, so retries can back off. Index = tier. */
+  forgiven: number[]
 }
 
 export type TierMove = 'down' | 'up' | 'hold'
@@ -75,7 +77,7 @@ export const MAX_RETRIES = 2
 export const FORGIVE_AFTER = 30
 
 export function newTierState(tierCount: number): TierState {
-  return { strikes: 0, fast: 0, failed: new Array(tierCount).fill(0) }
+  return { strikes: 0, fast: 0, failed: new Array(tierCount).fill(0), forgiven: new Array(tierCount).fill(0) }
 }
 
 /**
@@ -124,8 +126,16 @@ export function tierMove(
     }
     // Blocked by the retry budget. Keep counting: if the machine stays comfortable far longer than
     // any transient lasts, the evidence that it failed here is stale and one failure is forgiven.
-    if (st.fast >= FORGIVE_AFTER) {
+    //
+    // BUT THE WAIT DOUBLES EACH TIME. Flat forgiveness re-offers the rung every ~10s forever, so a
+    // machine that genuinely cannot hold it pays a burst of bad frames on a permanent loop -- worse
+    // than never probing at all, and exactly what the retry budget existed to prevent. Doubling
+    // means a rung that keeps failing is retried after 10s, then 20s, 40s, 80s and so on, which
+    // fades to never in practice while still recovering instantly from a one-off bad spell.
+    const n = st.forgiven[tier - 1] ?? 0
+    if (st.fast >= FORGIVE_AFTER * Math.pow(2, n)) {
       st.failed[tier - 1] = Math.max(0, (st.failed[tier - 1] ?? 0) - 1)
+      st.forgiven[tier - 1] = n + 1
       st.fast = 0
     }
   }

@@ -111,6 +111,23 @@ check('a machine pinned at the bottom with its retries spent still climbs back g
   check('and that retrying stays rare over 3000 windows', moves < 250, true)
 }
 
+{
+  // A machine that cannot hold tier 0 must stop probing it, not stutter on a permanent loop.
+  const st = newTierState(MAX + 1)
+  let tier = 0
+  const probes = []
+  for (let i = 0; i < 4000; i++) {
+    const m = tierMove(tier === 0 ? 50 : 5, tier, MAX, SLOW, st)
+    if (m === 'down') tier++
+    else if (m === 'up') { tier--; probes.push(i) }
+  }
+  const early = probes.filter(i => i < 1000).length
+  const late = probes.filter(i => i >= 3000).length
+  console.log(`    (probed tier 0 ${probes.length}x in 4000 windows; ${early} early, ${late} late)`)
+  check('probing an unaffordable rung backs off instead of looping forever', late < early, true)
+  check('and it stops entirely within a few thousand windows', late <= 1, true)
+}
+
 console.log('\nEDGES')
 check('at the bottom tier it still samples instead of switching itself off (the old bug)',
   run(rep(40, 10), MAX).tier, MAX)
