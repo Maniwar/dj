@@ -43,11 +43,12 @@ const SCENARIOS = {
   lasers: {
     why: 'the sweeping beams and their volumetric god rays, mid-bar so they are spread across the frame',
     uni: { uBeat: 1, uLevel: 0.8, uBass: 0.8, uBar: 0.35, uBuild: 0.5, uSong: 0.3 },
-    // no fixed crop: the beams sweep with uBar, so the hotspot scan finds them
+    band: [0.0, 0.55], // above the LED strip, or the wall wins the edge-energy scan every time
   },
   ledwall: {
     why: 'the cell grid is snapped to whole pixels, so it is the effect most sensitive to render scale',
     uni: { uBeat: 1, uDown: 1, uLevel: 0.9, uBass: 0.9, uSong: 0.3 },
+    band: [0.7, 1.0], // the wall itself
   },
   water: {
     why: 'beads and runners — fine curved edges and specular highlights, where aliasing shows worst',
@@ -57,6 +58,7 @@ const SCENARIOS = {
   confetti: {
     why: 'small bright particles, the classic case where one sample per pixel produces blocky squares',
     uni: { uConfetti: 1, uDrop: 1, uBeat: 1, uLevel: 0.9, uSong: 0.3 },
+    band: [0.0, 0.55],
   },
 }
 
@@ -115,8 +117,16 @@ const pngs = await page.evaluate(async ({ vs, fs, W, H, scenarios, names, SS }) 
     gl.uniform1i(U('uFreq'), 0); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex)
     gl.viewport(0, 0, w, h); gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT)
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
+    const raw = new Uint8Array(w * h * 4)
+    gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, raw)
+    // FLIPPED. readPixels returns rows bottom-up while every crop, band and composite here treats
+    // y as top-down -- so a band meaning "the top half of the picture" was selecting the bottom of
+    // the scene, which is where the LED wall lives. Both the `lasers` and `confetti` comparisons
+    // were therefore illustrated with the wall. Flip once at the source rather than making every
+    // consumer remember the convention.
     const px = new Uint8Array(w * h * 4)
-    gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px)
+    for (let y = 0; y < h; y++)
+      px.set(raw.subarray((h - 1 - y) * w * 4, (h - y) * w * 4), y * w * 4)
     return { px, w, h }
   }
 
@@ -147,6 +157,29 @@ const pngs = await page.evaluate(async ({ vs, fs, W, H, scenarios, names, SS }) 
     return { px: out, w: W, h: H }
   }
 
+  // BOX DOWNSAMPLE IS THE SOFTEST FILTER THERE IS. It removes the jaggies and takes the crispness
+  // with them -- "supersampled looks soft" is exactly right, and it is a property of the filter, not
+  // of supersampling. An unsharp mask restores the edge contrast the averaging took out, without
+  // bringing back the staircase: the jaggies were removed by SAMPLING (4 samples per output pixel),
+  // and sharpening operates on the already-averaged result, so it cannot reintroduce them.
+  const sharpen = (img, amount) => {
+    const out = new Uint8ClampedArray(img.px.length)
+    const at = (x, y, c) => img.px[((Math.min(img.h-1, Math.max(0, y))) * img.w +
+                                    (Math.min(img.w-1, Math.max(0, x)))) * 4 + c]
+    for (let y = 0; y < img.h; y++) for (let x = 0; x < img.w; x++) {
+      const o = (y * img.w + x) * 4
+      for (let c = 0; c < 3; c++) {
+        // 3x3 blur as the low-pass, then push the original away from it
+        const blur = (at(x-1,y-1,c) + at(x,y-1,c) + at(x+1,y-1,c) +
+                      at(x-1,y  ,c) + at(x,y  ,c) + at(x+1,y  ,c) +
+                      at(x-1,y+1,c) + at(x,y+1,c) + at(x+1,y+1,c)) / 9
+        out[o+c] = at(x,y,c) + (at(x,y,c) - blur) * amount
+      }
+      out[o+3] = 255
+    }
+    return { px: out, w: img.w, h: img.h }
+  }
+
   // Magnified nearest-neighbour crop, so individual pixels are visible and a staircase reads as
   // a staircase rather than being hidden by the viewer's own scaling.
   const crop = (img, cx, cy, cw, ch, zoom) => {
@@ -161,17 +194,19 @@ const pngs = await page.evaluate(async ({ vs, fs, W, H, scenarios, names, SS }) 
     return { px: out, w: cw * zoom, h: ch * zoom }
   }
 
-  const compose = (a, b, labelA, labelB) => {
+  const compose = (panels) => {
     const gap = 10, c = document.createElement('canvas')
-    c.width = a.w + b.w + gap; c.height = a.h + 26
+    c.width = panels.reduce((n, p) => n + p.img.w + gap, -gap); c.height = panels[0].img.h + 26
     const g = c.getContext('2d')
     g.fillStyle = '#111'; g.fillRect(0, 0, c.width, c.height)
-    const put = (img, x) => { const d = new ImageData(img.px, img.w, img.h)
-      const t = document.createElement('canvas'); t.width = img.w; t.height = img.h
-      t.getContext('2d').putImageData(d, 0, 0); g.drawImage(t, x, 26) }
-    put(a, 0); put(b, a.w + gap)
-    g.fillStyle = '#fff'; g.font = 'bold 15px monospace'
-    g.fillText(labelA, 6, 18); g.fillText(labelB, a.w + gap + 6, 18)
+    let x = 0
+    for (const p of panels) {
+      const d = new ImageData(p.img.px, p.img.w, p.img.h)
+      const t = document.createElement('canvas'); t.width = p.img.w; t.height = p.img.h
+      t.getContext('2d').putImageData(d, 0, 0); g.drawImage(t, x, 26)
+      g.fillStyle = '#fff'; g.font = 'bold 15px monospace'; g.fillText(p.label, x + 6, 18)
+      x += p.img.w + gap
+    }
     return c.toDataURL('image/png')
   }
 
@@ -180,9 +215,14 @@ const pngs = await page.evaluate(async ({ vs, fs, W, H, scenarios, names, SS }) 
   // uniforms, and a fixed coordinate cannot track that. This scans for the tile with the most edge
   // energy (summed neighbour differences), which is by definition where the sharpest structure is,
   // and therefore where a difference in render scale would show. `crop` in a scenario overrides it.
-  const hotspot = (img, cw, ch) => {
+  // `band` limits the search to a vertical slice. Without it every scenario returned the LED wall:
+  // a grid of hard-edged cells has more edge energy than any beam or particle, so `lasers` and
+  // `confetti` were both being illustrated with a picture of the wall.
+  const hotspot = (img, cw, ch, band) => {
+    const yLo = Math.round((band ? band[0] : 0) * img.h)
+    const yHi = Math.round((band ? band[1] : 1) * img.h)
     let best = null
-    for (let y = 0; y + ch <= img.h; y += Math.round(ch / 3)) {
+    for (let y = yLo; y + ch <= yHi; y += Math.round(ch / 3)) {
       for (let x = 0; x + cw <= img.w; x += Math.round(cw / 3)) {
         let e = 0
         for (let j = y; j < y + ch; j += 2) for (let i = x; i < x + cw; i += 2) {
@@ -203,11 +243,13 @@ const pngs = await page.evaluate(async ({ vs, fs, W, H, scenarios, names, SS }) 
     // 1.5x is the actual top rung of TIERS in ThermalRunaway, not a round number chosen for the test.
     const sup = down(draw(Math.round(W * SS), Math.round(H * SS), SS, sc.uni), W, H)
     // Located on the NATIVE frame and reused for both, so the two panels show the same region.
-    const at = sc.crop || (h => [h.cx, h.cy])(hotspot(nat, CW, CH))
-    res[name] = compose(
-      crop(nat, at[0], at[1], CW, CH, ZOOM),
-      crop(sup, at[0], at[1], CW, CH, ZOOM),
-      'NATIVE 1.0x', `SUPERSAMPLED ${SS}x`)
+    const at = sc.crop || (h => [h.cx, h.cy])(hotspot(nat, CW, CH, sc.band))
+    const shp = sharpen(sup, 0.9)
+    res[name] = compose([
+      { img: crop(nat, at[0], at[1], CW, CH, ZOOM), label: 'NATIVE 1.0x' },
+      { img: crop(sup, at[0], at[1], CW, CH, ZOOM), label: `SUPERSAMPLED ${SS}x` },
+      { img: crop(shp, at[0], at[1], CW, CH, ZOOM), label: `${SS}x + SHARPEN` },
+    ])
   }
   return res
 }, { vs: thermalVert, fs: thermalFrag, W, H, scenarios: SCENARIOS, names, SS })
