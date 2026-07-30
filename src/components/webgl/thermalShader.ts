@@ -1098,7 +1098,21 @@ export const thermalFrag = /* glsl */ `
       // Gated rather than scaled: smoothstep reaches full occlusion as soon as confetti is
       // meaningfully present, and returns to zero during the clear phase of the cycle so invisible
       // flakes cannot punch dark holes in the wall.
-      col *= 1.0 - clamp(flakeCover, 0.0, 1.0) * 0.95 * smoothstep(0.0, 0.12, uConfetti);
+      // PAPER INTERCEPTS LIGHT AND REFLECTS IT -- it does not just delete it. Occluding alone turned
+      // every flake crossing the LED wall into a black rectangle: the wall's light was removed and
+      // only the flake's own modest self-light went back, so a bright surface became a dark notch.
+      // Which is the same error as the first attempt, inverted -- too transparent, then too opaque,
+      // when the actual answer is that the flake should be LIT BY whatever it is passing in front of.
+      //
+      // So the blocked light is captured rather than discarded, tinted by the flake's own colour and
+      // re-emitted. A gold flake over a green wall goes bright gold; the same flake over a dark
+      // patch of footage stays dim, because there was nothing there to intercept.
+      float occ = clamp(flakeCover, 0.0, 1.0) * 0.90 * smoothstep(0.0, 0.12, uConfetti);
+      vec3 blocked = col * occ;
+      // flakes is tint * coverage, so dividing coverage out recovers the colour on its own.
+      vec3 flakeTint = flakes / max(flakeCover, 1e-3);
+      col -= blocked;
+      col += blocked * flakeTint * 0.95;
       vec3 flakeLight = flakes * (0.60 + lightHere * 1.9) * uConfetti * (0.78 + uBeat * 0.32);
       col += flakeLight;
       // Foil is a mirror, so a flake passing a drop should put a glint in it -- but each flake is a
