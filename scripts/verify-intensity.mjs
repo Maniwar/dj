@@ -164,12 +164,30 @@ eq('--fx is 0', s.fx, '0.000')
 eq('every NON-ESSENTIAL effect is retired', s.off.length, NON_ESSENTIAL)
 // --m-beat is a REGISTERED property, so the computed value is the number, not the token that was
 // written; compare numerically or a correct "0.00" reads as a failure against a literal "0".
-Number(s.beat) > 0
-  ? ok('the beat variable survives the floor', `--m-beat ${s.beat} — clamped at FX_MOTION_MIN ${FX_MOTION_MIN}, not zeroed`)
-  : bad('the beat variable survives the floor', `--m-beat ${s.beat} — the motion clamp is not in effect`)
-s.lift !== '0px'
-  ? ok('the heading lift survives the floor', `--beat-lift ${s.lift}`)
-  : bad('the heading lift survives the floor', 'the lift was zeroed; essential beat motion is gone')
+// POLLED, NOT SAMPLED ONCE. --m-beat is a live audio transient: between two beats it is legitimately
+// near zero, so a single read makes this check flaky, and a flaky suite is very nearly as useless as
+// a red one. It failed intermittently for exactly that reason. Poll for up to 3s and take the peak;
+// only a floor that is genuinely pinned to zero can fail now.
+const peak = await page.evaluate(async () => {
+  const root = document.documentElement
+  let beat = 0
+  let lift = '0px'
+  const t0 = performance.now()
+  while (performance.now() - t0 < 3000) {
+    const cs = getComputedStyle(root)
+    beat = Math.max(beat, Number(cs.getPropertyValue('--m-beat')) || 0)
+    const l = cs.getPropertyValue('--beat-lift').trim()
+    if (l && l !== '0px') lift = l
+    await new Promise((r) => requestAnimationFrame(r))
+  }
+  return { beat, lift }
+})
+peak.beat > 0
+  ? ok('the beat variable survives the floor', `peak --m-beat ${peak.beat} — clamped at FX_MOTION_MIN ${FX_MOTION_MIN}, not zeroed`)
+  : bad('the beat variable survives the floor', 'peak --m-beat was 0 across 3s — the motion clamp is not in effect')
+peak.lift !== '0px'
+  ? ok('the heading lift survives the floor', `peak --beat-lift ${peak.lift}`)
+  : bad('the heading lift survives the floor', 'the lift stayed 0px across 3s; essential beat motion is gone')
 eq('the light rig is not drawn', s.canvasOpacity === null || s.canvasOpacity === '0', true)
 
 console.log('\n--- the top of the dial ---')
