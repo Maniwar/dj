@@ -986,14 +986,24 @@ export const thermalFrag = /* glsl */ `
     // Rounded, and never below 1, so the dark edge always exists.
     float gapPx = max(floor(uPxScale + 0.5), 1.0);
     float gap = gapPx / cellPx;
-    float cellY = smoothstep(gap*0.4, gap*1.4, fract(uv.y * uRes.y / cellPx));
-    float cellX = smoothstep(gap*0.4, gap*1.4, fract(uv.x * uRes.x / cellPx));
+    // THE WALL IS SEEN THROUGH THE WATER TOO. Everything here composites additively, so there is no
+    // depth order -- and the wall is bright enough that a bead adding a little light on top of it is
+    // imperceptible. The water read as being BEHIND the wall for that reason, which is backwards:
+    // the water is on the lens, so it is in front of everything in the room.
+    //
+    // Adding more light was never going to fix it. What makes a drop read as in front of a bright
+    // surface is that the surface BENDS through it -- the cell grid kinking as it passes behind a
+    // droplet is unmistakable, because the grid is rigidly regular and the eye knows what it should
+    // look like. So the wall is sampled at the displaced coordinate, exactly as the beams are.
+    vec2 wuv = uv + wdisp * 0.85;
+    float cellY = smoothstep(gap*0.4, gap*1.4, fract(wuv.y * uRes.y / cellPx));
+    float cellX = smoothstep(gap*0.4, gap*1.4, fract(wuv.x * uRes.x / cellPx));
     // THE WALL LIGHTS THE ROOM TOO, at a fraction of its own brightness. It is a diffuse source, not
     // a directional one -- a big lit surface behind the room rather than a head pointed at the lens --
     // so it should wash the water near it rather than flare it the way a beam does. 0.30 is low
     // deliberately: the wall covers a wide strip, so at full strength it would lift every bead in the
     // lower third uniformly, which reads as the water glowing on its own rather than catching light.
-    vec3 wallLight = wallCol * step(uv.y, lip) * cellY * cellX * (0.34 + uBeat*0.42 + uDrop*0.6);
+    vec3 wallLight = wallCol * step(wuv.y, lip) * cellY * cellX * (0.34 + uBeat*0.42 + uDrop*0.6);
     col += wallLight;
     beams += wallLight * 0.30;
     // soft spill of light up off the strip
