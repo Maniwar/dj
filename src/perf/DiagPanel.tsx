@@ -500,8 +500,15 @@ function Panel({ host, onClose }: { host: HTMLDivElement | null; onClose: () => 
               >
                 {id === 'auto' ? 'auto' : PROFILE_BY_ID[id].label}
                 {/* The detected value as a ghost label, so `auto` is never a black box: what this
-                    device MEASURED is visible whether or not it is what is being applied. */}
-                {id === 'auto' && ps.detected && <em>→ {ps.detected}</em>}
+                    device MEASURED is visible whether or not it is what is being applied.
+
+                    ALWAYS rendered, which it was not. The label was conditional on ps.detected, so
+                    it vanished entirely in the one state where the question is most live -- a
+                    profile picked by hand means the detector never runs, so there is no detected
+                    value, so the row went silent and `auto` became the black box this comment says
+                    it must never be. "not measured" is information; an absent label is not, and it
+                    also reads as though the panel has lost track of something. */}
+                {id === 'auto' && <em>→ {ps.detected ?? 'not measured'}</em>}
               </button>
             ))}
           </div>
