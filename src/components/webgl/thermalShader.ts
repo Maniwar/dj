@@ -366,10 +366,34 @@ export const thermalFrag = /* glsl */ `
       col += gold * flake * uConfetti * (0.55 + uBeat * 0.4);
     }
     // DROP = pyro. Rays fire out of the middle for the length of the release.
+    //
+    // CONFINED AND DIMMED, and this was THE whitewash. Reported many times as the picture going
+    // milky and unreadable -- "flashes on like this every dew cycle" -- and it reads as coincident
+    // with dew because a drop and a dew-point hit ride the same musical peak.
+    //
+    // What it was: 18 spokes (sin(ang*9) doubled by abs) radiating from the exact centre, in warm
+    // gold, spread across 85% of the frame RADIUS at 1.15 gain, additive under mix-blend-mode:
+    // screen. Screen can only lighten, so a full-frame gold wash at that strength does not read as
+    // pyro at all -- it lifts the entire image toward white and buries the footage, which is the one
+    // thing the rig comments elsewhere in this file insist must not happen ("the footage is the
+    // star; the rig lights it").
+    //
+    // Three changes, all about CONTAINMENT rather than removal:
+    //   radius 0.85 -> 0.40, so the burst lives in the middle of the frame instead of covering it.
+    //     The falloff now starts at 0.10 as well, which hollows the very centre slightly -- real
+    //     pyro is brightest a little way out from its origin, not at a single saturated point.
+    //   gain 1.15 -> 0.5, which stops the spokes clipping to white the moment uDrop peaks.
+    //   spokes narrowed 22 -> 30, so each ray is a shaft rather than a wedge. Narrower rays read as
+    //     brighter at the same energy, which buys back some of the punch the gain cut costs.
+    //
+    // NOT VERIFIABLE FROM A HEADLESS CAPTURE: uDrop only rises when audio is playing, and audio
+    // does not play in headless Chrome, so this branch is never even entered in anything measured on
+    // the build machine. That is why five earlier hypotheses about the wash all scored clean here.
     if (uDrop > 0.01) {
       float ang = atan(p.y, p.x);
-      float rays = pow(abs(sin(ang*9.0 + uTime*1.6)), 22.0);
-      col += vec3(1.0,0.72,0.34) * rays * uDrop * (1.0 - smoothstep(0.0, 0.85, r)) * 1.15;
+      float rays = pow(abs(sin(ang*9.0 + uTime*1.6)), 30.0);
+      float reach = (1.0 - smoothstep(0.10, 0.40, r)) * smoothstep(0.0, 0.06, r);
+      col += vec3(1.0,0.72,0.34) * rays * uDrop * reach * 0.5;
     }
 
     // CONDENSATION beading over the whole "lens" — the humidity signature.
