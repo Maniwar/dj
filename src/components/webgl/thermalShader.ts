@@ -248,7 +248,14 @@ export const thermalFrag = /* glsl */ `
       // Small near-field radius only: enough to stop a blown-out blob AT the lens, but not so
       // wide that it erases the centre-burst look (whose origin is the middle of the screen).
       float att = fwd * smoothstep(0.0, 0.10, len) / (1.0 + len*0.9);
-      float w = (0.0030 + uBeat*0.012 + uBass*0.004 + uDrop*0.02) * beamWidth(fi); // fattens on the hit
+      // FLOORED AT ~1.8 CANVAS PIXELS. beamWidth() narrows some groups hard -- 0.45 for the floor
+      // uplights -- so the core came out at 0.0030*0.45 = 0.00135 in p units, and p.y spans 1.0 over
+      // uRes.y, which is 1.08 pixels on a 1280x800 viewport at scale 1.0 and worse at 0.55. A
+      // sub-pixel core cannot be anti-aliased by the smoothstep below it; it just flickers along the
+      // beam, which is the residual "lasers still look pixelated". Floored, the narrow groups stay
+      // visibly narrower than the rest without going below what the buffer can draw.
+      float wRaw = (0.0030 + uBeat*0.012 + uBass*0.004 + uDrop*0.02) * beamWidth(fi); // fattens on the hit
+      float w = max(wRaw, 1.8 / max(uRes.y, 1.0));
       float core = smoothstep(w, 0.0, d) * att;
       // Halo width/strength are deliberately restrained: the alpha of this whole layer is its
       // own luminance, so an over-bright halo turns the overlay opaque and BURIES the footage
@@ -431,10 +438,19 @@ export const thermalFrag = /* glsl */ `
     // Converted through uPxScale, then floored at 2 canvas pixels: below that the canvas physically
     // cannot resolve a cell and the grid just aliases, so the fine mode gets as close as the buffer
     // allows instead of asking for detail that does not exist.
-    float cellDisplayPx = uPattern < 1.5 ? 3.0 : (uPattern < 3.5 ? 6.0 : 10.0);
-    float cellPx = max(cellDisplayPx * uPxScale, 2.0);
-    float cellY = smoothstep(0.12, 0.40, fract(uv.y * uRes.y / cellPx));
-    float cellX = smoothstep(0.12, 0.40, fract(uv.x * uRes.x / cellPx));
+    float cellDisplayPx = uPattern < 1.5 ? 4.0 : (uPattern < 3.5 ? 7.0 : 11.0);
+    // FLOOR AT 5, NOT 2. A cell needs room for a cell AND a gap, and fract(pos/cellPx) only takes
+    // cellPx distinct values -- so at 2 it is [0.00, 0.50] and at 3 it is [0.00, 0.33, 0.67]. Neither
+    // can express a lit square with a dark edge; they collapse into a 1px checkerboard, which upscales
+    // into stripes and moire. That is exactly what "not squares pattern at times" was: the fine mode
+    // at 3 display px times a 0.67 render scale is 2.01, landing on the old floor. Reported and
+    // measured. At 5 the samples are [0.00, 0.20, 0.40, 0.60, 0.80] and a square reads properly.
+    float cellPx = max(cellDisplayPx * uPxScale, 5.0);
+    // The gap is ONE canvas pixel wide whatever the cell size, instead of a fixed 0.12-0.40 fraction
+    // that got narrower in absolute terms as cells grew and vanished as they shrank.
+    float gap = 1.0 / cellPx;
+    float cellY = smoothstep(gap*0.4, gap*1.4, fract(uv.y * uRes.y / cellPx));
+    float cellX = smoothstep(gap*0.4, gap*1.4, fract(uv.x * uRes.x / cellPx));
     col += wallCol * step(uv.y, lip) * cellY * cellX * (0.34 + uBeat*0.42 + uDrop*0.6);
     // soft spill of light up off the strip
     col += wallCol * step(uv.y, lip + 0.075) * smoothstep(lip + 0.075, lip, uv.y) * (0.05 + uLevel*0.05);
