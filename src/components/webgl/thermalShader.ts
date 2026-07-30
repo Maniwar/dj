@@ -56,6 +56,14 @@ export const thermalFrag = /* glsl */ `
   // is retired by the dial or the registry, and the two samples below are skipped entirely.
   uniform sampler2D uBackdrop;
   uniform float uRefract;
+  // THE CURSOR, AS LIGHT IN THE ROOM. The trail and the click burst are DOM elements -- .glow-trail
+  // and .click-burst -- drawn far above this canvas, so nothing in the rig could ever react to them:
+  // move the pointer over a droplet and it stayed dark. These carry the same gesture into the shader
+  // as actual light, so the water, the confetti and the dust answer to it. The DOM versions stay as
+  // the crisp foreground cursor; this is the room responding, not a copy of them.
+  uniform vec2  uTrail[8];   // recent pointer positions, 0 = newest
+  uniform vec2  uClickPos;
+  uniform float uClickAge;   // seconds since the last click, large when there has not been one
   uniform float uFreqCount;
 
   // ============================================================
@@ -668,6 +676,40 @@ export const thermalFrag = /* glsl */ `
     // Weighted a little higher into the field than into the picture: the spot is soft and wide, so
     // the direct contribution has to stay subtle to avoid a milky patch, but the things it LIGHTS
     // should respond to it clearly.
+    // ---- CURSOR TRAIL AS LIGHT ----
+    // Eight recent positions, each dimmer and tighter than the last, so the path reads as something
+    // that was dragged through the haze rather than eight separate lamps. Folded into the light field
+    // the same way the follow spot is, so drops along the path brighten as the pointer goes by.
+    vec3 trailLight = vec3(0.0);
+    for (int i = 0; i < 8; i++) {
+      float fi = float(i);
+      vec2 tp = vec2((uTrail[i].x - 0.5) * aspect, uTrail[i].y - 0.5);
+      float age = 1.0 - fi / 8.0;             // 1 at the head, fading back along the path
+      float rad = 0.045 + fi * 0.016;         // older samples bloom wider as they dissipate
+      trailLight += uAccent * smoothstep(rad, 0.0, length(p - tp)) * age * age * 0.16;
+    }
+    col += trailLight;
+    beams += trailLight * 3.0;
+
+    // ---- CLICK: A SHOCKWAVE THROUGH THE ROOM ----
+    // A ring that expands and fades, plus a flash at the point of impact. uClickAge is seconds since
+    // the click, so this costs nothing at all when nobody has clicked -- the branch is uniform, so the
+    // GPU skips it coherently rather than executing both sides.
+    if (uClickAge < 1.2) {
+      vec2 cp = vec2((uClickPos.x - 0.5) * aspect, uClickPos.y - 0.5);
+      float cd = length(p - cp);
+      float k = uClickAge / 1.2;              // 0 at impact, 1 when spent
+      float decay = (1.0 - k) * (1.0 - k);    // fades fast, the way a real shock does
+      // the ring travels outward and thins as it goes
+      float ringR = k * 0.75;
+      float ringW = 0.010 + k * 0.045;
+      vec3 clickLight =
+          uAccent * smoothstep(ringW, 0.0, abs(cd - ringR)) * decay * 0.55
+        + mix(uAccent, vec3(1.0), 0.5) * smoothstep(0.09, 0.0, cd) * decay * 0.85;
+      col += clickLight;
+      beams += clickLight * 2.6;
+    }
+
     vec2 mpos = vec2((uMouse.x-0.5)*aspect, uMouse.y-0.5);
     vec3 spot = uAccent * smoothstep(0.40, 0.0, length(p - mpos)) * (0.045 + uBeat*0.11);
     col += spot;

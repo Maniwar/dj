@@ -70,10 +70,40 @@ function shaderScale(cssW: number, cssH: number): number {
 }
 
 const pointer = { x: 0.5, y: 0.5 }
+/**
+ * A short history of pointer positions, newest first, and the last click.
+ *
+ * The visible trail and burst are DOM (.glow-trail, .click-burst in BeatCursor) and the rig cannot
+ * see them, so the same gesture is carried into the shader as LIGHT — which is what lets the water,
+ * the confetti and the dust react to the cursor. Module scope rather than component state because it
+ * is read once per frame inside useFrame and must never trigger a React render.
+ *
+ * Sampled on a distance threshold rather than on every event: a fast drag fires pointermove far more
+ * often than the rig draws, and an unfiltered history would collapse into eight samples spanning a
+ * few pixels — a blob, not a trail.
+ */
+const TRAIL_LEN = 8
+const trail = Array.from({ length: TRAIL_LEN }, () => ({ x: 0.5, y: 0.5 }))
+const click = { x: 0.5, y: 0.5, at: -100 }
 if (typeof window !== 'undefined') {
   window.addEventListener('pointermove', (e) => {
     pointer.x = e.clientX / window.innerWidth
     pointer.y = 1 - e.clientY / window.innerHeight
+    const dx = pointer.x - trail[0].x
+    const dy = pointer.y - trail[0].y
+    if (dx * dx + dy * dy > 0.0004) {
+      for (let i = TRAIL_LEN - 1; i > 0; i--) {
+        trail[i].x = trail[i - 1].x
+        trail[i].y = trail[i - 1].y
+      }
+      trail[0].x = pointer.x
+      trail[0].y = pointer.y
+    }
+  })
+  window.addEventListener('pointerdown', (e) => {
+    click.x = e.clientX / window.innerWidth
+    click.y = 1 - e.clientY / window.innerHeight
+    click.at = performance.now() / 1000
   })
 }
 
@@ -120,6 +150,9 @@ function Mainstage() {
       // The footage, so water can bend it. Null until a <video> is actually on screen.
       uBackdrop: { value: null as THREE.VideoTexture | null },
       uRefract: { value: 0 },
+      uTrail: { value: Array.from({ length: 8 }, () => new THREE.Vector2(0.5, 0.5)) },
+      uClickPos: { value: new THREE.Vector2(0.5, 0.5) },
+      uClickAge: { value: 99 },
       uQuality: { value: PERF.isMobile ? 0 : 1 }, // phones skip the costliest shader passes
       uSong: { value: 0 }, // per-track lighting design (stable hash of the slug)
       uPattern: { value: 0 }, // which rig look is up; changes every 4 bars
@@ -333,6 +366,11 @@ function Mainstage() {
     // produces the burst; it is no longer the only thing that produces anything.
     confettiRef.current = Math.max(mu.drop, confettiRef.current - dt / 11.0)
     u.uConfetti.value = Math.max(confettiRef.current, mu.bpm > 0 ? 0.24 : 0.0)
+    // Cursor history and the last click, straight through — no smoothing here, because the trail's
+    // own spacing IS the smoothing and the click is meant to be instant.
+    for (let i = 0; i < 8; i++) u.uTrail.value[i].set(trail[i].x, trail[i].y)
+    u.uClickPos.value.set(click.x, click.y)
+    u.uClickAge.value = performance.now() / 1000 - click.at
 
     // ---- THE FOOTAGE AS A TEXTURE ----
     // The rig composites over a DOM <video> and has never been able to see it, which is why the water
