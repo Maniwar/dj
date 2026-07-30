@@ -990,7 +990,10 @@ export const thermalFrag = /* glsl */ `
       // share of the frame, so paper falling through the dark half of the shot was effectively
       // invisible -- the same mistake that hid the water. Foil catches SOME light from the room even
       // where no beam finds it.
-      vec3 flakeLight = flakes * (0.60 + lightHere * 1.9) * uConfetti * (0.55 + uBeat * 0.4);
+      // The beat term's FLOOR is what mattered here, not its range. At 0.55 it was halving the
+      // effect between kicks, on top of the ambient level already scaling it -- two dimmers applied
+      // to one effect. 0.78 keeps a clear beat pulse while leaving the flakes readable in between.
+      vec3 flakeLight = flakes * (0.60 + lightHere * 1.9) * uConfetti * (0.78 + uBeat * 0.32);
       col += flakeLight;
       // Foil is a mirror, so a flake passing a drop should put a glint in it -- but each flake is a
       // few pixels and the field is sparse, so this is a small local kick rather than a wash. 0.45,

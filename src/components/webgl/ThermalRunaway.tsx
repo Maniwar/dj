@@ -441,7 +441,12 @@ function Mainstage() {
     // and this baseline never once fired. Confetti has only ever appeared on mu.drop, which is a
     // genuine drop detector firing once or twice a track. That is the answer to "what triggers the
     // confetti, I do not see it": nothing did, most of the time.
-    u.uConfetti.value = Math.max(confettiRef.current, audioBus.playing ? 0.26 : 0.0)
+    // 0.55 ambient, not 0.26. This is one of two multiplicative dimmers on the same effect -- the
+    // shader also scales the flakes by (0.55 + uBeat*0.4) -- and 0.26 x 0.55 is 14%, so a fully lit
+    // flake emitted 0.086 under a screen blend and simply did not appear over bright footage.
+    // Reported as the confetti being almost transparent. Neither number was wrong on its own; they
+    // were tuned in different passes and nothing looked at the product.
+    u.uConfetti.value = Math.max(confettiRef.current, audioBus.playing ? 0.55 : 0.0)
     // Cursor history and the last click, straight through — no smoothing here, because the trail's
     // own spacing IS the smoothing and the click is meant to be instant.
     for (let i = 0; i < 8; i++) u.uTrail.value[i].set(trail[i].x, trail[i].y)
