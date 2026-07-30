@@ -961,8 +961,31 @@ section.hero { min-height: 100vh; min-height: 100svh; display: grid; place-items
 .egg-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 120; background: var(--grad-gold); color: #0d1017; font-family: 'Oswald', sans-serif; font-weight: bold; padding: 0.9rem 1.5rem; border-radius: 999px; box-shadow: 0 12px 44px rgba(230,192,90,0.6); letter-spacing: 0.05em; }
 
 body.sauna { filter: saturate(1.25) hue-rotate(-6deg); }
-body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 25; pointer-events: none; background: radial-gradient(120% 80% at 50% 120%, rgba(247,230,192,0.12), transparent 60%); animation: steamPulse 3s ease-in-out infinite; }
-@keyframes steamPulse { 50% { opacity: 0.5; } }
+/* STEAM AS RISING HAZE, NOT A PULSE.
+   It was one flat cream wash over the whole viewport on a 3s ease-in-out loop. A 3-second cycle on a
+   full-screen layer is fast enough to read as strobing rather than as atmosphere, and stacked on the
+   grain and the scanlines it was most of what "too much going on" meant.
+   Rethought around three ideas:
+   1. SLOW. 19s, alternating, so it drifts. Steam does not throb.
+   2. TWO OFFSET LAYERS at different sizes and origins, so the density varies across the frame and it
+      reads as convection instead of a single vignette breathing.
+   3. COMPOSITOR-ONLY MOTION. transform and opacity only -- no background-position, no filter -- so a
+      full-viewport fixed layer costs no repaint per frame. That matters here more than anywhere: this
+      sits above the club at z-index 25.
+   Alpha is down as well (0.12 -> 0.10 + 0.07 over two layers) and the cream is pulled toward neutral,
+   because a warm tint that strong was greying the footage as much as it was fogging it. The inset is
+   negative so the drift never exposes an edge. */
+body.sauna .content::before {
+  content: ''; position: fixed; inset: -12% -6% -6%; z-index: 25; pointer-events: none;
+  background:
+    radial-gradient(145% 72% at 50% 106%, rgba(238,229,214,0.10), rgba(238,229,214,0) 64%),
+    radial-gradient(88% 44% at 24% 102%, rgba(224,231,236,0.07), rgba(224,231,236,0) 58%);
+  animation: steamDrift 19s ease-in-out infinite alternate;
+}
+@keyframes steamDrift {
+  from { transform: translate3d(0, 2.5%, 0) scale(1.02); opacity: 0.5; }
+  to   { transform: translate3d(0, -2.5%, 0) scale(1.06); opacity: 1; }
+}
 
 @media (max-width: 560px) {
   body { font-size: 16px; }

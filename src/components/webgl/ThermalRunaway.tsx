@@ -3,6 +3,23 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { audioBus } from '../../audio/audioBus'
 import { ACCENTS, useSiteStore } from '../../state/useSiteStore'
+
+/**
+ * The order the rig walks its palette through when no section has claimed the colour.
+ *
+ * Ordered so consecutive steps are far apart in hue -- magenta, cold blue, acid, gold, aqua --
+ * because adjacent similar colours read as a flicker rather than as a cue change. `kiki` is absent
+ * on purpose: it is the same value as `default`, so it would stall the walk on pink.
+ */
+const ACCENT_WALK = [
+  ACCENTS.default,
+  ACCENTS.dieter,
+  ACCENTS.both,
+  ACCENTS.ibiza,
+  ACCENTS.miami,
+  ACCENTS.tokyo,
+  ACCENTS.berlin,
+] as const
 import { usePlayerStore } from '../../state/usePlayerStore'
 import { thermalVert, thermalFrag } from './thermalShader'
 import { PERF } from '../../lib/perfFlags'
@@ -281,7 +298,26 @@ function Mainstage() {
     // Change the LOOK every 4 bars, on the bar line — so the rig moves from the overhead
     // truss to the corners to floor uplights to side towers, like a desk running cues.
     u.uPattern.value = Math.floor(mu.beatIndex / 16) % 5
-    const target = ACCENTS[useSiteStore.getState().accent] ?? ACCENTS.default
+    // COLOUR ON THE BAR LINE, NOT ONLY ON SCROLL POSITION.
+    //
+    // The accent was set exclusively by Lore (per stop) and TourJourney (per city), which meant the
+    // rig held house magenta for the entire hero -- and the hero is where the wall is most visible.
+    // Worse, the wall is mostly occluded by content while you are IN those sections, so tying its
+    // only colour change to scrolling spent the palette exactly where nobody could see it.
+    //
+    // So a named section still owns the colour -- that association is the point of ACCENTS and it
+    // must not be overridden. But where nothing has claimed it, the rig walks the palette itself,
+    // advancing every 8 bars on the beat grid. Same mechanism and the same clock as uPattern above,
+    // which already moves the beam LOOK every 4 bars, so the two read as one desk running cues
+    // rather than as two unrelated timers.
+    //
+    // `kiki` is excluded from the walk: it is byte-identical to `default` (both house magenta), so
+    // including it would stall the cycle on pink for two of its steps.
+    const siteAccent = useSiteStore.getState().accent
+    const target =
+      siteAccent !== 'default'
+        ? (ACCENTS[siteAccent] ?? ACCENTS.default)
+        : ACCENT_WALK[Math.floor(mu.beatIndex / 32) % ACCENT_WALK.length]
     const k = 1 - Math.exp(-dt / 0.35)
     u.uAccent.value.x += (target[0] - u.uAccent.value.x) * k
     u.uAccent.value.y += (target[1] - u.uAccent.value.y) * k

@@ -32,6 +32,9 @@ export default function SpectrumDisplay() {
   const accent = useSiteStore((s) => s.accent)
   const accentRef = useRef(accent)
   accentRef.current = accent
+  // The eased colour actually painted, carried across frames. Seeded from the accent in force at
+  // mount so the first frame is already correct rather than fading up from black.
+  const smoothRef = useRef<[number, number, number]>([...(ACCENTS[accent] ?? ACCENTS.default)] as [number, number, number])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -101,7 +104,15 @@ export default function SpectrumDisplay() {
       // not for brightness on its own. `hot` is folded into every call site rather
       // than replaced: a rig that is genuinely running hot should still read hotter, it just no
       // longer decides the hue on its own. ACCENTS values are 0..1 for the shader, hence the *255.
-      const [ar, ag, ab] = ACCENTS[accentRef.current] ?? ACCENTS.default
+      // EASED, NOT SNAPPED. Read raw, this jumped the instant a stop crossed the observer line, so
+      // scrolling read as the display flashing between colours rather than changing cue. The shader
+      // already eases uAccent with a 0.35s time constant (ThermalRunaway), and the two have to agree
+      // or the rig and the player disagree about what colour the room is. 0.05 per frame is that
+      // same constant at 60fps: 1 - exp(-(1/60)/0.35) = 0.047.
+      const tgt = ACCENTS[accentRef.current] ?? ACCENTS.default
+      const sm = smoothRef.current
+      for (let i = 0; i < 3; i++) sm[i] += (tgt[i] - sm[i]) * 0.05
+      const [ar, ag, ab] = sm
       const A = (t: number) => {
         const k = t < 0 ? 0 : t > 1 ? 1 : t
         const c = (v: number) => Math.round(255 * (v + (1 - v) * k))
