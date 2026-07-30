@@ -92,7 +92,13 @@ export default function SpectrumDisplay() {
       const hot = Math.min(1, Math.max(0, (temp - 22) / 90))
       const m = modeRef.current
 
-      // The section accent, lifted toward white by `t`. `hot` is folded into every call site rather
+      // The section accent, lifted toward white by `t`.
+      // THE LIFT VALUES ARE DELIBERATELY SMALL. The first version of this used 0.62-0.90, which
+      // whitened every accent so far that they all collapsed toward pale -- and pale magenta reads
+      // as exactly the "stuck on pink" this was meant to fix. Measured on the canvas: dieter came
+      // back rgb(168,169,186) against a default of rgb(194,148,183), i.e. the accent WAS arriving
+      // and was being washed out on arrival. Keep the hue dominant; the lift is for reading height,
+      // not for brightness on its own. `hot` is folded into every call site rather
       // than replaced: a rig that is genuinely running hot should still read hotter, it just no
       // longer decides the hue on its own. ACCENTS values are 0..1 for the shader, hence the *255.
       const [ar, ag, ab] = ACCENTS[accentRef.current] ?? ACCENTS.default
@@ -106,7 +112,7 @@ export default function SpectrumDisplay() {
       if (m === 'scope') {
         const t = audioBus.time
         ctx.lineWidth = 1.6 * dpr
-        ctx.strokeStyle = A(0.22 + hot * 0.35)
+        ctx.strokeStyle = A(0.06 + hot * 0.16)
         ctx.beginPath()
         for (let i = 0; i < t.length; i += 2) {
           const x = (i / t.length) * W
@@ -159,7 +165,7 @@ export default function SpectrumDisplay() {
           // Peak-only: just the cap, floating on its own decay. Sparse, and the spectral shape
           // reads at a glance without a wall of colour.
           peaks[i] = Math.max(peaks[i] - 1.2 * dpr, v * H)
-          ctx.fillStyle = A(0.3 + hot * 0.4)
+          ctx.fillStyle = A(0.10 + hot * 0.18)
           ctx.fillRect(x, H - peaks[i] - 2 * dpr, bw, 2.5 * dpr)
           continue
         }
@@ -169,9 +175,9 @@ export default function SpectrumDisplay() {
           const half = (v * H) / 2
           const grad = ctx.createLinearGradient(0, H / 2 - half, 0, H / 2 + half)
           // Mirrored: lifted at the extremes, pure accent through the centre line.
-          grad.addColorStop(0, A(0.62 + hot * 0.25))
+          grad.addColorStop(0, A(0.30 + hot * 0.16))
           grad.addColorStop(0.5, A(0.02))
-          grad.addColorStop(1, A(0.62 + hot * 0.25))
+          grad.addColorStop(1, A(0.30 + hot * 0.16))
           ctx.fillStyle = grad
           ctx.fillRect(x, H / 2 - half, bw, half * 2)
           continue
@@ -183,7 +189,7 @@ export default function SpectrumDisplay() {
         // Bars: saturated accent at the floor, lifting toward white at the peak, so height still
         // reads as energy without the hue changing between one bar and its neighbour.
         grad.addColorStop(0, A(0.04))
-        grad.addColorStop(1, A(0.66 + hot * 0.24))
+        grad.addColorStop(1, A(0.34 + hot * 0.16))
         ctx.fillStyle = grad
         ctx.fillRect(x, H - bh, bw, bh)
 
