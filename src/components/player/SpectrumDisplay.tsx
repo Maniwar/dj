@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { audioBus } from '../../audio/audioBus'
 import { usePlayerStore } from '../../state/usePlayerStore'
-import { useSiteStore, VIZ_LABEL } from '../../state/useSiteStore'
+import { ACCENTS, useSiteStore, VIZ_LABEL } from '../../state/useSiteStore'
 
 const BARS = 40
 
@@ -18,6 +18,20 @@ export default function SpectrumDisplay() {
   // The draw loop must NOT restart when the mode changes, so it reads the mode from a ref.
   const modeRef = useRef(mode)
   modeRef.current = mode
+  // THE SECTION OWNS THE COLOUR, which is why this is here at all. Reported twice as "the wide
+  // spectrometer only stays pink" and "spec is not cycling in colors as expected", and it was
+  // neither a stuck value nor a broken ramp: this component simply never read `accent`. It drew
+  // from `temp` alone, and every warm stop had red pinned at 255, so the whole palette it could
+  // reach was salmon -> magenta. At a real 37C rig temperature `hot` is 0.17, i.e. the bottom
+  // sixth of a ramp nothing ever traverses.
+  // ACCENTS carries eight section colours and its own comment says they exist so "the lasers
+  // belong to the section instead of washing everything the same pink" — this display was the
+  // thing washing everything the same pink. Lore sets it per stop and TourJourney per city, so
+  // scrolling now walks magenta / cold blue / acid / sunrise gold / neon pink / pool aqua.
+  // Same ref treatment as the mode: a colour change must not restart the loop.
+  const accent = useSiteStore((s) => s.accent)
+  const accentRef = useRef(accent)
+  accentRef.current = accent
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -78,11 +92,21 @@ export default function SpectrumDisplay() {
       const hot = Math.min(1, Math.max(0, (temp - 22) / 90))
       const m = modeRef.current
 
+      // The section accent, lifted toward white by `t`. `hot` is folded into every call site rather
+      // than replaced: a rig that is genuinely running hot should still read hotter, it just no
+      // longer decides the hue on its own. ACCENTS values are 0..1 for the shader, hence the *255.
+      const [ar, ag, ab] = ACCENTS[accentRef.current] ?? ACCENTS.default
+      const A = (t: number) => {
+        const k = t < 0 ? 0 : t > 1 ? 1 : t
+        const c = (v: number) => Math.round(255 * (v + (1 - v) * k))
+        return `rgb(${c(ar)}, ${c(ag)}, ${c(ab)})`
+      }
+
       // ---- OSCILLOSCOPE: the raw waveform; no band analysis needed ----
       if (m === 'scope') {
         const t = audioBus.time
         ctx.lineWidth = 1.6 * dpr
-        ctx.strokeStyle = `rgb(${60 + hot * 180}, 255, ${190 - hot * 130})`
+        ctx.strokeStyle = A(0.22 + hot * 0.35)
         ctx.beginPath()
         for (let i = 0; i < t.length; i += 2) {
           const x = (i / t.length) * W
@@ -135,7 +159,7 @@ export default function SpectrumDisplay() {
           // Peak-only: just the cap, floating on its own decay. Sparse, and the spectral shape
           // reads at a glance without a wall of colour.
           peaks[i] = Math.max(peaks[i] - 1.2 * dpr, v * H)
-          ctx.fillStyle = `rgb(255, ${210 - hot * 130}, ${130 + hot * 80})`
+          ctx.fillStyle = A(0.3 + hot * 0.4)
           ctx.fillRect(x, H - peaks[i] - 2 * dpr, bw, 2.5 * dpr)
           continue
         }
@@ -144,9 +168,10 @@ export default function SpectrumDisplay() {
           // Mirrored about the centre line — the classic hi-fi analyser look.
           const half = (v * H) / 2
           const grad = ctx.createLinearGradient(0, H / 2 - half, 0, H / 2 + half)
-          grad.addColorStop(0, `rgb(255, ${200 - hot * 120}, ${120 + hot * 80})`)
-          grad.addColorStop(0.5, `rgb(${40 + hot * 180}, 255, ${180 - hot * 120})`)
-          grad.addColorStop(1, `rgb(255, ${200 - hot * 120}, ${120 + hot * 80})`)
+          // Mirrored: lifted at the extremes, pure accent through the centre line.
+          grad.addColorStop(0, A(0.62 + hot * 0.25))
+          grad.addColorStop(0.5, A(0.02))
+          grad.addColorStop(1, A(0.62 + hot * 0.25))
           ctx.fillStyle = grad
           ctx.fillRect(x, H / 2 - half, bw, half * 2)
           continue
@@ -155,8 +180,10 @@ export default function SpectrumDisplay() {
         // default: bars rising from the floor, with falling peak caps
         const bh = v * H
         const grad = ctx.createLinearGradient(0, H, 0, H - bh)
-        grad.addColorStop(0, `rgb(${40 + hot * 180}, 255, ${180 - hot * 120})`)
-        grad.addColorStop(1, `rgb(255, ${200 - hot * 120}, ${120 + hot * 80})`)
+        // Bars: saturated accent at the floor, lifting toward white at the peak, so height still
+        // reads as energy without the hue changing between one bar and its neighbour.
+        grad.addColorStop(0, A(0.04))
+        grad.addColorStop(1, A(0.66 + hot * 0.24))
         ctx.fillStyle = grad
         ctx.fillRect(x, H - bh, bw, bh)
 
