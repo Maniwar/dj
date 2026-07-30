@@ -23,6 +23,11 @@ export type AccentKey = keyof typeof ACCENTS
  * adjacent similar colours read as a flicker rather than a cue change. `kiki` is absent on purpose:
  * it is byte-identical to `default`, so including it would stall the walk on pink for two steps.
  */
+/** Beats per step of the walk. 32 = 8 bars. */
+const WALK_BEATS = 32
+/** Fraction of a step the colour sits still before it begins crossing to the next. */
+const WALK_HOLD = 0.6
+
 export const ACCENT_WALK: readonly AccentKey[] = [
   'default',
   'dieter',
@@ -52,8 +57,28 @@ export function effectiveAccent(
   beatIndex: number
 ): readonly [number, number, number] {
   if (accent !== 'default') return ACCENTS[accent] ?? ACCENTS.default
+
   // 32 beats = 8 bars, the same cadence the shader's beam patterns move on.
-  return ACCENTS[ACCENT_WALK[Math.floor(beatIndex / 32) % ACCENT_WALK.length]]
+  const pos = beatIndex / WALK_BEATS
+  const step = Math.floor(pos)
+  const from = ACCENTS[ACCENT_WALK[step % ACCENT_WALK.length]]
+  const to = ACCENTS[ACCENT_WALK[(step + 1) % ACCENT_WALK.length]]
+
+  // HOLD, THEN CROSSFADE -- it used to snap to the next entry and let the consumer's own 0.35s
+  // easing cover the change, which against a 15-second hold reads as a switch rather than a fade.
+  // So the blend happens HERE: the colour sits on one accent for the first WALK_HOLD of the step and
+  // then crosses to the next over the remainder. At 128bpm that is about 9 seconds settled and 6
+  // seconds moving, which is a lighting desk easing between cues rather than flipping a gel.
+  const t = pos - step
+  if (t < WALK_HOLD) return from
+  const f = (t - WALK_HOLD) / (1 - WALK_HOLD)
+  // smoothstep, so the fade starts and ends gently instead of kinking at both ends
+  const e = f * f * (3 - 2 * f)
+  return [
+    from[0] + (to[0] - from[0]) * e,
+    from[1] + (to[1] - from[1]) * e,
+    from[2] + (to[2] - from[2]) * e,
+  ]
 }
 
 // How the sung lyric words are drawn. Legibility over moving footage is genuinely a matter of

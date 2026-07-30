@@ -26,6 +26,9 @@
 // that stays warm hides exactly the cost this test is meant to measure.
 
 import { execFileSync } from 'node:child_process'
+
+/** Last commit whose worker still ran list() on every GET /likes. The 'before' in every table. */
+const BASELINE_REF = process.env.BASELINE_REF || '102814c'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -222,7 +225,12 @@ mkdirSync(baselinePath, { recursive: true })
 const baselineFile = join(baselinePath, 'guestbook.head.mjs')
 writeFileSync(
   baselineFile,
-  execFileSync('git', ['show', 'HEAD:worker/guestbook.js'], {
+  // PINNED, NOT `HEAD`. This loads the PRE-FIX worker to demonstrate what it cost, and reading it
+  // from HEAD was self-invalidating: the moment the fix was committed, HEAD became the fixed file
+  // and the "before" case measured the "after" code, so the baseline check failed and the suite went
+  // permanently red for a reason that had nothing to do with the product. A suite that is always red
+  // teaches you to ignore it. 102814c is the last commit whose worker still listed on every view.
+  execFileSync('git', ['show', `${BASELINE_REF}:worker/guestbook.js`], {
     cwd: new URL('../..', HERE).pathname,
     encoding: 'utf8',
   }),
@@ -232,7 +240,7 @@ const BASELINE = pathToFileURL(baselineFile).href
 const N = 10
 
 async function measureBaseline() {
-  console.log(`\nBEFORE — HEAD:worker/guestbook.js, ${N} sequential GET /likes`)
+  console.log(`\nBEFORE — ${BASELINE_REF}:worker/guestbook.js, ${N} sequential GET /likes`)
   installCaches('inert')
   const kv = makeKV({ store: seeded() })
   const e = env(kv)
@@ -564,7 +572,7 @@ await auditSubmissionPath()
 const row = (label, ops) =>
   `  ${label.padEnd(46)} list ${String(ops.list).padStart(3)}   get ${String(ops.get).padStart(3)}`
 console.log(`\n${'='.repeat(78)}\nGET /likes × ${N} — operations charged to KV`)
-console.log(row('BEFORE (HEAD)  every view lists', before))
+console.log(row('BEFORE (pinned)  every view lists', before))
 console.log(row('AFTER  warm isolate, no edge cache', warm))
 console.log(row('AFTER  10 cold isolates, no edge cache', cold))
 console.log(row('AFTER  10 cold isolates, edge cache live', edge))
