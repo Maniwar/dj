@@ -20,7 +20,7 @@
 export type RigStats = {
   /** The pixel ratio handed to WebGLRenderer.setPixelRatio, after budget and tier. */
   scale: number
-  /** Degradation step, 0..3. ONE-WAY within a session — see the sampler in ThermalRunaway. */
+  /** Degradation step, 0..3. Moves BOTH ways — see src/perf/tierPolicy.ts. */
   tier: number
   /** The multiplier that tier applies to the budgeted scale. */
   tierMultiplier: number

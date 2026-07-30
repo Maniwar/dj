@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "System Overload // Club Humidity — The Moist Mix 2002. A campy Y2K cyber-club promo site.",
+  "description": "System Overload // Club Humidity \u2014 The Moist Mix 2002. A campy Y2K cyber-club promo site.",
   "scripts": {
     "gen:tracks": "node scripts/build-tracks.mjs",
     "gen:lyrics": "node scripts/build-lyrics.mjs",
@@ -21,7 +21,8 @@
     "verify:intensity": "node scripts/verify-intensity.mjs",
     "verify:video": "node scripts/verify-video-pref.mjs",
     "deploy:worker": "wrangler deploy --config worker/wrangler.toml",
-    "worker:tail": "wrangler tail --config worker/wrangler.toml"
+    "worker:tail": "wrangler tail --config worker/wrangler.toml",
+    "verify:tier": "node scripts/verify-tier.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.114.0",

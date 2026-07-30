@@ -647,7 +647,14 @@ export const thermalFrag = /* glsl */ `
     vec3 rd = normalize(vec3(p.x, p.y, 1.0));
     vec3 acc = vec3(0.0);
     float t = 0.35;
-    for(int s=0; s<16; s++){
+    // TEN STEPS, NOT SIXTEEN. At 4 lights this was 64 cone evaluations per pixel -- by a wide margin
+    // the most expensive thing in the shader, and the reason a machine that had been holding native
+    // kept stepping down to tier 3 (half resolution, upscaled) once the water effects were added on
+    // top. Half resolution costs far more visually than a slightly coarser march does: the march is
+    // integrating a smooth fog volume, so fewer samples mostly means marginally softer god rays,
+    // whereas tier 3 makes EVERY effect on the page half-resolution.
+    // The step length below is widened to cover the same depth, so the beams reach as far as before.
+    for(int s=0; s<10; s++){
       vec3 pos = ro + rd*t;
       // haze is thicker toward the floor and drifts slowly, so beams break up as they descend
       float dens = (0.55 + 0.45*noise(pos.xz*1.6 + uTime*0.05)) * smoothstep(1.3, -0.5, pos.y);
@@ -665,9 +672,14 @@ export const thermalFrag = /* glsl */ `
         float cone = smoothstep(0.9885 - uBuild*0.012, 0.9997, dot(L/dist, cd));
         acc += rigColour(fi) * cone * dens / (1.0 + dist*dist*1.7);
       }
-      t += 0.21;   // fewer, longer steps cover the same depth
+      t += 0.336;  // fewer, longer steps cover the same depth
     }
-    return acc * (0.22 + uBeat*0.6 + uDrop*0.6);
+    // x1.6 because acc is a raw sum, not an average. Dropping 16 steps to 10 without this would
+    // have dimmed every god ray to 62% of its old brightness -- the classic way a "pure performance"
+    // change quietly becomes a visual regression. Each step now covers 1.6x more path length
+    // (0.336 vs 0.21), so scaling the sum by the same 1.6 is what the Riemann sum actually wants:
+    // same integrated light, fewer samples of it.
+    return acc * 1.6 * (0.22 + uBeat*0.6 + uDrop*0.6);
   }
 
   void main(){

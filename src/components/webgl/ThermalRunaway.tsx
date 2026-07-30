@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { audioBus } from '../../audio/audioBus'
 import { ACCENTS, effectiveAccent, useSiteStore } from '../../state/useSiteStore'
 import { publishRigStats } from '../../perf/rigStats'
+import { tierMove, newTierState } from '../../perf/tierPolicy'
 import { fxOffClass } from '../../perf/fxClasses'
 import { usePlayerStore } from '../../state/usePlayerStore'
 import { thermalVert, thermalFrag } from './thermalShader'
@@ -187,10 +188,11 @@ function Mainstage() {
   // 10fps a 90-frame window is nine seconds of jank before anything happens.
   // Grace period before ANY measurement. Start-up is the slowest the page ever is — shaders
   // compiling, the first video decoding, chunks landing — and judging a GPU on those frames
-  // would pin a 3080 to the bottom tier for the rest of the session. Degradation is one-way,
-  // so a false positive here is permanent and must be designed out.
-  const acc = useRef({ frames: 0, time: 0, settleUntil: 0, strikes: 0 })
+  // would pin a 3080 to the bottom tier. Degradation is no longer one-way -- tierPolicy climbs
+  // back once the machine shows sustained headroom -- but a false positive still costs several
+  // seconds at the wrong resolution, so the settle window below stays generous.
   const TIERS = [1, 0.8, 0.65, 0.5] // multipliers on the budgeted scale
+  const acc = useRef({ frames: 0, time: 0, settleUntil: 0, policy: newTierState(TIERS.length) })
   const SLOW_MS = 22 // ~45fps; below this we are visibly dropping frames
 
   const applyScale = useCallback(() => {
@@ -272,24 +274,21 @@ function Mainstage() {
     const a = acc.current
     const now = performance.now()
     if (a.settleUntil === 0) a.settleUntil = now + 3000 // ignore the first 3s entirely
-    if (now >= a.settleUntil && tier.current < TIERS.length - 1) {
+    // The policy itself lives in src/perf/tierPolicy.ts and is covered by scripts/verify-tier.mjs.
+    // It is out there rather than inline because the rig needs WebGL2 to mount and the headless
+    // browser on this machine has none, so a policy written in here could not be tested at all --
+    // which is how it shipped one-way degradation (drop on a hitch, never climb back) unnoticed.
+    if (now >= a.settleUntil) {
       a.frames++
       a.time += dt * 1000
       // a full second of evidence, or 20 frames, whichever lands first — so a machine running
       // at 8fps still gets judged after ~1s rather than after ninety slow frames
       if (a.time >= 1000 || a.frames >= 20) {
-        // two consecutive slow windows, not one: a single hitch (a video starting, a GC pause,
-        // the user dragging the window to another display) must not cost quality permanently
-        if (a.time / a.frames > SLOW_MS) {
-          a.strikes++
-          if (a.strikes >= 2) {
-            tier.current++
-            applyScale()
-            a.strikes = 0
-            a.settleUntil = now + 600 // don't count the resize itself as a slow frame
-          }
-        } else {
-          a.strikes = 0
+        const move = tierMove(a.time / a.frames, tier.current, TIERS.length - 1, SLOW_MS, a.policy)
+        if (move !== 'hold') {
+          tier.current += move === 'down' ? 1 : -1
+          applyScale()
+          a.settleUntil = now + 600 // don't count the resize itself as a slow frame
         }
         a.frames = 0
         a.time = 0
