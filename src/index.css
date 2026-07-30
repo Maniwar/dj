@@ -306,7 +306,7 @@ body {
   linear-gradient(rgba(0,0,0,0.32), rgba(0,0,0,0.32)),
   repeating-linear-gradient(0deg, rgba(0,0,0,0.10) 0 2px, transparent 2px 4px); }
 .bc-strobe { position: absolute; inset: 0; background: #fff; opacity: calc(var(--beat) * 0.18); mix-blend-mode: screen; }
-.bc-grain { position: absolute; inset: -8%; opacity: 0.045; mix-blend-mode: overlay; animation: grainshift 0.5s steps(2) infinite;
+.bc-grain { position: absolute; inset: -8%; opacity: 0.022; mix-blend-mode: overlay; animation: grainshift 0.5s steps(2) infinite;
   /* inset -8%, not -150%. grainshift only translates by (-6%, 4%), so -8% is all the overscan
      it can possibly need — but at -150% the element was 400% x 400%, i.e. SIXTEEN times the
      viewport, and it is animated AND blended. On a 7680x2160 screen that was a ~265 Mpx
@@ -1021,7 +1021,7 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    0.10) and the sauna steam wash (0.22 -> 0.12 cream over the full viewport) are the other two
    halves of what reads as "noise", and all three are dial-scaled so turning down still calms them
    further. */
-.bc-grain { opacity: calc(0.035 * var(--fx, 1) + var(--m-hat, 0) * 0.03); }
+.bc-grain { opacity: calc(0.018 * var(--fx, 1) + var(--m-hat, 0) * 0.014); }
 /* HATS = sparkle on the small accent type (top-end detail, so top-end text) */
 .journey-seed, .lore-tag { opacity: calc(0.75 + var(--m-hat, 0) * 0.25); }
 /* KICK = a camera PUSH on the scene itself, and a bigger shove on the drop. This rides the
