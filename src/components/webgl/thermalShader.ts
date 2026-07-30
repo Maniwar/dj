@@ -293,7 +293,21 @@ export const thermalFrag = /* glsl */ `
     float id = floor(uvx*cols);
     float rnd = hash(vec2(id, layer*17.3));
     lane = 0.0;
-    if(rnd <= 1.0 - amount) return 2.0;
+    // PRESENCE LATCHED AT BIRTH, exactly as runners() does it. This tested rnd against the CURRENT
+    // amount while runners() had moved to evaluating it at the run's start, so the two disagreed
+    // about which runners exist as the fog cycle moved -- a bead would decline to be absorbed by a
+    // drop that was visibly on top of it, or vanish under one that was not there.
+    float rnd2p = hash(vec2(id*1.37 + 5.1, layer*7.9));
+    float rnd3p = hash(vec2(id*2.11 + 13.7, layer*23.1));
+    float szp = (0.55 + rnd3p*rnd3p*1.10) * (1.0 - layer*0.42);
+    float speedp = (0.05 + rnd2p*0.09) * (0.70 + szp*0.45);
+    float cycp = uTime*speedp + rnd*4.7;
+    float tBirthP = (floor(cycp) - rnd*4.7) / max(speedp, 1e-4);
+    float fphP = fract(tBirthP * 0.018);
+    float fogP = smoothstep(0.05, 0.30, fphP) * smoothstep(1.0, 0.75, fphP);
+    float wetP = clamp((uHumidity*0.60 + uDew*0.80) * max(fogP, uDew*0.7), 0.0, 1.0);
+    float amtP = 0.36 + wetP*0.54;
+    if(rnd <= 1.0 - amtP) return 2.0;
     float rnd2 = hash(vec2(id*1.37 + 5.1, layer*7.9));
     float rnd3 = hash(vec2(id*2.11 + 13.7, layer*23.1));
     float sz = (0.55 + rnd3*rnd3*1.10) * (1.0 - layer*0.42);
@@ -311,7 +325,15 @@ export const thermalFrag = /* glsl */ `
     float fallNow = 1.0 - (1.0 - t)*(1.0 - t);
     float massNow = 0.60 + fallNow * 1.60;
     lane = 0.016 * sz * massNow;
-    return 1.08 - fall*1.00;
+    // THE SAME GEOMETRY runners() DRAWS. This read 1.08 - fall*1.00 while the runner was drawn at
+    // 1.02 - fall*1.60, so the absorption test was asking about a drop nowhere near where the drop
+    // actually was: beads were not picked up, and runners passed straight over them. The two were
+    // already slightly out of step, and extending the travel so the tail could clear the frame --
+    // changed here in runners() and not here -- pushed them badly apart.
+    //
+    // This is the second time the pair has drifted. They are the same physical drop asked about in
+    // two places, so any change to one is a change to both.
+    return 1.02 - fall*1.60;
   }
 
   // ---- WATER RUNNING DOWN THE GLASS ----
@@ -511,8 +533,12 @@ export const thermalFrag = /* glsl */ `
   // Rebuilt: columns, each carrying a few flakes at independent phases that fall the FULL height of
   // the frame, drift sideways as paper does, spin rigidly in ISOTROPIC units (screen heights, so a
   // rotation is a rotation), and fade in and out so nothing pops at the wrap.
-  vec3 confetti(vec2 uv, float aspect, float amount, vec3 accent){
+  // cover is how much of this pixel the paper occupies, kept separate from its colour. A flake is
+  // opaque card, not a light: in front of a bright surface it has to BLOCK what is behind it, and
+  // colour alone cannot express that when everything composites additively.
+  vec3 confetti(vec2 uv, float aspect, float amount, vec3 accent, out float cover){
     vec3 acc = vec3(0.0);
+    cover = 0.0;
     for(int c=0; c<2; c++){
       float cols = 22.0 + float(c)*15.0;
       float x = uv.x*cols;
@@ -549,6 +575,7 @@ export const thermalFrag = /* glsl */ `
                   : h3 < 0.76 ? vec3(0.30, 1.00, 0.48)    // acid green
                               : vec3(0.36, 0.68, 1.00);   // ice blue
         acc += tint * fl * life;
+        cover += fl * life;
       }
     }
     return acc;
@@ -1042,7 +1069,8 @@ export const thermalFrag = /* glsl */ `
       // beams already has the volumetric pass folded into it (see beams += vol above), so it IS
       // the total light arriving at this point -- no second lookup needed.
       vec3 lightHere = beams;
-      vec3 flakes = confetti(uv, aspect, 0.34, uAccent);
+      float flakeCover;
+      vec3 flakes = confetti(uv, aspect, 0.34, uAccent, flakeCover);
       // Self-light raised 0.30 -> 0.60. Making the flakes beam-lit was right, but beams cover a small
       // share of the frame, so paper falling through the dark half of the shot was effectively
       // invisible -- the same mistake that hid the water. Foil catches SOME light from the room even
@@ -1050,6 +1078,18 @@ export const thermalFrag = /* glsl */ `
       // The beat term's FLOOR is what mattered here, not its range. At 0.55 it was halving the
       // effect between kicks, on top of the ambient level already scaling it -- two dimmers applied
       // to one effect. 0.78 keeps a clear beat pulse while leaving the flakes readable in between.
+      // PAPER IS OPAQUE, so it occludes what is behind it. Reported as the confetti falling behind
+      // the LED wall, which is the same complaint as the water and needs the opposite treatment: the
+      // water is a lens and reads as being in front by BENDING the wall, but a flake is card and
+      // reads as being in front by hiding it. Everything here composites additively, so without this
+      // a flake crossing a bright wall just adds a little more light to something already near
+      // saturation and disappears into it.
+      //
+      // This can only occlude what the SHADER has drawn -- the wall, the beams, the water. The
+      // footage underneath is composited with mix-blend-mode: screen, which cannot darken, so a
+      // flake will never block the video itself. Against the wall, which is what was reported, it
+      // works properly.
+      col *= 1.0 - clamp(flakeCover, 0.0, 1.0) * 0.88 * uConfetti;
       vec3 flakeLight = flakes * (0.60 + lightHere * 1.9) * uConfetti * (0.78 + uBeat * 0.32);
       col += flakeLight;
       // Foil is a mirror, so a flake passing a drop should put a glint in it -- but each flake is a
