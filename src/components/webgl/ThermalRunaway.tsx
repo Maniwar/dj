@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { audioBus } from '../../audio/audioBus'
 import { ACCENTS, effectiveAccent, useSiteStore } from '../../state/useSiteStore'
 import { publishRigStats } from '../../perf/rigStats'
+import { fxOffClass } from '../../perf/fxClasses'
 import { usePlayerStore } from '../../state/usePlayerStore'
 import { thermalVert, thermalFrag } from './thermalShader'
 import { PERF } from '../../lib/perfFlags'
@@ -81,6 +82,8 @@ function Mainstage() {
   const songSlugRef = useRef('')
   const agcRef = useRef(0) // running peak for the spectrum strip's auto-gain
   const confettiRef = useRef(0)
+  const backdropElRef = useRef<HTMLVideoElement | null>(null)
+  const backdropTexRef = useRef<THREE.VideoTexture | null>(null)
   const { size, gl } = useThree()
 
   // RGBA spectrum texture (universally supported) — the giant LED wall + lasers read it
@@ -114,6 +117,9 @@ function Mainstage() {
       // in "pixels" (the LED cells) has to be converted through this or it changes size whenever the
       // budget or the tier moves the scale.
       uPxScale: { value: 1 },
+      // The footage, so water can bend it. Null until a <video> is actually on screen.
+      uBackdrop: { value: null as THREE.VideoTexture | null },
+      uRefract: { value: 0 },
       uQuality: { value: PERF.isMobile ? 0 : 1 }, // phones skip the costliest shader passes
       uSong: { value: 0 }, // per-track lighting design (stable hash of the slug)
       uPattern: { value: 0 }, // which rig look is up; changes every 4 bars
@@ -327,6 +333,31 @@ function Mainstage() {
     // produces the burst; it is no longer the only thing that produces anything.
     confettiRef.current = Math.max(mu.drop, confettiRef.current - dt / 11.0)
     u.uConfetti.value = Math.max(confettiRef.current, mu.bpm > 0 ? 0.24 : 0.0)
+
+    // ---- THE FOOTAGE AS A TEXTURE ----
+    // The rig composites over a DOM <video> and has never been able to see it, which is why the water
+    // could only add light and never bend anything. THREE.VideoTexture wraps THE SAME ELEMENT, so it
+    // reuses frames the decoder is already producing -- no second decode, no second network fetch.
+    // Re-resolved each frame because Broadcast swaps scenes and the stills fallback removes the
+    // element entirely; querySelector on a mounted document is cheap and this is the only place that
+    // knows whether there is anything to sample at all.
+    const vid = document.querySelector('video.bc-video') as HTMLVideoElement | null
+    if (vid !== backdropElRef.current) {
+      backdropElRef.current = vid
+      if (backdropTexRef.current) backdropTexRef.current.dispose()
+      backdropTexRef.current = vid ? new THREE.VideoTexture(vid) : null
+      u.uBackdrop.value = backdropTexRef.current
+    }
+    // OFF unless there is genuinely something to refract AND the effect is switched on. Three gates,
+    // because each answers a different question: is there a frame to sample, has the registry retired
+    // it (the dial does this through minIntensity, and the panel through the same class), and is the
+    // GPU already struggling. uIntensity scales the strength so the dial reads as a strength control
+    // rather than an on/off, right up to the point the registry retires it entirely.
+    const canRefract =
+      !!vid &&
+      vid.readyState >= 2 &&
+      !document.documentElement.classList.contains(fxOffClass('dropRefraction'))
+    u.uRefract.value = canRefract && tier.current < 2 ? Math.min(1.2, u.uIntensity.value) : 0
     // Ease toward the current section's colour rather than snapping — a hard cut in the rig
     // colour on a scroll boundary looks like a bug; a ~1s fade reads as the lighting following
     // the story. (Same rate regardless of framerate.)

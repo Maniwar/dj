@@ -80,6 +80,7 @@ export type FxId =
   | 'bcVideo'
   | 'sectionVideo'
   | 'hdRendition'
+  | 'dropRefraction'
 
 export type FxDef = {
   id: FxId
@@ -424,6 +425,16 @@ export const FX: readonly FxDef[] = [
     minIntensity: 0.3,
     why: '1920x1080 at ~4 Mbps instead of 1280x720 at ~2.4. Decode cost scales with pixels, and on a tile-based mobile GPU the decoded frame is also a bigger texture to composite every other layer against.',
     targets: 'videoRendition.prefersHdVideo() → /assets/video/hd/',
+  },
+  {
+    id: 'dropRefraction',
+    label: 'Water refracts the footage',
+    group: 'shader',
+    cost: 2,
+    kind: 'js',
+    minIntensity: 0.35,
+    why: 'Hands the playing <video> to the rig as a THREE.VideoTexture so the condensation can BEND what is behind it instead of only adding light on top. The same decoded frames, so no second decoder — the cost is one extra texture bound per frame plus two samples per pixel, taken once for the whole water field rather than once per droplet. Retires at a low dial because it is the most optional thing in the rig: without it the drops still read as water, they just stop tracking the picture. It also switches itself off whenever there is nothing to sample, i.e. on the stills fallback or with video off.',
+    targets: 'thermalShader uBackdrop/uRefract · ThermalRunaway VideoTexture on .bc-video',
   },
 ] as const
 

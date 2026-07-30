@@ -84,8 +84,20 @@ await build({
 })
 const { FX } = await import(`file://${regBundle}`)
 const ESSENTIAL = new Set(FX.filter((f) => f.essential).map((f) => f.id))
-/** What a declared profile set actually RESOLVES to once the essentials floor is applied. */
-const resolved = (ids) => ids.filter((id) => !ESSENTIAL.has(id)).slice().sort()
+/**
+ * What a declared profile set actually RESOLVES to.
+ *
+ * TWO mechanisms, not one, and modelling only the first is why this went red when a new effect was
+ * added. resolveOff() unions the profile's declared ids with every id the DIAL has retired -- and a
+ * profile also CLAMPS the dial to its intensityCap, so choosing `lean` pulls the dial to 0.35 and
+ * anything with minIntensity >= 0.35 goes off with it even though `lean` never names it. Then the
+ * essentials floor removes the protected ids from whatever that union produced.
+ */
+const resolved = (ids, cap = 1) => {
+  const out = new Set(ids)
+  for (const f of FX) if (cap <= f.minIntensity) out.add(f.id)
+  return [...out].filter((id) => !ESSENTIAL.has(id)).sort()
+}
 
 /** A window with the given percentiles and nothing else wrong. */
 const stats = (o) => ({
@@ -168,9 +180,9 @@ const browser = await chromium.launch(launchOpts)
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } })
 const page = await ctx.newPage()
 
-const LEAN = resolved(PROFILE_BY_ID.lean.off)
-const BALANCED = resolved(PROFILE_BY_ID.balanced.off)
-const ALL = resolved(PROFILE_BY_ID.minimal.off)
+const LEAN = resolved(PROFILE_BY_ID.lean.off, PROFILE_BY_ID.lean.intensityCap)
+const BALANCED = resolved(PROFILE_BY_ID.balanced.off, PROFILE_BY_ID.balanced.intensityCap)
+const ALL = resolved(PROFILE_BY_ID.minimal.off, PROFILE_BY_ID.minimal.intensityCap)
 
 /** Load, get past the boot gate, and report what the page resolved to. */
 async function load(query, { storage = null, settleMs = 700 } = {}) {

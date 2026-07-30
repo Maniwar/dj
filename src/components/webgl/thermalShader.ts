@@ -48,6 +48,14 @@ export const thermalFrag = /* glsl */ `
   uniform float uIntensity; // master dial, 0..1.4 (1.0 = the site as tuned)
   uniform float uSauna;
   uniform sampler2D uFreq;
+  // THE FOOTAGE, as a texture, so water can actually bend it. This is the one thing the rig could
+  // never do: it composites with mix-blend-mode: screen over a DOM <video>, so it can add light but
+  // has no idea what is underneath. Handed the same video element as a THREE.VideoTexture -- the same
+  // decoded frames, no second decoder -- the droplets can sample what is behind them and displace it.
+  // uRefract is 0 whenever there is nothing to sample (stills, video switched off) or when the effect
+  // is retired by the dial or the registry, and the two samples below are skipped entirely.
+  uniform sampler2D uBackdrop;
+  uniform float uRefract;
   uniform float uFreqCount;
 
   // ============================================================
@@ -87,8 +95,9 @@ export const thermalFrag = /* glsl */ `
   //   FORM. A drop is a LENS, not a dot: bright rim where it refracts, darker through the middle.
   //     That is the whole difference between "water" and "speckle", and it costs one extra
   //     smoothstep. The body is kept faint and the rim carries the read.
-  float droplets(vec2 uv, float aspect, float density){
+  float droplets(vec2 uv, float aspect, float density, out vec2 disp){
     float acc=0.0;
+    disp=vec2(0.0);
     for(int layer=0; layer<2; layer++){
       // THE SECOND LAYER IS THE ONE THAT GETS DROPPED ON WEAK HARDWARE, not the whole effect.
       // Beads used to be skipped outright once uQuality fell -- and uQuality is 0 as soon as the perf
@@ -183,6 +192,17 @@ export const thermalFrag = /* glsl */ `
         // Offset up-left, consistent for every bead, because one room has one key light.
         float spec = smoothstep(rad*0.34, 0.0, length(((f - c) - vec2(-0.30, 0.30)*rad)*vec2(aspect,1.0))) * 0.85;
         acc += (body + max(rim, 0.0) + spec) * bFade * pres;
+        // LENS DISPLACEMENT. A drop is a converging lens: the further off its axis you look, the more
+        // it bends, and it inverts -- so the offset points back toward the centre and grows with
+        // distance from it. Accumulated rather than sampled here, so the whole field costs ONE pair of
+        // texture reads per pixel further down instead of one per bead.
+        // The mask is INSIDE-ness, not centre-ness. A first attempt used smoothstep(rad, rad*0.15, d),
+        // which peaks at the drop's centre -- exactly where (f - c) is near zero -- and falls off at the
+        // rim, where the bending should be strongest. The two cancelled and the whole effect measured
+        // as 0.01 points of light. A lens bends most at its edge: (f - c) already supplies that
+        // gradient, so the mask only has to say whether we are in the drop at all.
+        float inside = smoothstep(rad, rad*0.86, d);
+        disp += -(f - c) / s * inside * bFade * pres * 3.2;
       }
     }
     return clamp(acc,0.0,1.0);
@@ -202,8 +222,9 @@ export const thermalFrag = /* glsl */ `
   //
   // Columns rather than a square grid, because water runs in lanes. Two passes at different column
   // counts so the sizes vary without a second grid becoming visible.
-  float runners(vec2 uv, float amount){
+  float runners(vec2 uv, float amount, out vec2 disp){
     float acc = 0.0;
+    disp = vec2(0.0);
     for(int c=0; c<2; c++){
       float cols = 11.0 + float(c)*8.0;
       float x = uv.x * cols;
@@ -268,6 +289,10 @@ export const thermalFrag = /* glsl */ `
         // a couple of stragglers left along the track, so it is not a clean line
         float bead = smoothstep(tw, tw*0.30, length(vec2(ox, fract(y*7.0 + rnd*3.0) - 0.5)*vec2(1.0,0.55)));
         acc += (head + track*0.55 + bead*behind*dry*0.30) * life;
+        // A running drop lenses too, mostly across its width -- it is a cylinder of water, so it bends
+        // horizontally far more than vertically. Scaled into uv by the column count.
+        float rl = smoothstep(hr, hr*0.88, length(vec2(ox, y*0.62)));
+        disp += vec2(-ox / cols * 0.26, -y * 0.10) * rl * life * 2.4;
       }
     }
     return acc;
@@ -768,7 +793,8 @@ export const thermalFrag = /* glsl */ `
     float fogPh = fract(uTime * 0.018);
     float fog = smoothstep(0.05, 0.30, fogPh) * smoothstep(1.0, 0.75, fogPh);
     float wetness = fog * smoothstep(0.30, 0.78, uHumidity);
-    float beads = droplets(uv, aspect, wetness * 0.26 * (uQuality > 0.5 ? 1.0 : 1.45));
+    vec2 beadDisp;
+    float beads = droplets(uv, aspect, wetness * 0.26 * (uQuality > 0.5 ? 1.0 : 1.45), beadDisp);
     // Water catches the light too. A droplet is a lens: in the dark it is nearly invisible, and when
     // a beam crosses it, it lights up. Same lookup as the confetti -- the field is already computed.
     col += beads * (vec3(0.8,0.9,1.0) * 0.16 + beams * 1.9);
@@ -790,12 +816,30 @@ export const thermalFrag = /* glsl */ `
     // Gated by the same fog cycle as the beads. Runners drying on a different schedule would leave
     // water streaking down a lens that had just been declared clear.
     float wet = clamp((uHumidity*0.60 + uDew*0.80) * max(fog, uDew*0.7), 0.0, 1.0);
-    float run = runners(uv, 0.13 + wet*0.34);
+    vec2 runDisp;
+    float run = runners(uv, 0.13 + wet*0.34, runDisp);
     // Dimmer as well as softer. 0.34 was set when the runners were barely visible at all, before the
     // edges were sharpened; sharpened AND at that gain they read as bright white lines drawn over the
     // footage. Soft edges plus a lower gain is what water on glass looks like against a dark scene.
     col += clamp(run, 0.0, 1.5) * (vec3(0.66,0.80,0.94) * 0.09 + beams * 1.5)
          * (0.55 + uDew*0.75);
+
+    // ---- REFRACTION THROUGH THE WATER ----
+    // ONE pair of samples for the whole field, using the displacement both water passes accumulated.
+    //
+    // The layer is mix-blend-mode: screen, so it can only ADD -- it cannot substitute the displaced
+    // pixel for the one underneath, which is what real refraction does. What it CAN do honestly is
+    // emit the positive difference: where the light bent through the drop is brighter than what is
+    // already behind it, the drop lights up; where it is darker, the drop leaves it alone. The result
+    // is lensing that genuinely tracks the footage -- a drop passing over a laser in the picture
+    // flares, one over a dark jacket stays quiet -- rather than a painted-on highlight that looks the
+    // same over everything.
+    if (uRefract > 0.001) {
+      vec2 duv = (beadDisp + runDisp) * uRefract;
+      vec3 behind = texture2D(uBackdrop, uv + duv).rgb;
+      vec3 straight = texture2D(uBackdrop, uv).rgb;
+      col += max(behind - straight, vec3(0.0)) * 1.6;
+    }
 
     // overclock shimmer
     col += vec3(0.4,1.0,0.6) * uOverclock * 0.1 * (0.5+0.5*sin(uTime*8.0));
