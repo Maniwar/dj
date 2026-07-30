@@ -3334,9 +3334,20 @@ body.sauna .content::before {
 /* the shockwave */
 .click-burst::before {
   content: ''; position: absolute; left: 50%; top: 50%;
-  width: 26px; height: 26px; border-radius: 50%;
-  border: 2px solid var(--accent, #ff1f8f);
-  box-shadow: 0 0 18px var(--accent, #ff1f8f), inset 0 0 12px var(--accent, #ff1f8f);
+  /* A GRADIENT RING, NOT A HAIRLINE BORDER. `border: 2px solid` on a circle that is then scaled and
+     squashed by scaleY(0.42) gives the rasteriser a hard 2px edge to follow around an ellipse, and on
+     a dpr-1 display there is no subpixel headroom to hide the stair-stepping -- reported as the cursor
+     effects looking pixelated, and the shader is confirmed native so it was never the rig. A radial
+     gradient draws the same ring with edges that fall off over a couple of pixels, which antialiases
+     itself. Same 2px of apparent thickness, no hard boundary anywhere in it. */
+  width: 30px; height: 30px; border-radius: 50%;
+  background: radial-gradient(circle,
+    transparent 0 42%,
+    color-mix(in srgb, var(--accent, #ff1f8f) 85%, transparent) 47%,
+    var(--accent, #ff1f8f) 50%,
+    color-mix(in srgb, var(--accent, #ff1f8f) 85%, transparent) 53%,
+    transparent 60%);
+  box-shadow: 0 0 18px var(--accent, #ff1f8f);
   transform: translate(-50%, -50%) scaleY(0.42);
   animation: burstRing 780ms cubic-bezier(0.15, 0.7, 0.2, 1) forwards;
 }
@@ -3368,8 +3379,14 @@ body.sauna .content::before {
 }
 .click-burst i {
   position: absolute; left: 0; top: 0;
-  width: var(--len, 170px); height: 3px; transform-origin: 0 50%;
+  /* SOFT LONG EDGES. A 3px-tall bar rotated to an arbitrary angle is the same case the shader's
+     confetti had: the short ends were rounded but the two LONG edges stayed hard, and those are the
+     ones a rotation staircases. Taller by a pixel and masked to fade across its own height, so the
+     edge the rasteriser follows is a gradient rather than a boundary. */
+  width: var(--len, 170px); height: 4px; transform-origin: 0 50%;
   border-radius: 2px;
+  -webkit-mask-image: linear-gradient(0deg, transparent 0, #000 38%, #000 62%, transparent 100%);
+  mask-image: linear-gradient(0deg, transparent 0, #000 38%, #000 62%, transparent 100%);
   background: linear-gradient(90deg,
     #fff 0%, var(--accent, #ff1f8f) 22%, color-mix(in srgb, var(--accent, #ff1f8f) 55%, transparent) 60%, transparent 100%);
   box-shadow: 0 0 14px var(--accent, #ff1f8f), 0 0 30px color-mix(in srgb, var(--accent, #ff1f8f) 60%, transparent);

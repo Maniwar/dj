@@ -365,7 +365,12 @@ function Mainstage() {
     // small constant fall underneath it, so the air is never completely empty. The drop still
     // produces the burst; it is no longer the only thing that produces anything.
     confettiRef.current = Math.max(mu.drop, confettiRef.current - dt / 11.0)
-    u.uConfetti.value = Math.max(confettiRef.current, mu.bpm > 0 ? 0.24 : 0.0)
+    // GATED ON PLAYBACK, not on mu.bpm. bpm is documented as "0 until enough beats are seen" and
+    // NOTHING EVER ASSIGNS IT -- setTempoHint sets this.period, not m.bpm -- so it is permanently 0
+    // and this baseline never once fired. Confetti has only ever appeared on mu.drop, which is a
+    // genuine drop detector firing once or twice a track. That is the answer to "what triggers the
+    // confetti, I do not see it": nothing did, most of the time.
+    u.uConfetti.value = Math.max(confettiRef.current, audioBus.playing ? 0.26 : 0.0)
     // Cursor history and the last click, straight through — no smoothing here, because the trail's
     // own spacing IS the smoothing and the click is meant to be instant.
     for (let i = 0; i < 8; i++) u.uTrail.value[i].set(trail[i].x, trail[i].y)

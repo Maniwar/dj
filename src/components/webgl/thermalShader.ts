@@ -875,7 +875,11 @@ export const thermalFrag = /* glsl */ `
       // the total light arriving at this point -- no second lookup needed.
       vec3 lightHere = beams;
       vec3 flakes = confetti(uv, aspect, 0.34, uAccent);
-      col += flakes * (0.30 + lightHere * 2.2) * uConfetti * (0.55 + uBeat * 0.4);
+      // Self-light raised 0.30 -> 0.60. Making the flakes beam-lit was right, but beams cover a small
+      // share of the frame, so paper falling through the dark half of the shot was effectively
+      // invisible -- the same mistake that hid the water. Foil catches SOME light from the room even
+      // where no beam finds it.
+      col += flakes * (0.60 + lightHere * 1.9) * uConfetti * (0.55 + uBeat * 0.4);
     }
     // DROP = pyro. Rays fire out of the middle for the length of the release.
     //
