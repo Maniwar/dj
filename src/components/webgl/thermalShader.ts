@@ -585,8 +585,12 @@ export const thermalFrag = /* glsl */ `
         // is turned about. rq is the position within the flake in its OWN rotated frame, so feeding
         // that back as an offset makes the reflected image slide across the flake as it spins and
         // squash as it turns edge-on -- which is exactly what catches the eye on real foil.
-        vec2 tilt = vec2(sin(spin), cos(spin*1.3)) * 0.075;
-        reflUV += (uv + tilt + rq * 2.4) * fl * life;
+          // rq * 1.1, not 2.4. At the higher figure the mirrored image compressed into something that
+        // read as shimmer rather than as a reflection you can follow -- the whole point is that it is
+        // legibly the room, bending. The tilt is larger to compensate, so the image still SWIMS as
+        // the flake turns; it is travel that sells a reflection, not fineness.
+        vec2 tilt = vec2(sin(spin), cos(spin*1.3)) * 0.16;
+        reflUV += (uv + tilt + rq * 1.1) * fl * life;
       }
     }
     return acc;
@@ -1169,8 +1173,25 @@ export const thermalFrag = /* glsl */ `
       float rgY = smoothstep(gap*0.4, gap*1.4, fract(ruv.y * uRes.y / cellPx));
       float rgX = smoothstep(gap*0.4, gap*1.4, fract(ruv.x * uRes.x / cellPx));
       float mirror = 0.35 + 0.65 * rgX * rgY;   // never fully dark: the gaps between cells still glow
+
+      // IT REFLECTS THE ROOM, NOT JUST THE WALL. Foil mirrors whatever is in front of it, and the
+      // footage is already here as a texture for the water's refraction -- one more sample at the
+      // flake's own mirrored coordinate gives a genuine environment reflection rather than a
+      // procedural stand-in. Warped by the same tumble, so the scene slides and skews across each
+      // flake as it falls, which is the thing that actually reads as metal.
+      //
+      // Sampling ruv unclamped would wrap the footage at the edges; clamping holds the border pixel,
+      // which is what a mirror pointed off the edge of the room would show anyway.
+      vec3 envRefl = vec3(0.0);
+      if (uRefract > 0.001) envRefl = texture2D(uBackdrop, clamp(ruv, 0.0, 1.0)).rgb;
+
+      // The beams and the starburst reflect too. beams is the total light arriving here, so using it
+      // directly would paint this pixel's light onto the flake -- reflections have to come from
+      // ELSEWHERE. ambient carries the room's light without local structure, and mirror carries the
+      // wall's grid through the flake's frame; together they stand in for the rig.
       col += flakeTint * ambient * occ * 1.9 * mirror;
       col += flakeTint * ambient * ambient * occ * 1.1 * mirror;
+      col += flakeTint * envRefl * occ * 1.5;
       vec3 flakeLight = flakes * (0.60 + lightHere * 1.9) * uConfetti * (0.78 + uBeat * 0.32);
       col += flakeLight;
       // Foil is a mirror, so a flake passing a drop should put a glint in it -- but each flake is a
