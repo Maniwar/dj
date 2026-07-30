@@ -355,13 +355,32 @@ export const thermalFrag = /* glsl */ `
       // does when you sweep it. Ramped over a 0.14 band, a runner near the edge of the density thins
       // out over several seconds instead, and because the band is wider than the fog cycle moves in one
       // run, a drop that has started is still there to finish.
-      float rpres = smoothstep(1.0 - amount, 1.0 - amount + 0.14, rnd);
+      // t accelerates: a drop starts slow, gains speed as it gathers mass on the way down.
+      // A FAT DROP FALLS FASTER, because it is heavier -- so size and speed are correlated rather
+      // than independent, which is what stops the variety looking arbitrary.
+      float speed = (0.05 + rnd2*0.09) * (0.70 + sz*0.45);
+      float cyc = uTime*speed + rnd*4.7;
+      float t = fract(cyc);
+
+      // PRESENCE IS DECIDED AT BIRTH, NOT EVERY FRAME. It used to test rnd against amount as it
+      // stood right now, and amount tracks the 56s fog cycle -- so as the glass dried, a runner
+      // already halfway down had its own existence faded out underneath it and vanished mid-screen.
+      // Reported as runners disappearing before they reach the bottom. It is the same fault as the
+      // beads blinking: a threshold swept by a time-varying parameter, and softening the edge only
+      // turned a pop into a fade at the same wrong moment.
+      //
+      // A fragment shader has no memory, but it does not need one here. t is fract(cyc), so
+      // floor(cyc) identifies WHICH run this is, and the time that run began follows directly. The
+      // fog is a pure function of uTime, so it can simply be evaluated back there -- the same
+      // deterministic re-derivation runnerHeadY uses to let a bead ask whether a runner has passed
+      // it. Once a drop starts, it finishes, whatever the glass does in the meantime.
+      float tBirth = (floor(cyc) - rnd*4.7) / max(speed, 1e-4);
+      float fphB = fract(tBirth * 0.018);
+      float fogB = smoothstep(0.05, 0.30, fphB) * smoothstep(1.0, 0.75, fphB);
+      float wetB = clamp((uHumidity*0.60 + uDew*0.80) * max(fogB, uDew*0.7), 0.0, 1.0);
+      float amtB = 0.20 + wetB*0.46;
+      float rpres = smoothstep(1.0 - amtB, 1.0 - amtB + 0.14, rnd);
       if(rpres > 0.003){
-        // t accelerates: a drop starts slow, gains speed as it gathers mass on the way down.
-        // A FAT DROP FALLS FASTER, because it is heavier -- so size and speed are correlated rather
-        // than independent, which is what stops the variety looking arbitrary.
-        float speed = (0.05 + rnd2*0.09) * (0.70 + sz*0.45);
-        float t = fract(uTime*speed + rnd*4.7);
         float fall = 1.0 - (1.0 - t)*(1.0 - t);   // ease-in, i.e. accelerating downward
         // Tuned so the head reaches the bottom edge at about t=0.88 and is just clear of it by t=1.0.
         // The ease-in means 94% of the journey is done by 75% of the time -- that acceleration is the
