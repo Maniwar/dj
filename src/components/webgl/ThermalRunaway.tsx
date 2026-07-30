@@ -357,7 +357,7 @@ function Mainstage() {
       !!vid &&
       vid.readyState >= 2 &&
       !document.documentElement.classList.contains(fxOffClass('dropRefraction'))
-    u.uRefract.value = canRefract && tier.current < 2 ? Math.min(1.2, u.uIntensity.value) : 0
+    u.uRefract.value = canRefract && tier.current < 3 ? Math.min(1.2, u.uIntensity.value) : 0
     // Ease toward the current section's colour rather than snapping — a hard cut in the rig
     // colour on a scroll boundary looks like a bug; a ~1s fade reads as the lighting following
     // the story. (Same rate regardless of framerate.)

@@ -166,7 +166,7 @@ export const thermalFrag = /* glsl */ `
         // Minimum raised 0.055 -> 0.085: at 18 cells over 1363px a cell is 76px, so 0.055 was a 4px
         // bead with nowhere to shrink to. 0.085 is ~6.5px at full size and ~3.6px shrunk, which stays
         // visible while it dims.
-        float radFull = max(0.085 + rnd2*rnd2*0.20, 2.6 * s / max(uRes.y, 1.0));
+        float radFull = max(0.105 + rnd2*rnd2*0.22, 2.6 * s / max(uRes.y, 1.0));
         float rad = radFull * bShrink;
         // A drop is a lens: it refracts at the edge and is nearly clear through the middle. The rim
         // carries the read and is deliberately SOFT -- a hard ring reads as a bubble outline, which
@@ -792,12 +792,26 @@ export const thermalFrag = /* glsl */ `
     // which is also just how a cold lens in a hot room behaves.
     float fogPh = fract(uTime * 0.018);
     float fog = smoothstep(0.05, 0.30, fogPh) * smoothstep(1.0, 0.75, fogPh);
-    float wetness = fog * smoothstep(0.30, 0.78, uHumidity);
+    // THRESHOLD MOVED DOWN TO WHERE THE RIG ACTUALLY RUNS. 0.30-0.78 was chosen so the glass could
+    // be genuinely dry, and it achieves that -- but the thermal sim sits at 44-48% RH through normal
+    // play, which lands at 0.23 of full wetness, a quarter strength. Combined with the fog cycle
+    // multiplying it down further for part of every 56s, there was often almost no water on screen at
+    // all. 0.10-0.50 keeps a real dry state below ~15% RH while making ordinary humidity properly wet.
+    float wetness = fog * smoothstep(0.10, 0.50, uHumidity);
     vec2 beadDisp;
-    float beads = droplets(uv, aspect, wetness * 0.26 * (uQuality > 0.5 ? 1.0 : 1.45), beadDisp);
+    // DENSITY RAISED, because the problem was never brightness. Measured with the beams zeroed, a
+    // single drop peaks at 0.465 and lifts a dark part of the frame by 0.418 -- plenty. Only 2.5% of
+    // pixels had any water on them at all, so on a busy shot you had to hunt for it. The headroom is
+    // enormous: at that coverage the water contributes about 0.01 of mean lift, against the 0.387 of
+    // the dew wash that caused the milky problem, so this can roughly double without going near it.
+    float beads = droplets(uv, aspect, wetness * 0.45 * (uQuality > 0.5 ? 1.0 : 1.45), beadDisp);
     // Water catches the light too. A droplet is a lens: in the dark it is nearly invisible, and when
     // a beam crosses it, it lights up. Same lookup as the confetti -- the field is already computed.
-    col += beads * (vec3(0.8,0.9,1.0) * 0.16 + beams * 1.9);
+    // SELF-LIGHT RESTORED. Making the water beam-lit was right, but I took the self term from 0.44 to
+    // 0.16 at the same time -- a 64% cut -- and the beams only cover a small share of the frame, so
+    // most drops sat where there was no light to catch and simply vanished. Water in a dark room is
+    // dim, not absent: enough self-light to read, with the beams still doing the flaring.
+    col += beads * (vec3(0.8,0.9,1.0) * 0.40 + beams * 1.15);
 
     // ---- LIQUID COOLING: WATER ON THE LENS ----
     // This replaces a full-frame noise wash that was the reported milky static. That version ran
@@ -817,11 +831,11 @@ export const thermalFrag = /* glsl */ `
     // water streaking down a lens that had just been declared clear.
     float wet = clamp((uHumidity*0.60 + uDew*0.80) * max(fog, uDew*0.7), 0.0, 1.0);
     vec2 runDisp;
-    float run = runners(uv, 0.13 + wet*0.34, runDisp);
+    float run = runners(uv, 0.20 + wet*0.46, runDisp);
     // Dimmer as well as softer. 0.34 was set when the runners were barely visible at all, before the
     // edges were sharpened; sharpened AND at that gain they read as bright white lines drawn over the
     // footage. Soft edges plus a lower gain is what water on glass looks like against a dark scene.
-    col += clamp(run, 0.0, 1.5) * (vec3(0.66,0.80,0.94) * 0.09 + beams * 1.5)
+    col += clamp(run, 0.0, 1.5) * (vec3(0.66,0.80,0.94) * 0.28 + beams * 1.0)
          * (0.55 + uDew*0.75);
 
     // ---- REFRACTION THROUGH THE WATER ----
