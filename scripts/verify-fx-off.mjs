@@ -78,6 +78,14 @@ const CHECKS = [
   { id: 'blurFills', wide: true, html: '<div class="lore-stop"><div class="lore-fill"></div></div>', sel: '.lore-fill', props: ['display'] },
   { id: 'blurFills', wide: true, html: '<div class="journey-stop"><div class="journey-bg-blur"></div></div>', sel: '.journey-bg-blur', props: ['display'] },
 
+  // The feather is the same story: --edge-mask/--col-mask only exist past 2.5:1, so `wide`. All
+  // FOUR masked boxes are checked rather than one, because the join is two ramps meeting and a
+  // switch that took out one of them would leave a half-dissolve while still reporting "off".
+  { id: 'bandFeather', wide: true, html: '<div class="broadcast"><div class="bc-band"></div></div>', sel: '.bc-band', props: ['mask-image'] },
+  { id: 'bandFeather', wide: true, html: '<div class="lore-stop"><div class="lore-band"></div></div>', sel: '.lore-band', props: ['mask-image'] },
+  { id: 'bandFeather', wide: true, html: '<div class="journey-stop"><div class="journey-band"></div></div>', sel: '.journey-band', props: ['mask-image'] },
+  { id: 'bandFeather', wide: true, html: '<div class="broadcast"></div>', sel: '.broadcast', pseudo: '::before', props: ['mask-image'] },
+
   { id: 'beatFilter', html: '<h2 class="section-title">X</h2>', sel: '.section-title', props: ['filter'] },
   { id: 'beatFilter', html: '<h1 class="hero-title">X</h1>', sel: '.hero-title', props: ['filter'] },
   { id: 'beatFilter', html: '<h3 class="journey-city">X</h3>', sel: '.journey-city', props: ['filter'] },

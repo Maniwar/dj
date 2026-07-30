@@ -63,6 +63,7 @@ export type FxId =
   | 'cardGlass'
   | 'playerGlass'
   | 'blurFills'
+  | 'bandFeather'
   | 'beatFilter'
   | 'beatShadow'
   | 'beatBoxShadow'
@@ -241,6 +242,16 @@ export const FX: readonly FxDef[] = [
     minIntensity: 0.35,
     why: 'blur(7px) on an 8x-upscaled copy of each lore scene and of the Broadcast, and blur(48px)/blur(40px) behind each journey scene. Only rendered past 2.5:1 (or on a landscape phone), where the surfaces are largest. Off returns them to the default they already have at ordinary aspect ratios: hidden — and the band keeps its feathered edge either way, because that is a mask, not a fill.',
     targets: '.bc-fill · .lore-fill · .journey-bg-blur',
+  },
+  {
+    id: 'bandFeather',
+    label: 'Soft letterbox edge',
+    group: 'blur',
+    cost: 1,
+    kind: 'css',
+    minIntensity: 0.05,
+    why: 'One mask-image on each of the three band wrappers plus one on .broadcast::before: a paint-time alpha ramp on four layers that already exist, no new element, no new surface, no animation, and nothing to recompute until the window resizes. Measured on both target geometries — the tablet floor stays at census 66, tablet default 85, Surface default 84, i.e. it buys no compositor layer. It is switchable because a mask over a layer that CONTAINS A DECODING VIDEO is exactly the kind of thing that can force a render surface on a tile-based GPU, and only ablating it on the device can rule that out. Grouped with the letterbox fills because the two together are the join: 570px of architecture, then a 120px double dissolve into sharp footage at 3840x1080.',
+    targets: '.bc-band · .lore-band · .journey-band (--edge-mask) · .broadcast::before (--col-mask) · --edge-feather',
   },
 
   // ---- audio-driven CSS --------------------------------------------------------------------

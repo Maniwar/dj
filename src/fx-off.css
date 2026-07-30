@@ -143,11 +143,39 @@
    THE SOFT EDGE SURVIVES THIS SWITCH. The feather is a mask on the band (index.css --edge-mask),
    not part of the fill, so turning the fills off still gives a falloff — the picture dissolves
    into the columns / the Broadcast behind instead of into a blurred copy of itself. That is the
-   point: this switch buys back blur cost without putting the hard letterbox line back. */
+   point: this switch buys back blur cost without putting the hard letterbox line back. The feather
+   has its own id, `bandFeather`, immediately below; these two are deliberately separate switches
+   because the expensive half (per-pixel blur over an 8x-upscaled surface) and the cheap half (an
+   alpha ramp) are what a benchmark needs to tell apart. */
 :root.fx-off-blurFills .bc-fill,
 :root.fx-off-blurFills .lore-fill,
 :root.fx-off-blurFills .journey-bg-blur,
 :root.fx-off-blurFills .journey-stop .journey-bg-blur { display: none !important; }
+
+
+/* ---- bandFeather --------------------------------------------------------------------------
+   BOTH HALVES OF THE JOIN, IN ONE RULE. The dissolve is two masks that were measured and tuned
+   together (index.css, the .bc-band comment and the --col-mask comment): the band's own edge ramps
+   out over --edge-feather, and the speaker-stack column ramps in over the same distance from the
+   other side. Switching off only the band's mask would leave the column still feathering into a
+   picture with a hard edge — a half-dissolve that looks like neither state and would make the
+   benchmark row unreadable. So `none` goes on all four.
+
+   `mask-image: none` IS the default here, exactly as with blurFills: the mask only exists past
+   2.5:1 or in a short landscape window, where --edge-mask/--col-mask are defined. Off, the picture
+   ends on the hard vertical line this effect was built to remove — measured at 3840x1080 as a 24.1
+   single-column luminance step at x=571, against 1.1 with the effect on. That is the honest "off"
+   state and the reason this id is not in the balanced or lean sets: it is retired only at the
+   floor, where everything is. Both properties are named because index.css sets both. */
+:root.fx-off-bandFeather .bc-band,
+:root.fx-off-bandFeather .lore-band,
+:root.fx-off-bandFeather .lore-stop .lore-band,
+:root.fx-off-bandFeather .journey-band,
+:root.fx-off-bandFeather .journey-stop .journey-band,
+:root.fx-off-bandFeather .broadcast::before {
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+}
 
 
 /* ---- beatFilter ---------------------------------------------------------------------------

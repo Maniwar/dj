@@ -99,9 +99,19 @@
    Rules that read it (the STATIC half of the dial; the dynamic half is pre-multiplied into the
    --m-* variables in AudioReactive, so it needs no declarations at all):
      .thermal-canvas opacity · .bc-scan opacity (x2) · .bc-grain base opacity · .bc-vignette
-     stop + alpha · .ls-line glow radius · .tint-* .lm-item glow radius (x6)
+     stop + alpha · .ls-line glow radius · .tint-* .lm-item glow radius (x6) · --edge-feather (x2)
    Everything else the dial reaches, it reaches by retiring the effect outright below that
-   effect's minIntensity threshold — see resolveOff() in src/perf/fxState.ts. */
+   effect's minIntensity threshold — see resolveOff() in src/perf/fxState.ts.
+
+   READING IT FROM A `:root` RULE IS A SILENT NO-OP, and it is the reason --edge-feather is
+   declared on `body`. Because this property is REGISTERED with initial-value 1 and is written on
+   <body>, the value inheriting DOWN from body is the multiplier but the value ON <html> is always
+   the initial 1 — measured at ?intensity=0.3 (multiplier 0.5): getComputedStyle(:root)['--fx'] ===
+   '1' while getComputedStyle(body)['--fx'] === '0.5'. A custom property's own value is substituted
+   at computed-value time on the element it is declared on, so `:root { --x: calc(8px*var(--fx)) }`
+   resolves against that 1, computes cleanly, and the dial does nothing at all. No error, no
+   warning, nothing to see in the stylesheet. Anything that multiplies by --fx must be declared on
+   body or below. */
 @property --fx {
   syntax: '<number>';
   inherits: true;
@@ -253,7 +263,13 @@ body {
    columns (min-aspect-ratio 5/2, and short landscape); everywhere else the fallback `none` wins,
    the mask is the CSS initial value, no stacking context is created and nothing is paid.
    mask-repeat MUST be no-repeat: the default is repeat, which would tile the falloff across the
-   Ken-Burns overscan and produce extra feather bands inside the picture. */
+   Ken-Burns overscan and produce extra feather bands inside the picture.
+
+   THIS IS THE `bandFeather` REGISTRY EFFECT (src/perf/registry.ts), not a hardcoded flourish: its
+   WIDTH scales with the master dial through --fx (see --edge-feather in the two media queries) and
+   its kill rule is in src/fx-off.css, which sets mask-image on these three wrappers AND on
+   .broadcast::before back to `none` — the two halves of the join have to go together or "off"
+   leaves half a dissolve. */
 .bc-band,
 .lore-stop .lore-band,
 .journey-stop .journey-band {
@@ -1970,9 +1986,23 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      Written in VIEWPORT units on purpose. This value is read again inside .bc-band / .lore-band
      / .journey-band, where a `%` would resolve against the BAND rather than the screen and
      collapse to almost nothing — the custom-property equivalent of the `scale:` vs `scale()`
-     trap. vw/svh mean the same thing in every element. */
-  :root {
-    --edge-feather: clamp(20px, calc((100vw - min(100vw, 100svh * 2.5)) / 2 * 0.5), 120px);
+     trap. vw/svh mean the same thing in every element.
+
+     AND IT SCALES WITH THE DIAL. The whole clamp is multiplied by --fx, which is the convention
+     every other static term follows (`opacity: calc(0.16 * var(--fx))` on .bc-scan), so the join
+     softens and tightens with the master control instead of being the one thing on the page the
+     dial cannot reach. Measured at 3840x1080: 36px of falloff at --fx 0.3, 120px at 1.0, 168px at
+     1.4. Scaling the clamp rather than only its middle term is deliberate — at the bottom of the
+     dial the feather goes to zero, which is the same place the `bandFeather` switch takes it, so
+     the two mechanisms agree instead of leaving a full-opacity mask painted for no visible reason
+     (the exact failure the old friction knob shipped: "0" that was never off).
+
+     ON `body`, NOT `:root` — the trap is documented in full at the @property --fx block near the
+     top of this file. --fx is registered with initial-value 1 and written on <body>, so a var(--fx)
+     inside a `:root` rule resolves to 1 forever: measured at ?intensity=0.3, --fx is 0.5 on body
+     and 1 on <html>. The declaration has to sit on body or below to see the dial at all. */
+  body {
+    --edge-feather: calc(clamp(20px, calc((100vw - min(100vw, 100svh * 2.5)) / 2 * 0.5), 120px) * var(--fx, 1));
     /* Duplicated in the short-landscape block below — CSS cannot express "this query OR that
        one" in one at-rule. If you edit one, edit both. */
     --edge-mask: linear-gradient(90deg,
@@ -2061,7 +2091,13 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
        A stop written as `calc(var(--bar) - var(--edge-feather))` can go negative on a screen
        barely past 2.5:1, where the bar is a few pixels wide; CSS clamps a gradient stop to the
        largest preceding stop, so that degrades to "no feather on a bar too small to show one"
-       rather than to anything broken. */
+       rather than to anything broken. Measured at 2560x1015 (2.52:1): bar 13px against a 20px
+       feather, so the inner stop clamps and the whole 13px column is a falloff.
+
+       --edge-feather is inherited from `body` and already carries the dial's --fx multiplier, so
+       this half of the dissolve scales with the other half for free and there is nothing to keep
+       in sync. It is one registry effect, `bandFeather`, and one kill rule in fx-off.css turns
+       both halves off together. */
     --col-mask: linear-gradient(90deg,
       #000 0,
       #000 calc(var(--bar) - var(--edge-feather)),
@@ -2570,9 +2606,13 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
 
      Ceiling is 40px, not 120px: with only 390-560px of height the band is small, and a feather
      sized for a 5120px monitor would eat a visible fraction of the picture. Floor is 14px so
-     the very narrow bars (20px at 1000x480) still read as a falloff. */
-  :root {
-    --edge-feather: clamp(14px, calc((100vw - min(100vw, 100svh * 2.0)) / 2 * 0.5), 40px);
+     the very narrow bars (20px at 1000x480) still read as a falloff.
+
+     Same --fx multiplier and the same reason it is on `body` rather than `:root` as the block
+     above: this is the `bandFeather` registry effect at both breakpoints, not two effects.
+     Measured at 1400x520: bar 180px, feather 40px at --fx 1.0 and 12px at 0.3. */
+  body {
+    --edge-feather: calc(clamp(14px, calc((100vw - min(100vw, 100svh * 2.0)) / 2 * 0.5), 40px) * var(--fx, 1));
     /* Duplicated from the min-aspect-ratio: 5/2 block above — if you edit one, edit both. */
     --edge-mask: linear-gradient(90deg,
       transparent 0,
