@@ -437,9 +437,33 @@ export const thermalFrag = /* glsl */ `
     if (uQuality > 0.5) beads = droplets(uv, 0.02 + uHumidity*0.12);
     col += vec3(0.8,0.9,1.0) * beads * 0.30;
 
-    // liquid-cooling wash on dew point
-    float water = smoothstep(0.0,0.6, fbm(vec2(uv.x*8.0, uv.y*3.0 - uTime*4.0)))*uDew;
-    col += vec3(0.6,0.85,1.0) * water * 0.5;
+    // ---- LIQUID-COOLING SHEET ON DEW POINT ----
+    // THIS WAS THE MILKY STATIC. Reported across many screenshots and finally pinned by the
+    // observation that it "only happens when the dew effect comes in" -- which is exactly right, and
+    // uDew drives precisely one thing, this.
+    //
+    // What it was doing: fbm peaks near 0.94, and smoothstep(0.0, 0.6, ...) maps almost that whole
+    // range to ~1, so water SATURATED across most of the frame rather than picking out streaks.
+    // Pale blue-white at 0.5 additive under mix-blend-mode: screen is an enormous lift -- it flattens
+    // the footage toward white for the ~0.67s uDew takes to decay. And the noise it was built from is
+    // the wrong kind: fbm's top octave here is ~67 cycles across the screen (~19px features) scrolling
+    // at uTime*4.0, which is fast enough to shimmer. Fine, bright, fast noise over the whole frame is
+    // the definition of static, which is why it never read as water.
+    //
+    // Rebuilt as what liquid cooling on a lens actually looks like -- sheeting water, not fog:
+    //   THRESHOLD  smoothstep(0.52, 0.88, ...) instead of (0.0, 0.6), so only the PEAKS of the noise
+    //              survive. That turns a full-frame wash into discrete rivulets with dry glass
+    //              between them, which is the single biggest part of the fix.
+    //   ANISOTROPY water runs DOWN. The noise is stretched 3.5x vertically (uv.y*0.9 against
+    //              uv.x*7.0) so features are tall streaks rather than round blobs.
+    //   SPEED      uTime*4.0 -> 1.1. Sheeting water flows; it does not flicker. The old rate was
+    //              fast enough to alias into shimmer on its own.
+    //   STRENGTH   0.5 -> 0.18, and the tint pulled back toward neutral. With the threshold now
+    //              rejecting most of the frame, the surviving streaks still read clearly at a third
+    //              of the gain -- and the starburst is no longer competing with a clipped frame.
+    float sheet = fbm(vec2(uv.x*7.0, uv.y*0.9 - uTime*1.1));
+    float water = smoothstep(0.52, 0.88, sheet) * uDew;
+    col += vec3(0.62,0.80,0.95) * water * 0.18;
 
     // overclock shimmer
     col += vec3(0.4,1.0,0.6) * uOverclock * 0.1 * (0.5+0.5*sin(uTime*8.0));
