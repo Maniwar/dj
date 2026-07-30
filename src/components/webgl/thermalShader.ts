@@ -882,7 +882,12 @@ export const thermalFrag = /* glsl */ `
     // cells. Two render scales, two different-looking walls, which is half of "sometimes the led
     // produces the wrong pattern". Scaling the floor by uPxScale pins the wall to a fixed DISPLAY
     // size and lets extra buffer resolution do what it should: resolve the same cell more finely.
-    float cellPx = max(floor(cellDisplayPx * uPxScale + 0.5), 5.0 * uPxScale);
+    // BOTH TERMS FLOORED. Pinning the floor to display pixels was right, but writing it as
+    // 5.0 * uPxScale threw away the integrality the outer floor() existed to guarantee: uPxScale
+    // is 0.8, 0.65 or 0.5 at the degraded tiers, so max() would return a fractional cell like 3.25,
+    // cell edges landed mid-pixel, and the grid beat against the pixel lattice -- the plaid moire,
+    // back again, and only on machines that had stepped down. floor() on the floor term as well.
+    float cellPx = max(floor(cellDisplayPx * uPxScale + 0.5), floor(5.0 * uPxScale + 0.5));
     // The gap is ONE canvas pixel wide whatever the cell size, instead of a fixed 0.12-0.40 fraction
     // that got narrower in absolute terms as cells grew and vanished as they shrank.
     // ONE DISPLAY PIXEL, not one buffer pixel. As a buffer pixel the gap survived native and then
@@ -890,7 +895,12 @@ export const thermalFrag = /* glsl */ `
     // it into its neighbours -- the grid washing out into soft uneven stripes exactly when the rig
     // had MORE resolution to draw it with. uPxScale keeps the dark edge one pixel of the picture
     // the viewer is actually looking at.
-    float gap = uPxScale / cellPx;
+    // The gap has to be a WHOLE number of buffer pixels for the same reason. One display pixel is
+    // uPxScale buffer pixels, which is 0.65 of a pixel at tier 3 -- a gap that cannot be drawn, so
+    // it smeared across two pixels at different strengths depending on where each cell edge fell.
+    // Rounded, and never below 1, so the dark edge always exists.
+    float gapPx = max(floor(uPxScale + 0.5), 1.0);
+    float gap = gapPx / cellPx;
     float cellY = smoothstep(gap*0.4, gap*1.4, fract(uv.y * uRes.y / cellPx));
     float cellX = smoothstep(gap*0.4, gap*1.4, fract(uv.x * uRes.x / cellPx));
     col += wallCol * step(uv.y, lip) * cellY * cellX * (0.34 + uBeat*0.42 + uDrop*0.6);
