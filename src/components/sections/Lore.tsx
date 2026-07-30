@@ -49,9 +49,9 @@ export default function Lore() {
   const stops = LORE_STOPS
   // `sectionVideo` off falls back to each stop's still — the same path a stop with no mp4
   // already takes — so the scene composition is unchanged and up to 7 decoders stop existing.
-  // Two statements, because && would short-circuit past the hook. See Broadcast.
-  const sectionVideoOn = useFxOn('sectionVideo')
-  const videoEnabled = useSiteStore((s) => s.videoEnabled) && sectionVideoOn
+  // The player's 🎬 button arrives through this same class rather than as a second flag ANDed on
+  // top of it; see Broadcast.
+  const videoEnabled = useFxOn('sectionVideo')
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
 
   // map lore stop id -> mp4 (from the AtlasCloud results, keyed "lore-<id>")

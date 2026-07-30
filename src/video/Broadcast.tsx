@@ -24,7 +24,6 @@ export default function Broadcast() {
   const slug = usePlayerStore((s) => s.currentTrackSlug)
   const loggedOn = useSiteStore((s) => s.loggedOn)
   const reduced = useSiteStore((s) => s.reducedMotion)
-  const videoEnabled = useSiteStore((s) => s.videoEnabled)
 
   const [scene, setScene] = useState<Scene>(() => sceneForTrack(null))
   const [frameIdx, setFrameIdx] = useState(0)
@@ -38,11 +37,14 @@ export default function Broadcast() {
   // why this switch can exist at all: hiding the <video> with CSS would leave a decoder running
   // behind a black page, which in a benchmark reads as "the video is free".
   //
-  // On its own line, NOT folded into the && below: `vids.length > 0 && videoEnabled` short-
-  // circuits, and a hook behind a short-circuit is a hook that is called on some renders and not
-  // others. React detects that as a changed hook order and throws out of the whole subtree.
+  // ONE condition now, not two. The player's 🎬 button used to be a separate `videoEnabled` flag
+  // ANDed in here, which meant the visitor's explicit choice and the perf ladder's decision were
+  // two different channels that could contradict each other — and did: `minimal` switched
+  // `bcVideo` off while the button went on claiming video was on. The button writes a per-effect
+  // override now, so it arrives through this same class and outranks the profile by the ordinary
+  // precedence rule. See the block above setVideoPreference in fxState.ts.
   const bcVideoOn = useFxOn('bcVideo')
-  const useVideo = vids.length > 0 && videoEnabled && bcVideoOn
+  const useVideo = vids.length > 0 && bcVideoOn
 
   const rootRef = useRef<HTMLDivElement>(null)
   const lastCut = useRef(0)

@@ -2,11 +2,17 @@ import { APP_VERSION, BUILD_SHA, BUILD_STAMP } from '../version'
 import { PERF } from '../lib/perfFlags'
 import { prefersHdVideo } from '../lib/videoRendition'
 import { usePlayerStore } from '../state/usePlayerStore'
-import { useSiteStore } from '../state/useSiteStore'
 import { audioBus } from '../audio/audioBus'
 import { FX, type FxId } from './registry'
 import { readFxOff, RELOAD_REQUIRED, fxUrl } from './fxClasses'
-import { appliedProfile, appliedProfileDef, perfState, type FxSource } from './fxState'
+import {
+  appliedProfile,
+  appliedProfileDef,
+  perfState,
+  videoByHand,
+  videoOn,
+  type FxSource,
+} from './fxState'
 import type { ProfileId, Verdict } from './profiles'
 import { getIntensity, getFxMultiplier, FX_DEFAULT } from './intensity'
 import { deviceInfo, deviceSlug, type DeviceInfo } from './deviceInfo'
@@ -66,7 +72,16 @@ export type PerfReport = {
     calmLatched: boolean
     audioPlaying: boolean
     trackSlug: string | null
+    /** Video as RESOLVED — the `bcVideo` class, not a preference that could disagree with it. */
     videoEnabled: boolean
+    /** Whether a person pinned that, as opposed to it being the default or the ladder's doing. */
+    videoByHand: boolean
+    /**
+     * How many times the page has been made more expensive since load, each of which licensed the
+     * detector one further measurement. Non-zero next to a `full` verdict is the signal that the
+     * verdict describes a cheaper page than the one these rows were measured on.
+     */
+    measureEpoch: number
     renditionHd: boolean
   }
   registry: Array<{
@@ -129,7 +144,12 @@ export function buildReport(runs: BenchRun[], notes = ''): PerfReport {
       calmLatched: document.documentElement.classList.contains('calm'),
       audioPlaying: audioBus.playing,
       trackSlug: usePlayerStore.getState().currentTrackSlug,
-      videoEnabled: useSiteStore.getState().videoEnabled,
+      // Read off the resolved state rather than out of the site store, which no longer has an
+      // opinion about video. An export that disagreed with the page about whether video was
+      // playing would misattribute every row measured under it.
+      videoEnabled: videoOn(),
+      videoByHand: videoByHand(),
+      measureEpoch: perfState().measureEpoch,
       renditionHd: prefersHdVideo(),
     },
     // Embedded in full, not by reference. The `why` strings are the difference between "cardGlass

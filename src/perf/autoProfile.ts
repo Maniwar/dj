@@ -105,8 +105,18 @@ export function startAutoProfile(): () => void {
   if (typeof window === 'undefined') return () => {}
 
   let stopped = false
-  /** A measurement has been started during the CURRENT armed period. Cleared when it disarms. */
-  let startedThisArming = false
+  /**
+   * The `measureEpoch` a measurement has already been started for during the CURRENT armed
+   * period, or null if none has. Cleared when it disarms, so re-arming always re-measures.
+   *
+   * This is an epoch rather than a boolean because the page's cost is not fixed after boot. The
+   * video button can add up to twelve decoders to a page that was already judged without them, and
+   * a boolean "we measured once" made that verdict permanent — auto had spent both its windows
+   * describing a configuration the visitor then changed. Comparing against the epoch instead means
+   * a cost INCREASE licenses exactly one more full cycle, and nothing else does. See the field's
+   * note in fxState.ts for why only increases bump it.
+   */
+  let startedForEpoch: number | null = null
   let inFlight = false
 
   // REDUCED MOTION SHORT-CIRCUITS, and does not measure. Someone who has asked their operating
@@ -124,11 +134,16 @@ export function startAutoProfile(): () => void {
       // callback on every frame of a page whose configuration is already decided — and forget that
       // this arming ran, so that arming it AGAIN gets a fresh measurement rather than silently
       // reusing a verdict from before the user took control.
-      startedThisArming = false
+      startedForEpoch = null
       return
     }
-    if (startedThisArming || inFlight) return
-    startedThisArming = true
+    // A cycle already running is left alone rather than restarted: the finally-block below calls
+    // attempt() again on its way out, and by then this same comparison sees the bumped epoch and
+    // starts the fresh cycle. Interrupting mid-flight would throw away up to 19 seconds of
+    // measurement to replace it with one that is only marginally more current.
+    if (inFlight) return
+    if (startedForEpoch === perfState().measureEpoch) return
+    startedForEpoch = perfState().measureEpoch
 
     if (reducedMotion()) {
       setDetectedProfile({
@@ -145,9 +160,11 @@ export function startAutoProfile(): () => void {
     inFlight = true
     void cycle(() => stopped).finally(() => {
       inFlight = false
-      // The arming may have changed underneath a cycle that was mid-sleep — 15 seconds is a long
-      // time to hold a page still. `startedThisArming` is false only if it did, so this restarts
-      // exactly then and is a no-op every other time (the guard above returns immediately).
+      // Two things can have changed underneath a cycle that was mid-sleep — 15 seconds is a long
+      // time to hold a page still. The arming may have gone and come back, and the epoch may have
+      // been bumped by the video button. Either leaves `startedForEpoch` disagreeing with the
+      // current state, so this restarts exactly then and is a no-op every other time (the guards
+      // above return immediately).
       attempt()
     })
   }

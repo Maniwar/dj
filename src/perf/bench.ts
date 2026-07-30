@@ -1,5 +1,5 @@
 import { audioBus } from '../audio/audioBus'
-import { ALL_FX_IDS, FX, FX_BY_ID, type FxId } from './registry'
+import { ALL_FX_IDS, FX, FX_BY_ID, VIDEO_FX_IDS, type FxId } from './registry'
 import { applyFxOff, readFxOff, unhonoured } from './fxClasses'
 import { holdPerfState } from './fxState'
 import { getIntensity, setIntensity } from './intensity'
@@ -71,7 +71,10 @@ const SETTLE_MS = 700
 // p99 is a single sample and is noise; above ~5s the full matrix stops fitting in the window a
 // person will hold a tablet still for.
 const SAMPLE_MS = 3000
-const VIDEO_IDS: FxId[] = ['bcVideo', 'sectionVideo']
+// Shared with the player's 🎬 button rather than restated here. The headline legs of this
+// benchmark and that button have to mean the same thing by "the video", or `effects-only` would be
+// measuring a page the visitor could not actually produce.
+const VIDEO_IDS: readonly FxId[] = VIDEO_FX_IDS
 
 export type BenchProgress = {
   index: number
@@ -95,7 +98,7 @@ export type BenchOptions = {
 // The matrix
 // --------------------------------------------------------------------------------------------
 
-function everythingExcept(keep: FxId[]): FxId[] {
+function everythingExcept(keep: readonly FxId[]): FxId[] {
   const k = new Set(keep)
   return ALL_FX_IDS.filter((id) => !k.has(id))
 }

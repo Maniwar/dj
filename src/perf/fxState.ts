@@ -1,6 +1,6 @@
 import { PERF } from '../lib/perfFlags'
 import { refreshRenditionChoice } from '../lib/videoRendition'
-import { ALL_FX_IDS, FX_BY_ID, type FxId } from './registry'
+import { ALL_FX_IDS, FX_BY_ID, VIDEO_FX_IDS, type FxId } from './registry'
 import { applyFxOff } from './fxClasses'
 import { getIntensity, setIntensity } from './intensity'
 import { FX_DEFAULT } from './fxCurve'
@@ -111,6 +111,22 @@ export type PerfState = {
   intensityByHand: boolean
   /** The auto-detector's full reasoning, for the export. */
   verdict: Verdict | null
+  /**
+   * Bumped whenever something makes the page MEASURABLY MORE EXPENSIVE than when it was last
+   * judged, to license one further measurement.
+   *
+   * The one-way rule (autoProfile.ts) says a verdict may only ever move DOWN the ladder, and that
+   * is what stops the oscillation. But it was written for a page whose cost is fixed after boot,
+   * and the video button breaks that assumption: measure a device with video OFF and it is a page
+   * with no decoders, which classifies healthy — then the video goes on and the page it certified
+   * no longer exists. Auto had already spent its two windows and would never look again.
+   *
+   * So the epoch is not an exception to the one-way rule, it is the rule's missing input. Only
+   * transitions that ADD cost bump it, so every re-measurement it licenses can still only move
+   * downwards; turning video back OFF deliberately does not bump, because that is an upgrade and
+   * upgrades are exactly what must never be automatic.
+   */
+  measureEpoch: number
 }
 
 let state: PerfState = {
@@ -123,6 +139,7 @@ let state: PerfState = {
   intensity: FX_DEFAULT,
   intensityByHand: false,
   verdict: null,
+  measureEpoch: 0,
 }
 
 let initialised = false
@@ -367,6 +384,10 @@ export function initPerfState(): Readonly<PerfState> {
     intensity: asked,
     intensityByHand: byHand,
     verdict: null,
+    // A stored video override is not a cost INCREASE relative to anything — there is no earlier
+    // verdict on this load to invalidate. Boot always starts at epoch 0 and the first measurement
+    // simply measures whatever the stored preference already put on the page.
+    measureEpoch: 0,
   }
   // The profile's cap applies AT BOOT, by the same rule setProfile uses. Without this,
   // ?profile=minimal — and a stored `minimal` from a previous visit — left the dial at its
@@ -491,6 +512,81 @@ export function setOverride(id: FxId, on: boolean | undefined): void {
   if (on === undefined) delete overrides[id]
   else overrides[id] = on
   state = { ...state, overrides }
+  writeStoredOverrides(overrides)
+  apply()
+}
+
+// --------------------------------------------------------------------------------------------
+// THE VIDEO BUTTON — on the ladder, not beside it
+// --------------------------------------------------------------------------------------------
+// The player's 🎬 button used to be `videoEnabled` in useSiteStore, ANDed into three components
+// next to their `useFxOn` reads. That made it a FIFTH source of truth this file could not see, and
+// the precedence ladder at the top — whose entire purpose is that a measurement never overrules a
+// person — gave it no protection at all, because protection is something resolveOff() does and
+// resolveOff() had never heard of it. Two consequences, both of which shipped:
+//
+//   `lean` contains sectionVideo and `minimal` contains everything, so auto reaching either killed
+//   the video while `videoEnabled` stayed true. The button went on rendering `.on`, went on saying
+//   "Video ON — tap for stills", and did nothing anyone could see. A control that lies about the
+//   thing it controls.
+//
+//   `videoEnabled` was not persisted and the profile was. A stored `lean` therefore reloaded with
+//   the button claiming ON over dead section videos, on every single visit.
+//
+// So the preference IS an override now — rung 2, "a person flipped this by hand", which
+// resolveOff() already honours in BOTH directions and persist.ts already stores. Nothing new had to
+// be invented for it to outrank a profile; it just had to stop being kept somewhere else.
+
+/**
+ * Whether video is actually on screen right now, resolved exactly as the classes are.
+ *
+ * The button reads THIS rather than a preference flag, which is what makes it honest: when auto or
+ * the dial legitimately retires video on an untouched button, the button goes dark with it instead
+ * of claiming a state the page is not in.
+ */
+export function videoOn(): boolean {
+  return isFxActive('bcVideo')
+}
+
+/**
+ * Whether a PERSON has said anything about video, as opposed to it merely defaulting to on.
+ *
+ * The presence of the override is the signal, exactly as the presence of a stored dial position is
+ * what `intensityByHand` is reconstructed from at boot — no extra key, nothing that can fall out of
+ * step with the thing it describes.
+ *
+ * This is the whole asymmetry, and it is the same one `autoChosen` draws for the profile:
+ *
+ *   untouched   video is on because that is the default. Auto may still retire it on a device that
+ *               cannot afford it — which is the point of having a floor at all.
+ *   tapped      video is on because someone asked for it. Auto may not take it away, at any
+ *               profile, `minimal` included. It drops something else instead.
+ */
+export function videoByHand(): boolean {
+  return state.overrides.bcVideo !== undefined
+}
+
+/**
+ * The 🎬 button. Pins video on or off across both video ids, and licenses a re-measurement when
+ * that makes the page more expensive.
+ *
+ * Both ids move together because the button has always meant "moving pictures or stills" as one
+ * idea, and splitting them would give it a third state nobody asked for. `hdRendition` is
+ * deliberately not among them — see VIDEO_FX_IDS.
+ */
+export function setVideoPreference(on: boolean): void {
+  const overrides: Overrides = { ...state.overrides }
+  for (const id of VIDEO_FX_IDS) overrides[id] = on
+  state = {
+    ...state,
+    overrides,
+    // ONLY ON THE WAY UP. Turning video on adds up to twelve decoders to a page whose verdict was
+    // measured without them, so that verdict now describes a page that does not exist and one more
+    // window is owed. Turning it off can only have made things cheaper, and a re-measurement there
+    // could only ever argue for an upgrade — which is the oscillation the one-way rule exists to
+    // prevent, so it is not licensed.
+    measureEpoch: on ? state.measureEpoch + 1 : state.measureEpoch,
+  }
   writeStoredOverrides(overrides)
   apply()
 }

@@ -11,7 +11,16 @@ import { useThermalReadout } from '../../hooks/useThermalReadout'
 import SpectrumDisplay from './SpectrumDisplay'
 import BootlegSwitch from './BootlegSwitch'
 import Knob from './Knob'
-import { setIntensityPref, setProfile, perfState, appliedProfile, subscribePerfState } from '../../perf/fxState'
+import {
+  setIntensityPref,
+  setProfile,
+  perfState,
+  appliedProfile,
+  subscribePerfState,
+  setVideoPreference,
+  videoByHand,
+} from '../../perf/fxState'
+import { useFxOn } from '../../perf/useFx'
 import { FX_DEFAULT } from '../../perf/fxCurve'
 import { PROFILE_BY_ID, type ProfileId } from '../../perf/profiles'
 
@@ -121,8 +130,11 @@ export default function Player() {
   useEffect(() => subscribePerfState(() => setFx(fxChip())), [])
   const toggleLyrics = useSiteStore((s) => s.toggleLyrics)
   const lyricsOpen = useSiteStore((s) => s.lyricsOpen)
-  const videoEnabled = useSiteStore((s) => s.videoEnabled)
-  const toggleVideo = useSiteStore((s) => s.toggleVideo)
+  // THE RESOLVED STATE, not a preference flag. Subscribed to the root classes like every other
+  // effect, so when the dial or a chosen Auto legitimately retires video the button goes dark
+  // with it. It used to read `useSiteStore.videoEnabled`, which is how it came to sit lit over
+  // dead videos under `lean` — see the block above setVideoPreference in fxState.ts.
+  const videoEnabled = useFxOn('bcVideo')
   const lyricStyle = useSiteStore((s) => s.lyricStyle)
   const cycleLyricStyle = useSiteStore((s) => s.cycleLyricStyle)
   const toggleVisualizer = useSiteStore((s) => s.toggleVisualizer)
@@ -534,9 +546,22 @@ export default function Player() {
             </button>
             <button
               className={`tbtn vid ${videoEnabled ? 'on' : ''}`}
-              onClick={toggleVideo}
+              onClick={() => setVideoPreference(!videoEnabled)}
               aria-label="Toggle video backgrounds"
-              title={videoEnabled ? 'Video ON — tap for stills' : 'Stills — tap for video'}
+              // Three states, because there genuinely are three. The middle one is the case that
+              // used to be silent: video off, nobody having asked for that — the performance
+              // ladder decided it — and the tap that fixes it also pins it, so the ladder cannot
+              // decide again. Saying so is the difference between a control that looks broken and
+              // one that explains itself.
+              title={
+                videoEnabled
+                  ? videoByHand()
+                    ? 'Video ON, kept on — tap for stills'
+                    : 'Video ON — tap for stills'
+                  : videoByHand()
+                    ? 'Stills — tap for video'
+                    : 'Stills (performance) — tap to force video on'
+              }
             >
               🎬
             </button>

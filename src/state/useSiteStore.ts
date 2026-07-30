@@ -72,7 +72,12 @@ type SiteState = {
   reducedMotion: boolean
   hits: number // fake 2004 hit-counter
   lyricsOpen: boolean // karaoke panel visibility
-  videoEnabled: boolean // play the real muted mp4 backgrounds vs the Ken-Burns stills
+  // NO `videoEnabled` HERE ANY MORE. It lived in this store for a long time and that was the bug:
+  // the perf harness reconciles four sources of truth about which effects run, and this was a
+  // fifth that it could not see, so `minimal` switched the video off underneath a button that
+  // went on reporting it as on. It is a per-effect override in fxState now — rung 2 of the
+  // precedence ladder — which is persisted, appears in the JSON export, and outranks a profile by
+  // the ordinary rule instead of by a bare && in three components. See setVideoPreference.
   accent: AccentKey // which section owns the light rig right now
   setAccent: (a: AccentKey) => void
   lyricStyle: LyricStyle // viewer's choice of how sung words are drawn
@@ -93,7 +98,6 @@ type SiteState = {
   setIntensity: (v: number) => void
   toggleSauna: () => void
   toggleLyrics: () => void
-  toggleVideo: () => void
   bumpHits: () => void
 }
 
@@ -115,7 +119,6 @@ export const useSiteStore = create<SiteState>((set) => ({
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true,
   hits: seededHits,
   lyricsOpen: false,
-  videoEnabled: true,
   accent: 'default',
   setAccent: (a) => set((s) => (s.accent === a ? s : { accent: a })), // no-op re-renders avoided
   lyricStyle: initialLyricStyle(),
@@ -192,6 +195,5 @@ export const useSiteStore = create<SiteState>((set) => ({
   setIntensity: (v) => set({ intensity: Math.max(0, Math.min(1, v)) }),
   toggleSauna: () => set((s) => ({ saunaMode: !s.saunaMode })),
   toggleLyrics: () => set((s) => ({ lyricsOpen: !s.lyricsOpen })),
-  toggleVideo: () => set((s) => ({ videoEnabled: !s.videoEnabled })),
   bumpHits: () => set((s) => ({ hits: s.hits + Math.floor(1 + Math.random() * 3) })),
 }))

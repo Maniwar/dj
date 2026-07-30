@@ -429,6 +429,17 @@ export const FX: readonly FxDef[] = [
 
 export const ALL_FX_IDS: FxId[] = FX.map((f) => f.id)
 
+/**
+ * What the player's 🎬 button means, as a set of registry ids.
+ *
+ * NOT `group === 'video'`, which would sweep in `hdRendition`. HD-versus-SD is a QUALITY axis and
+ * the button is an ON/OFF one: video at the SD rendition is still video, and letting the button
+ * pin the HD stream would hand a weak device the single most expensive video decision it has, on a
+ * tap that only asked for moving pictures. So the profile keeps `hdRendition` and the button never
+ * touches it.
+ */
+export const VIDEO_FX_IDS: readonly FxId[] = ['bcVideo', 'sectionVideo']
+
 export const FX_BY_ID = Object.fromEntries(FX.map((f) => [f.id, f])) as Record<FxId, FxDef>
 
 /** Ordered as the panel groups them: the expensive, page-wide things first. */

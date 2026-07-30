@@ -21,10 +21,9 @@ export default function TourJourney() {
   // atlascloud.results.json via the hydrated SCENES, matching the Broadcast's source of truth.
   const [videoMap, setVideoMap] = useState<Record<string, string>>({})
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
-  // See Lore: off falls back to the poster Ken-Burns each city already has, and the hook is on
-  // its own line because && would short-circuit past it.
-  const sectionVideoOn = useFxOn('sectionVideo')
-  const videoEnabled = useSiteStore((s) => s.videoEnabled) && sectionVideoOn
+  // See Lore: off falls back to the poster Ken-Burns each city already has, and the 🎬 button
+  // reaches this through the same class rather than as a separate flag.
+  const videoEnabled = useFxOn('sectionVideo')
   const cities = TOUR_CLIPS
 
   // Pull in real videos once (if the results file has ready clips). A city's stop swaps its
