@@ -1056,10 +1056,19 @@ export const thermalFrag = /* glsl */ `
     // lower third uniformly, which reads as the water glowing on its own rather than catching light.
     vec3 wallLight = wallCol * step(wuv.y, lip) * cellY * cellX * (0.34 + uBeat*0.42 + uDrop*0.6);
     col += wallLight;
-    beams += wallLight * 0.30;
-    // The same wall WITHOUT the cell mask -- its average emission, which is what actually falls on
-    // anything in front of it. cellY*cellX is the grid; omitting it leaves the glow.
-    ambient += wallCol * step(wuv.y, lip) * (0.34 + uBeat*0.42 + uDrop*0.6) * 0.85;
+    // The wall WITHOUT its cell mask -- average emission, which is what actually falls on anything in
+    // front of it. cellY*cellX is the grid; omitting it leaves the glow.
+    vec3 wallGlow = wallCol * step(wuv.y, lip) * (0.34 + uBeat*0.42 + uDrop*0.6) * 0.85;
+    ambient += wallGlow;
+    // THE GLOW GOES INTO beams, NOT THE GRID. This was wallLight * 0.30, and wallLight carries
+    // cellY*cellX -- so every object lit from beams had the LED grid printed onto it. That is why the
+    // confetti still showed the cross pattern after being fully occluded: the occlusion was working,
+    // but the flake's own light, flakes * (0.60 + lightHere * 1.9), was modulated by the grid, so the
+    // pattern came back in the light rather than through the paper. The water beads read it too.
+    //
+    // A grid of lit cells a few metres away does not cast a grid onto something in front of it; it
+    // casts its average. Only the glow belongs in the illumination field.
+    beams += wallGlow * 0.35;
     // soft spill of light up off the strip
     col += wallCol * step(uv.y, lip + 0.075) * smoothstep(lip + 0.075, lip, uv.y) * (0.05 + uLevel*0.05);
 

@@ -245,6 +245,25 @@ const pngs = await page.evaluate(async ({ vs, fs, W, H, scenarios, names, SS }) 
     return best
   }
 
+  // THE PAGE COMPOSITES THE CANVAS OVER VIDEO WITH mix-blend-mode: screen. Rendering the rig on
+  // black, as this harness did, is not what anybody sees -- and it hid a whole class of problem,
+  // because screen CANNOT DARKEN: result = 1-(1-base)*(1-rig). Anywhere the shader occludes
+  // something by pulling col down, the footage underneath comes straight back through at full
+  // strength. A flake that correctly erases the LED grid inside the shader can still show that grid
+  // if the grid's brightness is partly coming from the video beneath it.
+  // SCREEN=1 renders on black as before; SCREEN=2 composites over a stand-in backdrop first.
+  const screenOver = (img, base) => {
+    const out = new Uint8ClampedArray(img.px.length)
+    for (let i = 0; i < img.px.length; i += 4) {
+      for (let c = 0; c < 3; c++) {
+        const r = img.px[i + c] / 255, b = base[c] / 255
+        out[i + c] = (1 - (1 - b) * (1 - r)) * 255
+      }
+      out[i + 3] = 255
+    }
+    return { px: out, w: img.w, h: img.h }
+  }
+
   const CW = 150, CH = 100, ZOOM = 4
   const res = {}
   for (const name of names) {
@@ -254,9 +273,13 @@ const pngs = await page.evaluate(async ({ vs, fs, W, H, scenarios, names, SS }) 
     const sup = down(draw(Math.round(W * SS), Math.round(H * SS), SS, sc.uni), W, H)
     // Located on the NATIVE frame and reused for both, so the two panels show the same region.
     const at = sc.crop || (h => [h.cx, h.cy])(hotspot(nat, CW, CH, sc.band))
+    // A mid-bright neutral stand-in for the footage. Not a real frame, but the property that matters
+    // is only that it is NOT black -- that is what makes screen blending lift the occluded regions.
+    const BACKDROP = [96, 88, 104]
     const shp = sharpen(sup, 0.9)
     res[name] = compose([
-      { img: crop(nat, at[0], at[1], CW, CH, ZOOM), label: 'NATIVE 1.0x' },
+      { img: crop(nat, at[0], at[1], CW, CH, ZOOM), label: 'RIG ON BLACK' },
+      { img: crop(screenOver(nat, BACKDROP), at[0], at[1], CW, CH, ZOOM), label: 'SCREEN OVER FOOTAGE (what you see)' },
       { img: crop(sup, at[0], at[1], CW, CH, ZOOM), label: `SUPERSAMPLED ${SS}x` },
       { img: crop(shp, at[0], at[1], CW, CH, ZOOM), label: `${SS}x + SHARPEN` },
     ])
