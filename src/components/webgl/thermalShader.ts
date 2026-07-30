@@ -107,7 +107,8 @@ export const thermalFrag = /* glsl */ `
   // maths lives below it and GLSL requires a symbol to be declared before it is used.
   float runnerHeadY(float uvx, float layer, float amount, out float lane);
 
-  float droplets(vec2 uv, float aspect, float density, float runAmount, out vec2 disp){
+  float droplets(vec2 uv, float aspect, float density, float runAmount,
+                 float ry0, float lane0, float ry1, float lane1, out vec2 disp){
     float acc=0.0;
     disp=vec2(0.0);
     for(int layer=0; layer<2; layer++){
@@ -218,9 +219,16 @@ export const thermalFrag = /* glsl */ `
         // column is now BELOW it and the bead sits inside its lane, that water has already been swept
         // up. Faded over a short distance rather than cut, so a bead is taken as the drop arrives
         // instead of blinking off ahead of it.
+        // The runner state is passed IN, not re-derived here. This block used to call runnerHeadY
+        // twice, inside a loop that runs twice -- four calls of five hashes each, i.e. twenty extra
+        // hashes per pixel, inside a divergent branch. That is what pushed a machine that had been
+        // rendering at native down to tier 3 and half resolution, which is one-way for the session:
+        // the rig went soft and the frame counter still read 59fps, because the tier system had
+        // bought that back by throwing away pixels.
+        // Hoisting costs nothing in accuracy: beads are 6-17px and the runner columns are 126-218px
+        // wide, so evaluating at the pixel rather than at the bead's cell centre picks the same
+        // column every time.
         vec2 buv = (id + 0.5 + c) / s;
-        float lane0; float ry0 = runnerHeadY(buv.x, 0.0, runAmount, lane0);
-        float lane1; float ry1 = runnerHeadY(buv.x, 1.0, runAmount, lane1);
         // ABSORBED AS THE DROP ARRIVES, not after it has gone past. The window used to be
         // smoothstep(0.02, -0.03, ...), i.e. the bead only began to go once the head was already
         // BELOW it -- so for the frames where they crossed, both were drawn on top of one another and
@@ -308,7 +316,7 @@ export const thermalFrag = /* glsl */ `
   //
   // Columns rather than a square grid, because water runs in lanes. Two passes at different column
   // counts so the sizes vary without a second grid becoming visible.
-  float runners(vec2 uv, float amount, out vec2 disp){
+  float runners(vec2 uv, float amount, float bigY, float bigLane, out vec2 disp){
     float acc = 0.0;
     disp = vec2(0.0);
     for(int c=0; c<2; c++){
@@ -359,7 +367,10 @@ export const thermalFrag = /* glsl */ `
         // the one that avoids two drops each concluding the other should disappear.
         float merged = 1.0;
         if (c == 1) {
-          float bigLane; float bigY = runnerHeadY(uv.x, 0.0, amount, bigLane);
+          // bigY/bigLane are passed in, not re-derived. This called runnerHeadY once per inner
+          // iteration -- three more calls of five hashes each per pixel -- and it is the same
+          // layer-0 lookup the bead absorption already needs, so it was being computed twice over
+          // for no reason. Between this and the bead hoist, 25 hashes per pixel come back.
           float lanes = smoothstep(0.09, 0.02, abs(fract(uv.x*11.0) - 0.5) / 11.0);
           float near  = smoothstep(0.18, 0.0, abs(bigY - (uv.y - y)));
           merged = 1.0 - lanes * near * 0.92;
@@ -762,8 +773,10 @@ export const thermalFrag = /* glsl */ `
     // that was dragged through the haze rather than eight separate lamps. Folded into the light field
     // the same way the follow spot is, so drops along the path brighten as the pointer goes by.
     vec3 trailLight = vec3(0.0);
-    for (int i = 0; i < 8; i++) {
-      float fi = float(i);
+    // Five of the eight samples, not all eight: each costs a length() and a smoothstep per pixel,
+    // and the path reads the same from five points spaced wider along it.
+    for (int i = 0; i < 5; i++) {
+      float fi = float(i) * 1.6;
       vec2 tp = vec2((uTrail[i].x - 0.5) * aspect, uTrail[i].y - 0.5);
       float age = 1.0 - fi / 8.0;             // 1 at the head, fading back along the path
       float rad = 0.045 + fi * 0.016;         // older samples bloom wider as they dissipate
@@ -1025,7 +1038,11 @@ export const thermalFrag = /* glsl */ `
     // the runner or beads would vanish under drops that are not there.
     float wet = clamp((uHumidity*0.60 + uDew*0.80) * max(fog, uDew*0.7), 0.0, 1.0);
     float runAmount = 0.20 + wet*0.46;
-    float beads = droplets(uv, aspect, wetness * 0.78 * (uQuality > 0.5 ? 1.0 : 1.45), runAmount, beadDisp);
+    // Derived ONCE per pixel and handed to droplets(), rather than four times inside its loops.
+    float bLane0; float bRy0 = runnerHeadY(uv.x, 0.0, runAmount, bLane0);
+    float bLane1; float bRy1 = runnerHeadY(uv.x, 1.0, runAmount, bLane1);
+    float beads = droplets(uv, aspect, wetness * 0.78 * (uQuality > 0.5 ? 1.0 : 1.45), runAmount,
+                           bRy0, bLane0, bRy1, bLane1, beadDisp);
     // Water catches the light too. A droplet is a lens: in the dark it is nearly invisible, and when
     // a beam crosses it, it lights up. Same lookup as the confetti -- the field is already computed.
     // SELF-LIGHT RESTORED. Making the water beam-lit was right, but I took the self term from 0.44 to
@@ -1051,7 +1068,7 @@ export const thermalFrag = /* glsl */ `
     // Gated by the same fog cycle as the beads. Runners drying on a different schedule would leave
     // water streaking down a lens that had just been declared clear.
     vec2 runDisp;
-    float run = runners(uv, runAmount, runDisp);
+    float run = runners(uv, runAmount, bRy0, bLane0, runDisp);
     // Dimmer as well as softer. 0.34 was set when the runners were barely visible at all, before the
     // edges were sharpened; sharpened AND at that gain they read as bright white lines drawn over the
     // footage. Soft edges plus a lower gain is what water on glass looks like against a dark scene.
