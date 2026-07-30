@@ -2642,8 +2642,18 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
      old darkening, so deleting it would lighten the whole site. Same treatment fx-off.css gives it.
      No !important anywhere here, deliberately: these win on source order, which leaves the
      registry's fx-off rules and the diag panel still able to override them. */
-  .bc-grain, .bc-strobe, .bc-vignette { display: none; }
-  .bc-scan { mix-blend-mode: normal; }
+  /* NORMALISED, NOT HIDDEN -- corrected. Hiding these emptied the side bars, and that silently
+     killed the feather too: the mask fades the band edge into whatever is BEHIND it, so with the
+     bars black the dissolve was black-into-black. bandFeather was still on and had nothing to
+     dissolve into.
+     What costs the readback is the BLEND MODE, not the layer, so only the blend mode goes. All four
+     keep painting -- the bars stay lit and the feather has a backdrop again.
+     .bc-vignette is NOT listed: line 326 sets no mix-blend-mode at all, so it never caused a
+     readback and hiding it bought nothing. Restored.
+     .bc-strobe keeps its per-frame opacity, which is fine once it is not blending: an opacity change
+     on an unblended layer is a compositor-only update, no backdrop read. Same for .bc-grain's
+     grainshift, which animates background-position on a normal layer. */
+  .bc-grain, .bc-strobe, .bc-scan { mix-blend-mode: normal; }
 
   /* the ticker lines up with the frame too, rather than running the full window */
   .lyric-marquee { width: min(100%, calc(100svh * 2.0)); margin-inline: auto; }
