@@ -106,7 +106,9 @@ export type PerfState = {
    * profile control dishonest in one direction: choosing Lean pulls the dial to 0.35, and
    * choosing Full afterwards left it there, so a segmented control labelled "everything on, as
    * designed" resolved to a page with eight effects still switched off. A profile may move a dial
-   * it set itself; it may only ever clamp DOWN one that someone chose.
+   * it set itself. NOTE the asymmetry now only applies to the AUTOMATIC paths — setDetectedProfile
+   * and boot — because an explicit rung tap PLACES the dial at that rung instead of clamping it;
+   * see setProfile for why clamping there was the cursor-trail defect.
    */
   intensityByHand: boolean
   /** The auto-detector's full reasoning, for the export. */
@@ -446,7 +448,18 @@ export function setProfile(p: ProfileId | 'auto'): void {
     // lighter profile can never make the page more expensive, and it stays free afterwards so
     // that wanting the look back under `lean` is not fought by a control that snaps out of your
     // fingers.
-    intensity: state.intensityByHand ? Math.min(state.intensity, cap) : Math.min(FX_DEFAULT, cap),
+    // A RUNG TAP IS A STATEMENT ABOUT POSITION, so the dial is PLACED AT the rung rather than
+    // merely clamped to it. Clamping was the reported defect: with a hand-set dial, `Math.min`
+    // could only ever lower it, so tapping up the ladder left the dial stranded low -- pick Lean
+    // (0.35), then pick Full, and Full resolved to a page with sixteen effects still retired
+    // because --fx never came back up. Reported as the cursor trail not returning until the dial
+    // was played with by hand, which is exactly what was required of it.
+    //
+    // Placing it makes the five rungs deterministic and reversible: each one is a named position,
+    // tapping it twice is idempotent, and the label always describes the page. Auto keeps the old
+    // expression because it is not a position -- it is a request to be measured, so it starts from
+    // the designed look and the verdict moves it from there.
+    intensity: p === 'auto' ? Math.min(FX_DEFAULT, cap) : cap,
   }
   writeStoredProfile(p)
   // ONLY a hand-set dial is persisted, and this is load-bearing rather than an optimisation: the

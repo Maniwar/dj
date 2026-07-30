@@ -3856,7 +3856,12 @@ body.sauna .content::before { content: ''; position: fixed; inset: 0; z-index: 2
    sequence. Only the animation is paused, so nothing about load order changes.
    `.content` is excluded from nothing here — the gate covers the page, so pausing is invisible
    by definition, and everything resumes the moment the class comes off. */
-:root.gated *, :root.gated *::before, :root.gated *::after { animation-play-state: paused !important; }
+/* SCOPED TO .content, NOT `*`. This pauses the club while the boot gate is up so a device is not
+   rendering a full site nobody can see. As `:root.gated *` it also froze THE GATE ITSELF, which is
+   the one thing actually on screen at that moment -- the logon button and its conic-gradient halo
+   both sit inside .boot-gate, a sibling of .content, so the sheen and the spin were both paused
+   for the entire time they were visible. That is why the chrome sheen "did not work". */
+:root.gated .content, :root.gated .content *, :root.gated .content *::before, :root.gated .content *::after { animation-play-state: paused !important; }
 /* ...except the gate itself, which is the only thing anyone can actually see. */
 :root.gated .boot-gate, :root.gated .boot-gate *,
 :root.gated .boot-gate *::before, :root.gated .boot-gate *::after { animation-play-state: running !important; }

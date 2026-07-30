@@ -123,7 +123,7 @@ export default function BootGate() {
             <p className="boot-tag">
               MULTI-PLATINUM · MOISTURE-LADEN · LIMITED EDITION
             </p>
-            <button className="logon-btn" onClick={handleLogOn}>
+            <button className="logon-btn gold-text" onClick={handleLogOn}>
               <span className="logon-glow" />
               ▸ LOG ON &amp; PLUG IN
             </button>
