@@ -56,9 +56,15 @@ let stats: RigStats | null = null
  * it has given up on, and `windows` says whether the sampler is running AT ALL -- which matters
  * because it sits after useFrame's idle return, so it only measures while audio is playing.
  */
-let policy: { fast: number; failed: number[]; windows: number } | null = null
-export function publishTierDebug(fast: number, failed: number[]): void {
-  policy = { fast, failed: [...failed], windows: (policy?.windows ?? 0) + 1 }
+let policy: { fast: number; failed: number[]; windows: number; avgMs: number; gapMs: number } | null = null
+export function publishTierDebug(fast: number, failed: number[], avgMs: number, spanMs: number): void {
+  policy = {
+    fast, failed: [...failed], windows: (policy?.windows ?? 0) + 1, avgMs,
+    // Wall-clock between window closes. If this is far longer than avgMs * frames, the sampler is
+    // being starved -- frames are elapsing that never reach it -- and the average it is judging is
+    // computed from a biased sample of them.
+    gapMs: spanMs,
+  }
 }
 
 /**
@@ -97,7 +103,8 @@ export function rigStatsLine(): string {
   const t = ` · tier ${s.tier} (x${s.tierMultiplier}, ${rung})${head}`
   // Empty when the sampler has never run — which is itself the answer, not a missing field.
   const p = policy
-    ? ` · climb ${policy.fast}/8 · failed [${policy.failed.join(',')}] · ${policy.windows}w`
+    ? ` · climb ${policy.fast}/8 · failed [${policy.failed.join(',')}] · ${policy.windows}w` +
+      ` · avg ${policy.avgMs.toFixed(1)}ms · gap ${policy.gapMs.toFixed(0)}ms`
     : ' · sampler has not run (needs audio playing)'
   const l = live ? ` · audio ${live.playing ? 'on' : 'OFF'} · idle ${live.idle} · f${live.frames}` : ''
   const q = s.quality > 0.5 ? '' : ' · reduced passes'

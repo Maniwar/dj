@@ -238,7 +238,7 @@ function Mainstage() {
   // would pin a 3080 to the bottom tier. Degradation is no longer one-way -- tierPolicy climbs
   // back once the machine shows sustained headroom -- but a false positive still costs several
   // seconds at the wrong resolution, so the settle window below stays generous.
-  const acc = useRef({ frames: 0, time: 0, settleUntil: 0, policy: newTierState(TIERS.length) })
+  const acc = useRef({ frames: 0, time: 0, settleUntil: 0, lastClose: 0, policy: newTierState(TIERS.length) })
   // 42ms, i.e. 24fps, and sustained over 4 windows rather than 2 -- roughly four seconds.
   //
   // This was 22ms. Frame time is quantised by vsync: a 60Hz display delivers 16.7, 33.3 or 50ms and
@@ -357,7 +357,8 @@ function Mainstage() {
       // at 8fps still gets judged after ~1s rather than after ninety slow frames
       if (a.time >= 1000 || a.frames >= 20) {
         const move = tierMove(a.time / a.frames, tier.current, TIERS.length - 1, SLOW_MS, a.policy)
-        publishTierDebug(a.policy.fast, a.policy.failed)
+        publishTierDebug(a.policy.fast, a.policy.failed, a.time / a.frames, now - (a.lastClose || now))
+        a.lastClose = now
         if (move !== 'hold') {
           tier.current += move === 'down' ? 1 : -1
           applyScale()
