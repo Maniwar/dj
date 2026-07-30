@@ -141,9 +141,21 @@ export const thermalFrag = /* glsl */ `
       float fx = fract(x) - 0.5;
       float rnd  = hash(vec2(id, float(c)*17.3));
       float rnd2 = hash(vec2(id*1.37 + 5.1, float(c)*7.9));
+      // SIZE, from its own hash. Every drop was the same size, which reads as a repeating pattern
+      // rather than water -- and the cause was not just the missing randomisation. ox is normalised by
+      // max(cols*0.06, 0.35), which CANCELS the column count out of the head radius entirely: the
+      // head worked out to 0.085*0.06*screenWidth regardless of cols, so both layers drew identical
+      // drops and adding a second layer bought nothing. Squared, so most drops are small and a few
+      // are fat, which is how water beads; and an explicit per-layer scale so the two passes are
+      // genuinely different calibres now that cols no longer does it.
+      float rnd3 = hash(vec2(id*2.11 + 13.7, float(c)*23.1));
+      float layerScale = 1.0 - float(c)*0.42;
+      float sz = (0.55 + rnd3*rnd3*1.10) * layerScale;
       if(rnd > 1.0 - amount){
-        // t accelerates: a drop starts slow, gains speed as it gathers mass on the way down
-        float speed = 0.05 + rnd2*0.09;
+        // t accelerates: a drop starts slow, gains speed as it gathers mass on the way down.
+        // A FAT DROP FALLS FASTER, because it is heavier -- so size and speed are correlated rather
+        // than independent, which is what stops the variety looking arbitrary.
+        float speed = (0.05 + rnd2*0.09) * (0.70 + sz*0.45);
         float t = fract(uTime*speed + rnd*4.7);
         float fall = 1.0 - (1.0 - t)*(1.0 - t);   // ease-in, i.e. accelerating downward
         float y = uv.y - (1.08 - fall*1.16);      // head position, starting above frame
@@ -158,8 +170,12 @@ export const thermalFrag = /* glsl */ `
         // the track wanders -- water follows the imperfections in the glass, it does not fall straight
         float wob = sin((uv.y + rnd*6.283)*17.0)*0.010 + sin((uv.y + rnd2*4.0)*41.0)*0.004;
         float ox = (fx + wob) / max(cols*0.06, 0.35);
-        // HEAD: the bead itself, slightly taller than wide because it is being pulled
-        float head = smoothstep(0.085, 0.0, length(vec2(ox, y*0.62)));
+        // HEAD: the bead itself, slightly taller than wide because it is being pulled.
+        // Floored at 2 canvas px in ox units -- one ox unit spans cols*0.06 of the frame width, so a
+        // pixel is (1/uRes.x)/(cols*0.06) in these units.
+        float oxPx = (1.0/max(uRes.x,1.0)) / max(cols*0.06, 0.35);
+        float hr = max(0.085 * sz, oxPx*2.0);
+        float head = smoothstep(hr, 0.0, length(vec2(ox, y*0.62)));
         // TRACK: wet glass BEHIND the head, i.e. above it, evaporating as it ages.
         // The old version used smoothstep(-0.01, 0.16, y), which RISES with y -- so the trail was
         // brightest at its oldest end and faded toward the drop, backwards. Now a sharp mask keeps it
@@ -167,9 +183,12 @@ export const thermalFrag = /* glsl */ `
         // trail is a tail rather than a full-height line.
         float behind = smoothstep(-0.005, 0.028, y);
         float dry = exp(-max(y, 0.0) * 3.4);
-        float track = smoothstep(0.030, 0.0, abs(ox)) * behind * dry;
+        // The track scales with the drop but less than proportionally -- a fat drop leaves a wider
+        // wet path, not a proportionally wider one. Floored at 2 canvas px like the head.
+        float tw = max(0.030 * (0.60 + sz*0.40), oxPx*2.0);
+        float track = smoothstep(tw, 0.0, abs(ox)) * behind * dry;
         // a couple of stragglers left along the track, so it is not a clean line
-        float bead = smoothstep(0.030, 0.0, length(vec2(ox, fract(y*7.0 + rnd*3.0) - 0.5)*vec2(1.0,0.55)));
+        float bead = smoothstep(tw, 0.0, length(vec2(ox, fract(y*7.0 + rnd*3.0) - 0.5)*vec2(1.0,0.55)));
         acc += (head + track*0.55 + bead*behind*dry*0.30) * life;
       }
     }
@@ -530,7 +549,16 @@ export const thermalFrag = /* glsl */ `
     // NOT VERIFIABLE FROM A HEADLESS CAPTURE: uDrop only rises when audio is playing, and audio
     // does not play in headless Chrome, so this branch is never even entered in anything measured on
     // the build machine. That is why five earlier hypotheses about the wash all scored clean here.
-    if (uDrop > 0.01) {
+    // FIRES ON THE BAR AS WELL AS ON DROPS. uDrop is a real drop detector in audioBus -- a rising
+    // edge where the energy ratio crosses 1.18, decaying with a 1.2s constant -- so it lands once or
+    // twice in a whole track. That is correct for "the room blows open", but it made the starburst so
+    // rare it read as broken; what had actually been seen often was the dew wash that used to white
+    // out the frame. So the downbeat now carries a smaller version of it -- the motif recurs every bar
+    // at just over a third strength, and a genuine drop still slams at full. Nothing else that reads
+    // uDrop changes, which is the point: lowering the detector's threshold would have moved the beam
+    // gains, the volumetric pass and the room flash along with it.
+    float burst = uDrop + uDown * 0.38;
+    if (burst > 0.01) {
       // ANALYTIC ANTI-ALIASING, because the pixelation is not the spokes' fault -- it is that the
       // shader canvas renders BELOW display resolution by design (PIXEL_BUDGET in ThermalRunaway
       // caps it, and a wide viewport lands at 0.55-0.67 linear scale), and 32 spokes converging on a
@@ -559,7 +587,7 @@ export const thermalFrag = /* glsl */ `
       float rays = smoothstep(1.0 - w, 1.0, sa);
       rays *= rays;                                           // tighten the core without hard edges
       float reach = (1.0 - smoothstep(0.05, 0.82, r)) * smoothstep(0.0, 0.035, r);
-      col += vec3(1.0,0.72,0.34) * rays * uDrop * reach * 0.80;
+      col += vec3(1.0,0.72,0.34) * rays * burst * reach * 0.80;
     }
 
     // CONDENSATION beading over the whole "lens" — the humidity signature.
