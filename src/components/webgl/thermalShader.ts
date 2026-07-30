@@ -252,10 +252,10 @@ export const thermalFrag = /* glsl */ `
     // Base level per group — which part of the kit each fixture answers to.
     float g;
     if (fi < 1.5)      g = 0.30 + uBeat*1.15;                          // overhead: on the kick
-    else if (fi < 3.5) g = 0.10 + uSnare*1.9 + uDrop*1.2;              // corners: SNAP on the backbeat
+    else if (fi < 3.5) g = 0.10 + uSnare*1.9 + uDrop*0.7;              // corners: SNAP on the backbeat
     else if (fi < 5.5) g = 0.02 + uBuild*1.9 + uBeat*0.55;              // floor: idle dark, swell on a build
     else if (fi < 6.5) g = (0.20 + uBeat*0.8) * step(1.0, mod(pat,2.0)); // side tower: alternate cues
-    else               g = 0.06 + uDown*1.1 + uDrop*2.2 + uVocal*0.9;  // centre: accents + vocal
+    else               g = 0.06 + uDown*1.1 + uDrop*1.3 + uVocal*0.9;  // centre: accents + vocal
 
     // HERO BEAMS. Every fixture running at the same level is a wash, not a show — a real rig
     // has one or two heads punching far harder than the rest, and which ones changes with the
@@ -265,7 +265,7 @@ export const thermalFrag = /* glsl */ `
     float hero = step(pick, 1.5);                       // 2 of the 8 are heroes this cue
     g *= mix(0.38, 5.0, hero);                          // a hero is >13x the fill, not 5x
     // and the heroes flare harder still on the hit
-    g += hero * (uBeat*2.2 + uDown*1.6 + uDrop*3.0);   // and it SLAMS on the hit
+    g += hero * (uBeat*2.2 + uDown*1.6 + uDrop*1.7);   // and it SLAMS on the hit
     return g;
   }
 
@@ -310,7 +310,10 @@ export const thermalFrag = /* glsl */ `
       // sub-pixel core cannot be anti-aliased by the smoothstep below it; it just flickers along the
       // beam, which is the residual "lasers still look pixelated". Floored, the narrow groups stay
       // visibly narrower than the rest without going below what the buffer can draw.
-      float wRaw = (0.0030 + uBeat*0.012 + uBass*0.004 + uDrop*0.02) * beamWidth(fi); // fattens on the hit
+      // uDrop fattening halved: 0.02 in p units is about 18 canvas pixels of extra core on every one
+      // of the eight beams at once, which ablation put at 11% of the drop wash. Halved, the beams still
+      // visibly swell on the hit without the whole rig turning into a single bright mass.
+      float wRaw = (0.0030 + uBeat*0.012 + uBass*0.004 + uDrop*0.010) * beamWidth(fi); // fattens on the hit
       float w = max(wRaw, 2.0 / max(uRes.y, 1.0));
       float core = smoothstep(w, 0.0, d) * att;
       // Halo width/strength are deliberately restrained: the alpha of this whole layer is its
@@ -371,7 +374,7 @@ export const thermalFrag = /* glsl */ `
       }
       t += 0.21;   // fewer, longer steps cover the same depth
     }
-    return acc * (0.22 + uBeat*0.6 + uDrop*1.1);
+    return acc * (0.22 + uBeat*0.6 + uDrop*0.6);
   }
 
   void main(){
@@ -465,7 +468,12 @@ export const thermalFrag = /* glsl */ `
     vec2 mpos = vec2((uMouse.x-0.5)*aspect, uMouse.y-0.5);
     col += uAccent * smoothstep(0.40, 0.0, length(p - mpos)) * (0.045 + uBeat*0.11);
     // DROP = the whole room blows open
-    col += vec3(1.0,0.55,0.9) * uDrop * 0.3 * (1.0 - r);
+    // ROOM FLASH, cut from 0.3 to 0.09. Measured by ablation on a standalone render of this shader
+    // with the audio uniforms forced to a drop: this one term was 22% of the whole drop wash, and it is
+    // the least defensible 22% -- a flat full-viewport magenta lift with no structure, so it reads as
+    // the picture going pale rather than as anything happening in the room. The beams, the starburst
+    // and the pyro all carry the drop with shape; this only carried brightness.
+    col += vec3(1.0,0.55,0.9) * uDrop * 0.09 * (1.0 - r);
 
     // volumetric haze that breathes with the level, pulses on the kick, and THICKENS
     // through a build-up so the room feels like it's filling before the drop
@@ -607,7 +615,12 @@ export const thermalFrag = /* glsl */ `
       float rays = smoothstep(1.0 - w, 1.0, sa);
       rays *= rays;                                           // tighten the core without hard edges
       float reach = (1.0 - smoothstep(0.05, 0.82, r)) * smoothstep(0.0, 0.035, r);
-      col += vec3(1.0,0.72,0.34) * rays * burst * reach * 0.80;
+      // 0.66 rather than 0.80. Ablation on a standalone drop render put this one effect at 19% of the
+      // remaining drop wash, and -- more to the point -- at MOST of the clipping: removing it takes
+      // blown pixels from 4.99% to 1.22%. The rays are what saturate, because they land on a frame where
+      // uBeat, uBass, uSnare and uLevel are already peaking together. Trimmed rather than reshaped,
+      // since the reach and the spoke count are what make it read as a starburst and both were asked for.
+      col += vec3(1.0,0.72,0.34) * rays * burst * reach * 0.66;
     }
 
     // CONDENSATION beading over the whole "lens" — the humidity signature.

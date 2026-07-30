@@ -192,9 +192,15 @@ body {
    `var(--fx)` alone was also a dead control above the default dial: the multiplier is already 1.0 at
    the shipped position of 0.6, and CSS clamps opacity at 1, so every dial position from 0.6 upward
    rendered this layer identically at full strength. Multiplying gives the dial real travel across its
-   entire range and puts the black level back. The rig still reads: it is beams against a dark room,
-   which is what a rig in a dark room looks like. */
-.thermal-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; mix-blend-mode: screen; opacity: calc(var(--fx, 1) * 0.6); }
+   entire range. That part was a genuine bug and it stays fixed.
+   THE 0.6 WAS OVER-CORRECTION, and it is 0.82 now. The rig was blamed for a wash it was not causing:
+   the real culprits were the dew sheet and the drop terms, both since fixed in thermalShader.ts. It is
+   finally measurable too, by rendering the shader STANDALONE with the audio uniforms forced, which is
+   the only way round the headless-audio trap described above. Because this layer is screen-blended,
+   its own mean luminance IS how far it lifts the blacks: 0.025 idle, 0.029 between beats, 0.067 on a
+   kick, 0.093 on a downbeat. None of those is a wash, so there was nothing here to dim. 0.82 keeps
+   the dial's travel without darkening a rig that was not at fault. */
+.thermal-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; mix-blend-mode: screen; opacity: calc(var(--fx, 1) * 0.82); }
 .thermal-fallback { position: fixed; inset: 0; z-index: 1; background: radial-gradient(120% 90% at 50% 20%, rgba(58,13,23,0.5) 0%, transparent 70%); pointer-events: none; }
 .thermal-canvas canvas { display: block; }
 
