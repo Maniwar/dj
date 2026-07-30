@@ -328,7 +328,15 @@ export const thermalFrag = /* glsl */ `
       float rnd3 = hash(vec2(id*2.11 + 13.7, float(c)*23.1));
       float layerScale = 1.0 - float(c)*0.42;
       float sz = (0.55 + rnd3*rnd3*1.10) * layerScale;
-      if(rnd > 1.0 - amount){
+      // A SOFT PRESENCE RAMP, the same fix the beads needed and the runners never got. This was
+      // if(rnd > 1.0 - amount), a hard threshold -- and amount is driven by the fog cycle, so as the
+      // lens dries every runner whose hash sits near the line switches off in the same frame. Reported
+      // as "sometimes i see runners disappear all at once", which is precisely what a step function
+      // does when you sweep it. Ramped over a 0.14 band, a runner near the edge of the density thins
+      // out over several seconds instead, and because the band is wider than the fog cycle moves in one
+      // run, a drop that has started is still there to finish.
+      float rpres = smoothstep(1.0 - amount, 1.0 - amount + 0.14, rnd);
+      if(rpres > 0.003){
         // t accelerates: a drop starts slow, gains speed as it gathers mass on the way down.
         // A FAT DROP FALLS FASTER, because it is heavier -- so size and speed are correlated rather
         // than independent, which is what stops the variety looking arbitrary.
@@ -340,6 +348,22 @@ export const thermalFrag = /* glsl */ `
         // point -- so the constants have to be set against the CURVE, not against the endpoints: an
         // earlier attempt at 1.32 put the drop off-screen by t=0.70 and wasted a third of every run.
         float y = uv.y - (1.02 - fall*1.035);     // enters just above the frame, exits just below it
+
+        // RUNNERS MERGE INTO EACH OTHER TOO. The two passes are computed independently, so a fine
+        // stream and a heavy one could occupy the same lane and simply draw over one another --
+        // reported as runners overlapping without merging. Rivulets do not do that: where two paths
+        // converge, the smaller joins the larger and stops existing as a separate stream.
+        // The finer pass (c == 1) asks the heavy pass where its runner in this column is, using the
+        // same runnerHeadY() the beads use, and fades out as the two converge. One-directional on
+        // purpose: the heavy stream is the one that survives, which is both the physical answer and
+        // the one that avoids two drops each concluding the other should disappear.
+        float merged = 1.0;
+        if (c == 1) {
+          float bigLane; float bigY = runnerHeadY(uv.x, 0.0, amount, bigLane);
+          float lanes = smoothstep(0.09, 0.02, abs(fract(uv.x*11.0) - 0.5) / 11.0);
+          float near  = smoothstep(0.18, 0.0, abs(bigY - (uv.y - y)));
+          merged = 1.0 - lanes * near * 0.92;
+        }
 
         // LIFE ENVELOPE, and it is the fix for "the water just disappears into nothing randomly".
         // t is a fract(), so at the wrap the drop teleported from the bottom of its run back to the
@@ -403,11 +427,11 @@ export const thermalFrag = /* glsl */ `
         float track = smoothstep(tw, tw*0.25, abs(ox)) * behind * dry;
         // a couple of stragglers left along the track, so it is not a clean line
         float bead = smoothstep(tw, tw*0.30, length(vec2(ox, fract(y*7.0 + rnd*3.0) - 0.5)*vec2(1.0,0.55)));
-        acc += (head + track*0.55 + bead*behind*dry*0.30) * life;
+        acc += (head + track*0.55 + bead*behind*dry*0.30) * life * rpres * merged;
         // A running drop lenses too, mostly across its width -- it is a cylinder of water, so it bends
         // horizontally far more than vertically. Scaled into uv by the column count.
         float rl = smoothstep(hr, hr*0.88, length(vec2(ox, y*0.62)));
-        disp += vec2(-ox / cols * 0.26, -y * 0.10) * rl * life * 2.4;
+        disp += vec2(-ox / cols * 0.26, -y * 0.10) * rl * life * rpres * merged * 2.4;
       }
     }
     return acc;
