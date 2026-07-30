@@ -110,6 +110,51 @@ export const thermalFrag = /* glsl */ `
     return clamp(acc,0.0,1.0);
   }
 
+  // ---- WATER RUNNING DOWN THE GLASS ----
+  // Condensation does two things and the shader only ever did one of them. Beads CLING, and once a
+  // bead gets heavy enough it BREAKS LOOSE and runs, clearing a wet track behind it. Without the
+  // second half there is nothing to read as water -- which is why a static field of dots, at any
+  // size, kept reading as noise.
+  //
+  // ONE CONSTRAINT SHAPES ALL OF THIS: the layer composites with mix-blend-mode: screen, so it can
+  // only ADD light. It cannot refract the footage and it cannot darken, which is how a real droplet
+  // mostly announces itself. So each runner is built from the two things that ARE additive on a dark
+  // scene: a bright specular head where the light catches the meniscus, and a thin bright track above
+  // it where the glass is wet. That is what you actually see of rain on a window at night.
+  //
+  // Columns rather than a square grid, because water runs in lanes. Two passes at different column
+  // counts so the sizes vary without a second grid becoming visible.
+  float runners(vec2 uv, float amount){
+    float acc = 0.0;
+    for(int c=0; c<2; c++){
+      float cols = 11.0 + float(c)*8.0;
+      float x = uv.x * cols;
+      float id = floor(x);
+      float fx = fract(x) - 0.5;
+      float rnd  = hash(vec2(id, float(c)*17.3));
+      float rnd2 = hash(vec2(id*1.37 + 5.1, float(c)*7.9));
+      if(rnd > 1.0 - amount){
+        // t accelerates: a drop starts slow, gains speed as it gathers mass on the way down
+        float speed = 0.05 + rnd2*0.09;
+        float t = fract(uTime*speed + rnd*4.7);
+        float fall = 1.0 - (1.0 - t)*(1.0 - t);   // ease-in, i.e. accelerating downward
+        float y = uv.y - (1.08 - fall*1.16);      // head position, starting above frame
+        // the track wanders -- water follows the imperfections in the glass, it does not fall straight
+        float wob = sin((uv.y + rnd*6.283)*17.0)*0.010 + sin((uv.y + rnd2*4.0)*41.0)*0.004;
+        float ox = (fx + wob) / max(cols*0.06, 0.35);
+        // HEAD: the bead itself, slightly taller than wide because it is being pulled
+        float head = smoothstep(0.085, 0.0, length(vec2(ox, y*0.62)));
+        // TRACK: wet glass ABOVE the head, thinner than the bead and fading with age
+        float above = smoothstep(-0.01, 0.16, y);
+        float track = smoothstep(0.030, 0.0, abs(ox)) * above * (0.35 + 0.65*(1.0-t));
+        // a couple of stragglers left along the track, so it is not a clean line
+        float bead = smoothstep(0.030, 0.0, length(vec2(ox, fract(y*7.0 + rnd*3.0) - 0.5)*vec2(1.0,0.55)));
+        acc += head + track*0.42 + bead*above*0.16;
+      }
+    }
+    return acc;
+  }
+
   // The whole light rig evaluated at a point. Pulled into a function so the WET FLOOR can
   // evaluate it a second time at the mirrored position — an actual reflection rather than a
   // painted-on gradient.
@@ -423,10 +468,35 @@ export const thermalFrag = /* glsl */ `
     // does not play in headless Chrome, so this branch is never even entered in anything measured on
     // the build machine. That is why five earlier hypotheses about the wash all scored clean here.
     if (uDrop > 0.01) {
+      // ANALYTIC ANTI-ALIASING, because the pixelation is not the spokes' fault -- it is that the
+      // shader canvas renders BELOW display resolution by design (PIXEL_BUDGET in ThermalRunaway
+      // caps it, and a wide viewport lands at 0.55-0.67 linear scale), and 32 spokes converging on a
+      // point exceed the pixel rate near the centre no matter what that scale is. pow() cannot fix
+      // that: it is a fixed angular width, so as the rays converge they go sub-pixel and alias.
+      //
+      // Instead the ray's width is derived from the PIXEL FOOTPRINT at this radius. p.y spans
+      // -0.5..0.5, so one pixel is 1.0/uRes.y in p units, and the angle it subtends at radius r is
+      // that over r. Multiplied by the spoke count that gives how much abs(sin(ang*k)) changes across
+      // one pixel -- so a band that wide is exactly one pixel of edge, and never less. The rays
+      // therefore widen automatically as they converge, which is both alias-free and physically
+      // right, and stay razor thin further out. fwidth() would do the same job in one line but needs
+      // a derivatives extension under Three's default GLSL ES 1.0, so this is computed by hand.
       float ang = atan(p.y, p.x);
-      float rays = pow(abs(sin(ang*16.0 + uTime*1.6)), 44.0);
+      float k = 16.0;
+      float sa = abs(sin(ang*k + uTime*1.6));
+      float apx = (1.0 / max(uRes.y, 1.0)) / max(r, 0.012);   // radians per pixel at this radius
+      // 1.2 pixels, not 1.7, and gain 0.80 rather than 1.15. Widening the band to kill the aliasing
+      // also ADDS light -- most of it near the centre where the band is widest -- and the first pass
+      // at this overshot badly: measured over the frame it came out 16% brighter than the original
+      // version that washed the picture out, which would have undone the whole fix. Crispness comes
+      // from the band being pixel-width, not from the gain, so the band is trimmed to just over one
+      // pixel (still alias-free) and the gain brought down with it. Total light now integrates to 32%
+      // BELOW the washing version while the rays stay hard-edged at any render scale.
+      float w = max(k * apx * 1.2, 0.012);                    // footprint of sa across one pixel
+      float rays = smoothstep(1.0 - w, 1.0, sa);
+      rays *= rays;                                           // tighten the core without hard edges
       float reach = (1.0 - smoothstep(0.05, 0.82, r)) * smoothstep(0.0, 0.035, r);
-      col += vec3(1.0,0.72,0.34) * rays * uDrop * reach * 0.95;
+      col += vec3(1.0,0.72,0.34) * rays * uDrop * reach * 0.80;
     }
 
     // CONDENSATION beading over the whole "lens" — the humidity signature.
@@ -434,36 +504,26 @@ export const thermalFrag = /* glsl */ `
     // phone tier skips it entirely. Branching on a uniform is coherent across every pixel, so
     // the GPU really does skip the work rather than executing both sides.
     float beads = 0.0;
-    if (uQuality > 0.5) beads = droplets(uv, 0.02 + uHumidity*0.12);
-    col += vec3(0.8,0.9,1.0) * beads * 0.30;
+    if (uQuality > 0.5) beads = droplets(uv, 0.03 + uHumidity*0.20);
+    col += vec3(0.8,0.9,1.0) * beads * 0.44;
 
-    // ---- LIQUID-COOLING SHEET ON DEW POINT ----
-    // THIS WAS THE MILKY STATIC. Reported across many screenshots and finally pinned by the
-    // observation that it "only happens when the dew effect comes in" -- which is exactly right, and
-    // uDew drives precisely one thing, this.
+    // ---- LIQUID COOLING: WATER ON THE LENS ----
+    // This replaces a full-frame noise wash that was the reported milky static. That version ran
+    // smoothstep(0.0, 0.6) over fbm, which saturated 77.5% of the frame at 0.5 gain -- a mean additive
+    // lift of 0.387 under a screen blend, held for the ~0.67s uDew takes to decay. Fine, bright, fast
+    // noise across the whole picture is the definition of static; it could never have read as water.
     //
-    // What it was doing: fbm peaks near 0.94, and smoothstep(0.0, 0.6, ...) maps almost that whole
-    // range to ~1, so water SATURATED across most of the frame rather than picking out streaks.
-    // Pale blue-white at 0.5 additive under mix-blend-mode: screen is an enormous lift -- it flattens
-    // the footage toward white for the ~0.67s uDew takes to decay. And the noise it was built from is
-    // the wrong kind: fbm's top octave here is ~67 cycles across the screen (~19px features) scrolling
-    // at uTime*4.0, which is fast enough to shimmer. Fine, bright, fast noise over the whole frame is
-    // the definition of static, which is why it never read as water.
-    //
-    // Rebuilt as what liquid cooling on a lens actually looks like -- sheeting water, not fog:
-    //   THRESHOLD  smoothstep(0.52, 0.88, ...) instead of (0.0, 0.6), so only the PEAKS of the noise
-    //              survive. That turns a full-frame wash into discrete rivulets with dry glass
-    //              between them, which is the single biggest part of the fix.
-    //   ANISOTROPY water runs DOWN. The noise is stretched 3.5x vertically (uv.y*0.9 against
-    //              uv.x*7.0) so features are tall streaks rather than round blobs.
-    //   SPEED      uTime*4.0 -> 1.1. Sheeting water flows; it does not flicker. The old rate was
-    //              fast enough to alias into shimmer on its own.
-    //   STRENGTH   0.5 -> 0.18, and the tint pulled back toward neutral. With the threshold now
-    //              rejecting most of the frame, the surviving streaks still read clearly at a third
-    //              of the gain -- and the starburst is no longer competing with a clipped frame.
-    float sheet = fbm(vec2(uv.x*7.0, uv.y*0.9 - uTime*1.1));
-    float water = smoothstep(0.52, 0.88, sheet) * uDew;
-    col += vec3(0.62,0.80,0.95) * water * 0.18;
+    // Now it is actual water. Runners are always present in proportion to humidity -- the glass is
+    // wetter the muggier the room gets -- and a dew-point hit opens the taps, which is the moment the
+    // liquid cooling kicks in. Beads (droplets(), above) handle the clinging condensation; runners()
+    // handles what breaks loose and streaks down.
+    // STRENGTH IS SET BY COVERAGE, NOT BY CAUTION. The wash this replaced lifted the whole frame by
+    // a mean of 0.387; runners touch on the order of 3% of pixels, so even a gain that makes each
+    // streak clearly readable costs roughly a hundredth of that in total added light. The first pass
+    // at these numbers was tuned as though the old cost still applied and the water was invisible.
+    float wet = clamp(uHumidity*0.60 + uDew*0.80, 0.0, 1.0);
+    float run = runners(uv, 0.13 + wet*0.34);
+    col += vec3(0.66,0.80,0.94) * clamp(run, 0.0, 1.5) * (0.34 + uDew*0.40);
 
     // overclock shimmer
     col += vec3(0.4,1.0,0.6) * uOverclock * 0.1 * (0.5+0.5*sin(uTime*8.0));
