@@ -7,6 +7,7 @@ import Player from './components/player/Player'
 import Hero from './components/sections/Hero'
 import Lore from './components/sections/Lore'
 import Tracklist from './components/sections/Tracklist'
+import Streaming from './components/sections/Streaming'
 import Guestbook from './components/sections/Guestbook'
 import TourJourney from './components/sections/TourJourney'
 import HallOfFame from './components/sections/HallOfFame'
@@ -102,6 +103,7 @@ export default function App() {
         <Lore />
         <LyricMarquee tint="acid" offset={3} pxPerSec={95} />
         <Tracklist />
+        <Streaming />
         <Guestbook />
         <LyricMarquee tint="blue" offset={6} />
         <TourJourney />

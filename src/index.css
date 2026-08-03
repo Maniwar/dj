@@ -4111,3 +4111,55 @@ body.sauna .content::before {
 :root.nofx-filter .journey-city { filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.6)) drop-shadow(0 0 30px rgba(255, 31, 143, 0.5)) !important; }
 :root.nofx-filter .lore-roster-name { filter: drop-shadow(0 0 16px var(--accent)) !important; }
 :root.nofx-filter .lore-name { filter: drop-shadow(0 0 16px var(--accent)) !important; }
+
+/* ---- DISTRIBUTION NOTICE ------------------------------------------------------------------
+   The site's only outbound ask, sitting straight after the tracklist -- peak intent, where
+   someone has just read nineteen titles and played a few clips. FOLLOW is the verb rather than
+   LISTEN because a Spotify follow places every future release in that person's Release Radar
+   automatically, so it compounds where a play does not. Styled as a label notice, not a social
+   card: the visitor has been inside a 2002 fiction for five minutes and a generic "follow us!"
+   badge shows them the edge of the set. */
+.streaming { padding: clamp(3rem, 8vw, 6rem) var(--sp-4); position: relative; z-index: 2; }
+.streaming-inner {
+  max-width: 780px; margin: 0 auto; text-align: center;
+  border: 1px solid var(--edge); border-radius: 4px;
+  background: linear-gradient(180deg, rgba(10,13,18,0.72), rgba(10,13,18,0.42));
+  padding: clamp(1.6rem, 4vw, 2.8rem) clamp(1.2rem, 4vw, 2.6rem);
+  backdrop-filter: blur(2px);
+}
+.streaming-eyebrow {
+  font-family: 'Oswald', sans-serif; font-size: var(--step--2); letter-spacing: 0.28em;
+  color: var(--gold); opacity: 0.75; margin: 0 0 1rem; text-transform: uppercase;
+}
+.streaming-h {
+  font-family: 'Anton', 'Oswald', sans-serif; font-size: var(--step-3); line-height: 1.05;
+  margin: 0 0 1.8rem; color: var(--ink); letter-spacing: 0.01em; text-wrap: balance;
+}
+.streaming-h span { display: block; font-size: var(--step-0); letter-spacing: 0.16em; color: var(--champagne); opacity: 0.8; margin-top: 0.5rem; }
+.streaming-links { display: flex; flex-direction: column; align-items: center; gap: 1.4rem; }
+
+/* The green is Spotify's own, used as a signal rather than as a logo -- no brand mark is
+   reproduced, which keeps this clear of their asset guidelines while still reading instantly. */
+.streaming-cta {
+  display: block; text-decoration: none; width: min(420px, 100%);
+  padding: 1rem 1.6rem; border-radius: 999px;
+  background: #1db954; color: #04140a;
+  border: 1px solid rgba(255,255,255,0.25);
+  box-shadow: 0 0 calc(var(--m-beat) * 30px) rgba(29,185,84, calc(0.35 + var(--m-beat) * 0.5));
+  transition: transform 140ms ease, filter 140ms ease;
+}
+.streaming-cta:hover, .streaming-cta:focus-visible { transform: translateY(-2px); filter: brightness(1.12); }
+.streaming-cta-verb { display: block; font-family: 'Oswald', sans-serif; font-weight: 700; font-size: var(--step-0); letter-spacing: 0.14em; }
+.streaming-cta-sub { display: block; font-size: var(--step--2); letter-spacing: 0.06em; opacity: 0.72; margin-top: 0.2rem; text-transform: lowercase; }
+
+.streaming-alt { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem 1.6rem; }
+.streaming-alt a {
+  font-family: 'Oswald', sans-serif; font-size: var(--step--1); letter-spacing: 0.12em;
+  color: var(--champagne); text-decoration: none; border-bottom: 1px solid var(--edge);
+  padding-bottom: 2px; transition: color 140ms ease, border-color 140ms ease;
+}
+.streaming-alt a:hover, .streaming-alt a:focus-visible { color: var(--ink); border-color: var(--ink); }
+.streaming-fine {
+  font-family: 'Oswald', sans-serif; font-size: var(--step--2); letter-spacing: 0.2em;
+  color: var(--gold); opacity: 0.55; margin: 1.8rem 0 0;
+}
