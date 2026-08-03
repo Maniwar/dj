@@ -47,7 +47,18 @@
     <link rel="preload" href="/fonts/oswald-400.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/barlow-condensed-400.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="/fonts/fonts.css" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%A6%3C/text%3E%3C/svg%3E" />
+    <!-- REAL FILES AT REAL URLS. This was a data: URI holding an SVG of the 💦 emoji, which fails for
+         two separate reasons. Google needs to CRAWL the favicon -- Googlebot-Image fetches it by URL --
+         and a data: URI has no URL to fetch, so search results showed the generic globe. And an emoji
+         inside an SVG is rendered by the viewer's own font stack, so it is not a mark we control and
+         may not render at all on a machine without that emoji.
+         Google wants a square, larger than 48x48, at a URL that does not change. -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <!-- Structured data: lets search engines read this as an ALBUM with named tracks rather
          than as one unlabelled page, and is how the site gets associated with the release
          once the stores propagate. Track urls point at the crawlable lyric pages. -->

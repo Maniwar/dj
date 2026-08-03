@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="SYSTEM OVERLOAD">
+  <defs>
+    <linearGradient id="chrome" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="42%" stop-color="#dfe8f0"/>
+      <stop offset="52%" stop-color="#8e9dab"/>
+      <stop offset="100%" stop-color="#f2f7fb"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="#0a0d12"/>
+  <circle cx="256" cy="256" r="212" fill="none" stroke="#ff1f8f" stroke-width="14" opacity="0.85"/>
+  <circle cx="256" cy="256" r="188" fill="none" stroke="#c8d2dc" stroke-width="6" opacity="0.5"/>
+  <text x="256" y="256" fill="url(#chrome)" font-family="Impact, 'Haettenschweiler', 'Arial Narrow Bold', sans-serif"
+        font-size="240" text-anchor="middle" dominant-baseline="central" letter-spacing="-6">SO</text>
+</svg>
