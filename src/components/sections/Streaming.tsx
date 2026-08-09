@@ -20,6 +20,7 @@
 const SPOTIFY_ARTIST = 'https://open.spotify.com/artist/3ABcpkKvzG7zpBxTOA88AZ'
 const APPLE_ARTIST = 'https://music.apple.com/us/artist/club-humidity-system-overload/6794950659'
 const APPLE_ALBUM = 'https://music.apple.com/us/album/the-moist-mix-2002-unfiltered-excess/6794980730'
+const YTMUSIC_ARTIST = 'https://music.youtube.com/channel/UCly66mPIZ8wLrRqrdPknAvA'
 
 export default function Streaming() {
   return (
@@ -51,6 +52,9 @@ export default function Streaming() {
             </a>
             <a href={APPLE_ARTIST} target="_blank" rel="noopener noreferrer">
               ◉ SYSTEM OVERLOAD ON APPLE MUSIC
+            </a>
+            <a href={YTMUSIC_ARTIST} target="_blank" rel="noopener noreferrer">
+              ▶ SYSTEM OVERLOAD ON YOUTUBE MUSIC
             </a>
           </div>
         </div>
