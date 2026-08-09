@@ -4121,7 +4121,10 @@ body.sauna .content::before {
    badge shows them the edge of the set. */
 .streaming { padding: clamp(3rem, 8vw, 6rem) var(--sp-4); position: relative; z-index: 2; }
 .streaming-inner {
-  max-width: 780px; margin: 0 auto; text-align: center;
+  /* 640, not 780. The player is fixed bottom-right and the card is centred, so at common desktop
+     widths they collided and the notice was clipped mid-word. Narrower costs nothing here -- this is
+     a centred notice, not a layout element -- and it clears the player. */
+  max-width: 640px; margin: 0 auto; text-align: center;
   border: 1px solid var(--edge); border-radius: 4px;
   background: linear-gradient(180deg, rgba(10,13,18,0.72), rgba(10,13,18,0.42));
   padding: clamp(1.6rem, 4vw, 2.8rem) clamp(1.2rem, 4vw, 2.6rem);
@@ -4152,7 +4155,10 @@ body.sauna .content::before {
 .streaming-cta-verb { display: block; font-family: 'Oswald', sans-serif; font-weight: 700; font-size: var(--step-0); letter-spacing: 0.14em; }
 .streaming-cta-sub { display: block; font-size: var(--step--2); letter-spacing: 0.06em; opacity: 0.72; margin-top: 0.2rem; text-transform: lowercase; }
 
-.streaming-alt { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem 1.6rem; }
+/* STACKED, not wrapped. Wrapping put the break wherever the width happened to land -- three across
+   on one screen, two-then-one on another -- which reads as an accident rather than a hierarchy.
+   Three rows reads as what it is: a list of the formats the record is on. */
+.streaming-alt { display: flex; flex-direction: column; align-items: center; gap: 0.7rem; }
 .streaming-alt a {
   font-family: 'Oswald', sans-serif; font-size: var(--step--1); letter-spacing: 0.12em;
   color: var(--champagne); text-decoration: none; border-bottom: 1px solid var(--edge);
