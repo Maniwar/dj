@@ -143,7 +143,7 @@ export default function Lore() {
     <section className="lore" id="lore" ref={secRef}>
       <div className={`lore-title ${titleOn ? 'on' : ''}`}>
         <h2 className="section-title">THE ORIGIN</h2>
-        <p className="section-kicker">two humans · one sauna · scroll to meet them</p>
+        <p className="section-kicker">two humans · one finn · one sauna · scroll to meet them</p>
       </div>
 
       <div className="lore-stops">
@@ -213,11 +213,12 @@ export default function Lore() {
                 {s.kind === 'hero' && (
                   <span className="lore-tag">
                     ●{' '}
-                    {s.id === 'kiki'
-                      ? 'SHE IS THE SIGNAL'
-                      : s.id === 'dieter'
-                        ? 'HE IS THE NOISE'
-                        : 'THEY ARE THE HUMIDITY'}
+                    {s.tag ??
+                      (s.id === 'kiki'
+                        ? 'SHE IS THE SIGNAL'
+                        : s.id === 'dieter'
+                          ? 'HE IS THE NOISE'
+                          : 'THEY ARE THE HUMIDITY')}
                   </span>
                 )}
               </div>

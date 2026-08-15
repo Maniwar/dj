@@ -5,6 +5,8 @@ const QUOTES = [
   ['“Dieter is not a god. But the synth IS so big.”', 'PITCHFORK-ish'],
   ['“Kiki G looked at me. I filed my taxes early.”', 'EURO DANCE DIGEST'],
   ['“Do not operate heavy machinery. Operate this.”', 'CLUB CIRCUIT'],
+  ['“We asked the Finn for a comment. He said “It is fine.” We ran it as the headline.”', 'HELSINKI BEAT'],
+  ['“Rated our sauna a 2. We have closed the venue.”', 'CLUB CONDENSA, BERLIN'],
 ]
 
 const DATES = [

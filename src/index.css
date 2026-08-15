@@ -792,6 +792,8 @@ section.hero { min-height: 100vh; min-height: 100svh; display: grid; place-items
 .accent-kiki { --accent: var(--magenta); }
 .accent-dieter { --accent: var(--blue); }
 .accent-both { --accent: var(--acid); }
+/* Jussi runs cold — a pale rink-ice blue, distinct from Dieter's neon cyan. */
+.accent-jussi { --accent: #a8e6ff; }
 .lore-eyebrow { display: inline-block; font-family: 'Oswald', sans-serif; letter-spacing: 0.2em; font-size: 0.7rem;
   color: var(--accent); text-transform: uppercase; margin-bottom: 0.8rem; text-shadow: 0 0 10px var(--accent); }
 .lore-name { font-family: 'Anton', sans-serif; text-transform: uppercase; line-height: 0.88; margin: 0 0 1rem;

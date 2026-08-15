@@ -9,8 +9,13 @@ export type LoreStop = {
   title: string
   body: string
   image: string
-  accent: 'kiki' | 'dieter' | 'both'
+  accent: 'kiki' | 'dieter' | 'both' | 'jussi'
   videoKey?: string
+  /**
+   * Hero sign-off line ("SHE IS THE SIGNAL"). Optional: the original three heroes are still
+   * resolved by id in the component, so adding a stop only needs this when it wants its own.
+   */
+  tag?: string
   /** Optional named line-up, rendered as a roster instead of one block of prose. */
   roster?: { name: string; tag: string; line: string }[]
   /**
@@ -40,6 +45,16 @@ export const LORE_STOPS: LoreStop[] = [
     accent: 'dieter',
     image: '/assets/lore/dieter-hero.jpg',
     body: `Former MIDI-workstation salesman of Munich; keeps all forty-one framed noise complaints above the decks. Believes — with his whole bare chest — that he IS a synthesizer. Communicates exclusively via a deep sleazy whisper and one thin, decisive moustache. The leather jacket has never been zipped. The sunglasses have never come off. Not even in the sauna. ESPECIALLY not in the sauna.`,
+  },
+  {
+    id: 'jussi',
+    kind: 'hero',
+    eyebrow: 'HEAD OF LÖYLY & ICE · GOALTENDER · REFRIGERATION · NINE WORDS PER SHOW',
+    title: 'JUSSI JÄRVI',
+    accent: 'jussi',
+    image: '/assets/lore/jussi-hero.jpg',
+    tag: 'HE IS THE COLD',
+    body: `Born Järvi. Eurobeat's art department, working from a smudged fax, printed "JARS" across the first 400,000 sleeves; pulping was quoted at €38,000 and renaming him was free. He was informed by postcard and has never mentioned it. Eleven years on the compressor room at a Tampere ice rink, which makes the only man here with an actual qualification a refrigeration engineer. Scores every venue's löyly out of ten and has awarded exactly one 10, to his aunt's cabin outside Kuopio, 1994. Berlin — the sacred sauna, the birthplace of this entire band — got a 2.`,
   },
   {
     id: 'crew',
@@ -105,6 +120,15 @@ export const LORE_STOPS: LoreStop[] = [
     accent: 'both',
     image: '/assets/lore/doctrine.jpg',
     body: `They signed to Eurobeat Records on a napkin too damp to read. The rider: one working sauna, one cedar bucket, and thermal paste "for emergencies." "Club Humidity" was mixed entirely at 94% relative humidity — which is why the engineers worked in clear plastic ponchos, hoods up, as condensation ran off the ceiling and rained onto the mixing desk. Two consoles were lost. The masters still smell faintly of eucalyptus.`,
+  },
+  {
+    id: 'tampere',
+    kind: 'chapter',
+    eyebrow: 'CHAPTER V · TAMPERE, 2003',
+    title: 'THE MAN WHO COULD COOL ANYTHING',
+    accent: 'jussi',
+    image: '/assets/lore/jussi-beerleague.jpg',
+    body: `The drum machine kept overheating. Someone said there was a man in Tampere who could cool anything, so Dieter flew to Finland and found him at six in the morning, alone, in goal. Dieter explained the humidity, the meltdown and the entire Moisture Doctrine for eleven uninterrupted minutes. Jussi conceded a goal partway through and did not react. When it was over he said four words — "Your sauna was a cupboard" — and Dieter wept and hired him on the spot. He has filled the bucket every night since. Nobody has ever thanked him.`,
   },
 ]
 

@@ -8,6 +8,7 @@ export const ACCENTS = {
   kiki: [1.0, 0.12, 0.56], // she is the signal — magenta
   dieter: [0.08, 0.88, 1.0], // he is the noise — cold blue
   both: [0.39, 1.0, 0.18], // the sauna incident — acid
+  jussi: [0.66, 0.9, 1.0], // he is the cold — pale rink ice (matches .accent-jussi)
   ibiza: [1.0, 0.55, 0.18], // sunrise gold
   tokyo: [1.0, 0.15, 0.78], // neon pink
   miami: [0.1, 0.95, 0.85], // pool aqua
