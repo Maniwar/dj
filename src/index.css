@@ -4247,3 +4247,36 @@ body.sauna .content::before {
 @media (min-aspect-ratio: 17/10) { .lore-stop.hero .lore-video { object-position: center 34%; } }
 @media (min-aspect-ratio: 41/20) { .lore-stop.hero .lore-video { object-position: center 25%; } }
 @media (min-aspect-ratio: 5/2)   { .lore-stop.hero .lore-video { object-position: center 22%; } }
+
+/* ---- Outtakes: member filter + per-frame attribution ---------------------------------------
+   The sheet covers the whole band, so each frame says WHO it is, and the chips let you follow
+   one member without the sheet being split into four blocks. Colours reuse the lore accents
+   (Kiki magenta / Dieter blue / crew acid / Jussi ice) so the coding is consistent site-wide. */
+.ot-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 1.6rem; }
+.ot-chip {
+  font-family: 'Oswald', sans-serif; font-size: 0.68rem; letter-spacing: 0.12em;
+  text-transform: uppercase; cursor: pointer; padding: 7px 14px; border-radius: 2px;
+  color: var(--ink); background: rgba(8,10,16,0.7);
+  border: 1px solid var(--edge); transition: all 0.15s ease;
+}
+.ot-chip:hover { border-color: var(--chip, var(--gold)); color: #fff; }
+.ot-chip.on { background: var(--chip, var(--gold)); border-color: var(--chip, var(--gold)); color: #06080d; font-weight: 600; }
+.ot-chip .ot-count { opacity: 0.65; margin-left: 6px; font-size: 0.9em; }
+.ot-chip.who-kiki   { --chip: var(--magenta); }
+.ot-chip.who-dieter { --chip: var(--blue); }
+.ot-chip.who-crew   { --chip: var(--acid); }
+.ot-chip.who-jussi  { --chip: #a8e6ff; }
+
+.ot-who {
+  position: absolute; top: 8px; right: 9px; font-family: 'Oswald', sans-serif;
+  font-size: 0.58rem; letter-spacing: 0.12em; padding: 2px 7px; border-radius: 2px;
+  background: rgba(0,0,0,0.66); color: var(--chip, var(--gold));
+  text-shadow: 0 0 8px currentColor;
+}
+.ot-card.who-kiki   { --chip: var(--magenta); }
+.ot-card.who-dieter { --chip: var(--blue); }
+.ot-card.who-crew   { --chip: var(--acid); }
+.ot-card.who-jussi  { --chip: #a8e6ff; }
+/* the per-member accent also tints the hover glow, so the sheet reads by colour as you scan it */
+.ot-card:hover { box-shadow: 0 26px 60px rgba(0,0,0,0.72), 0 0 26px color-mix(in srgb, var(--chip) 55%, transparent); }
+.ot-title { text-shadow: 0 0 calc(6px + var(--m-beat, 0) * 18px) color-mix(in srgb, var(--chip) 60%, transparent); }
