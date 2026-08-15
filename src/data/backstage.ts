@@ -63,8 +63,8 @@ const CREW: BackstageFrame[] = [
 ]
 
 const JUSSI: BackstageFrame[] = [
-  { id: 'j-file', who: 'jussi', image: '/assets/ref/jussi.jpg', title: 'THE FILE PHOTO',
-    note: 'Taken for the tour laminates. He was asked to smile. This is the result.' },
+  { id: 'j-decks', who: 'jussi', image: '/assets/lore/jussi-decks.jpg', title: 'THE CREASE',
+    note: 'Ninety minutes, full pads, blocker and glove never once off the table. Two bottles were opened over him. He acknowledged neither and did not miss a cue.' },
   { id: 'j-inspection', who: 'jussi', image: '/assets/lore/jussi-inspection.jpg', title: 'THE INSPECTION',
     note: 'Clipboard, thermometer, beer. Kiki and Dieter waited in the doorway for eleven minutes without speaking. The venue scored a 2 and closed the following spring.' },
   { id: 'j-sauna', who: 'jussi', image: '/assets/lore/jussi-sauna.jpg', title: 'THE LÖYLY VERDICT',
