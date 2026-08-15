@@ -30,6 +30,17 @@ const slugs = [...new Set([...genSrc.matchAll(/trackSlug:\s*'([^']+)'/g)].map((m
 const only = process.argv[2]
 const wanted = only ? slugs.filter((s) => s.includes(only)) : slugs
 mkdirSync(OUT_DIR, { recursive: true })
+
+// Fail loudly and immediately if ffmpeg is absent. It is NOT preinstalled on ubuntu-24.04
+// runners, and without this the loop below just logs ENOENT per track and exits 0 — a green
+// step that produced nothing, which is what made the first two render runs fail downstream.
+try {
+  execFileSync('ffmpeg', ['-version'], { stdio: 'ignore' })
+} catch {
+  console.error('[clips] ffmpeg not found on PATH — install it first (apt-get install -y ffmpeg)')
+  process.exit(1)
+}
+
 console.log(`[clips] ${wanted.length} track(s) to check · ${SECONDS}s each`)
 
 function duration(file) {
@@ -42,6 +53,7 @@ function duration(file) {
 }
 
 let made = 0
+let failed = 0
 for (const slug of wanted) {
   const track = tracks.find((t) => t.slug === slug)
   if (!track) { console.log(`  ? ${slug} — no such track, skipping`); continue }
@@ -62,7 +74,11 @@ for (const slug of wanted) {
     made++
     console.log(`  + ${file} — ${SECONDS}s from ${start.toFixed(0)}s (${(statSync(out).size / 1024).toFixed(0)} KB)`)
   } catch (e) {
+    failed++
     console.log(`  ✗ ${file} — ${String(e.stderr || e.message).split('\n').slice(-2)[0]}`)
   }
 }
-console.log(`[clips] ${made} new excerpt(s)`)
+console.log(`[clips] ${made} new excerpt(s), ${failed} failed`)
+// A silent no-op here surfaces much later as an opaque "no short audio excerpt" render error,
+// so make the cut step itself the thing that goes red.
+if (failed) process.exit(1)
