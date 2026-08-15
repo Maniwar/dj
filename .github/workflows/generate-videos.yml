@@ -97,8 +97,32 @@ jobs:
             node scripts/gen-atlascloud-videos.mjs "$FILTER"
           fi
 
-      - name: Download, compress to silent 720p, and point the site at local files
+      - name: Download masters and build the 720p rendition
+        env:
+          atlascloudapikey: ${{ secrets.ATLASCLOUD_API_KEY }}
         run: node scripts/localize-videos.mjs
+
+      - name: Build the 1080p (hd) rendition
+        # videoRendition.ts swaps /assets/video/ -> /assets/video/hd/ by display width with NO
+        # 404 fallback, so a clip shipping only 720p is a BROKEN video on any wide screen.
+        run: node scripts/build-video-renditions.mjs
+
+      - name: Every ready clip must ship BOTH renditions
+        run: |
+          node -e "
+            const fs = require('fs');
+            const r = require('./src/data/atlascloud.results.json');
+            const missing = [];
+            for (const c of r.clips.filter(c => c.status === 'ready')) {
+              const sd = 'public/assets/video/' + c.id + '.mp4';
+              const hd = 'public/assets/video/hd/' + c.id + '.mp4';
+              if (!fs.existsSync(sd)) missing.push(c.id + ' (720p)');
+              if (!fs.existsSync(hd)) missing.push(c.id + ' (1080p/hd)');
+            }
+            for (const m of missing) console.error('::error::missing rendition: ' + m);
+            console.log(r.clips.filter(c=>c.status==='ready').length + ' ready clip(s); ' + missing.length + ' missing rendition file(s)');
+            if (missing.length) process.exit(1);
+          "
 
       - name: Show what changed
         run: |
@@ -114,7 +138,7 @@ jobs:
           rm -rf .video-tmp
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/data/atlascloud.results.json public/assets/video public/mp3-clips
+          git add src/data/atlascloud.results.json public/assets/video public/assets/video/hd public/mp3-clips scripts/video-masters.manifest.json
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
