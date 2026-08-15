@@ -83,6 +83,16 @@
       "id": "lore-doctrine",
       "status": "ready",
       "mp4Url": "/assets/video/lore-doctrine.mp4"
+    },
+    {
+      "id": "lore-jussi",
+      "trackSlug": "euro-trash",
+      "city": "JUSSI · THE CREASE",
+      "still": "public/assets/lore/jussi-hero.jpg",
+      "scene": "a nightclub stage with a hockey goal set up on it — the huge bearded Finn in goaltender pads stands perfectly still and expressionless in the crease while the three super-fans spray champagne and the crowd roars. ONLY the crowd, the champagne, the confetti, the lasers and the fog move; the bearded man stays motionless and deadpan, and does NOT dance",
+      "seed": 480917,
+      "status": "error",
+      "error": "HTTP 400 https://api.atlascloud.ai/api/v1/model/generateVideo\n{\"code\":400,\"msg\":\"InvalidParameter.DurationTooLong: Duration must be between 1.8s and 30.2s.\",\"data\":{\"session_id\":\"c56e55379ca0464b8ca70ce1f6a91f21\"}}"
     }
   ]
 }
