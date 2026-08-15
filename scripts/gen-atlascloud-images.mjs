@@ -55,6 +55,14 @@ const DIETER = 'DJ DIETER: a sleazy campy 2000s Eurodance heart-throb in his lat
   'with tousled natural BLOND hair (lightly styled, NOT heavily gelled or wet-look), a THIN pencil MOUSTACHE, ' +
   'cheap flashy Euro wraparound SUNGLASSES, an open black LEATHER JACKET over a bare tanned chest with a thick ' +
   'gold chain, headphones around his neck, a greasy confident smirk, glistening with sweat, hands on the DJ decks.'
+// The Finn. Deadpan mass. The opposite energy to Dieter's camp — he never smiles, never poses,
+// and is never without the sunglasses. Pale where the others are tanned.
+const JUSSI = 'JUSSI JÄRVI ("JARS"), the Finnish Head of Löyly & Ice: a big broad-shouldered pale Finnish man ' +
+  'in his early 40s, with a HUGE thick dark-brown BEARD that grows long and wild down his chest and turns ' +
+  'salt-and-pepper GREY at the ends, shaggy dark shoulder-length hair, and BLACK rectangular wraparound ' +
+  'SUNGLASSES that he never takes off (indoors, outdoors, in the sauna). He wears a plain black heavy-duty ' +
+  'utility work shirt buttoned up, sleeves rolled. Completely deadpan, stone-faced, utterly unimpressed — ' +
+  'he never smiles and never poses for the camera. Always holding a beer.'
 
 // ---- REFERENCE SHEET (text-to-image) ----
 const REFS = [
@@ -64,11 +72,17 @@ const REFS = [
     prompt: `Reference photo of the recurring crew together. ${TRIO} They pose as a trio on a podium, champagne, gold confetti. ${WARDROBE} ${STYLE} ${NEG}` },
   { out: 'public/assets/ref/dieter.jpg', size: '1664*2496',
     prompt: `Clear, well-lit reference PORTRAIT, waist-up and centered, of ${DIETER} He is behind the glowing DJ decks, one hand on a fader, arm raised, magenta and acid-green lasers and haze behind him. His face is large, sharp and clearly visible — this is a character reference so he must be unmistakable, not a silhouette. ${STYLE} ${NEG}` },
+  { out: 'public/assets/ref/jussi.jpg', size: '1664*2496',
+    prompt: `Clear, well-lit reference PORTRAIT, waist-up and centered, of ${JUSSI} He stands completely still and expressionless, arms at his sides, holding a large beer, in a club doorway with magenta and acid-green laser haze behind him. His face and enormous beard are large, sharp and clearly visible — this is a character reference so he must be unmistakable, not a silhouette. He is NOT dancing, NOT smiling, NOT posing. ${STYLE} ${NEG}` },
 ]
 
 // ---- STORY / CITY SCENES (edit — reuse the refs so faces stay consistent) ----
 // Each references specific ref images by index in the prompt ("woman in image 1", etc.).
 const K = 'public/assets/ref/kiki.jpg', C = 'public/assets/ref/crew.jpg', D = 'public/assets/ref/dieter.jpg'
+const J = 'public/assets/ref/jussi.jpg'
+// Jussi's rule, applied to every scene he appears in: he is the still point in the chaos.
+const JUSSI_RULE = 'JUSSI NEVER changes expression, never dances and never looks at the camera — whatever ' +
+  'chaos is happening, he stands or sits perfectly still and deadpan with his sunglasses on and a beer in hand.'
 // Keep the referenced people/outfits identical; each scene is that SONG's gag, staged with
 // our cast (Kiki fronting, Dieter at the decks, the leopard crew up front). Funny + campy.
 // Lock IDENTITY only (face, hair, outfit) — but explicitly re-pose everyone for each scene,
@@ -88,6 +102,16 @@ const SCENES = [
     prompt: `${KEEP} RIDICULOUS funny scene: a neon-spandex GYM rave on a Miami rooftop pool deck at pink sunset — the leopard trio (image 1) and Kiki (image 2) in glitter workout gear pumping chrome dumbbells and flexing, dripping sweat, DJ Dieter (image 3) grinning as their spotter at the decks, a gold Ferrari and mega-yacht below, champagne towers. ${WARDROBE} ${STYLE} ${NEG}` },
   { out: 'public/assets/tour/berlin.jpg', size: '2720*1530', refs: [C, K, D], // The Basement VIP
     prompt: `${KEEP} DEADPAN funny scene: a dingy Berlin basement "VIP" behind a red velvet rope — mops, buckets and exposed pipes in the corner, the leopard trio (image 1) and Kiki (image 2) acting ultra-glamorous and exclusive among the cleaning supplies, DJ Dieter (image 3) guarding the rope, steam, one lonely disco light. ${WARDROBE} ${STYLE} ${NEG}` },
+
+  // ---- JUSSI JÄRVI — the Finnish Head of Löyly & Ice ----
+  { out: 'public/assets/lore/jussi-hero.jpg', size: '1664*2496', refs: [J], // Lore hero portrait
+    prompt: `${KEEP} ${JUSSI_RULE} Portrait of the bearded Finnish man in image 1, standing dead still and expressionless in the doorway of a wood-panelled sauna, thick steam rolling out around him, a wooden ladle in one hand and a beer in the other, glowing coals behind. Magenta and acid-green club light bleeding in from the corridor. He looks profoundly unimpressed. ${STYLE} ${NEG}` },
+  { out: 'public/assets/lore/jussi-sauna.jpg', size: '2720*1530', refs: [J, K, D], // the löyly verdict
+    prompt: `${KEEP} ${JUSSI_RULE} HILARIOUS deadpan scene inside a cramped wood-panelled sauna: the bearded Finn in image 1 sits perfectly still on the top bench in his black shirt and sunglasses holding a beer, radiating calm authority, while blonde Kiki (image 2) and DJ Dieter (image 3) flail and gasp dramatically in the steam below him, red-faced and overwhelmed, a drum machine steaming on the bench beside them. He is pouring one more ladle of water on the coals. ${STYLE} ${NEG}` },
+  { out: 'public/assets/lore/jussi-hockey.jpg', size: '2720*1530', refs: [J, C], // goaltender of the booth
+    prompt: `${KEEP} ${JUSSI_RULE} ABSURD funny scene: the bearded Finn in image 1 in full battered ice-hockey GOALTENDER pads and blocker, sunglasses on, standing stone-faced in front of the glowing DJ booth as if defending a goal crease, hockey stick across the decks, while the leopard-print trio (image 2) rave wildly around him. Neon lasers, fog, a beer balanced on the goal post. ${WARDROBE} ${STYLE} ${NEG}` },
+  { out: 'public/assets/lore/jussi-beer.jpg', size: '2720*1530', refs: [J], // the caloric intake
+    prompt: `${KEEP} ${JUSSI_RULE} DEADPAN funny scene: the bearded Finn in image 1 sits alone at a battered club backstage table lit by one bare bulb, surrounded by a towering wall of empty beer glasses and steins arranged in neat, precise rows, holding one full beer, staring straight ahead expressionless. A hockey stick leans on the wall behind him. Laser haze creeps under the door. ${STYLE} ${NEG}` },
   // ---- MAINSTAGE / BROADCAST club frames (current-track fallback) — cast on stage ----
   { out: 'public/assets/video/frames/club-booth.jpg', size: '2720*1530', refs: [K, D, C],
     prompt: `${KEEP} KIKI G (image 1) commands the DJ decks in her silver two-piece, arm thrown up; DJ Dieter (image 2) leans in sleazily beside her at the decks; the leopard trio (image 3) scream and reach up from the front row. Lasers, fog, sweat, champagne. ${STYLE} ${NEG}` },
