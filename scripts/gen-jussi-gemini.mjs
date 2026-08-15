@@ -81,13 +81,58 @@ const JOBS = [
   },
   {
     out: 'public/assets/lore/jussi-hockey.jpg', ratio: '16:9', refs: [C],
-    prompt: `${KEEP} ${RULE} TWO reference images: the bearded Finn from image 1, and the trio of female ` +
-      `super-fans from image 2 — keep the crew's EXACT faces, hair and leopard-print two-piece rave outfits ` +
-      `from that reference, but give them new dancing poses. ABSURD funny scene: the Finn wears full battered ` +
-      `ice-hockey GOALTENDER pads, chest protector and blocker over his black shirt, sunglasses on, standing ` +
-      `stone-faced in front of a glowing nightclub DJ booth as if defending a goal crease, a hockey stick laid ` +
-      `across the decks, a beer balanced on the goalpost, while the leopard crew rave wildly around him. ` +
-      `Lasers, fog. ${STYLE} ${NEG}`,
+    prompt: `${KEEP} ${RULE} TWO reference images: the bearded Finn from image 1, and the three friends from ` +
+      `image 2. ALL THREE of them must appear here — the one with long dark hair, the one with platinum hair ` +
+      `with pink tips, and the one with copper-red curls. Keep their exact faces and hair from the reference ` +
+      `and dress them the same way, and frame the shot WIDE so all three are fully visible, two on one side ` +
+      `of him and one on the other. ABSURD funny scene: the Finn wears full battered ice-hockey GOALTENDER ` +
+      `equipment — big leg pads, chest protector, blocker and catching glove over his black shirt — sunglasses ` +
+      `on, standing stone-faced in front of a glowing nightclub DJ booth as if defending a goal crease, a ` +
+      `hockey stick laid across the decks and a beer balanced on the goalpost, while the three friends ` +
+      `celebrate and dance around him. Lasers, fog, gold confetti. ${STYLE} ${NEG}`,
+  },
+
+  // ---- more situations ----
+  {
+    out: 'public/assets/lore/jussi-zamboni.jpg', ratio: '16:9', refs: [C],
+    prompt: `${KEEP} ${RULE} GLORIOUSLY ABSURD scene: the bearded Finn from image 1 drives a full-size ice-rink ` +
+      `ZAMBONI ice-resurfacing machine straight across a packed nightclub dancefloor, sitting bolt upright at ` +
+      `the controls in his black shirt and sunglasses with a beer in one hand, utterly expressionless, as the ` +
+      `crowd parts around him. The three women from image 2 (same faces, leopard and holographic rave outfits) ` +
+      `dance on and beside the machine, delighted. Lasers, fog, gold confetti. ${STYLE} ${NEG}`,
+  },
+  {
+    out: 'public/assets/lore/jussi-tv.jpg', ratio: '16:9',
+    prompt: `${KEEP} ${RULE} DEADPAN funny scene: at the edge of a heaving nightclub, the bearded Finn has set ` +
+      `up a tiny battered portable CRT television on a road case and turned his back completely on the party ` +
+      `to watch an ICE HOCKEY GAME on it. He sits on a flight case, beer in hand, face lit by the small screen, ` +
+      `totally absorbed and expressionless, while behind him the dancefloor erupts in lasers, fog and confetti. ` +
+      `${STYLE} ${NEG}`,
+  },
+  {
+    out: 'public/assets/lore/jussi-rider.jpg', ratio: '16:9',
+    prompt: `${KEEP} ${RULE} DEADPAN funny scene in a shabby backstage dressing room: the bearded Finn sits on ` +
+      `a battered couch between two tables. On his left, an enormous pristine untouched catering spread — fruit ` +
+      `platters, sandwiches, vegetables — perfectly arranged and clearly never touched. On his right, a wooden ` +
+      `beer crate absolutely demolished, empty bottles everywhere. He holds one full beer and stares straight ` +
+      `ahead. A hockey stick leans on the wall. One bare bulb, laser haze under the door. ${STYLE} ${NEG}`,
+  },
+  {
+    out: 'public/assets/lore/jussi-foam.jpg', ratio: '16:9', refs: [C],
+    prompt: `${KEEP} ${RULE} HILARIOUS scene at an open-air Ibiza foam party at sunrise: the bearded Finn from ` +
+      `image 1 stands buried CHEST-DEEP in a rising sea of white foam, completely motionless and expressionless ` +
+      `in his sunglasses, holding his beer carefully raised ABOVE the foam line to keep it safe. The women from ` +
+      `image 2 (same faces and rave outfits) shriek with joy and hurl foam around him. Palm silhouettes, ` +
+      `sunrise, lasers. ${STYLE} ${NEG}`,
+  },
+  {
+    out: 'public/assets/lore/jussi-bus.jpg', ratio: '16:9', refs: [K, D],
+    prompt: `${KEEP} ${RULE} DEADPAN funny scene inside a cramped tour bus at 4am: the bearded Finn from image 1 ` +
+      `is fast ASLEEP sitting bolt upright, sunglasses still on, chin up, his full beer held perfectly level and ` +
+      `unspilled in one hand. Around him total chaos — the blonde KIKI G from image 2 (exact face, platinum ` +
+      `hair, silver metallic crop top) and DJ DIETER from image 3 (exact face, blond hair, thin moustache, ` +
+      `wraparound sunglasses, open leather jacket) are mid-argument over a tangle of cables and empty ` +
+      `champagne bottles. Neon strip light, condensation on the windows. ${STYLE} ${NEG}`,
   },
   {
     out: 'public/assets/lore/jussi-beer.jpg', ratio: '16:9',
