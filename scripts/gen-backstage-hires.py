@@ -57,6 +57,7 @@ for frame_id, rel in jobs:
         fail += 1
         continue
     print(f"  • {frame_id} ... ", end="", flush=True)
+    tries = int(os.environ.get("TRIES", "4"))
     body = json.dumps({
         "contents": [{"role": "user", "parts": [
             {"inline_data": {"mime_type": "image/jpeg",
@@ -66,23 +67,33 @@ for frame_id, rel in jobs:
         "generationConfig": {"responseModalities": ["IMAGE"],
                              "imageConfig": {"imageSize": "2K"}},
     }).encode()
-    try:
-        req = urllib.request.Request(URL, data=body, headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=240) as r:
-            payload = json.load(r)
-        parts = payload["candidates"][0]["content"].get("parts", [])
-        b64 = next((p.get("inlineData", p.get("inline_data", {})).get("data") for p in parts
-                    if p.get("inlineData", p.get("inline_data", {})).get("data")), None)
-        if not b64:
-            raise RuntimeError(str(payload)[:160])
-        im = Image.open(io.BytesIO(base64.b64decode(b64))).convert("RGB")
-        dst = OUT_DIR / f"{frame_id}.jpg"
-        # The re-encode is what makes this shippable: the raw output is ~3MB a frame.
-        im.save(dst, quality=82, optimize=True, progressive=True)
-        print(f"OK {im.size[0]}x{im.size[1]} ({dst.stat().st_size/1048576:.2f} MB)")
-        ok += 1
-    except Exception as e:
-        print(f"FAIL — {str(e).splitlines()[0][:150]}")
+    # IMAGE_SAFETY refuses a share of these non-deterministically, and 503s happen too. A single
+    # attempt leaves a frame with no hi-res, which the lightbox then silently papers over by
+    # falling back to the small grid image — a hole you would not notice until you opened it.
+    last = None
+    for attempt in range(1, tries + 1):
+        try:
+            req = urllib.request.Request(URL, data=body,
+                                         headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=240) as r:
+                payload = json.load(r)
+            parts = payload["candidates"][0]["content"].get("parts", [])
+            b64 = next((p.get("inlineData", p.get("inline_data", {})).get("data") for p in parts
+                        if p.get("inlineData", p.get("inline_data", {})).get("data")), None)
+            if not b64:
+                raise RuntimeError(str(payload.get("candidates", [{}])[0].get("finishReason"))[:60])
+            im = Image.open(io.BytesIO(base64.b64decode(b64))).convert("RGB")
+            dst = OUT_DIR / f"{frame_id}.jpg"
+            # The re-encode is what makes this shippable: the raw output is ~3MB a frame.
+            im.save(dst, quality=82, optimize=True, progressive=True)
+            print(f"OK {im.size[0]}x{im.size[1]} ({dst.stat().st_size/1048576:.2f} MB)")
+            ok += 1
+            break
+        except Exception as e:
+            last = e
+            print(f"retry{attempt} ", end="", flush=True)
+    else:
+        print(f"FAIL — {str(last).splitlines()[0][:120]}")
         fail += 1
 
 print(f"[hires] {ok} ok, {fail} failed")

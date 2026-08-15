@@ -76,6 +76,33 @@ const JOBS = [
   { out: 'crew-chips.jpg', refs: [C], prompt: `${KEEP} ${CREW} DEADPAN funny scene: 6am outside a late-night food van, all three eating chips out of paper, exhausted and content, glitter still on their faces, dawn light. One traffic cone.` },
   { out: 'crew-trolleys.jpg', refs: [C], prompt: `${KEEP} ${CREW} ABSURD funny scene: all three ride luggage trolleys down an empty airport terminal, luggage piled high, laughing. Fluorescent light, polished floor.` },
   { out: 'crew-pile.jpg', refs: [C], prompt: `${KEEP} ${CREW} FUNNY scene: all three fast asleep leaning on each other across the back seat of a tour bus under a shared blanket, one boot off on the floor, neon strip light, condensation on the windows.` },
+
+  // ---- Round two. Five more each, added when the five unused Jussi frames were finally placed:
+  // he went to thirteen, so everyone goes to thirteen. The section is balanced by construction and
+  // the moment one member gains frames the others have to gain the same number or it tilts again.
+  // ---------------- KIKI ----------------
+  { out: 'kiki-vending.jpg', refs: [K], prompt: `${KEEP} ${KIKI} FUNNY scene: backstage, her whole arm is thrust up inside a vending machine's flap trying to free a stuck snack, one platform boot braced against the glass for leverage, face set with total determination, while two roadies watch without offering to help. Corridor, strip light.` },
+  { out: 'kiki-suitcase.jpg', refs: [K], prompt: `${KEEP} ${KIKI} FUNNY scene: in a cheap hotel corridor she sits on top of a wildly overstuffed suitcase, bouncing, trying to force the zip round the corner, silver sequinned clothing bursting out of every gap. Patterned carpet, one flickering wall light.` },
+  { out: 'kiki-tvshow.jpg', refs: [K], prompt: `${KEEP} ${KIKI} DEADPAN funny scene: on the set of a cheap regional TV show with a painted sunset backdrop and plastic palm trees, she mimes passionately into an obviously unplugged microphone, utterly committed, while the bored floor crew look at their watches. Flat TV lighting.` },
+  // Was a step-ladder scene; refused eight times running on the low camera angle alone. Rewritten
+  // at eye level with a coat over the stage outfit, which is what the filter was actually objecting
+  // to. The joke survived the move; the ladder was never the funny part.
+  { out: 'kiki-payphone.jpg', refs: [K], prompt: `${KEEP} ${KIKI} DEADPAN funny scene: 5am in a glass street payphone box, a big oversized tour coat pulled on over her stage clothes, she feeds a growing stack of coins into the slot one after another while arguing patiently with the record label. Wet pavement, orange street light, empty street. Camera at eye level.` },
+  { out: 'kiki-icebath.jpg', refs: [K], prompt: `${KEEP} ${KIKI} DEADPAN funny scene: sitting fully dressed in a backstage bathtub filled to the brim with ice and cans, boots hooked over the rim, taking a phone call on a chunky 2000s mobile with complete composure. Tiled room, one bare bulb, laser haze through the door.` },
+
+  // ---------------- DIETER ----------------
+  { out: 'dieter-fax.jpg', refs: [D], prompt: `${KEEP} ${DIETER} DEADPAN funny scene: he stands over a fax machine at 4am feeding in an ENORMOUS scroll of paper that has already pooled across the floor around his feet, watching it go with immense satisfaction. Cramped back office, one desk lamp.` },
+  { out: 'dieter-poster.jpg', refs: [D], prompt: `${KEEP} ${DIETER} FUNNY scene: at night on a wet city street he pastes his own gig poster directly over somebody else's, brush and glue bucket in hand, glancing over his shoulder mid-crime. Street light, puddles, neon reflections.` },
+  { out: 'dieter-mirror.jpg', refs: [D], prompt: `${KEEP} ${DIETER} HILARIOUS scene: alone in a dressing room he practises his intense DJ face in the mirror, one finger raised in the air mid-cue, rehearsing it seriously — caught by the camera. Bulb-lit mirror, cluttered counter.` },
+  { out: 'dieter-catering.jpg', refs: [D], prompt: `${KEEP} ${DIETER} DEADPAN funny scene: clipboard in hand, he inspects a modest backstage catering table with the gravity of a health inspector, lifting one corner of clingfilm to peer underneath, deeply unimpressed. Strip light, folding tables.` },
+  { out: 'dieter-scooter.jpg', refs: [D], prompt: `${KEEP} ${DIETER} ABSURD funny scene: he rides a tiny child's push scooter across a vast empty venue floor, a heavy record box balanced under one arm, leather jacket flying, expression completely serious. House lights, empty barriers.` },
+
+  // ---------------- THE CREW ----------------
+  { out: 'crew-setlist.jpg', refs: [C], prompt: `${KEEP} ${CREW} FUNNY scene: all three stand at a backstage wall rewriting the setlist directly onto the paintwork in thick marker, arguing over the running order, one of them holding the marker out of another's reach. Corridor, magenta light.` },
+  { out: 'crew-laundry.jpg', refs: [C], prompt: `${KEEP} ${CREW} DEADPAN funny scene: 4am in a fluorescent-lit laundromat, all three slumped on plastic chairs in oversized tour jackets watching a machine full of silver sequinned stage clothes go round. Empty street outside the window.` },
+  { out: 'crew-map.jpg', refs: [C], prompt: `${KEEP} ${CREW} FUNNY scene: on a dark roadside all three lean over an enormous paper road map spread across the bonnet of a van, each pointing in a completely different direction, headlights lighting them from below.` },
+  { out: 'crew-nails.jpg', refs: [C], prompt: `${KEEP} ${CREW} FUNNY scene: perched on flight cases backstage, all three paint each other's nails in a chain — each doing the hands of the next — total concentration, tiny bottles balanced on the cases. Bare bulb, cables.` },
+  { out: 'crew-jumpstart.jpg', refs: [C], prompt: `${KEEP} ${CREW} DEADPAN funny scene: at dawn in a car park all three jump-start the tour van, one holding the jump leads, one under the bonnet, one behind the wheel giving a thumbs up through the windscreen. Cold flat morning light, breath visible.` },
 ]
 
 const OUT_DIR = 'public/assets/backstage'
@@ -107,11 +134,22 @@ const jobs = (only ? JOBS.filter((j) => j.out.includes(only)) : JOBS)
   .filter((j) => process.env.FORCE === '1' || !existsSync(resolve(ROOT, OUT_DIR, j.out)))
 console.log(`[backstage] model=${MODEL} · ${jobs.length} image(s) to make`)
 
+// Google's IMAGE_SAFETY filter refuses a good share of these on wardrobe grounds alone, and it is
+// not deterministic — the same request that gets refused comes back fine on a later attempt. One
+// try per job used to leave holes in the sheet that looked like bad prompts rather than bad luck.
+const TRIES = Number(process.env.TRIES || 4)
 let ok = 0, fail = 0
 for (const job of jobs) {
   process.stdout.write(`  • ${job.out} ... `)
-  try { await generate(job); ok++; console.log('OK') }
-  catch (e) { fail++; console.log('FAIL — ' + e.message.split('\n')[0]) }
+  // NOT existsSync — under FORCE=1 the previous render is still on disk, so checking the file
+  // would report a stale image as a fresh success and quietly bury a total failure.
+  let last, wrote = false
+  for (let attempt = 1; attempt <= TRIES; attempt++) {
+    try { await generate(job); wrote = true; break }
+    catch (e) { last = e; process.stdout.write(`retry${attempt} `) }
+  }
+  if (wrote) { ok++; console.log('OK') }
+  else { fail++; console.log('FAIL — ' + String(last?.message ?? '').split('\n')[0].slice(0, 120)) }
 }
 console.log(`[backstage] ${ok} ok, ${fail} failed`)
 if (fail && !ok) process.exit(1)

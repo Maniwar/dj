@@ -1,7 +1,11 @@
 // BACKSTAGE — the Eurobeat Records archive: the band with the performance switched off, and the
-// note the archivist filed against each frame. Deliberately BALANCED and INTERLEAVED — eight frames per
-// member, shuffled so no one person owns the section (it began as fourteen straight Jussi frames,
-// which made it his page rather than the band's).
+// note the archivist filed against each frame. Deliberately BALANCED and INTERLEAVED — THIRTEEN
+// frames per member, shuffled so no one person owns the section (it began as fourteen straight
+// Jussi frames, which made it his page rather than the band's).
+//
+// The count is load-bearing, not decorative: the filter chips print it, so the moment one member
+// gains frames and the others don't, the imbalance is displayed on the page in figures. Adding to
+// one array means adding the same number to the other three.
 export type Who = 'kiki' | 'dieter' | 'crew' | 'jussi'
 export type BackstageFrame = { id: string; who: Who; image: string; title: string; note: string }
 
@@ -22,6 +26,16 @@ const KIKI: BackstageFrame[] = [
     note: 'One cracked mirror, one bulb, one green laser coming through the door. She was on stage ninety seconds later looking like this was intentional.' },
   { id: 'k-asleep', who: 'kiki', image: '/assets/backstage/kiki-asleep.jpg', title: 'LOAD-OUT, 05:00',
     note: 'Asleep upright on the cases, still holding the mic. Nobody dared take it off her.' },
+  { id: 'k-vending', who: 'kiki', image: '/assets/backstage/kiki-vending.jpg', title: 'THE MACHINE',
+    note: 'It took her money and gave her nothing. Two roadies watched the entire recovery operation and were not asked to help.' },
+  { id: 'k-suitcase', who: 'kiki', image: '/assets/backstage/kiki-suitcase.jpg', title: 'EXCESS',
+    note: 'The case closed. It has never opened again in the same condition. Four cities later the zip was still holding.' },
+  { id: 'k-tvshow', who: 'kiki', image: '/assets/backstage/kiki-tvshow.jpg', title: 'PLAYBACK, REGIONAL TV',
+    note: 'The microphone was not connected to anything. She gave it everything regardless. The broadcast went out at 14:40 on a Tuesday.' },
+  { id: 'k-payphone', who: 'kiki', image: '/assets/backstage/kiki-payphone.jpg', title: '05:00, THE LABEL',
+    note: 'Eleven minutes and most of a pocket of coins. She won the argument. The label maintains there was no argument.' },
+  { id: 'k-icebath', who: 'kiki', image: '/assets/backstage/kiki-icebath.jpg', title: 'THE RIDER, CHILLED',
+    note: 'The dressing room had no fridge. It did have a bath. She took the call from it without mentioning either fact.' },
 ]
 
 const DIETER: BackstageFrame[] = [
@@ -41,6 +55,16 @@ const DIETER: BackstageFrame[] = [
     note: 'He will not let anyone else press the tracksuit. He irons it shirtless, in the leather jacket, at a temperature nobody has been allowed to verify.' },
   { id: 'd-whiteboard', who: 'dieter', image: '/assets/backstage/dieter-whiteboard.jpg', title: 'THE DOCTRINE, EXPLAINED',
     note: 'Ninety minutes on humidity, delivered to an empty room of folding chairs. He described it afterwards as "well received."' },
+  { id: 'd-fax', who: 'dieter', image: '/assets/backstage/dieter-fax.jpg', title: 'THE FAX',
+    note: 'Nine pages of notes on the Rotterdam mix, sent at 04:00 to a machine nobody was standing next to. He waited for the confirmation slip.' },
+  { id: 'd-poster', who: 'dieter', image: '/assets/backstage/dieter-poster.jpg', title: 'FLYPOSTING, 03:00',
+    note: 'He pasted over a bill for a rival night and did not consider this to be a decision worth discussing.' },
+  { id: 'd-mirror', who: 'dieter', image: '/assets/backstage/dieter-mirror.jpg', title: 'THE FACE',
+    note: 'Rehearsed nightly. He is not aware anyone has ever seen him do it. Everyone has seen him do it.' },
+  { id: 'd-catering', who: 'dieter', image: '/assets/backstage/dieter-catering.jpg', title: 'CATERING, ASSESSED',
+    note: 'Clipboard, clingfilm, one raised corner. The verdict was delivered to the promoter in writing the following morning.' },
+  { id: 'd-scooter', who: 'dieter', image: '/assets/backstage/dieter-scooter.jpg', title: 'TRANSPORT',
+    note: 'The venue was large and the record box was heavy. He has never explained where the scooter came from, or where it went.' },
 ]
 
 const CREW: BackstageFrame[] = [
@@ -60,6 +84,16 @@ const CREW: BackstageFrame[] = [
     note: 'Banned from the trolleys at two European airports. Both bans were, in their view, "unclear at the time."' },
   { id: 'c-pile', who: 'crew', image: '/assets/backstage/crew-pile.jpg', title: 'THE BACK SEAT',
     note: 'One boot off between the three of them. They arrived in Cologne in exactly this arrangement.' },
+  { id: 'c-setlist', who: 'crew', image: '/assets/backstage/crew-setlist.jpg', title: 'THE RUNNING ORDER',
+    note: 'Written straight onto the wall of the venue, revised twice, and followed exactly. The venue has since painted over it.' },
+  { id: 'c-laundry', who: 'crew', image: '/assets/backstage/crew-laundry.jpg', title: '04:00, SPIN CYCLE',
+    note: 'Every sequin on the tour, in one machine, in a launderette in an unnamed town. Nobody spoke for the full forty minutes.' },
+  { id: 'c-map', who: 'crew', image: '/assets/backstage/crew-map.jpg', title: 'THREE DIRECTIONS',
+    note: 'Three opinions, one map, no agreement. They arrived on time, and none of them will say whose route it was.' },
+  { id: 'c-nails', who: 'crew', image: '/assets/backstage/crew-nails.jpg', title: 'THE CHAIN',
+    note: 'Each one does the next one\'s hands. Nobody does their own. The system has never been explained to anyone outside the three of them.' },
+  { id: 'c-jumpstart', who: 'crew', image: '/assets/backstage/crew-jumpstart.jpg', title: 'THE VAN, AGAIN',
+    note: 'Fourth time that month. Under two minutes, no discussion, everyone in position. The van was sold at the end of the tour.' },
 ]
 
 const JUSSI: BackstageFrame[] = [
@@ -79,6 +113,16 @@ const JUSSI: BackstageFrame[] = [
     note: 'The label sent a complete catering spread by way of apology. It was not touched. The crate was gone by 23:40.' },
   { id: 'j-merch', who: 'jussi', image: '/assets/lore/jussi-merch.jpg', title: 'MERCH · MILAN',
     note: 'Units sold that evening: zero. Stock returned: complete. Fans queued for forty minutes and then quietly went home.' },
+  { id: 'j-hockey', who: 'jussi', image: '/assets/lore/jussi-hockey.jpg', title: 'THE NET',
+    note: 'He had a regulation goal erected behind the booth and stood in it for the whole set. A beer balanced on the stick for two hours and did not fall.' },
+  { id: 'j-foam', who: 'jussi', image: '/assets/lore/jussi-foam.jpg', title: 'THE ONLY THING HE SAVED',
+    note: 'Chest-deep in the foam party, shirt on, sunglasses on, one arm held clear of the water. The beer was never at any point in danger.' },
+  { id: 'j-booth', who: 'jussi', image: '/assets/lore/jussi-booth.jpg', title: 'THE BACKING VOCAL',
+    note: 'One take, four words, no notes. Dieter is visible through the glass reacting to it. The take was not used.' },
+  { id: 'j-bus', who: 'jussi', image: '/assets/lore/jussi-bus.jpg', title: '04:00, THE ARGUMENT',
+    note: 'Kiki and Dieter are eleven minutes into a disagreement about the encore. He has not opened his eyes and has not put the bottle down.' },
+  { id: 'j-beer', who: 'jussi', image: '/assets/lore/jussi-beer.jpg', title: 'THE TALLY',
+    note: 'The venue stacked them as they came back. He maintains the count is unremarkable for a Tuesday and declines to give a figure.' },
 ]
 
 export const WHO_LABEL: Record<Who, string> = {
