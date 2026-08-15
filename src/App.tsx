@@ -12,6 +12,7 @@ import Guestbook from './components/sections/Guestbook'
 import TourJourney from './components/sections/TourJourney'
 import HallOfFame from './components/sections/HallOfFame'
 import Merch from './components/sections/Merch'
+import Outtakes from './components/sections/Outtakes'
 import { BrandBar, Crest } from './components/Ornaments'
 import AudioReactive from './components/AudioReactive'
 import LyricMarquee from './components/LyricMarquee'
@@ -101,6 +102,7 @@ export default function App() {
         <Hero />
         <LyricMarquee tint="magenta" offset={0} />
         <Lore />
+        <Outtakes />
         <LyricMarquee tint="acid" offset={3} pxPerSec={95} />
         <Tracklist />
         <Streaming />

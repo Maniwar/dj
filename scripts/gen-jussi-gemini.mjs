@@ -61,11 +61,21 @@ const JOBS = [
       `He is NOT dancing, NOT smiling, NOT posing. ${STYLE} ${NEG}`,
   },
   {
-    out: 'public/assets/lore/jussi-hero.jpg', ratio: '3:4',
-    prompt: `${KEEP} ${RULE} Full-length hero portrait: he stands dead still in the doorway of a wood-panelled ` +
-      `Finnish sauna, thick steam rolling out around him, a wooden sauna ladle in one hand and a beer in the ` +
-      `other, glowing coals visible behind. Magenta and acid-green club light bleeds in from a corridor. ` +
-      `He looks profoundly unimpressed. ${STYLE} ${NEG}`,
+    // SQUARE and CROP-SAFE to match the other heroes: the hero CSS forces background-position
+    // center and ignores --focus, so the face must sit dead-centre of the frame or wide/ultrawide
+    // viewports crop the head off (which is exactly what the first epic attempt did).
+    out: 'public/assets/lore/jussi-hero.jpg', ratio: '1:1', refs: [C],
+    prompt: `${KEEP} ${RULE} COMPOSITION IS CRITICAL: his FACE must sit at the EXACT CENTRE of the square ` +
+      `frame, with generous headroom above it, so the shot stays safe when cropped to a wide letterbox. Do ` +
+      `NOT place his head near the top edge. EPIC low-angle HERO SHOT, shot from slightly below so he towers ` +
+      `over the camera, monumental and centred. He wears FULL battered ice-hockey GOALTENDER equipment over ` +
+      `his black shirt — big white leg pads, chest protector, blocker and catching glove — sunglasses on, a ` +
+      `goalie stick in one hand and a beer in the other, standing in the mouth of a hockey goal that has been ` +
+      `set up on a nightclub stage. The three friends from image 2 flank him, two on one side and one on the ` +
+      `other, celebrating wildly with champagne — keep their exact faces and hair from that reference and ` +
+      `dress them the same way. Behind them a packed crowd roars with arms raised, magenta and acid-green ` +
+      `lasers blaze through fog, gold confetti falls. He is drenched in sweat and utterly, magnificently ` +
+      `expressionless in the middle of the chaos. Cinematic, huge, godlike scale. ${STYLE} ${NEG}`,
   },
   {
     out: 'public/assets/lore/jussi-sauna.jpg', ratio: '16:9', refs: [K, D],

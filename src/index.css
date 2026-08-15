@@ -4171,3 +4171,66 @@ body.sauna .content::before {
   font-family: 'Oswald', sans-serif; font-size: var(--step--2); letter-spacing: 0.2em;
   color: var(--gold); opacity: 0.55; margin: 1.8rem 0 0;
 }
+
+/* =========================================================
+   THE OUTTAKES — Eurobeat Records archive contact sheet
+   ========================================================= */
+.outtakes { position: relative; z-index: 2; }
+.ot-inner { max-width: 1280px; margin: 0 auto; }
+.ot-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.6rem 1.4rem; margin-top: 1rem;
+}
+.ot-card {
+  margin: 0; display: flex; flex-direction: column;
+  border: 2px solid transparent; border-radius: 3px;
+  background: linear-gradient(180deg, rgba(10,12,20,0.86), rgba(4,5,9,0.92)) padding-box,
+              var(--grad-gilt-border) border-box;
+  box-shadow: 0 18px 44px rgba(0,0,0,0.6);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+/* pinned-up contact sheet: alternate the tilt so it reads as a wall, not a spreadsheet */
+.ot-grid > .ot-card:nth-child(3n+1) { transform: rotate(-0.7deg); }
+.ot-grid > .ot-card:nth-child(3n+2) { transform: rotate(0.5deg); }
+.ot-grid > .ot-card:nth-child(3n+3) { transform: rotate(-0.3deg); }
+.ot-card:hover {
+  transform: rotate(0deg) translateY(-4px) scale(1.02); z-index: 3;
+  box-shadow: 0 26px 60px rgba(0,0,0,0.72), 0 0 26px rgba(168,230,255,0.32);
+}
+.ot-media { position: relative; overflow: hidden; background: #06080d; aspect-ratio: 16 / 10; }
+.ot-img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  filter: saturate(1.12) contrast(1.04);
+}
+.ot-frame {
+  position: absolute; top: 8px; left: 9px; font-family: 'Courier New', monospace;
+  font-size: 0.62rem; letter-spacing: 0.1em; color: #a8e6ff;
+  background: rgba(0,0,0,0.62); padding: 2px 7px; border-radius: 2px;
+  text-shadow: 0 0 8px rgba(168,230,255,0.7);
+}
+.ot-scan {
+  position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0 2px, transparent 2px 4px);
+  mix-blend-mode: multiply; opacity: 0.55;
+}
+.ot-cap { padding: 0.85rem 1rem 1.1rem; }
+.ot-title {
+  font-family: 'Anton', sans-serif; text-transform: uppercase; letter-spacing: 0.02em;
+  font-size: 1.05rem; margin: 0 0 0.35rem; color: #fff;
+  text-shadow: 0 0 calc(6px + var(--m-beat, 0) * 18px) rgba(168,230,255,0.55);
+}
+.ot-note {
+  margin: 0; font-family: 'Barlow Condensed', sans-serif; font-size: 1.02rem;
+  line-height: 1.4; color: #cfe0ea;
+}
+.ot-foot {
+  margin-top: 2rem; text-align: center; font-family: 'Courier New', monospace;
+  font-size: 0.72rem; letter-spacing: 0.12em; color: #a8e6ff; opacity: 0.75;
+}
+@media (max-width: 560px) {
+  .ot-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+  .ot-grid > .ot-card { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ot-card, .ot-card:hover { transition: none; transform: none; }
+}
