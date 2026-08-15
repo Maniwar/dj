@@ -126,6 +126,49 @@ const JOBS = [
       `sunrise, lasers. ${STYLE} ${NEG}`,
   },
   {
+    out: 'public/assets/lore/jussi-inspection.jpg', ratio: '16:9', refs: [K, D],
+    prompt: `${KEEP} ${RULE} HILARIOUS deadpan scene: the bearded Finn from image 1 conducts a formal LÖYLY ` +
+      `INSPECTION of a venue's sauna — he stands in the doorway holding a clipboard and a long thermometer, ` +
+      `examining the wooden interior with grim professional scepticism, beer in his other hand. Behind him, ` +
+      `hovering anxiously and awaiting his verdict like nervous students, are the blonde KIKI G from image 2 ` +
+      `(exact face, platinum hair, silver metallic top) and DJ DIETER from image 3 (exact face, blond hair, ` +
+      `thin moustache, wraparound sunglasses, open leather jacket), both wringing their hands. Steam, dim ` +
+      `light, one laser creeping through the door. ${STYLE} ${NEG}`,
+  },
+  {
+    out: 'public/assets/lore/jussi-ice.jpg', ratio: '16:9',
+    prompt: `${KEEP} ${RULE} EPIC-but-deadpan scene: the bearded Finn hauls an ENORMOUS block of ice and a ` +
+      `wooden cedar bucket through the middle of a packed, overheating nightclub, steam and sweat everywhere, ` +
+      `the crowd blurred and delirious around him. He is completely unbothered, sunglasses on, carrying the ice ` +
+      `like a man taking out the bins, a beer wedged in his elbow. Backlit by magenta and acid-green lasers ` +
+      `through thick fog. He is the cooling system and nobody has noticed. ${STYLE} ${NEG}`,
+  },
+  {
+    out: 'public/assets/lore/jussi-beerleague.jpg', ratio: '16:9',
+    prompt: `${KEEP} ${RULE} QUIET funny scene, the total opposite of a nightclub: 6am in a freezing empty ` +
+      `small-town ice rink, harsh fluorescent lights, completely deserted stands. The bearded Finn stands alone ` +
+      `in the goal crease in full battered goaltender equipment over his black shirt, sunglasses on, absolutely ` +
+      `still, breath steaming in the cold. A single open beer sits on the boards beside the net. Nobody is ` +
+      `watching. This is the happiest he has ever been, and his face shows nothing. ${STYLE} ${NEG}`,
+  },
+  {
+    out: 'public/assets/lore/jussi-booth.jpg', ratio: '16:9', refs: [D],
+    prompt: `${KEEP} ${RULE} HILARIOUS scene in a cramped 2000s recording studio: the bearded Finn from image 1 ` +
+      `stands at a large studio microphone wearing headphones over his sunglasses, mouth barely open, ` +
+      `delivering a single unenthusiastic grunt. Through the control-room glass behind him, DJ DIETER from ` +
+      `image 2 (exact face, blond hair, thin moustache, wraparound sunglasses, open leather jacket) is losing ` +
+      `his mind with excitement, both arms in the air, thrilled. The Finn holds a beer at the mic stand. ` +
+      `${STYLE} ${NEG}`,
+  },
+  {
+    out: 'public/assets/lore/jussi-merch.jpg', ratio: '16:9',
+    prompt: `${KEEP} ${RULE} DEADPAN funny scene: the bearded Finn stands behind a small folding merchandise ` +
+      `table at the back of a club, arms folded, sunglasses on, completely expressionless, guarding neatly ` +
+      `stacked t-shirts and CDs. A small queue of eager young fans hesitates a few feet away, visibly nervous, ` +
+      `nobody quite willing to approach. A beer sits on the corner of the table. Lasers and fog behind them. ` +
+      `${STYLE} ${NEG}`,
+  },
+  {
     out: 'public/assets/lore/jussi-bus.jpg', ratio: '16:9', refs: [K, D],
     prompt: `${KEEP} ${RULE} DEADPAN funny scene inside a cramped tour bus at 4am: the bearded Finn from image 1 ` +
       `is fast ASLEEP sitting bolt upright, sunglasses still on, chin up, his full beer held perfectly level and ` +
