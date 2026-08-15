@@ -1,0 +1,111 @@
+name: Generate AtlasCloud videos
+
+# Renders scene videos on a GitHub runner, which (unlike some dev environments) can reach
+# api.atlascloud.ai. The runner generates, downloads, compresses to silent 720p and commits the
+# results back to main — which in turn triggers the Pages deploy, so new clips go live on their own.
+#
+# COSTS CREDITS. Manual trigger only, and `filter` defaults to Jussi's clips so an accidental run
+# renders two scenes rather than every scene in the file.
+#
+# Requires one repository secret: ATLASCLOUD_API_KEY  (Settings -> Secrets and variables -> Actions)
+
+on:
+  workflow_dispatch:
+    inputs:
+      filter:
+        description: 'Clip id substring to render (e.g. "jussi", "lore-tampere"). Leave as-is to render only Jussi. Use "ALL" to render every clip — expensive.'
+        required: true
+        default: 'jussi'
+      commit:
+        description: 'Commit the generated videos back to main'
+        type: boolean
+        required: true
+        default: true
+
+permissions:
+  contents: write
+
+# Never let two render jobs write results.json at once.
+concurrency:
+  group: generate-videos
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check the API key is present
+        env:
+          ATLASCLOUD_API_KEY: ${{ secrets.ATLASCLOUD_API_KEY }}
+        run: |
+          if [ -z "$ATLASCLOUD_API_KEY" ]; then
+            echo "::error::Repository secret ATLASCLOUD_API_KEY is not set."
+            echo "Add it under Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          echo "key present (${#ATLASCLOUD_API_KEY} chars)"
+
+      - name: Render clips
+        env:
+          # the scripts read this lowercase name
+          atlascloudapikey: ${{ secrets.ATLASCLOUD_API_KEY }}
+          # AtlasCloud fetches each track by URL — the MP3s are already published on Pages,
+          # so the deployed site doubles as the audio host. No extra hosting needed.
+          PUBLIC_MP3_BASE: https://maniwar.github.io/dj/mp3
+          GEN_CONCURRENCY: '2'
+        run: |
+          FILTER='${{ inputs.filter }}'
+          if [ "$FILTER" = "ALL" ]; then
+            echo "Rendering ALL clips"
+            node scripts/gen-atlascloud-videos.mjs
+          else
+            echo "Rendering clips matching: $FILTER"
+            node scripts/gen-atlascloud-videos.mjs "$FILTER"
+          fi
+
+      - name: Download, compress to silent 720p, and point the site at local files
+        run: node scripts/localize-videos.mjs
+
+      - name: Show what changed
+        run: |
+          node -e "const r=require('./src/data/atlascloud.results.json');console.log(r.clips.length+' clips, '+r.clips.filter(c=>c.status==='ready').length+' ready');console.log(r.clips.map(c=>' - '+c.id+' '+c.status+' '+(c.mp4Url||'')).join('\n'))"
+          git --no-pager diff --stat
+
+      - name: Verify the site still builds with the new manifest
+        run: npm run build
+
+      - name: Commit results
+        if: ${{ inputs.commit }}
+        run: |
+          rm -rf .video-tmp
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/data/atlascloud.results.json public/assets/video
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Render AtlasCloud clips (filter: ${{ inputs.filter }})"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+
+      - name: Upload clips as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-clips
+          path: |
+            public/assets/video/*.mp4
+            src/data/atlascloud.results.json
+          if-no-files-found: warn
+          retention-days: 14
