@@ -110,5 +110,21 @@
     "sourceUrl": "https://atlas-media.oss-us-west-1.aliyuncs.com/videos/cgt-20260720074108-dlrx7-0.mp4",
     "promptSnippet": "",
     "scene": "tokyo"
+  },
+  {
+    "id": "e408fe679e634cdbb59eb87b81e7efb0",
+    "createdAt": "2026-08-15T19:48:49.699Z",
+    "file": "video-masters/lore-jussi.1080p.mp4",
+    "sourceUrl": "https://atlas-media.oss-us-west-1.aliyuncs.com/assetd-history/v1/a-dec67269c850316e262c549bb34fd417da33319bdd7fdd3f33cdcaa94feb6f6f/u-dbcc47b07f9dfce052105e743a89273e2590c7919209f21855df553a1e3df2d2/s-dcfac582aaadaae41ff70b9bfd52cc04f8721350c35a51085ba9761e483effcf/e408fe679e634cdbb59eb87b81e7efb0-a49d5af2fb99b08d.mp4",
+    "promptSnippet": "",
+    "scene": "lore-jussi"
+  },
+  {
+    "id": "155797cc066e44ceb62431cbf170cc9a",
+    "createdAt": "2026-08-15T19:48:50.036Z",
+    "file": "video-masters/lore-tampere.1080p.mp4",
+    "sourceUrl": "https://atlas-media.oss-us-west-1.aliyuncs.com/assetd-history/v1/a-dec67269c850316e262c549bb34fd417da33319bdd7fdd3f33cdcaa94feb6f6f/u-dbcc47b07f9dfce052105e743a89273e2590c7919209f21855df553a1e3df2d2/s-4b441d53a434fdc438e9356af8fbf51c6a5f6098c0ea393cf63f79d53b9633c0/155797cc066e44ceb62431cbf170cc9a-6da32e663f7d8c4f.mp4",
+    "promptSnippet": "",
+    "scene": "lore-tampere"
   }
 ]
