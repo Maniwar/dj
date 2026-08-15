@@ -4280,3 +4280,77 @@ body.sauna .content::before {
 /* the per-member accent also tints the hover glow, so the sheet reads by colour as you scan it */
 .bs-card:hover { box-shadow: 0 26px 60px rgba(0,0,0,0.72), 0 0 26px color-mix(in srgb, var(--chip) 55%, transparent); }
 .bs-title { text-shadow: 0 0 calc(6px + var(--m-beat, 0) * 18px) color-mix(in srgb, var(--chip) 60%, transparent); }
+
+/* ---- Backstage: clickable frames + full-size viewer ---------------------------------------- */
+.bs-open {
+  display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in;
+  color: inherit; font: inherit;
+}
+.bs-open:focus-visible { outline: 2px solid var(--chip, var(--gold)); outline-offset: 3px; }
+.bs-media { position: relative; display: block; overflow: hidden; aspect-ratio: 16 / 10; background: #06080d; }
+.bs-media .bs-img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.35s ease; }
+.bs-open:hover .bs-img { transform: scale(1.04); }
+.bs-zoom {
+  position: absolute; bottom: 8px; right: 9px; width: 26px; height: 26px; border-radius: 2px;
+  display: grid; place-items: center; font-size: 0.8rem; color: #dfe9f2;
+  background: rgba(0,0,0,0.55); opacity: 0; transition: opacity 0.2s ease;
+}
+.bs-open:hover .bs-zoom, .bs-open:focus-visible .bs-zoom { opacity: 1; }
+
+/* 300 clears everything else that is fixed on this page — the player (60), the boot gate (100)
+   and the pointer effects (197–200). It only means anything because the node is portalled out of
+   `.backstage`, which is its own stacking context; see the note in Backstage.tsx. */
+.bs-viewer {
+  position: fixed; inset: 0; z-index: 300; display: grid; place-items: center;
+  padding: clamp(12px, 3vw, 40px);
+  background: rgba(3, 4, 8, 0.94); backdrop-filter: blur(6px);
+  animation: bsFade 0.18s ease-out;
+}
+@keyframes bsFade { from { opacity: 0 } to { opacity: 1 } }
+.bs-viewer-inner {
+  margin: 0; max-width: min(1600px, 100%); max-height: 100%;
+  display: flex; flex-direction: column; gap: 0.7rem; cursor: default;
+}
+.bs-viewer-img {
+  max-width: 100%; max-height: calc(100vh - 210px); object-fit: contain; display: block;
+  border: 2px solid transparent;
+  background: linear-gradient(#06080d, #06080d) padding-box, var(--grad-gilt-border) border-box;
+  box-shadow: 0 30px 90px rgba(0,0,0,0.8), 0 0 40px color-mix(in srgb, var(--chip, #fff) 22%, transparent);
+}
+.bs-viewer-cap { text-align: left; max-width: 900px; }
+.bs-viewer-who {
+  font-family: 'Oswald', sans-serif; font-size: 0.62rem; letter-spacing: 0.16em;
+  color: var(--chip, var(--gold)); text-shadow: 0 0 10px currentColor;
+}
+.bs-viewer-title { font-family: 'Anton', sans-serif; text-transform: uppercase; margin: 0.2rem 0 0.3rem;
+  font-size: clamp(1.1rem, 2.4vw, 1.7rem); color: #fff; }
+.bs-viewer-note { margin: 0; font-family: 'Barlow Condensed', sans-serif; font-size: 1.05rem;
+  line-height: 1.4; color: #cfe0ea; }
+.bs-viewer-count { display: inline-block; margin-top: 0.5rem; font-family: 'Courier New', monospace;
+  font-size: 0.7rem; letter-spacing: 0.1em; color: var(--gold-deep); }
+.bs-viewer.who-kiki   { --chip: var(--magenta); }
+.bs-viewer.who-dieter { --chip: var(--blue); }
+.bs-viewer.who-crew   { --chip: var(--acid); }
+.bs-viewer.who-jussi  { --chip: #a8e6ff; }
+
+.bs-x, .bs-nav {
+  position: fixed; z-index: 301; cursor: pointer; color: #eaf2f8;
+  background: rgba(10,12,18,0.72); border: 1px solid var(--edge);
+  border-radius: 2px; display: grid; place-items: center; transition: all 0.15s ease;
+}
+.bs-x { top: 18px; right: 18px; width: 42px; height: 42px; font-size: 1rem; }
+.bs-nav { top: 50%; transform: translateY(-50%); width: 46px; height: 74px; font-size: 1.9rem; line-height: 1; }
+.bs-nav.prev { left: 14px; }
+.bs-nav.next { right: 14px; }
+.bs-x:hover, .bs-nav:hover { background: var(--chip, var(--gold)); color: #06080d; border-color: var(--chip, var(--gold)); }
+.bs-x:focus-visible, .bs-nav:focus-visible { outline: 2px solid var(--chip, var(--gold)); outline-offset: 2px; }
+
+@media (max-width: 640px) {
+  .bs-viewer-img { max-height: calc(100vh - 260px); }
+  .bs-nav { width: 38px; height: 58px; font-size: 1.5rem; }
+  .bs-nav.prev { left: 6px; } .bs-nav.next { right: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bs-viewer { animation: none; }
+  .bs-open:hover .bs-img { transform: none; }
+}

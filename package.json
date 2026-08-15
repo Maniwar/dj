@@ -26,7 +26,9 @@
     "qa:fx": "node scripts/fx-visual-qa.mjs",
     "verify:glsl": "node scripts/verify-glsl.mjs",
     "gen:jussi": "node scripts/gen-jussi-gemini.mjs",
-    "gen:backstage": "node scripts/gen-backstage-gemini.mjs"
+    "gen:backstage": "node scripts/gen-backstage-gemini.mjs",
+    "gen:backstage-hd": "python3 scripts/gen-backstage-hires.py",
+    "verify:backstage": "node scripts/verify-backstage-viewer.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.114.0",
