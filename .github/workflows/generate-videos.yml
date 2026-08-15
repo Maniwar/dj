@@ -13,9 +13,9 @@ on:
   workflow_dispatch:
     inputs:
       filter:
-        description: 'Clip id substring to render (e.g. "jussi", "lore-tampere"). Leave as-is to render only Jussi. Use "ALL" to render every clip — expensive.'
+        description: 'Comma-separated clip id substrings (e.g. "lore-jussi,lore-tampere"). Use "ALL" to render every clip — expensive.'
         required: true
-        default: 'jussi'
+        default: 'lore-jussi,lore-tampere'
       commit:
         description: 'Commit the generated videos back to main'
         type: boolean
@@ -56,13 +56,15 @@ jobs:
           fi
           echo "key present (${#ATLASCLOUD_API_KEY} chars)"
 
+      - name: Cut any missing 10s audio excerpts
+        # Seedance caps conditioning audio at ~30s, so each clip needs a short excerpt rather
+        # than the full track. ffmpeg ships on ubuntu-latest.
+        run: node scripts/make-audio-clips.mjs
+
       - name: Render clips
         env:
           # the scripts read this lowercase name
           atlascloudapikey: ${{ secrets.ATLASCLOUD_API_KEY }}
-          # AtlasCloud fetches each track by URL — the MP3s are already published on Pages,
-          # so the deployed site doubles as the audio host. No extra hosting needed.
-          PUBLIC_MP3_BASE: https://maniwar.github.io/dj/mp3
           GEN_CONCURRENCY: '2'
         run: |
           FILTER='${{ inputs.filter }}'
@@ -91,7 +93,7 @@ jobs:
           rm -rf .video-tmp
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/data/atlascloud.results.json public/assets/video
+          git add src/data/atlascloud.results.json public/assets/video public/mp3-clips
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
@@ -99,6 +101,26 @@ jobs:
             git pull --rebase origin main
             git push origin HEAD:main
           fi
+
+      - name: Fail if any targeted clip did not render
+        # The generator catches per-clip errors so one failure cannot abort the batch — which
+        # means it exits 0 even when nothing rendered, and the run goes green having produced
+        # no video. This turns that back into an honest red, and runs AFTER the commit so any
+        # clip that DID render is still saved.
+        run: |
+          node -e "
+            const r = require('./src/data/atlascloud.results.json');
+            const raw = process.env.FILTER;
+            const terms = raw === 'ALL' ? null : raw.split(',').map(s=>s.trim()).filter(Boolean);
+            const targeted = terms ? r.clips.filter(c => terms.some(t => c.id.includes(t))) : r.clips;
+            const bad = targeted.filter(c => c.status !== 'ready');
+            for (const c of bad) console.error('::error::' + c.id + ' — ' + String(c.error||'').replace(/\n/g,' ').slice(0,300));
+            if (!targeted.length) { console.error('::error::filter matched no clips: ' + raw); process.exit(1); }
+            console.log(targeted.length - bad.length + '/' + targeted.length + ' targeted clip(s) ready');
+            if (bad.length) process.exit(1);
+          "
+        env:
+          FILTER: ${{ inputs.filter }}
 
       - name: Upload clips as an artifact
         uses: actions/upload-artifact@v4

@@ -87,10 +87,10 @@ async function uploadAsset(_path) {
 
 // base64 a local still so the clip ANIMATES that exact generated scene (character-locked by
 // the image itself — same faces/outfits as the site's stills).
-function toDataUrl(relPath) {
+function toDataUrl(relPath, mime = 'image/jpeg') {
   const p = resolve(ROOT, relPath)
   if (!existsSync(p)) return null
-  return `data:image/jpeg;base64,${readFileSync(p).toString('base64')}`
+  return `data:${mime};base64,${readFileSync(p).toString('base64')}`
 }
 
 async function submit(clip, audioRef) {
@@ -129,8 +129,19 @@ async function genClip(clip) {
   const track = tracks.find((t) => t.slug === clip.trackSlug) || tracks[0]
   const file = track.versions[0].file
   try {
-    if (!publicMp3Base) throw new Error('PUBLIC_MP3_BASE not set (AtlasCloud must fetch the track by URL)')
-    const audioRef = `${publicMp3Base.replace(/\/$/, '')}/${encodeURIComponent(file)}`
+    // Audio goes as a base64 data URI by default, same as the still. Two reasons: the model
+    // rejects anything over ~30s so it must be the SHORT excerpt in public/mp3-clips (a full
+    // track returns "InvalidParameter.DurationTooLong"), and inlining sidesteps a real race —
+    // a freshly cut excerpt is not on Pages until the deploy finishes, so a URL reference would
+    // 404 on the very run that created it. PUBLIC_MP3_BASE still overrides if you'd rather host.
+    const clipPath = `public/mp3-clips/${file}`
+    const inlineAudio = toDataUrl(clipPath, 'audio/mpeg')
+    if (!inlineAudio && !publicMp3Base) {
+      throw new Error(
+        `no short audio excerpt at ${clipPath} — run: node scripts/make-audio-clips.mjs ${track.slug}`,
+      )
+    }
+    const audioRef = inlineAudio ?? `${publicMp3Base.replace(/\/$/, '')}/${encodeURIComponent(file)}`
     const id = await submit(clip, audioRef)
     const mp4 = await poll(id)
     console.log(`  ✓ ${clip.city}  ⟵  "${track.title}"  ->  ${mp4}`)
@@ -146,8 +157,12 @@ const RESULTS = resolve(ROOT, 'src/data/atlascloud.results.json')
 async function main() {
   // Optional filter: `npm run gen:videos -- jussi` renders only the clips whose id matches,
   // so a new scene costs one render instead of re-rendering (and re-paying for) the whole set.
+  // Comma-separated so related clips render together: a single substring cannot catch both of
+  // Jussi's, because his second stop is keyed "lore-tampere" (the Lore mapping requires
+  // lore-<stopId>, so it cannot simply be renamed to contain his name).
   const only = process.argv[2]
-  const jobs = only ? CLIPS.filter((c) => c.id.includes(only)) : CLIPS
+  const terms = only ? only.split(',').map((s) => s.trim()).filter(Boolean) : []
+  const jobs = terms.length ? CLIPS.filter((c) => terms.some((t) => c.id.includes(t))) : CLIPS
   if (!jobs.length) {
     console.error(`[gen:videos] no clip id matches "${only}". Known: ${CLIPS.map((c) => c.id).join(', ')}`)
     process.exit(1)
