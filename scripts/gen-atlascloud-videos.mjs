@@ -41,12 +41,32 @@ const STYLE =
   'Leaked-VHS-camcorder crossed with gritty high-end club documentary: tape grain, tracking ' +
   'glitches, blown gold highlights, wet lens, humid haze. Farcical Euro-Riviera luxury excess. NO on-screen text.'
 
-// One clip per city (extend freely). trackSlug binds the clip to a specific song's audio + tempo.
+// One clip per scene (extend freely). trackSlug binds the clip to a song's audio + tempo, so the
+// motion follows that track. `still` overrides the default tour/<id>.jpg still to animate — a clip
+// whose id starts with "lore-" is picked up automatically by the Lore journey (see Lore.tsx, which
+// maps results id "lore-<stopId>" onto the stop of that id).
 const CLIPS = [
   { id: 'ibiza',  trackSlug: 'touch-my-subwoofer', city: 'IBIZA',  scene: 'open-air white-terrace Ibiza superclub at sunrise, foam cannons, palm silhouettes, a mega-yacht on the horizon, gold baroque DJ booth' },
   { id: 'tokyo',  trackSlug: 'euro-airways',       city: 'TOKYO',  scene: 'tiny neon Tokyo micro-club, rain-slicked windows, kanji neon, low ceiling, a red Ferrari in the wet street outside' },
   { id: 'miami',  trackSlug: 'pump-my-iron',       city: 'MIAMI',  scene: 'Miami rooftop pool deck at pink sunset, infinity pool, docked mega-yacht, a gold Ferrari, champagne towers' },
   { id: 'berlin', trackSlug: 'the-basement-vip',   city: 'BERLIN', scene: 'wood-panelled Berlin sauna-warehouse club, thick steam, glowing coals, condensation, a cedar bucket' },
+
+  // ---- JUSSI (animates his Lore stops) ----
+  {
+    id: 'lore-jussi', trackSlug: 'euro-trash', city: 'JUSSI · THE CREASE',
+    still: 'public/assets/lore/jussi-hero.jpg',
+    scene: 'a nightclub stage with a hockey goal set up on it — the huge bearded Finn in goaltender pads stands ' +
+      'perfectly still and expressionless in the crease while the three super-fans spray champagne and the crowd roars. ' +
+      'ONLY the crowd, the champagne, the confetti, the lasers and the fog move; the bearded man stays motionless and ' +
+      'deadpan, and does NOT dance',
+  },
+  {
+    id: 'lore-tampere', trackSlug: 'winter-time-romance', city: 'JUSSI · 06:00 TAMPERE',
+    still: 'public/assets/lore/jussi-beerleague.jpg',
+    scene: 'a freezing empty small-town ice rink at 6am, deserted stands, harsh fluorescent light — the bearded Finn ' +
+      'stands alone in the goal crease in full goaltender equipment, breath steaming in the cold. Almost nothing moves: ' +
+      'only his breath, a slow drifting camera and the faint flicker of the strip lights. Still, quiet, lonely',
+  },
 ]
 
 const tracks = JSON.parse(readFileSync(resolve(ROOT, 'src/data/tracks.json'), 'utf8')).tracks
@@ -74,7 +94,7 @@ function toDataUrl(relPath) {
 }
 
 async function submit(clip, audioRef) {
-  const still = toDataUrl(`public/assets/tour/${clip.id}.jpg`)
+  const still = toDataUrl(clip.still ?? `public/assets/tour/${clip.id}.jpg`)
   const prompt = still
     ? `Animate the exact scene and the exact same people and outfits shown in image 1 — they dance and party energetically, perfectly in time to the provided music; the camera drifts, lasers sweep, champagne and confetti fly. ${clip.scene}. ${STYLE}`
     : `${clip.scene}. ${CHARACTER_LOCK} Their dancing hits exactly on the beat of the provided audio. ${STYLE}`
@@ -121,21 +141,53 @@ async function genClip(clip) {
   }
 }
 
+const RESULTS = resolve(ROOT, 'src/data/atlascloud.results.json')
+
 async function main() {
+  // Optional filter: `npm run gen:videos -- jussi` renders only the clips whose id matches,
+  // so a new scene costs one render instead of re-rendering (and re-paying for) the whole set.
+  const only = process.argv[2]
+  const jobs = only ? CLIPS.filter((c) => c.id.includes(only)) : CLIPS
+  if (!jobs.length) {
+    console.error(`[gen:videos] no clip id matches "${only}". Known: ${CLIPS.map((c) => c.id).join(', ')}`)
+    process.exit(1)
+  }
+
   // clips run in PARALLEL (each poll waits minutes, so serial would be very slow)
   const CONCURRENCY = Number(process.env.GEN_CONCURRENCY || 4)
-  console.log(`[gen:videos] ${CLIPS.length} clip(s) · concurrency=${CONCURRENCY}`)
-  const out = new Array(CLIPS.length)
+  console.log(`[gen:videos] ${jobs.length} clip(s)${only ? ` matching "${only}"` : ''} · concurrency=${CONCURRENCY}`)
+  const out = new Array(jobs.length)
   let cursor = 0
   async function worker() {
-    while (cursor < CLIPS.length) {
+    while (cursor < jobs.length) {
       const i = cursor++
-      out[i] = await genClip(CLIPS[i])
+      out[i] = await genClip(jobs[i])
     }
   }
-  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, CLIPS.length) }, worker))
-  writeFileSync(resolve(ROOT, 'src/data/atlascloud.results.json'), JSON.stringify({ model: MODEL, seed: SEED, clips: out }, null, 2))
-  console.log('[gen:videos] wrote src/data/atlascloud.results.json')
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, jobs.length) }, worker))
+
+  // MERGE into whatever is already on disk, keyed by id. Writing `out` alone would delete every
+  // clip this run did not cover — with 13 clips already live and only some regenerated, that
+  // silently drops the rest of the site back to stills. A failed render must not evict a good
+  // one either, so only successful results overwrite an existing entry.
+  let prev = { clips: [] }
+  if (existsSync(RESULTS)) {
+    try { prev = JSON.parse(readFileSync(RESULTS, 'utf8')) } catch { /* corrupt file: start clean */ }
+  }
+  const byId = new Map((prev.clips ?? []).map((c) => [c.id, c]))
+  for (const c of out) {
+    if (!c) continue
+    const existing = byId.get(c.id)
+    if (c.status !== 'ready' && existing?.status === 'ready') {
+      console.log(`  ! kept existing ready clip for ${c.id} (this run failed)`)
+      continue
+    }
+    byId.set(c.id, c)
+  }
+  const merged = [...byId.values()]
+  writeFileSync(RESULTS, JSON.stringify({ model: MODEL, seed: SEED, clips: merged }, null, 2) + '\n')
+  const ready = merged.filter((c) => c.status === 'ready').length
+  console.log(`[gen:videos] wrote ${RESULTS} — ${merged.length} clip(s), ${ready} ready`)
 }
 
 main().catch((e) => { console.error(e); process.exit(1) })
