@@ -92,7 +92,17 @@
       "scene": "a nightclub stage with a hockey goal set up on it — the huge bearded Finn in goaltender pads stands perfectly still and expressionless in the crease while the three super-fans spray champagne and the crowd roars. ONLY the crowd, the champagne, the confetti, the lasers and the fog move; the bearded man stays motionless and deadpan, and does NOT dance",
       "seed": 480917,
       "status": "error",
-      "error": "HTTP 400 https://api.atlascloud.ai/api/v1/model/generateVideo\n{\"code\":400,\"msg\":\"InvalidParameter.DurationTooLong: Duration must be between 1.8s and 30.2s.\",\"data\":{\"session_id\":\"c56e55379ca0464b8ca70ce1f6a91f21\"}}"
+      "error": "no short audio excerpt at public/mp3-clips/Euro-Trash.mp3 — run: node scripts/make-audio-clips.mjs euro-trash"
+    },
+    {
+      "id": "lore-tampere",
+      "trackSlug": "winter-time-romance",
+      "city": "JUSSI · 06:00 TAMPERE",
+      "still": "public/assets/lore/jussi-beerleague.jpg",
+      "scene": "a freezing empty small-town ice rink at 6am, deserted stands, harsh fluorescent light — the bearded Finn stands alone in the goal crease in full goaltender equipment, breath steaming in the cold. Almost nothing moves: only his breath, a slow drifting camera and the faint flicker of the strip lights. Still, quiet, lonely",
+      "seed": 480917,
+      "status": "error",
+      "error": "no short audio excerpt at public/mp3-clips/Winter Time Romance.mp3 — run: node scripts/make-audio-clips.mjs winter-time-romance"
     }
   ]
 }
