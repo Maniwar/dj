@@ -45,6 +45,13 @@ const RULE =
   'chaos surrounds him he stands or sits perfectly still and deadpan, sunglasses on, a beer in hand. ' +
   'He is a big broad-shouldered pale Finnish man in his early 40s.'
 
+// The canonical cast references. Scenes that include Kiki / Dieter / the crew MUST pass these
+// as extra reference images, or the model invents lookalike strangers in the right outfits and
+// the shot silently desyncs from the 13 videos and every existing still.
+const K = 'public/assets/ref/kiki.jpg'
+const D = 'public/assets/ref/dieter.jpg'
+const C = 'public/assets/ref/crew.jpg'
+
 const JOBS = [
   {
     out: 'public/assets/ref/jussi.jpg', ratio: '3:4',
@@ -61,19 +68,26 @@ const JOBS = [
       `He looks profoundly unimpressed. ${STYLE} ${NEG}`,
   },
   {
-    out: 'public/assets/lore/jussi-sauna.jpg', ratio: '16:9',
-    prompt: `${KEEP} ${RULE} HILARIOUS deadpan scene inside a cramped wood-panelled sauna: he sits perfectly ` +
-      `still on the top bench in his black shirt and sunglasses holding a beer, radiating calm authority, ` +
-      `calmly pouring one more ladle of water onto the glowing coals — while below him a blonde woman in a ` +
-      `silver metallic crop top and a tanned blond man in a leather jacket flail and gasp dramatically in the ` +
-      `steam, red-faced and overwhelmed. A drum machine steams on the bench beside them. ${STYLE} ${NEG}`,
+    out: 'public/assets/lore/jussi-sauna.jpg', ratio: '16:9', refs: [K, D],
+    prompt: `${KEEP} ${RULE} There are THREE people, each taken from a different reference image: the bearded ` +
+      `Finn from image 1, the blonde woman KIKI G from image 2 (keep her exact face, platinum hair and silver ` +
+      `metallic crop top), and the tanned blond man DJ DIETER from image 3 (keep his exact face, blond hair, ` +
+      `thin pencil moustache, wraparound sunglasses and open black leather jacket). Use their EXACT faces from ` +
+      `those references — do not invent different people — but give them NEW poses for this scene. ` +
+      `HILARIOUS deadpan scene inside a cramped wood-panelled sauna: the Finn sits perfectly still on the top ` +
+      `bench in his black shirt and sunglasses holding a beer, radiating calm authority, calmly pouring one ` +
+      `more ladle of water onto the glowing coals — while below him Kiki and Dieter flail and gasp dramatically ` +
+      `in the steam, red-faced and overwhelmed. A drum machine steams on the bench beside them. ${STYLE} ${NEG}`,
   },
   {
-    out: 'public/assets/lore/jussi-hockey.jpg', ratio: '16:9',
-    prompt: `${KEEP} ${RULE} ABSURD funny scene: he wears full battered ice-hockey GOALTENDER pads, chest ` +
-      `protector and blocker over his black shirt, sunglasses on, standing stone-faced in front of a glowing ` +
-      `nightclub DJ booth as if defending a goal crease, a hockey stick laid across the decks, a beer balanced ` +
-      `on the goalpost, while women in leopard-print rave wear dance wildly around him. Lasers, fog. ${STYLE} ${NEG}`,
+    out: 'public/assets/lore/jussi-hockey.jpg', ratio: '16:9', refs: [C],
+    prompt: `${KEEP} ${RULE} TWO reference images: the bearded Finn from image 1, and the trio of female ` +
+      `super-fans from image 2 — keep the crew's EXACT faces, hair and leopard-print two-piece rave outfits ` +
+      `from that reference, but give them new dancing poses. ABSURD funny scene: the Finn wears full battered ` +
+      `ice-hockey GOALTENDER pads, chest protector and blocker over his black shirt, sunglasses on, standing ` +
+      `stone-faced in front of a glowing nightclub DJ booth as if defending a goal crease, a hockey stick laid ` +
+      `across the decks, a beer balanced on the goalpost, while the leopard crew rave wildly around him. ` +
+      `Lasers, fog. ${STYLE} ${NEG}`,
   },
   {
     out: 'public/assets/lore/jussi-beer.jpg', ratio: '16:9',
@@ -91,15 +105,20 @@ if (!existsSync(SRC)) {
 }
 const srcB64 = readFileSync(SRC).toString('base64')
 
+const asPart = (p) => ({
+  inline_data: { mime_type: 'image/jpeg', data: readFileSync(resolve(ROOT, p)).toString('base64') },
+})
+
 async function generate(job) {
+  // image 1 is ALWAYS Jussi's source photo; any job.refs follow as image 2, 3, ... and the
+  // prompt addresses them by that order.
+  const parts = [
+    { inline_data: { mime_type: 'image/jpeg', data: srcB64 } },
+    ...(job.refs ?? []).map(asPart),
+    { text: job.prompt },
+  ]
   const body = {
-    contents: [{
-      role: 'user',
-      parts: [
-        { inline_data: { mime_type: 'image/jpeg', data: srcB64 } },
-        { text: job.prompt },
-      ],
-    }],
+    contents: [{ role: 'user', parts }],
     generationConfig: {
       responseModalities: ['IMAGE'],
       imageConfig: { aspectRatio: job.ratio },
@@ -112,8 +131,8 @@ async function generate(job) {
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`)
   const j = await res.json()
-  const parts = j?.candidates?.[0]?.content?.parts ?? []
-  const img = parts.find((p) => p.inlineData?.data || p.inline_data?.data)
+  const outParts = j?.candidates?.[0]?.content?.parts ?? []
+  const img = outParts.find((p) => p.inlineData?.data || p.inline_data?.data)
   const b64 = img?.inlineData?.data || img?.inline_data?.data
   if (!b64) throw new Error('no image in response: ' + JSON.stringify(j).slice(0, 300))
   const outPath = resolve(ROOT, job.out)
