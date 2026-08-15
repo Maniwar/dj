@@ -4234,3 +4234,16 @@ body.sauna .content::before {
 @media (prefers-reduced-motion: reduce) {
   .ot-card, .ot-card:hover { transition: none; transform: none; }
 }
+
+/* ---- Hero clips inherit the hero STILL's crop, not the scene-footage crop -------------------
+   A hero stop that has a video still shows the SQUARE portrait as its poster until the clip
+   decodes — and `preload="none"` means that is the whole time the stop is off-screen. The
+   generic .lore-video anchors above are tuned for 16:9 scene footage (38%/35%, biased onto
+   raised arms), which on a square portrait lands well below the face: at 1.78:1 the poster was
+   cropping Jussi's head off while the .lore-bg beside it was correctly anchored at 34%.
+   Mirror the .lore-stop.hero .lore-bg anchors tier for tier so a hero's poster frames exactly
+   like the still it replaces. Once the 16:9 clip decodes it fills the box and object-position
+   has nothing left to crop, so this costs the video nothing. */
+@media (min-aspect-ratio: 17/10) { .lore-stop.hero .lore-video { object-position: center 34%; } }
+@media (min-aspect-ratio: 41/20) { .lore-stop.hero .lore-video { object-position: center 25%; } }
+@media (min-aspect-ratio: 5/2)   { .lore-stop.hero .lore-video { object-position: center 22%; } }
