@@ -53,3 +53,4 @@ worker/SETUP.local.md
 
 # visual QA renders from scripts/fx-visual-qa.mjs — local artefacts, not source
 .fx-qa/
+.private/
