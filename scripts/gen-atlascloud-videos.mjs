@@ -114,7 +114,10 @@ async function submit(clip, audioRef) {
   return r.prediction_id || r.id || r.data?.id
 }
 
-async function poll(id, { tries = 120, delay = 5000 } = {}) {
+// 240 x 10s = 40 minutes. The old 10-minute ceiling was simply too short: Seedance routinely
+// takes longer under load, and timing out does NOT cancel the render — it just abandons a job
+// that is still running and still paid for.
+async function poll(id, { tries = Number(process.env.POLL_TRIES || 240), delay = Number(process.env.POLL_DELAY_MS || 10000) } = {}) {
   for (let i = 0; i < tries; i++) {
     const r = await j(`${API}/model/prediction/${id}`, { headers: H })
     const s = (r.status || '').toLowerCase()
@@ -124,6 +127,10 @@ async function poll(id, { tries = 120, delay = 5000 } = {}) {
   }
   throw new Error(`job ${id} timed out`)
 }
+
+// clip id -> AtlasCloud prediction id, captured at submit time so a later timeout still knows
+// which job to collect.
+const predictionIds = new Map()
 
 async function genClip(clip) {
   const track = tracks.find((t) => t.slug === clip.trackSlug) || tracks[0]
@@ -143,12 +150,27 @@ async function genClip(clip) {
     }
     const audioRef = inlineAudio ?? `${publicMp3Base.replace(/\/$/, '')}/${encodeURIComponent(file)}`
     const id = await submit(clip, audioRef)
+    // Keep the prediction id OUTSIDE the try/catch result path: a timeout must not lose it.
+    // Re-fetching a finished output by id is free, so a recorded id turns "we timed out" from
+    // wasted credits into a job we can simply collect later (scripts/resume-videos.mjs).
+    predictionIds.set(clip.id, id)
     const mp4 = await poll(id)
     console.log(`  ✓ ${clip.city}  ⟵  "${track.title}"  ->  ${mp4}`)
-    return { ...clip, seed: SEED, trackSlug: track.slug, status: 'ready', mp4Url: mp4 }
+    return { ...clip, seed: SEED, trackSlug: track.slug, predictionId: id, status: 'ready', mp4Url: mp4 }
   } catch (e) {
-    console.log(`  ✗ ${clip.city} — ${e.message.split('\n')[0]}`)
-    return { ...clip, seed: SEED, status: 'error', error: e.message }
+    const id = predictionIds.get(clip.id)
+    const timedOut = /timed out/i.test(e.message)
+    console.log(`  ✗ ${clip.city} — ${e.message.split('\n')[0]}${id ? ` (prediction ${id})` : ''}`)
+    return {
+      ...clip,
+      seed: SEED,
+      trackSlug: track.slug,
+      ...(id ? { predictionId: id } : {}),
+      // "pending" means the render is very likely still going and is collectable for free;
+      // "error" means it genuinely failed. Conflating them is what threw away run #3's work.
+      status: timedOut && id ? 'pending' : 'error',
+      error: e.message,
+    }
   }
 }
 

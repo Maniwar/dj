@@ -16,6 +16,12 @@ on:
         description: 'Comma-separated clip id substrings (e.g. "lore-jussi,lore-tampere"). Use "ALL" to render every clip — expensive.'
         required: true
         default: 'lore-jussi,lore-tampere'
+      mode:
+        description: 'render = submit new clips (costs credits). resume = only collect renders already submitted (free).'
+        type: choice
+        options: [render, resume]
+        required: true
+        default: 'render'
       commit:
         description: 'Commit the generated videos back to main'
         type: boolean
@@ -70,7 +76,13 @@ jobs:
         # than the full track.
         run: node scripts/make-audio-clips.mjs
 
+      - name: Collect any renders already submitted (free — no new credits)
+        env:
+          atlascloudapikey: ${{ secrets.ATLASCLOUD_API_KEY }}
+        run: node scripts/resume-videos.mjs
+
       - name: Render clips
+        if: ${{ inputs.mode == 'render' }}
         env:
           # the scripts read this lowercase name
           atlascloudapikey: ${{ secrets.ATLASCLOUD_API_KEY }}
