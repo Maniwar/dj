@@ -26,7 +26,7 @@
     "qa:fx": "node scripts/fx-visual-qa.mjs",
     "verify:glsl": "node scripts/verify-glsl.mjs",
     "gen:jussi": "node scripts/gen-jussi-gemini.mjs",
-    "gen:outtakes": "node scripts/gen-outtakes-gemini.mjs"
+    "gen:backstage": "node scripts/gen-backstage-gemini.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^9.114.0",

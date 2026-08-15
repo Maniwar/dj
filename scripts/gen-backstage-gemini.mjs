@@ -1,20 +1,20 @@
 #!/usr/bin/env node
-// Generates OUTTAKE frames for Kiki, Dieter and the crew, identity-locked to the canonical
+// Generates BACKSTAGE frames for Kiki, Dieter and the crew, identity-locked to the canonical
 // reference sheets in public/assets/ref/ so the faces match the rest of the site (and the 15
 // videos). Same job gen-jussi-gemini.mjs does for the Finn, but anchored on refs rather than a
 // source photograph.
 //
-//   node scripts/gen-outtakes-gemini.mjs           # everything
-//   node scripts/gen-outtakes-gemini.mjs kiki      # only ids containing "kiki"
+//   node scripts/gen-backstage-gemini.mjs           # everything
+//   node scripts/gen-backstage-gemini.mjs kiki      # only ids containing "kiki"
 //
-// Requires geminiapikey. Writes to public/assets/outtakes/.
+// Requires geminiapikey. Writes to public/assets/backstage/.
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const KEY = process.env.geminiapikey
-if (!KEY) { console.error('[outtakes] missing env var geminiapikey'); process.exit(1) }
+if (!KEY) { console.error('[backstage] missing env var geminiapikey'); process.exit(1) }
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(__dirname, '..')
@@ -78,7 +78,7 @@ const JOBS = [
   { out: 'crew-pile.jpg', refs: [C], prompt: `${KEEP} ${CREW} FUNNY scene: all three fast asleep leaning on each other across the back seat of a tour bus under a shared blanket, one boot off on the floor, neon strip light, condensation on the windows.` },
 ]
 
-const OUT_DIR = 'public/assets/outtakes'
+const OUT_DIR = 'public/assets/backstage'
 mkdirSync(resolve(ROOT, OUT_DIR), { recursive: true })
 
 const asPart = (p) => ({
@@ -105,7 +105,7 @@ async function generate(job) {
 const only = process.argv[2]
 const jobs = (only ? JOBS.filter((j) => j.out.includes(only)) : JOBS)
   .filter((j) => process.env.FORCE === '1' || !existsSync(resolve(ROOT, OUT_DIR, j.out)))
-console.log(`[outtakes] model=${MODEL} · ${jobs.length} image(s) to make`)
+console.log(`[backstage] model=${MODEL} · ${jobs.length} image(s) to make`)
 
 let ok = 0, fail = 0
 for (const job of jobs) {
@@ -113,5 +113,5 @@ for (const job of jobs) {
   try { await generate(job); ok++; console.log('OK') }
   catch (e) { fail++; console.log('FAIL — ' + e.message.split('\n')[0]) }
 }
-console.log(`[outtakes] ${ok} ok, ${fail} failed`)
+console.log(`[backstage] ${ok} ok, ${fail} failed`)
 if (fail && !ok) process.exit(1)

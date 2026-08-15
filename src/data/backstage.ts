@@ -1,68 +1,68 @@
-// THE OUTTAKES — the Eurobeat Records archive contact sheet: frames of the whole band, with the
-// note the archivist filed against each. Deliberately BALANCED and INTERLEAVED — eight frames per
+// BACKSTAGE — the Eurobeat Records archive: the band with the performance switched off, and the
+// note the archivist filed against each frame. Deliberately BALANCED and INTERLEAVED — eight frames per
 // member, shuffled so no one person owns the section (it began as fourteen straight Jussi frames,
 // which made it his page rather than the band's).
 export type Who = 'kiki' | 'dieter' | 'crew' | 'jussi'
-export type Outtake = { id: string; who: Who; image: string; title: string; note: string }
+export type BackstageFrame = { id: string; who: Who; image: string; title: string; note: string }
 
-const KIKI: Outtake[] = [
-  { id: 'k-booth', who: 'kiki', image: '/assets/outtakes/kiki-booth.jpg', title: 'CONDUCTING',
+const KIKI: BackstageFrame[] = [
+  { id: 'k-booth', who: 'kiki', image: '/assets/backstage/kiki-booth.jpg', title: 'CONDUCTING',
     note: 'She climbed the booth in Rotterdam and conducted eleven thousand people for four minutes. Dieter continued playing, unaware.' },
-  { id: 'k-skates', who: 'kiki', image: '/assets/outtakes/kiki-skates.jpg', title: 'THE OLD JOB',
+  { id: 'k-skates', who: 'kiki', image: '/assets/backstage/kiki-skates.jpg', title: 'THE OLD JOB',
     note: 'Crossed a packed floor on skates with four coffees and lost none of them. She has not worked in a café since 2001 and has not lost the ability.' },
-  { id: 'k-extinguisher', who: 'kiki', image: '/assets/outtakes/kiki-extinguisher.jpg', title: 'THERMAL EVENT #12',
+  { id: 'k-extinguisher', who: 'kiki', image: '/assets/backstage/kiki-extinguisher.jpg', title: 'THERMAL EVENT #12',
     note: 'The drum machine went up again. She had the extinguisher before anyone else had stood up. Dieter called it "an overreaction."' },
-  { id: 'k-soundcheck', who: 'kiki', image: '/assets/outtakes/kiki-soundcheck.jpg', title: 'SOUNDCHECK',
+  { id: 'k-soundcheck', who: 'kiki', image: '/assets/backstage/kiki-soundcheck.jpg', title: 'SOUNDCHECK',
     note: 'One note. Both engineers reached for their ears at the same moment. The desk was re-gained around her, not the other way round.' },
-  { id: 'k-modem', who: 'kiki', image: '/assets/outtakes/kiki-modem.jpg', title: 'STILL FASTER THAN THE VENUE',
+  { id: 'k-modem', who: 'kiki', image: '/assets/backstage/kiki-modem.jpg', title: 'STILL FASTER THAN THE VENUE',
     note: 'The club\'s line went down an hour before doors. She had it back up before the promoter finished explaining the problem.' },
-  { id: 'k-autograph', who: 'kiki', image: '/assets/outtakes/kiki-autograph.jpg', title: 'FOREHEAD, MILAN',
+  { id: 'k-autograph', who: 'kiki', image: '/assets/backstage/kiki-autograph.jpg', title: 'FOREHEAD, MILAN',
     note: 'He asked. She obliged. He is reported to have not washed it off for nine days.' },
-  { id: 'k-mirror', who: 'kiki', image: '/assets/outtakes/kiki-mirror.jpg', title: 'FOUR MINUTES TO STAGE',
+  { id: 'k-mirror', who: 'kiki', image: '/assets/backstage/kiki-mirror.jpg', title: 'FOUR MINUTES TO STAGE',
     note: 'One cracked mirror, one bulb, one green laser coming through the door. She was on stage ninety seconds later looking like this was intentional.' },
-  { id: 'k-asleep', who: 'kiki', image: '/assets/outtakes/kiki-asleep.jpg', title: 'LOAD-OUT, 05:00',
+  { id: 'k-asleep', who: 'kiki', image: '/assets/backstage/kiki-asleep.jpg', title: 'LOAD-OUT, 05:00',
     note: 'Asleep upright on the cases, still holding the mic. Nobody dared take it off her.' },
 ]
 
-const DIETER: Outtake[] = [
-  { id: 'd-complaint', who: 'dieter', image: '/assets/outtakes/dieter-complaint.jpg', title: 'NUMBER FORTY-ONE',
+const DIETER: BackstageFrame[] = [
+  { id: 'd-complaint', who: 'dieter', image: '/assets/backstage/dieter-complaint.jpg', title: 'NUMBER FORTY-ONE',
     note: 'He frames every noise complaint. There are forty-one. He has never apologised for one of them and does not intend to start.' },
-  { id: 'd-synth', who: 'dieter', image: '/assets/outtakes/dieter-synth.jpg', title: 'THE CHILD',
+  { id: 'd-synth', who: 'dieter', image: '/assets/backstage/dieter-synth.jpg', title: 'THE CHILD',
     note: 'He carried it like this from the van to the stage in four cities. It has its own seat on the bus. It does not have a name, "because it is not a pet."' },
-  { id: 'd-zip', who: 'dieter', image: '/assets/outtakes/dieter-zip.jpg', title: 'THE JACKET HAS NEVER BEEN ZIPPED',
+  { id: 'd-zip', who: 'dieter', image: '/assets/backstage/dieter-zip.jpg', title: 'THE JACKET HAS NEVER BEEN ZIPPED',
     note: 'On this one occasion he attempted it. The struggle lasted six minutes. The jacket has not been zipped since.' },
-  { id: 'd-interview', who: 'dieter', image: '/assets/outtakes/dieter-interview.jpg', title: 'PRESS, HAMBURG',
+  { id: 'd-interview', who: 'dieter', image: '/assets/backstage/dieter-interview.jpg', title: 'PRESS, HAMBURG',
     note: 'Question one: "How did you form?" He was still answering it fifty-one minutes later. The journalist filed nothing.' },
-  { id: 'd-amp', who: 'dieter', image: '/assets/outtakes/dieter-amp.jpg', title: 'THE AMPLIFIER',
+  { id: 'd-amp', who: 'dieter', image: '/assets/backstage/dieter-amp.jpg', title: 'THE AMPLIFIER',
     note: 'It did not move. It was later moved, in one motion, by a Finn who said nothing about it.' },
-  { id: 'd-sunbed', who: 'dieter', image: '/assets/outtakes/dieter-sunbed.jpg', title: 'MAINTENANCE',
+  { id: 'd-sunbed', who: 'dieter', image: '/assets/backstage/dieter-sunbed.jpg', title: 'MAINTENANCE',
     note: 'Twice weekly, sunglasses on, chain on. He refers to this as "the studio."' },
-  { id: 'd-iron', who: 'dieter', image: '/assets/outtakes/dieter-iron.jpg', title: 'THE VELVET',
+  { id: 'd-iron', who: 'dieter', image: '/assets/backstage/dieter-iron.jpg', title: 'THE VELVET',
     note: 'He will not let anyone else press the tracksuit. He irons it shirtless, in the leather jacket, at a temperature nobody has been allowed to verify.' },
-  { id: 'd-whiteboard', who: 'dieter', image: '/assets/outtakes/dieter-whiteboard.jpg', title: 'THE DOCTRINE, EXPLAINED',
+  { id: 'd-whiteboard', who: 'dieter', image: '/assets/backstage/dieter-whiteboard.jpg', title: 'THE DOCTRINE, EXPLAINED',
     note: 'Ninety minutes on humidity, delivered to an empty room of folding chairs. He described it afterwards as "well received."' },
 ]
 
-const CREW: Outtake[] = [
-  { id: 'c-lift', who: 'crew', image: '/assets/outtakes/crew-lift.jpg', title: 'SERVICE LIFT, FLOOR 3',
+const CREW: BackstageFrame[] = [
+  { id: 'c-lift', who: 'crew', image: '/assets/backstage/crew-lift.jpg', title: 'SERVICE LIFT, FLOOR 3',
     note: 'Fully choreographed, performed for nobody, interrupted by the doors. They finished it anyway on the landing.' },
-  { id: 'c-boot', who: 'crew', image: '/assets/outtakes/crew-boot.jpg', title: 'FIELD REPAIR',
+  { id: 'c-boot', who: 'crew', image: '/assets/backstage/crew-boot.jpg', title: 'FIELD REPAIR',
     note: 'A platform boot, a kerb, and most of a roll of gaffer tape. The boot lasted another eleven cities.' },
-  { id: 'c-hairdryer', who: 'crew', image: '/assets/outtakes/crew-hairdryer.jpg', title: 'ONE HAIRDRYER',
+  { id: 'c-hairdryer', who: 'crew', image: '/assets/backstage/crew-hairdryer.jpg', title: 'ONE HAIRDRYER',
     note: 'Three of them, one dryer, one socket. A rota was proposed and immediately abandoned.' },
-  { id: 'c-photobooth', who: 'crew', image: '/assets/outtakes/crew-photobooth.jpg', title: 'FOUR EXPOSURES',
+  { id: 'c-photobooth', who: 'crew', image: '/assets/backstage/crew-photobooth.jpg', title: 'FOUR EXPOSURES',
     note: 'All three, one booth, limbs unaccounted for. The strip is pinned inside the tour bus to this day.' },
-  { id: 'c-door', who: 'crew', image: '/assets/outtakes/crew-door.jpg', title: 'SELF-APPOINTED SECURITY',
+  { id: 'c-door', who: 'crew', image: '/assets/backstage/crew-door.jpg', title: 'SELF-APPOINTED SECURITY',
     note: 'Nobody hired them for this. Nobody got past them either. The venue\'s actual security took the night off.' },
-  { id: 'c-chips', who: 'crew', image: '/assets/outtakes/crew-chips.jpg', title: '06:00, AFTER',
+  { id: 'c-chips', who: 'crew', image: '/assets/backstage/crew-chips.jpg', title: '06:00, AFTER',
     note: 'Full rave gear, glitter intact, chips in hand, dawn coming up. The quietest four minutes of the entire tour.' },
-  { id: 'c-trolleys', who: 'crew', image: '/assets/outtakes/crew-trolleys.jpg', title: 'TERMINAL 2',
+  { id: 'c-trolleys', who: 'crew', image: '/assets/backstage/crew-trolleys.jpg', title: 'TERMINAL 2',
     note: 'Banned from the trolleys at two European airports. Both bans were, in their view, "unclear at the time."' },
-  { id: 'c-pile', who: 'crew', image: '/assets/outtakes/crew-pile.jpg', title: 'THE BACK SEAT',
+  { id: 'c-pile', who: 'crew', image: '/assets/backstage/crew-pile.jpg', title: 'THE BACK SEAT',
     note: 'One boot off between the three of them. They arrived in Cologne in exactly this arrangement.' },
 ]
 
-const JUSSI: Outtake[] = [
+const JUSSI: BackstageFrame[] = [
   { id: 'j-file', who: 'jussi', image: '/assets/ref/jussi.jpg', title: 'THE FILE PHOTO',
     note: 'Taken for the tour laminates. He was asked to smile. This is the result.' },
   { id: 'j-inspection', who: 'jussi', image: '/assets/lore/jussi-inspection.jpg', title: 'THE INSPECTION',
@@ -89,11 +89,11 @@ export const WHO_LABEL: Record<Who, string> = {
 }
 
 // Round-robin the four sets so the sheet reads as the whole band rather than four blocks.
-function interleave(...sets: Outtake[][]): Outtake[] {
-  const out: Outtake[] = []
+function interleave(...sets: BackstageFrame[][]): BackstageFrame[] {
+  const out: BackstageFrame[] = []
   const longest = Math.max(...sets.map((s) => s.length))
   for (let i = 0; i < longest; i++) for (const s of sets) if (s[i]) out.push(s[i])
   return out
 }
 
-export const OUTTAKES: Outtake[] = interleave(KIKI, DIETER, CREW, JUSSI)
+export const BACKSTAGE: BackstageFrame[] = interleave(KIKI, DIETER, CREW, JUSSI)

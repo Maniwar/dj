@@ -4173,15 +4173,15 @@ body.sauna .content::before {
 }
 
 /* =========================================================
-   THE OUTTAKES — Eurobeat Records archive contact sheet
+   BACKSTAGE — Eurobeat Records archive: the band off duty
    ========================================================= */
-.outtakes { position: relative; z-index: 2; }
-.ot-inner { max-width: 1280px; margin: 0 auto; }
-.ot-grid {
+.backstage { position: relative; z-index: 2; }
+.bs-inner { max-width: 1280px; margin: 0 auto; }
+.bs-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.6rem 1.4rem; margin-top: 1rem;
 }
-.ot-card {
+.bs-card {
   margin: 0; display: flex; flex-direction: column;
   border: 2px solid transparent; border-radius: 3px;
   background: linear-gradient(180deg, rgba(10,12,20,0.86), rgba(4,5,9,0.92)) padding-box,
@@ -4190,49 +4190,49 @@ body.sauna .content::before {
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 /* pinned-up contact sheet: alternate the tilt so it reads as a wall, not a spreadsheet */
-.ot-grid > .ot-card:nth-child(3n+1) { transform: rotate(-0.7deg); }
-.ot-grid > .ot-card:nth-child(3n+2) { transform: rotate(0.5deg); }
-.ot-grid > .ot-card:nth-child(3n+3) { transform: rotate(-0.3deg); }
-.ot-card:hover {
+.bs-grid > .bs-card:nth-child(3n+1) { transform: rotate(-0.7deg); }
+.bs-grid > .bs-card:nth-child(3n+2) { transform: rotate(0.5deg); }
+.bs-grid > .bs-card:nth-child(3n+3) { transform: rotate(-0.3deg); }
+.bs-card:hover {
   transform: rotate(0deg) translateY(-4px) scale(1.02); z-index: 3;
   box-shadow: 0 26px 60px rgba(0,0,0,0.72), 0 0 26px rgba(168,230,255,0.32);
 }
-.ot-media { position: relative; overflow: hidden; background: #06080d; aspect-ratio: 16 / 10; }
-.ot-img {
+.bs-media { position: relative; overflow: hidden; background: #06080d; aspect-ratio: 16 / 10; }
+.bs-img {
   width: 100%; height: 100%; object-fit: cover; display: block;
   filter: saturate(1.12) contrast(1.04);
 }
-.ot-frame {
+.bs-frame {
   position: absolute; top: 8px; left: 9px; font-family: 'Courier New', monospace;
   font-size: 0.62rem; letter-spacing: 0.1em; color: #a8e6ff;
   background: rgba(0,0,0,0.62); padding: 2px 7px; border-radius: 2px;
   text-shadow: 0 0 8px rgba(168,230,255,0.7);
 }
-.ot-scan {
+.bs-scan {
   position: absolute; inset: 0; pointer-events: none;
   background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0 2px, transparent 2px 4px);
   mix-blend-mode: multiply; opacity: 0.55;
 }
-.ot-cap { padding: 0.85rem 1rem 1.1rem; }
-.ot-title {
+.bs-cap { padding: 0.85rem 1rem 1.1rem; }
+.bs-title {
   font-family: 'Anton', sans-serif; text-transform: uppercase; letter-spacing: 0.02em;
   font-size: 1.05rem; margin: 0 0 0.35rem; color: #fff;
   text-shadow: 0 0 calc(6px + var(--m-beat, 0) * 18px) rgba(168,230,255,0.55);
 }
-.ot-note {
+.bs-note {
   margin: 0; font-family: 'Barlow Condensed', sans-serif; font-size: 1.02rem;
   line-height: 1.4; color: #cfe0ea;
 }
-.ot-foot {
+.bs-foot {
   margin-top: 2rem; text-align: center; font-family: 'Courier New', monospace;
   font-size: 0.72rem; letter-spacing: 0.12em; color: #a8e6ff; opacity: 0.75;
 }
 @media (max-width: 560px) {
-  .ot-grid { grid-template-columns: 1fr; gap: 1.2rem; }
-  .ot-grid > .ot-card { transform: none; }
+  .bs-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+  .bs-grid > .bs-card { transform: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ot-card, .ot-card:hover { transition: none; transform: none; }
+  .bs-card, .bs-card:hover { transition: none; transform: none; }
 }
 
 /* ---- Hero clips inherit the hero STILL's crop, not the scene-footage crop -------------------
@@ -4248,35 +4248,35 @@ body.sauna .content::before {
 @media (min-aspect-ratio: 41/20) { .lore-stop.hero .lore-video { object-position: center 25%; } }
 @media (min-aspect-ratio: 5/2)   { .lore-stop.hero .lore-video { object-position: center 22%; } }
 
-/* ---- Outtakes: member filter + per-frame attribution ---------------------------------------
+/* ---- Backstage: member filter + per-frame attribution ---------------------------------------
    The sheet covers the whole band, so each frame says WHO it is, and the chips let you follow
    one member without the sheet being split into four blocks. Colours reuse the lore accents
    (Kiki magenta / Dieter blue / crew acid / Jussi ice) so the coding is consistent site-wide. */
-.ot-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 1.6rem; }
-.ot-chip {
+.bs-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 1.6rem; }
+.bs-chip {
   font-family: 'Oswald', sans-serif; font-size: 0.68rem; letter-spacing: 0.12em;
   text-transform: uppercase; cursor: pointer; padding: 7px 14px; border-radius: 2px;
   color: var(--ink); background: rgba(8,10,16,0.7);
   border: 1px solid var(--edge); transition: all 0.15s ease;
 }
-.ot-chip:hover { border-color: var(--chip, var(--gold)); color: #fff; }
-.ot-chip.on { background: var(--chip, var(--gold)); border-color: var(--chip, var(--gold)); color: #06080d; font-weight: 600; }
-.ot-chip .ot-count { opacity: 0.65; margin-left: 6px; font-size: 0.9em; }
-.ot-chip.who-kiki   { --chip: var(--magenta); }
-.ot-chip.who-dieter { --chip: var(--blue); }
-.ot-chip.who-crew   { --chip: var(--acid); }
-.ot-chip.who-jussi  { --chip: #a8e6ff; }
+.bs-chip:hover { border-color: var(--chip, var(--gold)); color: #fff; }
+.bs-chip.on { background: var(--chip, var(--gold)); border-color: var(--chip, var(--gold)); color: #06080d; font-weight: 600; }
+.bs-chip .bs-count { opacity: 0.65; margin-left: 6px; font-size: 0.9em; }
+.bs-chip.who-kiki   { --chip: var(--magenta); }
+.bs-chip.who-dieter { --chip: var(--blue); }
+.bs-chip.who-crew   { --chip: var(--acid); }
+.bs-chip.who-jussi  { --chip: #a8e6ff; }
 
-.ot-who {
+.bs-who {
   position: absolute; top: 8px; right: 9px; font-family: 'Oswald', sans-serif;
   font-size: 0.58rem; letter-spacing: 0.12em; padding: 2px 7px; border-radius: 2px;
   background: rgba(0,0,0,0.66); color: var(--chip, var(--gold));
   text-shadow: 0 0 8px currentColor;
 }
-.ot-card.who-kiki   { --chip: var(--magenta); }
-.ot-card.who-dieter { --chip: var(--blue); }
-.ot-card.who-crew   { --chip: var(--acid); }
-.ot-card.who-jussi  { --chip: #a8e6ff; }
+.bs-card.who-kiki   { --chip: var(--magenta); }
+.bs-card.who-dieter { --chip: var(--blue); }
+.bs-card.who-crew   { --chip: var(--acid); }
+.bs-card.who-jussi  { --chip: #a8e6ff; }
 /* the per-member accent also tints the hover glow, so the sheet reads by colour as you scan it */
-.ot-card:hover { box-shadow: 0 26px 60px rgba(0,0,0,0.72), 0 0 26px color-mix(in srgb, var(--chip) 55%, transparent); }
-.ot-title { text-shadow: 0 0 calc(6px + var(--m-beat, 0) * 18px) color-mix(in srgb, var(--chip) 60%, transparent); }
+.bs-card:hover { box-shadow: 0 26px 60px rgba(0,0,0,0.72), 0 0 26px color-mix(in srgb, var(--chip) 55%, transparent); }
+.bs-title { text-shadow: 0 0 calc(6px + var(--m-beat, 0) * 18px) color-mix(in srgb, var(--chip) 60%, transparent); }

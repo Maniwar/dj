@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Verifies the Outtakes contact sheet renders (all frames, all images actually load) and that
+// Verifies the Backstage contact sheet renders (all frames, all images actually load) and that
 // the rest of the page is untouched. Run against `npm run preview`.
 import { chromium } from 'playwright-core'
 import { mkdirSync } from 'node:fs'
@@ -24,7 +24,7 @@ const logon = page.locator('.logon-btn')
 if (await logon.count()) await logon.first().click()
 await page.waitForTimeout(2200)
 
-await page.locator('#outtakes').scrollIntoViewIfNeeded()
+await page.locator('#backstage').scrollIntoViewIfNeeded()
 await page.waitForTimeout(900)
 // nudge through the grid so every lazy image is asked for
 for (let i = 0; i < 6; i++) {
@@ -34,20 +34,20 @@ for (let i = 0; i < 6; i++) {
 await page.waitForTimeout(1200)
 
 const ot = await page.evaluate(() => {
-  const cards = [...document.querySelectorAll('.ot-card')]
-  const imgs = [...document.querySelectorAll('.ot-img')]
+  const cards = [...document.querySelectorAll('.bs-card')]
+  const imgs = [...document.querySelectorAll('.bs-img')]
   return {
     cards: cards.length,
-    titles: [...document.querySelectorAll('.ot-title')].map((n) => n.textContent),
+    titles: [...document.querySelectorAll('.bs-title')].map((n) => n.textContent),
     imgsTotal: imgs.length,
     imgsLoaded: imgs.filter((i) => i.complete && i.naturalWidth > 0).length,
     broken: imgs.filter((i) => i.complete && i.naturalWidth === 0).map((i) => i.getAttribute('src')),
   }
 })
 
-await page.locator('#outtakes').scrollIntoViewIfNeeded()
+await page.locator('#backstage').scrollIntoViewIfNeeded()
 await page.waitForTimeout(500)
-await page.screenshot({ path: `${OUT}/outtakes.png` })
+await page.screenshot({ path: `${OUT}/backstage.png` })
 
 // hero + rest of page still fine
 await page.locator('.lore-stop.accent-jussi').first().scrollIntoViewIfNeeded()
