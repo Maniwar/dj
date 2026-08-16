@@ -4,7 +4,7 @@
 DJ Dieter & Kiki G — and their multi-platinum, moisture-laden album
 _"Club Humidity — The Moist Mix 2002."_**
 
-### ▶ [**LOG ON & PLUG IN — maniwar.github.io/dj**](https://maniwar.github.io/dj/)
+### ▶ [**LOG ON & PLUG IN — club-humidity.com**](https://club-humidity.com/)
 
 An interactive, audio-reactive, deliberately excessive Y2K rave artifact: 19 real tracks
 behind a persistent streaming MP3 player, 13 character-locked AI music videos, a WebGL
@@ -44,11 +44,13 @@ masters), `capture.mjs` / `capture-ultrawide.mjs` / `perf.mjs` (QA), `smoke.mjs`
 
 **Stack:** React 18 · TypeScript · Vite · Three.js / react-three-fiber · Zustand · Web Audio API
 
-**Deploy:** live at **<https://maniwar.github.io/dj/>**. Every push to `main` builds and
-publishes there via `.github/workflows/deploy.yml`. It's a *project* page, so the build sets
-`BASE_PATH=/dj/` and every asset URL goes through `withBase()` (`src/lib/asset.ts`) to
-resolve under the subpath — which is why assets must never be referenced with a bare
-leading `/`.
+**Deploy:** live at **<https://club-humidity.com/>**. Every push to `main` builds and
+publishes there via `.github/workflows/deploy.yml`. The custom apex domain serves from the
+**root**, so the build sets `BASE_PATH=/` — not the old `/dj/` project subpath, which would
+make every asset resolve to `/dj/assets/…` and 404 into a blank page. `public/CNAME` carries
+the domain into the artifact so it survives each deploy rather than relying on the Pages
+setting alone. Asset URLs still go through `withBase()` (`src/lib/asset.ts`), which is what
+makes the base path a one-variable change if the domain ever goes away.
 
 ---
 
