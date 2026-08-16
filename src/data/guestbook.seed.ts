@@ -75,7 +75,9 @@ export const GUESTBOOK_SEED: GuestPost[] = [
     flag: '🇧🇪',
     color: '#0f9',
     time: '2004-03-17 09:12',
-    body: 'i reverse engineered the Synthesizer Is So Big bootleg _3 and its literally just dieter breathing near a Korg for 6 minutes. masterpiece. framed it.',
+    // _3 is the Sauna Dub; the White-Label Bootleg is _1. The site labels both, so naming the
+    // wrong one is checkable against the player two sections up.
+    body: 'i reverse engineered the Synthesizer Is So Big bootleg _1 and its literally just dieter breathing near a Korg for 6 minutes. masterpiece. framed it.',
     likes: 1330,
   },
   {
@@ -84,7 +86,7 @@ export const GUESTBOOK_SEED: GuestPost[] = [
     flag: '🇪🇸',
     color: '#ff6',
     time: '2004-03-18 02:20',
-    body: 'IBIZA FOAM PARTY 2004 NEVER FORGET. bianca lost a platform boot in the foam and kiki g threw her a NEW ONE from the DJ booth. legends only',
+    body: 'IBIZA FOAM PARTY 2004 NEVER FORGET. tanja lost a platform boot in the foam and kiki g threw her a NEW ONE from the DJ booth. legends only',
     likes: 1780,
   },
   {
@@ -102,7 +104,9 @@ export const GUESTBOOK_SEED: GuestPost[] = [
     flag: '🇩🇪',
     color: '#c0c0c0',
     time: '2004-03-19 04:44',
-    body: 'thank you my childrens. the synthesizer IS so big. more humidity is coming. do not let your drum machine get too hot without a supervising adult. — W',
+    // "— W" was Wolfgang, the name this character had before he became Dieter. Left behind by the
+    // rename and signed on the only post he writes himself, which is the worst place for it.
+    body: 'thank you my childrens. the synthesizer IS so big. more humidity is coming. do not let your drum machine get too hot without a supervising adult. — D',
     likes: 9999,
   },
   {

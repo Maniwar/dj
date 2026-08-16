@@ -5,17 +5,23 @@ const QUOTES = [
   ['“Dieter is not a god. But the synth IS so big.”', 'PITCHFORK-ish'],
   ['“Kiki G looked at me. I filed my taxes early.”', 'EURO DANCE DIGEST'],
   ['“Do not operate heavy machinery. Operate this.”', 'CLUB CIRCUIT'],
-  ['“We asked the Finn for a comment. He said “It is fine.” We ran it as the headline.”', 'HELSINKI BEAT'],
-  ['“Rated our sauna a 2. We have closed the venue.”', 'CLUB CONDENSA, BERLIN'],
+  // Inner quotation is single — it was the same curly double as the pull-quote around it, which
+  // renders as one quote closing early and the sentence falling apart.
+  ['“We asked the Finn for a comment. He said ‘It is fine.’ We ran it as the headline.”', 'HELSINKI BEAT'],
+  // NOT "Club Condensa, Berlin": Condensa is the Miami rooftop three lines down, and Berlin's
+  // venue is The Original Sauna. One name, two cities, both printed on the same screen.
+  ['“Rated our sauna a 2. We have closed the venue.”', 'CLUB KONDENSATOR, HAMBURG'],
 ]
 
+// No "— SOLD OUT" here: each row also renders the rotated red .date-stamp, so carrying it in the
+// string too printed it twice on every line.
 const DATES = [
-  'IBIZA · TERRAZA DEL VAPOR — SOLD OUT',
-  'TOKYO · SUB-BASEMENT 9 — SOLD OUT',
-  'MIAMI · ROOFTOP CONDENSA — SOLD OUT',
-  'BERLIN · THE ORIGINAL SAUNA — SOLD OUT',
-  'REYKJAVÍK · GEYSIR ARENA — SOLD OUT',
-  'DUBAI · INDOOR RAINFOREST — SOLD OUT',
+  'IBIZA · TERRAZA DEL VAPOR',
+  'TOKYO · SUB-BASEMENT 9',
+  'MIAMI · ROOFTOP CONDENSA',
+  'BERLIN · THE ORIGINAL SAUNA',
+  'REYKJAVÍK · GEYSIR ARENA',
+  'DUBAI · INDOOR RAINFOREST',
 ]
 
 export default function HallOfFame() {

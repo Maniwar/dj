@@ -143,7 +143,9 @@ export default function Lore() {
     <section className="lore" id="lore" ref={secRef}>
       <div className={`lore-title ${titleOn ? 'on' : ''}`}>
         <h2 className="section-title">THE ORIGIN</h2>
-        <p className="section-kicker">two humans · one finn · one sauna · scroll to meet them</p>
+        {/* Counts the hero stops, and there are four of them — the crew page was added after this
+            line was written and went uncounted, which is visible to anyone who scrolls. */}
+        <p className="section-kicker">two humans · one finn · three of the crew · one sauna · scroll to meet them</p>
       </div>
 
       <div className="lore-stops">
