@@ -104,7 +104,9 @@ const JUSSI: BackstageFrame[] = [
   { id: 'j-inspection', who: 'jussi', image: '/assets/lore/jussi-inspection.jpg', title: 'THE INSPECTION',
     note: 'Clipboard, thermometer, beer. Kiki and Dieter waited in the doorway for eleven minutes without speaking. The venue scored a 2 and closed the following spring.' },
   { id: 'j-sauna', who: 'jussi', image: '/assets/lore/jussi-sauna.jpg', title: 'THE LÖYLY VERDICT',
-    note: 'Shot for the album booklet and rejected — the label felt the artists looked "insufficiently comfortable." He added one more ladle after this frame.' },
+    // NOT the album booklet: the record is the 2002 Moist Mix and he is not hired until Tampere,
+    // 2003 (Chapter V), so he cannot be standing in a shot for it. The tour programme he can.
+    note: 'Shot for the tour programme and rejected — the label felt the artists looked "insufficiently comfortable." He added one more ladle after this frame.' },
   { id: 'j-ice', who: 'jussi', image: '/assets/lore/jussi-ice.jpg', title: 'THE BUCKET',
     note: 'Every night, unasked, he carries the ice that keeps the rig alive. This is the only known photograph of it. Nobody has thanked him.' },
   { id: 'j-tv', who: 'jussi', image: '/assets/lore/jussi-tv.jpg', title: 'THE THIRD PERIOD',

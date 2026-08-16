@@ -54,7 +54,7 @@ export const LORE_STOPS: LoreStop[] = [
     accent: 'jussi',
     image: '/assets/lore/jussi-hero.jpg',
     tag: 'HE IS THE COLD',
-    body: `Born Järvi. Eurobeat's art department, working from a smudged fax, printed "JARS" across the first 400,000 sleeves; pulping was quoted at €38,000 and renaming him was free. He was informed by postcard and has never mentioned it. Eleven years on the compressor room at a Tampere ice rink, which makes the only man here with an actual qualification a refrigeration engineer. Scores every venue's löyly out of ten and has awarded exactly one 10, to his aunt's cabin outside Kuopio, 1994. Berlin — the sacred sauna, the birthplace of this entire band — got a 2.`,
+    body: `Born Järvi. Eurobeat's art department, working from a smudged fax, printed "JARS" across the first 400,000 sleeves; pulping was quoted at €38,000 and renaming him was free. He was informed by postcard and has never mentioned it. Twelve years in the compressor room of a Tampere ice rink, which makes the only man here with an actual qualification a refrigeration engineer. Scores every venue's löyly out of ten and has awarded exactly one 10, to his aunt's cabin outside Kuopio, 1994. Berlin — the sacred sauna, the birthplace of this entire band — got a 2.`,
   },
   {
     id: 'crew',
@@ -128,7 +128,7 @@ export const LORE_STOPS: LoreStop[] = [
     title: 'THE MAN WHO COULD COOL ANYTHING',
     accent: 'jussi',
     image: '/assets/lore/jussi-beerleague.jpg',
-    body: `The drum machine kept overheating. Someone said there was a man in Tampere who could cool anything, so Dieter flew to Finland and found him at six in the morning, alone, in goal. Dieter explained the humidity, the meltdown and the entire Moisture Doctrine for eleven uninterrupted minutes. Jussi conceded a goal partway through and did not react. When it was over he said four words — "Your sauna was a cupboard" — and Dieter wept and hired him on the spot. He has filled the bucket every night since. Nobody has ever thanked him.`,
+    body: `The drum machine kept overheating. Someone said there was a man in Tampere who could cool anything, so Dieter flew to Finland and found him at six in the morning, alone, in goal. Dieter explained the humidity, the meltdown and the entire Moisture Doctrine for eleven uninterrupted minutes. Jussi conceded a goal partway through and did not react. When it was over he said five words — "Your sauna was a cupboard" — and Dieter wept and hired him on the spot. He has filled the bucket every night since. Nobody has ever thanked him.`,
   },
 ]
 
