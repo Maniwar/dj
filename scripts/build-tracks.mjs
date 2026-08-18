@@ -28,8 +28,15 @@ const VERSION_LABELS = [
   { label: 'Liquid-Cooled Overclock', badge: 'OC', vibe: 'Clipping hard. Do not attempt without thermal paste.' },
 ]
 
+// NFD + stripping combining marks folds ä->a and ö->o BEFORE the a-z filter runs. Without it a
+// Finnish title collapses to nonsense — "Ei Hätää" became "ei-h-t" — because every accented
+// letter fails [a-z0-9] and turns into a separator. This band has a Finn in it, so titles with
+// diacritics are a matter of time.
+// KEEP THIS IDENTICAL TO build-lyrics.mjs. The two slugs are what marry a lyric sheet to its
+// track; if they disagree the sheet simply never attaches, with no error to notice.
 const slugify = (s) =>
-  s.toLowerCase().replace(/['".]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+  s.normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .toLowerCase().replace(/['".]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
 
 function parse(file) {
   const stem = file.replace(/\.mp3$/i, '')

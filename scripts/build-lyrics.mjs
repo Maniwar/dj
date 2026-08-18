@@ -16,8 +16,11 @@ const ROOT = resolve(__dirname, '..')
 const SRC = process.argv[2] || process.env.LYRICS_SRC || resolve(ROOT, 'lyrics-src')
 const OUT = resolve(ROOT, 'src/data/lyrics.json')
 
+// KEEP THIS IDENTICAL TO build-tracks.mjs — see the note there. The NFD fold turns ä into a
+// before the a-z filter can shred it; matching slugs are the only thing joining a sheet to a track.
 const slugify = (s) =>
-  s.toLowerCase().replace(/['".]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+  s.normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .toLowerCase().replace(/['".]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
 
 function parseFile(txt) {
   const title = (txt.match(/^Title:\s*(.+)$/m) || [])[1]?.trim()
