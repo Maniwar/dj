@@ -1,0 +1,120 @@
+Metadata for: AI_Gunther-It_Is_Fine
+
+--- Track Information ---
+Title: It Is Fine
+Artist: Maniwar
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat
+
+--- Lyrics ---
+[Intro: Deep Sleazy Spoken Male]
+Mmm. Listen to me, my childrens.
+The drum machine is on fire. Again.
+The ceiling is raining on my moustache.
+Do not panic.
+I know a man.
+
+[Hook 1: Vocal Chant - Squeaky High-Pitched Female]
+JU-JU-JUSSI! (ice!)
+JU-JU-JUSSI! (ice!)
+He is the cold, he is the cold!
+JU-JU-JUSSI! (ice!)
+
+[Verse 1: Deep Sleazy Spoken Male]
+Twelve years in a compressor room.
+He does not blink. He does not sweat.
+Tampere built him out of frost and lager.
+I flew to Finland. I explained the Doctrine.
+Eleven minutes. He let in a goal.
+He did not turn around.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+Ninety-four percent and rising!
+Every single hairdo dying!
+Somebody go and get the bucket —
+He already HAS the bucket!
+
+[Chorus: Squeaky High-Pitched Female]
+It is fine! (It is fine!)
+It is fine! (It is fine!)
+He put the whole hot club on ice tonight!
+It is fine! (It is fine!)
+It is fine! (It is fine!)
+Nine little words and a sub-zero smile —
+Ju-Ju-Jussi, it is fine!
+
+[Post-Chorus: Squeaky High-Pitched Female]
+Ice, ice, ice, ice — it is fine!
+Ice, ice, ice, ice — it is fine!
+Colder! Colder! Colder! Colder!
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+
+[Verse 2: Deep Sleazy Spoken Male]
+He scores the sauna out of ten.
+He gave MY sacred sauna... a two.
+I wept. I hired him on the spot.
+Now every night he fills the bucket.
+Nobody ever says thank you.
+He says it is fine.
+
+[Pre-Chorus: Squeaky High-Pitched Female]
+The subwoofer is sweating!
+The tracksuit is regretting!
+Somebody call refrigeration —
+He IS the refrigeration!
+
+[Chorus: Squeaky High-Pitched Female]
+It is fine! (It is fine!)
+It is fine! (It is fine!)
+He put the whole hot club on ice tonight!
+It is fine! (It is fine!)
+It is fine! (It is fine!)
+Nine little words and a sub-zero smile —
+Ju-Ju-Jussi, it is fine!
+
+[Breakdown: Music Stops]
+[Female]
+Jussi?! Jussi, the booth is melting!
+[Male]
+Mmm. He is not looking at you.
+[Female]
+Say something! Anything! ANYTHING!
+[Male]
+He has five words left tonight.
+[Male: Flat, Deadpan, Finnish, Almost Bored]
+Your sauna was a cupboard.
+[Male]
+...ah. He is not wrong.
+
+[Drop: Massive Cheesy Supersaw Synth Melody]
+
+[Chorus: Squeaky High-Pitched Female]
+It is fine! (It is fine!)
+It is fine! (It is fine!)
+He put the whole hot club on ice tonight!
+It is fine! (It is fine!)
+It is fine! (It is fine!)
+Nine little words and a sub-zero smile —
+Ju-Ju-Jussi, it is fine!
+
+[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]
+[Female]
+Ju-Ju-Jussi! He is the cold!
+[Male]
+Do not thank him. He does not want it.
+[Female]
+It is fine!
+[Male]
+It is fine.
+
+Cover Art URL:
+
+--- Raw API Response ---
+(Not yet generated. build-lyrics.mjs captures everything between "--- Lyrics ---" and the
+first "Cover Art URL" / "--- Raw API" line, so this terminator is REQUIRED — without it the
+regex finds no end and the sheet imports completely empty. Replace this block with the real
+Suno export once the track exists.)
