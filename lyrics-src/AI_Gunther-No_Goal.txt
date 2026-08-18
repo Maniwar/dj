@@ -7,166 +7,126 @@ Artist: Maniwar
 --- Musical Information ---
 
 --- Creation Details ---
-Prompt: Maximalist 2004 campy Eurodance, 138 bpm, cascading vocal hooks, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat
+Prompt: Maximalist 2004 campy Eurodance staged inside a hockey arena, 138 bpm, stadium organ riff, goal-horn stabs, massed unison crowd chants with stomp-clap, booming PA announcer voice, deep sleazy spoken male vocals, squeaky high-pitched female vocals, bouncy happy hardcore bassline, massive cheesy supersaw synth melody, relentless four-on-the-floor beat
 
 --- Lyrics ---
-[Intro: Deep Sleazy Spoken Male]
-Mmm. Gather round, my childrens.
-The drum machine, she is on fire. Again.
-The ceiling is raining on my moustache.
-Do not panic.
-We have a goalie.
-Goalies are a different breed.
+[Intro: Stadium Organ, Then PA Announcer]
+[PA Announcer]
+Goooood evening, Club Humidity.
+Your starting goaltender tonight —
+from Tampere, Finland —
+number one — YOO-see YAR-vee.
+[Crowd]
+YOO-SEE!
+[PA Announcer]
+Correct. Thank you.
 
-[Hook 1: Vocal Chant - Squeaky High-Pitched Female]
-YOO-YOO-YOO-SEE! (save!)
-YOO-YOO-YOO-SEE! (save!)
-Glove saves for days!
-YOO-YOO-YOO-SEE! (SAVE!)
+[Crowd Chant: Massed Unison, Stomp-Clap]
+YOO-SEE! (stomp-stomp, clap-clap-clap)
+YOO-SEE! (stomp-stomp, clap-clap-clap)
+GLOVE SAVES FOR DAYS!
+YOO-SEE!
 
-[Aside: Deep Sleazy Spoken Male]
-Mmm. Listen to them. YOO-see.
-The J is a Y, my childrens. Two years I taught them that.
-The label never learned it.
-
-[Verse 1: Deep Sleazy Spoken Male]
-They shoot. He is already there.
-They shoot again. He was there first.
-Thirty-eight shots. He says it was a quiet night.
-Two minutes for roughing — and he was in his own net at the time.
-Nobody speaks to him during a shutout.
-Nobody speaks to him otherwise either.
-He has been standing on his head since the puck dropped.
-Twelve years down in the compressor room, ladies.
-The man knows exactly where the cold goes.
+[Verse 1: PA Announcer, Flat Booth Voice]
+Shot on goal — saved.
+Shot on goal — saved.
+Rebound — covered. Whistle.
+That is thirty-eight.
+He has asked us to stop reading them out.
 
 [Pre-Chorus: Squeaky High-Pitched Female]
 He's got the pads, he's got the paddle!
-Every puck bunny in the barn's unravelled!
-Squared to the shooter, don't you try it —
-Sin bin, boys! Sit down! Be quiet!
+Don't touch the bottle, don't touch the net!
+Nobody talk to him, he's got a shutout going —
+nobody talk to him ever, that's just how he gets!
 
-[Chorus: Squeaky High-Pitched Female]
+[Chorus: Full Crowd + Squeaky High-Pitched Female]
 NO GOAL! (NO GOAL!)
 Glove saves for days!
-He put the whole hot club on ice tonight!
 NO GOAL! (NO GOAL!)
-Glove saves for days!
+The lamp stays dark all night!
 Nine little words and a sub-zero smile —
-Yoo-Yoo-YOO-see, no goal!
+YOO-see! YOO-see! NO GOAL!
 
-[Post-Chorus: Squeaky High-Pitched Female]
-SAVE! SAVE! SAVE! SAVE! — for days!
-ROBBED! ROBBED! ROBBED! ROBBED! — NO GOAL!
-Flash the leather! Glove-glove-glove!
+[Goal Horn: Fires For Half A Second, Then Cuts Out]
+[PA Announcer]
+...my apologies. Wrong button.
+There has been no goal.
+There is not going to be a goal.
 
-[Drop: Massive Cheesy Supersaw Synth Melody]
+[Verse 2: Deep Sleazy Spoken Male, Heckling From Row Two]
+Mmm. That is MY goaltender.
+I found him at six in the morning. Alone. In a barn in Tampere.
+I explained the Moisture Doctrine for eleven uninterrupted minutes.
+He let one in halfway through and did not blink.
+Five words later I was weeping and he was employed.
 
-[Verse 2: Deep Sleazy Spoken Male]
-The booth, my darlings, is the crease.
-You do NOT go in the crease.
-I went in the crease one night in Rotterdam.
-He resurfaced me. Nineteen minutes. Walking pace.
-And that? That is not a beard.
-That is a playoff beard. Since 1994.
-
-[Pre-Chorus: Squeaky High-Pitched Female]
-Hooking! Holding! Too many men!
-The whole front row is down again!
-Don't touch the bottle, don't touch the net —
-Two minutes, boys! Hit the showers now!
-
-[Chorus: Squeaky High-Pitched Female]
+[Chorus: Full Crowd + Squeaky High-Pitched Female]
 NO GOAL! (NO GOAL!)
 Glove saves for days!
-He put the whole hot club on ice tonight!
 NO GOAL! (NO GOAL!)
-Glove saves for days!
+The lamp stays dark all night!
 Nine little words and a sub-zero smile —
-Yoo-Yoo-YOO-see, no goal!
+YOO-see! YOO-see! NO GOAL!
 
-[Hook 2: Vocal Chant - Squeaky High-Pitched Female]
+[Penalty Announcement: PA Announcer, Organ Sting]
+Two minutes...
+for roughing...
+number one... Järvi.
+[Crowd]
+BOOOOOO—
+[PA Announcer]
+He was in his own net at the time.
+[Crowd]
+...oooooh.
+
+[Verse 3: PA Announcer]
+Attention. The ladies at the sausage counter
+have asked for the music to be turned down.
+The music has been turned down.
+They have run this building since before the roof went on.
+They do not chirp. They announce.
+Tonight they bought the goaltender a beer.
+He tried to pay. They would not let him.
+
+[Crowd Chant: Massed Unison, Stomp-Clap]
 STONE him! ROB him! SLAM the door!
 STONE him! ROB him! SLAM THE DOOR!
-Wheel, snipe, celly? Not tonight —
-the lamp stays dark, the lamp stays DARK!
-
-[Aside: Deep Sleazy Spoken Male]
-In Finland he says "ei hätää." It means: it is fine.
-He says it after every goal he allows.
-He allowed one, in Tampere, in front of me. He said it to nobody.
-Dieter tried to wheel one time. Two minutes for interference.
-The label spelled his name JARS on four hundred thousand sleeves.
-He has never mentioned it.
-
-[Verse 3: Deep Sleazy Spoken Male]
-They came with hats. They went home with hats.
-He would like it on the record that the defence was very good.
-He thanks the posts after every period. Out loud. In Finnish.
-His pregame meal is a pregame beer.
-His postgame meal is that beer's cousin.
-Beer league Sunday he plays out. He is worse. He enjoys it more.
-Then he fills my bucket and says nothing.
-
-[Verse 4: Deep Sleazy Spoken Male]
-And behind the glass — the ladies of the rink.
-Enormous. Magnificent. Entirely unbothered.
-They have run the sausage counter since before the roof went on.
-They do not chirp, my darlings. They announce.
-One of them lifted the net back onto its pegs without setting down her coffee.
-He is not afraid of the shooters.
-He is afraid of them. He calls them ma'am.
-
-[Breakdown: Music Stops]
-[Female]
-YOO-see! YOO-see, they're coming in the back door!
-[Male]
-Mmm. He has seen the back door.
-[Female]
-They're going five-hole!
-[Male]
-Mmm. There is a hole. He simply stands in it.
-[Female]
-SAY SOMETHING! ANYTHING!
-[Male]
-He has five words left tonight.
-[Male: Flat, Deadpan, Finnish, Almost Bored]
-Your sauna was a cupboard.
-[Male]
-...ah. He says it is fine.
-[Female]
-NO GOAL!
-
-[Drop: Massive Cheesy Supersaw Synth Melody]
-
-[Chorus: Squeaky High-Pitched Female]
-NO GOAL! (NO GOAL!)
-Glove saves for days!
-He put the whole hot club on ice tonight!
-NO GOAL! (NO GOAL!)
-Glove saves for days!
-Nine little words and a sub-zero smile —
-Yoo-Yoo-YOO-see, no goal!
-
-[Outro: Deep Sleazy Spoken Male and Squeaky High-Pitched Female]
-[Female]
-Yoo-Yoo-YOO-SEE! Glove saves for days!
-[Male]
-Shutout tonight. Not every night. He would correct me if he spoke.
-[Female]
-SOMEBODY BUY THE MAN A BEER!
-[Male]
-The ladies at the counter already did. They would not take his money.
-[Male]
-He is fine.
-[Female]
-NO GOAL! ...say his name!
-[Female]
+GLOVE SAVES FOR DAYS!
 YOO-SEE!
-[Male]
-Mmm. Correct. Finally.
-[Male]
+
+[Breakdown: Everything Stops. Organ Only.]
+[Squeaky High-Pitched Female]
+Say something! ANYTHING!
+[Deep Sleazy Spoken Male]
+He has five words left tonight.
+[Jussi: Flat, Deadpan, Finnish, Almost Bored]
+Your sauna was a cupboard.
+[Deep Sleazy Spoken Male]
+...ah.
+[PA Announcer]
 No goal.
+
+[Drop: Supersaw And Stadium Organ Together]
+
+[Chorus: Full Crowd, Everyone]
+NO GOAL! (NO GOAL!)
+Glove saves for days!
+NO GOAL! (NO GOAL!)
+The lamp stays dark all night!
+Nine little words and a sub-zero smile —
+YOO-see! YOO-see! NO GOAL!
+
+[Outro: Organ Fading Under, PA Announcer]
+[PA Announcer]
+Final score: it does not matter.
+Shutout — Järvi.
+He is thanking the posts. Out loud. In Finnish.
+Please drive home safely.
+[Crowd]
+YOO-SEE!
+[PA Announcer]
+Correct.
 
 Cover Art URL:
 
